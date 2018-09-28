@@ -19,8 +19,8 @@
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/sp.runtime.js?rev=5f2WkYJoaxlIRdwUeg4WEg%3D%3D&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/sp.js?rev=lrxLgKOmx0nl2elVy0T07w%3D%3D&quot;&gt;&lt;/script&gt;
 " __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;MicrosoftAjax.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl00&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
-        <SharePoint:ScriptLink Name="SP.core.js" runat="server" Defer="False" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.core.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl01&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
-        <SharePoint:ScriptLink Name="SP.js" runat="server" Defer="True" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;Defer&#39; T=&#39;True&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl02&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
+<SharePoint:ScriptLink Name="SP.core.js" runat="server" Defer="False" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.core.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl01&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
+<SharePoint:ScriptLink Name="SP.js" runat="server" Defer="True" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;Defer&#39; T=&#39;True&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl02&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
         <meta charset="utf-8">
         <title>App Launcher</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -230,6 +230,7 @@ text-decoration:none;
               rd = raw[0];
             }
             catch (e) {
+              SP.UI.ModalDialog.showWaitScreenWaithNoClose("Oh No", "So something went wrong...please contract the sofware manager!");
               console.log("Critical Error: unable to find the appropriate request digest--> " + e);
             };
 
