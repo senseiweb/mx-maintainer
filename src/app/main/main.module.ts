@@ -29,6 +29,5 @@ const routes = [
     ]
 })
 
-export class MainModule
-{
+export class MainModule {
 }

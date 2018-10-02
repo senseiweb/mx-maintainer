@@ -21,26 +21,12 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy 
-{
+export class AppComponent implements OnInit, OnDestroy {
   fuseConfig: any;
   navigation: any;
 
   private _unsubscribeAll: Subject<any>;
-   /**
-    * Constructor
-    *
-    * @param {DOCUMENT} document
-    * @param {FuseConfigService} _fuseConfigService
-    * @param {FuseNavigationService} _fuseNavigationService
-    * @param {FuseSidebarService} _fuseSidebarService
-    * @param {FuseSplashScreenService} _fuseSplashScreenService
-    * @param {FuseTranslationLoaderService} _fuseTranslationLoaderService
-    * @param {Platform} _platform
-    * @param {TranslateService} _translateService
-    */
 
-  
    constructor (
     @Inject(DOCUMENT) private document: any,
     private _fuseConfigService: FuseConfigService,
@@ -50,8 +36,7 @@ export class AppComponent implements OnInit, OnDestroy
     private _fuseTranslationLoaderService: FuseTranslationLoaderService,
     private _translateService: TranslateService,
     private _platform: Platform
-)
-{
+) {
     // Get default navigation
     this.navigation = navigation;
 
@@ -104,14 +89,13 @@ export class AppComponent implements OnInit, OnDestroy
      */
 
     // Add is-mobile class to the body if the platform is mobile
-    if ( this._platform.ANDROID || this._platform.IOS )
-    {
+    if ( this._platform.ANDROID || this._platform.IOS ) {
         this.document.body.classList.add('is-mobile');
     }
 
     // Set the private defaults
     this._unsubscribeAll = new Subject();
-}  
+}
 
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
@@ -120,8 +104,7 @@ export class AppComponent implements OnInit, OnDestroy
     /**
      * On init
      */
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
         // Subscribe to config changes
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
@@ -130,22 +113,17 @@ export class AppComponent implements OnInit, OnDestroy
                 this.fuseConfig = config;
 
                 // Boxed
-                if ( this.fuseConfig.layout.width === 'boxed' )
-                {
+                if ( this.fuseConfig.layout.width === 'boxed' ) {
                     this.document.body.classList.add('boxed');
-                }
-                else
-                {
+                } else {
                     this.document.body.classList.remove('boxed');
                 }
 
                 // Color theme - Use normal for loop for IE11 compatibility
-                for ( let i = 0; i < this.document.body.classList.length; i++ )
-                {
+                for ( let i = 0; i < this.document.body.classList.length; i++ ) {
                     const className = this.document.body.classList[i];
 
-                    if ( className.startsWith('theme-') )
-                    {
+                    if ( className.startsWith('theme-') ) {
                         this.document.body.classList.remove(className);
                     }
                 }
@@ -157,8 +135,7 @@ export class AppComponent implements OnInit, OnDestroy
     /**
      * On destroy
      */
-    ngOnDestroy(): void
-    {
+    ngOnDestroy(): void {
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
@@ -167,14 +144,7 @@ export class AppComponent implements OnInit, OnDestroy
     // -----------------------------------------------------------------------------------------------------
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Toggle sidebar open
-     *
-     * @param key
-     */
-    toggleSidebarOpen(key): void
-    {
+    toggleSidebarOpen(key): void {
         this._fuseSidebarService.getSidebar(key).toggleOpen();
     }
 }

@@ -20,6 +20,7 @@
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/sp.js?rev=lrxLgKOmx0nl2elVy0T07w%3D%3D&quot;&gt;&lt;/script&gt;
 " __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;MicrosoftAjax.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl00&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
 <SharePoint:ScriptLink Name="SP.core.js" runat="server" Defer="False" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.core.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl01&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
+<SharePoint:ScriptLink Name="SP.UserProfiles.js" runat="server" Defer="False" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.core.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl01&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
 <SharePoint:ScriptLink Name="SP.js" runat="server" Defer="True" Localizable="false" __designer:Preview="" __designer:Values="&lt;P N=&#39;Name&#39; T=&#39;SP.js&#39; /&gt;&lt;P N=&#39;Localizable&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;Defer&#39; T=&#39;True&#39; /&gt;&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;ctl02&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"/>
         <meta charset="utf-8">
         <title>App Launcher</title>
@@ -217,61 +218,75 @@ text-decoration:none;
         <form runat="server">
           <SharePoint:FormDigest ID="FormDigest1" runat="server" __designer:Preview="" __designer:Values="&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;FormDigest1&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"></SharePoint:FormDigest>
         </form>
+        <div id="wrap" style="display:none">
+          <div id="errorDiag">
+            <div>
+              <p>Whoa! This is embrassing, something went wrong with the AAGT startup processes...we cannot continue. Please contact the site admins.</p>
+            </div>
+          </div>
+       </div>
         <script>
           (function () {
-            SP.UI.ModalDialog.showWaitScreenWithNoClose("Starting...", "Getting user data and redirecting to the app!");
+            SP.UI.ModalDialog.showWaitScreenWithNoClose("Engine Start...", "Please stand by...grabbing configuration data before redirecting to AAGT app!");
             var appConfig = {};
-            appConfig.userAppWebDomain = _spPageContextInfo.webAbsoluteUrl;
+            appConfig.currUser = {};
+            appConfig.appWebUrl = _spPageContextInfo.webAbsoluteUrl;
             appConfig.appDomain = _spPageContextInfo.siteAbsoluteUrl;
-            var rd = "";
+            var dialogOptions = {
+                title: "Startup Error",
+                showClose: true,
+                allowMaximize: false,
+                html: document.getElementById('errorDiag').cloneNode(true)
+              };
 
             try {
-              var raw = document.querySelector("#__REQUESTDIGEST").value.split(",")
-              rd = raw[0];
+              appConfig.requestDigestRaw = document.querySelector("#__REQUESTDIGEST").value
             }
             catch (e) {
-              SP.UI.ModalDialog.showWaitScreenWaithNoClose("Oh No", "So something went wrong...please contract the sofware manager!");
+              SP.UI.ModalDialog.showModalDialog(dialogOptions);
               console.log("Critical Error: unable to find the appropriate request digest--> " + e);
             };
 
             try {
-              var appWebUrl = window.location.protocol + "//" + window.location.host
-                + _spPageContextInfo.webServerRelativeUrl
-              var clientCtx = new SP.ClientContext(appWebUrl);
+              var clientCtx = new SP.ClientContext(appConfig.appWebUrl);
+              var peopleManager = new SP.UserProfiles.PeopleManager(clientCtx);
               var oWeb = clientCtx.get_web();
               var oUser = oWeb.get_currentUser();
-              appConfig.userRequestData = rd;
               oUser.retrieve();
               var groups = oUser.get_groups();
               clientCtx.load(oWeb);
               clientCtx.load(groups);
+              var profileProperties = peopleManager.getMyProperties();
+              clientCtx.load(profileProperties);
               clientCtx.executeQueryAsync(function () {
+                console.log(profileProperties);
                 var rUser = oWeb.get_currentUser();;
                 var tempUser = {};
-                tempUser.userId = rUser.get_id();
-                tempUser.email = rUser.get_email();
-                tempUser.loginName = rUser.get_loginName();
-                tempUser.title = rUser.get_title();
-                tempUser.groups = [];
+                appConfig.currUser.id = rUser.get_id();
+                appConfig.currUser.profileProperties = profileProperties.get_userProfileProperties();
+                appConfig.currUser.loginName = rUser.get_loginName();
+                appConfig.currUser.groups = [];
                 var grpEnum = groups.getEnumerator();
                 var i = 0;
                 while (grpEnum.moveNext()) {
                   var group = grpEnum.get_current();
-                  tempUser.groups[i] = {
+                  appConfig.currUser.groups[i] = {
                     title: group.get_title(),
                     id: group.get_id()
                   }
                   i += 1;
                 }
-                appConfig.userInfo = tempUser;
                 JSON.stringify(appConfig);
                 localStorage.setItem('AppConfig', appConfig);
-                // window.location = _spPageContextInfo.siteAbsolf uteUrl + '/sitepages/index.html';
-
-              }, function (error) {
-                console.log(error);
+                SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.Cancel);
+                SP.UI.ModalDialog.showWaitScreenWithNoClose("Done!...", "Starting AAGT app");
+                window.location.replace(appConfig.appWebUrl + '/SitePages/aagt-index.html');
+              }, function (sender, error) {
+                SP.UI.ModalDialog.showModalDialog(dialogOptions);
+                console.log("Critical Error: failed to get data from the server--> " + error.get_message());
               })
             } catch (e) {
+              SP.UI.ModalDialog.showModalDialog(dialogOptions);
               console.log("Critical Error: failed to get data from the server--> " + e);
             }
           })();

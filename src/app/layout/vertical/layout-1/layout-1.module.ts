@@ -32,6 +32,5 @@ import { VerticalLayout1Component } from 'app/layout/vertical/layout-1/layout-1.
         VerticalLayout1Component
     ]
 })
-export class VerticalLayout1Module
-{
+export class VerticalLayout1Module {
 }

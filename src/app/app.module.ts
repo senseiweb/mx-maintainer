@@ -14,6 +14,7 @@ import { fuseConfig } from './fuse-config';
 import { FuseProgressBarModule, FuseSidebarModule, FuseThemeOptionsModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
 import { LayoutModule } from './layout/layout.module';
+import { CoreModule } from './core';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 
 
@@ -33,30 +34,29 @@ const appRoutes: Routes = [
     BrowserAnimationsModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
+    CoreModule,
     RouterModule.forRoot(appRoutes),
     TranslateModule.forRoot(),
 
     // Material moment date module
-    MatMomentDateModule, 
-   
+    MatMomentDateModule,
     // Material
     MatButtonModule,
     MatIconModule,
 
     // Fuse modules
-    FuseModule.forRoot(fuseConfig), 
+    FuseModule.forRoot(fuseConfig),
     FuseProgressBarModule,
     FuseSidebarModule,
     FuseSharedModule,
-    FuseThemeOptionsModule, 
+    FuseThemeOptionsModule,
 
     // App modules
     LayoutModule,
-    
+
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule
-{
+export class AppModule {
 }
