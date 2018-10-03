@@ -12,3 +12,4 @@ export * from './trigger';
 export * from './work-shift';
 export * from './registration-helper';
 export * from './sp-user-profile-prop';
+export * from './_entity-base';

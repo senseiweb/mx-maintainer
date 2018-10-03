@@ -10,9 +10,7 @@ if (environment.production) {
   enableProdMode();
 }
 
-const bootstrap = () => platformBrowserDynamic().bootstrapModule(AppModule).then((moduleRef) => {
-  AppInjector.setInjector(moduleRef.injector);
-});
+const bootstrap = () => platformBrowserDynamic().bootstrapModule(AppModule);
 
 if ( environment.hmr ) {
     if ( module['hot'] ) {

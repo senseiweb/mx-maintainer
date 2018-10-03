@@ -1,6 +1,22 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EmProviderService, BaseRepoService } from './data';
+import { EmProviderService, BaseRepoService, GenerationRepoService } from './data';
+import {
+  EntityBase,
+  GeneratorOps,
+  SpAppConfig,
+  ActionItem,
+  AssetTriggerTask,
+  Asset,
+  Assumption,
+  Producer,
+  RegistrationHelper,
+  SpMetadata,
+  Trigger,
+  TriggerProductionCapability,
+  WorkShift,
+  AagtAppConfig
+} from './entities';
 
 @NgModule({
   imports: [
@@ -8,7 +24,22 @@ import { EmProviderService, BaseRepoService } from './data';
   ],
   providers: [
     EmProviderService,
-    BaseRepoService
+    AagtAppConfig,
+    BaseRepoService,
+    EntityBase,
+    GeneratorOps,
+    SpAppConfig,
+    ActionItem,
+    AssetTriggerTask,
+    Asset,
+    Assumption,
+    Producer,
+    RegistrationHelper,
+    SpAppConfig,
+    SpMetadata,
+    Trigger,
+    TriggerProductionCapability,
+    WorkShift
   ],
   declarations: []
 })

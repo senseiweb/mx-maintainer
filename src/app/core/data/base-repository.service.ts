@@ -14,10 +14,8 @@ export class BaseRepoService<T> {
   protected isCachedBundle: boolean;
   protected _defaultFetchStrategy: breeze.FetchStrategySymbol;
 
-  constructor(_entityData: EntityBase) {
-    const injector = AppInjector.getInjector();
-    const entityService = injector.get(EmProviderService);
-    this.entityManager = entityService.coreEntityManager;
+  constructor(_entityData: EntityBase, _entityService: EmProviderService, ) {
+    this.entityManager = _entityService.coreEntityManager;
     this.resourceName = _entityData.entityDefinition.defaultResourceName;
     this.entityType = _entityData.shortName;
   }

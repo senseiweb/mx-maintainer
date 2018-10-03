@@ -26,10 +26,11 @@ export class AagtAppConfig {
   appWebUrl: string;
 
   constructor() {
-    const initConfig = JSON.parse(localStorage.getItem('AppConfig')) as AppInitData;
-    this.requestDigestKey = initConfig.requestDigestRaw.split(',')[0];
+    // const initConfig = JSON.parse(localStorage.getItem('AppConfig')) as AppInitData;
+    const initConfig = { requestDigestRaw: 'fjdaljfiowaijfeopajopfeafe,12-Dec-2009' }
+      ;    this.requestDigestKey = initConfig.requestDigestRaw.split(',')[0];
     this.requestDigestExpire = new Date(initConfig.requestDigestRaw.split(',')[1]);
     this.appWebUrl = initConfig.requestDigestRaw;
-    this.currentUser = initConfig.currUser;
+    // this.currentUser = initConfig.currUser;
   }
 }

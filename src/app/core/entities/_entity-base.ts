@@ -3,6 +3,7 @@ import { SpMetadata } from './sp-metadata';
 import * as breeze from 'breeze-client';
 import 'breeze-client-labs/breeze.metadata-helper';
 import { MetadataStore, EntityActionSymbol } from 'breeze';
+import { Injectable } from '@angular/core';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -30,11 +31,16 @@ export interface SpEntityDef extends etDef {
     navigationProperties?: NavMembers;
 }
 
+@Injectable()
 export class EntityBase implements Entity {
     shortName: string;
     entityAspect: EntityAspect;
     entityType: EntityType;
-    entityDefinition = {} as SpEntityDef;
+    entityDefinition = {
+        dataProperties: {},
+        navigationProperties: {}
+    } as SpEntityDef;
+
     protected dt = breeze.DataType;
     self: any;
 
