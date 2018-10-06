@@ -1,6 +1,8 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EmProviderService, BaseRepoService, GenerationRepoService } from './data';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { EmProviderService, BaseRepoService} from './data';
 import {
   EntityBase,
   GeneratorOps,
@@ -43,7 +45,8 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatTabsModule,
     FuseSharedModule,
     FuseWidgetModule,
-    FuseSidebarModule
+    FuseSidebarModule,
+    BrowserAnimationsModule
   ],
   exports: [
     CommonModule,
@@ -57,7 +60,8 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatTabsModule,
     FuseSharedModule,
     FuseWidgetModule,
-    FuseSidebarModule
+    FuseSidebarModule,
+    BrowserAnimationsModule
   ],
   providers: [
     EmProviderService,

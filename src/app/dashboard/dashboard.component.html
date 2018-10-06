@@ -1,1 +1,12 @@
-<h1>hello</h1>
+<div id="dashboard-status-board">
+  <fuse-sidebar class="sidebar" name="status-board-dashboard-right-sidebar-1" position="right" lockedOpen="gt-md">
+    <div class="content">
+      <div class="widget-group" fxLayout="column" fsFlex="100" [@animateStagger]="{value: '50'}">
+
+      </div>
+    </div>
+  </fuse-sidebar>
+  <div class="center" fusePerfectScrollbar>
+    <router-outlet></router-outlet>
+  </div>
+</div>
