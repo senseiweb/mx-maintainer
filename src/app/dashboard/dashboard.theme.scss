@@ -1,9 +1,9 @@
-@mixin dashboards-project-theme($theme) {
+@mixin dashboards-statusboard-theme($theme) {
 
   $background: map-get($theme, background);
   $is-dark: map-get($theme, is-dark);
 
-  #dashboard-project {
+  #dashboard-status-board {
 
       > .sidebar {
 

@@ -9,12 +9,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule, MatIconModule } from '@angular/material';
 import { FuseModule } from '@fuse/fuse.module';
-import { fuseConfig } from './fuse-config';
 import { FuseProgressBarModule, FuseSidebarModule, FuseThemeOptionsModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
-import { LayoutModule } from './layout/layout.module';
+import { FusecLayoutModule } from './fusec-layout/fusec-layout.module';
 
-import { CoreModule } from './core';
+import { CoreModule, AagtAppConfig } from './core';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 import { DashboardModule } from './dashboard';
 import { AppRoutingModule } from './app-routing.module';
@@ -38,7 +37,7 @@ import { AppRoutingModule } from './app-routing.module';
     MatIconModule,
 
     // Fuse modules
-    FuseModule.forRoot(fuseConfig),
+    FuseModule.forRoot(AagtAppConfig.fuseConfig),
     FuseProgressBarModule,
     FuseSidebarModule,
     FuseSharedModule,
@@ -46,7 +45,7 @@ import { AppRoutingModule } from './app-routing.module';
 
     // App modules
     CoreModule,
-    LayoutModule,
+    FusecLayoutModule,
     AppRoutingModule
   ],
   providers: [],

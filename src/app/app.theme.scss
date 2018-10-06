@@ -74,8 +74,8 @@ $typography: mat-typography-config(
 // -----------------------------------------------------------------------------------------------------
 
 // Import app and page component themes here to enable theming for them
-@import "src/app/layout/components/chat-panel/chat-panel.theme";
-@import "src/app/layout/components/toolbar/toolbar.theme";
+@import "src/app/fusec-layout/components/chat-panel/fusec-chat-panel.theme";
+@import "src/app/fusec-layout/components/toolbar/fusec-toolbar.theme";
 @import "src/app/dashboard/dashboard.theme";
 
 // Define a mixin for easier access
@@ -84,6 +84,7 @@ $typography: mat-typography-config(
     // Layout components
     @include chat-panel-theme($theme);
     @include toolbar-theme($theme);
+    @include dashboards-statusboard-theme($theme);
 }
 
 // -----------------------------------------------------------------------------------------------------

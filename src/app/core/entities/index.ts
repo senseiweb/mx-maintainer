@@ -1,4 +1,4 @@
-export * from './aagt-app-config';
+export * from '../aagt-app-config';
 export * from './action-item';
 export * from './asset-trigger-task';
 export * from './asset';

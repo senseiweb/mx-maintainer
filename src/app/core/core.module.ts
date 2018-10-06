@@ -1,8 +1,6 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 import { EmProviderService, BaseRepoService} from './data';
+import { AppSharedModule  } from 'app/app-shared.module';
 import {
   EntityBase,
   GeneratorOps,
@@ -19,49 +17,12 @@ import {
   WorkShift,
   AagtAppConfig
 } from './entities';
-import {
-  MatButtonModule,
-  MatDividerModule,
-  MatFormFieldModule,
-  MatIconModule,
-  MatMenuModule,
-  MatSelectModule,
-  MatTableModule,
-  MatTabsModule
-} from '@angular/material';
-import { FuseSharedModule } from '@fuse/shared.module';
-import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
 
 @NgModule({
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatMenuModule,
-    MatSelectModule,
-    MatTableModule,
-    MatTabsModule,
-    FuseSharedModule,
-    FuseWidgetModule,
-    FuseSidebarModule,
-    BrowserAnimationsModule
+    AppSharedModule
   ],
   exports: [
-    CommonModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatMenuModule,
-    MatSelectModule,
-    MatTableModule,
-    MatTabsModule,
-    FuseSharedModule,
-    FuseWidgetModule,
-    FuseSidebarModule,
-    BrowserAnimationsModule
   ],
   providers: [
     EmProviderService,

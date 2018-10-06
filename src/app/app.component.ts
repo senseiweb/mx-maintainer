@@ -10,8 +10,8 @@ import { FuseTranslationLoaderService } from '@fuse/services/translation-loader.
 import { TranslateService } from '@ngx-translate/core';
 import { Platform } from '@angular/cdk/platform';
 
-import { navigation } from './core';
-import { locale as navigationEnglish } from './core';
+import { AagtAppConfig } from './core';
+import { navLocale as navigationEnglish } from './core';
 import { takeUntil } from 'rxjs/operators';
 
 
@@ -34,10 +34,11 @@ export class AppComponent implements OnInit, OnDestroy {
     private _fuseSplashScreenService: FuseSplashScreenService,
     private _fuseTranslationLoaderService: FuseTranslationLoaderService,
     private _translateService: TranslateService,
-    private _platform: Platform
+       private _platform: Platform,
+    private _aagtConfig: AagtAppConfig
 ) {
     // Get default navigation
-    this.navigation = navigation;
+    this.navigation = _aagtConfig.fuseNavigation;
 
     // Register the navigation to the service
     this._fuseNavigationService.register('main', this.navigation);

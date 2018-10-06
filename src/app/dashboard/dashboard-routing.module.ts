@@ -1,23 +1,23 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes, Route } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { StatusBoardComponent } from './status-board';
+import { AagtAppConfig } from 'app/core';
+import { FuseNavigation } from '@fuse/types';
 
-const appRoutes: Routes = [
-  {
-    path: 'dashboard',
-    component: DashboardComponent,
-    children: [{
-      path: 'status-board',
-      component: StatusBoardComponent
-    }]
-  }
-];
+const dashboardRoutes: Routes = [{
+  path: 'dashboard',
+  component: DashboardComponent,
+  children: [{
+    path: 'status-board',
+    component: StatusBoardComponent
+  }]
+}];
+
 
 @NgModule({
   imports: [
-    RouterModule.forChild(
-      appRoutes    )
+    RouterModule.forChild(dashboardRoutes)
   ],
   exports: [
     RouterModule
@@ -25,4 +25,19 @@ const appRoutes: Routes = [
 })
 export class DashboardRoutingModule {
 
+  dashboardNavConfig: Array<FuseNavigation> = [{
+    id: 'dashboard',
+    title: 'Dashboards',
+    type: 'group',
+    children: [{
+      id: 'dash-status-board',
+      title: 'Status Boards',
+      type: 'item',
+      icon: 'charts'
+    }]
+  }];
+
+  constructor(_aagtConfg: AagtAppConfig) {
+    this.dashboardNavConfig.forEach(navConfig => _aagtConfg.fuseNavigation.push(navConfig));
+  }
 }
