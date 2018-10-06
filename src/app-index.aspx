@@ -276,11 +276,10 @@ text-decoration:none;
                   }
                   i += 1;
                 }
-                JSON.stringify(appConfig);
-                localStorage.setItem('AppConfig', appConfig);
+                localStorage.setItem('AppConfig', JSON.stringify(appConfig));
                 SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.Cancel);
                 SP.UI.ModalDialog.showWaitScreenWithNoClose("Done!...", "Starting AAGT app");
-                window.location.replace(appConfig.appWebUrl + '/SitePages/aagt-index.html');
+                window.location.replace(appConfig.appWebUrl + '/aagt-index.html');
               }, function (sender, error) {
                 SP.UI.ModalDialog.showModalDialog(dialogOptions);
                 console.log("Critical Error: failed to get data from the server--> " + error.get_message());

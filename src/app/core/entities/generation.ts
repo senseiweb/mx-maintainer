@@ -38,16 +38,16 @@ export class GeneratorOps extends EntityBase {
         this.entityDefinition.dataProperties.StopDateTime = {
             dataType: this.dt.DateTime
         };
-        this.entityDefinition.navigationProperties.Assumptions = {
-            entityTypeName: this._assumption.shortName,
-            associationName: 'GeneratorAssumptions',
-            foreignKeyNames: ['GenerationId']
-        };
-        this.entityDefinition.navigationProperties.Generation = {
-            entityTypeName: this._trigger.shortName,
-            associationName: 'GeneratorTriggers',
-            foreignKeyNames: ['GenerationId']
-          };
+        // this.entityDefinition.navigationProperties.Assumptions = {
+        //    entityTypeName: this._assumption.shortName,
+        //    associationName: 'GeneratorAssumptions',
+        //    foreignKeyNames: ['GenerationId']
+        // };
+        // this.entityDefinition.navigationProperties.Generation = {
+        //    entityTypeName: this._trigger.shortName,
+        //    associationName: 'GeneratorTriggers',
+        //    foreignKeyNames: ['GenerationId']
+        //  };
         Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
     }
 

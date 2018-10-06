@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
-import { AppInjector } from '../../app-injector.service';
 import { EmProviderService } from './em-provider';
 import { EntityBase } from '../entities/_entity-base';
 

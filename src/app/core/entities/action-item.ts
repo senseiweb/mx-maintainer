@@ -13,9 +13,9 @@ export class ActionItem extends EntityBase {
     this.entityDefinition.dataProperties.ShortCode = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.Duration = { dataType: this.dt.Int16 };
 
-    this.entityDefinition.navigationProperties.Producer = {
-      entityTypeName: ''
-    };
+    // this.entityDefinition.navigationProperties.Producer = {
+    //   entityTypeName: ''
+    // };
 
 
     Object.assign(this.entityDefinition.dataProperties, this.coreProperties);

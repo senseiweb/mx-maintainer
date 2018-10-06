@@ -11,17 +11,14 @@ import { HorizontalLayout1Module } from 'app/layout/horizontal/layout-1/layout-1
         VerticalLayout1Module,
         VerticalLayout2Module,
         VerticalLayout3Module,
-
         HorizontalLayout1Module
     ],
     exports: [
         VerticalLayout1Module,
         VerticalLayout2Module,
         VerticalLayout3Module,
-
         HorizontalLayout1Module
     ]
 })
-export class LayoutModule
-{
+export class LayoutModule {
 }

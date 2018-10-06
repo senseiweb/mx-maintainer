@@ -40,4 +40,3 @@ import { FuseConfig } from '@fuse/types';
          }
      }
  };
- 

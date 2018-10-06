@@ -2,18 +2,18 @@ import { FuseNavigation } from '@fuse/types';
 
 export const navigation: FuseNavigation[] = [
     {
-        id       : 'applications',
-        title    : 'Applications',
+        id       : 'dashboard',
+        title    : 'Dashboards',
         translate: 'NAV.APPLICATIONS',
         type     : 'group',
         children : [
             {
-                id       : 'main',
-                title    : 'Main',
+                id       : 'status-board',
+                title    : 'Status Board',
                 translate: 'NAV.SAMPLE.TITLE',
                 type     : 'item',
-                icon     : 'email',
-                url      : '/main',
+                icon     : 'charts',
+                url      : '/dashboard/status-board',
                 badge    : {
                     title    : '25',
                     translate: 'NAV.SAMPLE.BADGE',

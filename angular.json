@@ -18,7 +18,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist",
-            "index": "src/index.html",
+            "index": "src/aagt-index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
@@ -35,6 +35,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/",
+              "deployUrl": "https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

@@ -93,8 +93,8 @@ export class EntityBase implements Entity {
 
     registerMe(store: breeze.MetadataStore, metadataHelper: breeze.config.MetadataHelper): void {
         const addedType = metadataHelper.addTypeToStore(store, this.entityDefinition as any) as EntityType;
-        store.registerEntityTypeCtor(this.shortName, this.self, this.initializer);
-        store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
+        store.registerEntityTypeCtor(this.shortName, this.self.constructor, this.initializer);
+        // store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
         this.addDefaultSelect(addedType);
 
     }

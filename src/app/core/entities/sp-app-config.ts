@@ -9,7 +9,7 @@ export interface SpConfigValue {
 export class SpAppConfig extends EntityBase {
 
   shortName = 'SpAppConfig';
-  private _configValue: string;
+  private _configValue = '{}';
 
   constructor() {
     super();

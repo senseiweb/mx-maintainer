@@ -5,7 +5,6 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import 'hammerjs';
 
 import { AppComponent } from './app.component';
-import { Routes, RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule, MatIconModule } from '@angular/material';
@@ -17,15 +16,8 @@ import { LayoutModule } from './layout/layout.module';
 
 import { CoreModule } from './core';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
-import { MainModule } from './main/main.module';
-
-
-const appRoutes: Routes = [
-  {
-      path      : '**',
-      redirectTo: 'main'
-  }
-];
+import { DashboardModule } from './dashboard';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -36,7 +28,7 @@ const appRoutes: Routes = [
     BrowserAnimationsModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
-    RouterModule.forRoot(appRoutes),
+    DashboardModule,
     TranslateModule.forRoot(),
 
     // Material moment date module
@@ -55,8 +47,7 @@ const appRoutes: Routes = [
     // App modules
     CoreModule,
     LayoutModule,
-    MainModule
-
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

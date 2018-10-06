@@ -19,10 +19,10 @@ export class Asset extends EntityBase {
     this.entityDefinition.dataProperties.Alias = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.Notes = { dataType: this.dt.String };
 
-    this.entityDefinition.navigationProperties.AssetTriggerTasks = {
-      entityTypeName: this._assetTriggerTask.shortName,
-      foreignKeyNames: ['AssetId']
-    };
+    // this.entityDefinition.navigationProperties.AssetTriggerTasks = {
+    //  entityTypeName: this._assetTriggerTask.shortName,
+    //  foreignKeyNames: ['AssetId']
+    // };
     Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
   }
 

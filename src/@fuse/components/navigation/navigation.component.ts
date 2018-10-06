@@ -10,8 +10,7 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
     styleUrls    : ['./navigation.component.scss'],
     encapsulation: ViewEncapsulation.None
 })
-export class FuseNavigationComponent implements OnInit
-{
+export class FuseNavigationComponent implements OnInit {
     @Input()
     layout = 'vertical';
 
@@ -26,8 +25,7 @@ export class FuseNavigationComponent implements OnInit
      */
     constructor(
         private _fuseNavigationService: FuseNavigationService
-    )
-    {
+    ) {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
     }
@@ -39,8 +37,7 @@ export class FuseNavigationComponent implements OnInit
     /**
      * On init
      */
-    ngOnInit(): void
-    {
+    ngOnInit(): void {
         // Load the navigation either from the input or from the service
         this.navigation = this.navigation || this._fuseNavigationService.getCurrentNavigation();
 

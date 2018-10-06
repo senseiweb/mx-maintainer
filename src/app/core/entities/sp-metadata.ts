@@ -8,6 +8,7 @@ export class SpMetadata extends EntityBase {
     this.self = this;
     this.entityDefinition.isComplexType = true;
     this.entityDefinition.shortName = this.shortName;
+    this.entityDefinition.navigationProperties = undefined;
     this.entityDefinition.dataProperties.id = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.uri = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.etag = { dataType: this.dt.String };
