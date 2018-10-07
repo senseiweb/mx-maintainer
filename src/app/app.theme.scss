@@ -84,7 +84,7 @@ $typography: mat-typography-config(
     // Layout components
     @include chat-panel-theme($theme);
     @include toolbar-theme($theme);
-    @include dashboards-statusboard-theme($theme);
+    @include dashboards-statusboard-theme($theme)
 }
 
 // -----------------------------------------------------------------------------------------------------

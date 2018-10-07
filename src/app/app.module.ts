@@ -1,5 +1,4 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import 'hammerjs';
@@ -7,14 +6,13 @@ import 'hammerjs';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatButtonModule, MatIconModule } from '@angular/material';
 import { FuseModule } from '@fuse/fuse.module';
-import { FuseProgressBarModule, FuseSidebarModule, FuseThemeOptionsModule } from '@fuse/components';
-import { FuseSharedModule } from '@fuse/shared.module';
-import { FusecLayoutModule } from './fusec-layout/fusec-layout.module';
+import { FusecLayoutModule } from 'app/fusec-layout/fusec-layout.module';
+import { FuseProgressBarModule, FuseSidebarModule } from '@fuse/components';
 
 import { CoreModule, AagtAppConfig } from './core';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
+import { AppSharedModule } from './app-shared.module';
 import { DashboardModule } from './dashboard';
 import { AppRoutingModule } from './app-routing.module';
 
@@ -24,7 +22,7 @@ import { AppRoutingModule } from './app-routing.module';
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule,
+    AppSharedModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
     DashboardModule,
@@ -32,16 +30,11 @@ import { AppRoutingModule } from './app-routing.module';
 
     // Material moment date module
     MatMomentDateModule,
-    // Material
-    MatButtonModule,
-    MatIconModule,
 
     // Fuse modules
-    FuseModule.forRoot(AagtAppConfig.fuseConfig),
+    FuseModule.forRoot(AagtAppConfig.defaultFuseConfig),
     FuseProgressBarModule,
     FuseSidebarModule,
-    FuseSharedModule,
-    FuseThemeOptionsModule,
 
     // App modules
     CoreModule,

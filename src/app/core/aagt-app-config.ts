@@ -30,7 +30,7 @@ export interface UserGrpInitData {
 @Injectable()
 export class AagtAppConfig {
 
-  static fuseConfig: FuseConfig = {
+  static defaultFuseConfig: FuseConfig = {
     colorTheme: 'theme-default',
     customScrollbars: true,
     layout: {
@@ -48,7 +48,7 @@ export class AagtAppConfig {
         customBackgroundColor: false,
         background: 'fuse-white-500',
         hidden: false,
-        position: 'below-static',
+        position: 'above-fixed',
       },
       footer: {
         customBackgroundColor: true,

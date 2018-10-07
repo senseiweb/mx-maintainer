@@ -84,9 +84,9 @@
 <!-- / SIDE PANEL -->
 
 <!-- QUICK PANEL -->
-<sidebar name="quickPanel" position="right" class="quick-panel">
+<fuse-sidebar name="quickPanel" position="right" class="quick-panel">
     <fusec-quick-panel></fusec-quick-panel>
-</sidebar>
+</fuse-sidebar>
 <!-- / QUICK PANEL -->
 
 
@@ -108,22 +108,22 @@
 
 <!-- LEFT NAVBAR -->
 <ng-template #leftNavbar>
-    <sidebar name="navbar" class="navbar-fuse-sidebar"
+    <fuse-sidebar name="navbar" class="navbar-fuse-sidebar"
                   [folded]="fuseConfig.layout.navbar.folded"
                   lockedOpen="gt-md"
                   *ngIf="!fuseConfig.layout.navbar.hidden">
         <fusec-navbar [variant]="fuseConfig.layout.navbar.variant" class="left-navbar"></fusec-navbar>
-</sidebar>
+</fuse-sidebar>
 </ng-template>
 <!-- / LEFT NAVBAR -->
 
 <!-- RIGHT NAVBAR -->
 <ng-template #rightNavbar>
-    <sidebar name="navbar" position="right" class="navbar-fuse-sidebar"
+    <fuse-sidebar name="navbar" position="right" class="navbar-fuse-sidebar"
                   [folded]="fuseConfig.layout.navbar.folded"
                   lockedOpen="gt-md"
                   *ngIf="!fuseConfig.layout.navbar.hidden">
         <fusec-navbar [variant]="fuseConfig.layout.navbar.variant" class="right-navbar"></fusec-navbar>
-    </sidebar>
+    </fuse-sidebar>
 </ng-template>
 <!-- / RIGHT NAVBAR -->

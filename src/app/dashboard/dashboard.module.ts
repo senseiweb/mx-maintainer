@@ -5,12 +5,6 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { AppSharedModule  } from 'app/app-shared.module';
 
-import {
-  FuseSharedModule,
-  FuseSidebarModule,
-  FuseWidgetModule
-} from '@fuse';
-
 @NgModule({
   declarations: [
     StatusBoardComponent,
@@ -22,8 +16,6 @@ import {
     DashboardRoutingModule
   ],
   exports: [
-    StatusBoardComponent,
-    DashboardComponent
   ]
 })
 export class DashboardModule {

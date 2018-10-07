@@ -19,7 +19,7 @@ export class FusecVerticalLayout3Component implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<any>;
 
     constructor(
-        private _aagtConfig: AagtAppConfig,
+        _aagtConfig: AagtAppConfig,
         private _fuseConfigService: FuseConfigService
     ) {
         // Set the defaults

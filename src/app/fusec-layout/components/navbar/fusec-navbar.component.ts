@@ -15,7 +15,7 @@ export class FusecNavbarComponent {
         private _elementRef: ElementRef,
         private _renderer: Renderer2) {
         // Set the private defaults
-        this._variant = AagtAppConfig.fuseConfig.layout.navbar.variant;
+        this._variant = AagtAppConfig.defaultFuseConfig.layout.navbar.variant;
     }
 
     get variant(): string {

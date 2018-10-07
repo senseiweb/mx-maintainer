@@ -20,7 +20,7 @@ import { FuseMatchMediaService } from '@fuse/services/match-media.service';
 import { FuseConfigService } from '@fuse/services/config.service';
 
 @Component({
-    selector     : 'sidebar',
+    selector     : 'fuse-sidebar',
     templateUrl  : './sidebar.component.html',
     styleUrls    : ['./sidebar.component.scss'],
     encapsulation: ViewEncapsulation.None
