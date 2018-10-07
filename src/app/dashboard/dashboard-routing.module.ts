@@ -5,7 +5,7 @@ import { StatusBoardComponent } from './status-board';
 import { AagtAppConfig } from 'app/core';
 import { FuseNavigation } from '@fuse/types';
 
-const dashboardRoutes: Routes = [{
+const routes: Routes = [{
   path: 'dashboard',
   component: DashboardComponent,
   children: [{
@@ -17,7 +17,7 @@ const dashboardRoutes: Routes = [{
 
 @NgModule({
   imports: [
-    RouterModule.forChild(dashboardRoutes)
+    RouterModule.forChild(routes)
   ],
   exports: [
     RouterModule
@@ -25,7 +25,7 @@ const dashboardRoutes: Routes = [{
 })
 export class DashboardRoutingModule {
 
-  dashboardNavConfig: Array<FuseNavigation> = [{
+  private dashboardNavConfig: Array<FuseNavigation> = [{
     id: 'dashboard',
     title: 'Dashboards',
     type: 'group',
@@ -37,7 +37,9 @@ export class DashboardRoutingModule {
     }]
   }];
 
-  constructor(_aagtConfg: AagtAppConfig) {
-    this.dashboardNavConfig.forEach(navConfig => _aagtConfg.fuseNavigation.push(navConfig));
+  constructor(aagtConfg: AagtAppConfig) {
+    this.dashboardNavConfig.forEach(navConfig => aagtConfg.fuseNavigation.push(navConfig));
   }
 }
+
+export const routedComponents = [StatusBoardComponent];
