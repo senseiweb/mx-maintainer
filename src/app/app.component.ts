@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 
+import { AagtAppConfig } from './core';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
@@ -10,7 +11,6 @@ import { FuseTranslationLoaderService } from '@fuse/services/translation-loader.
 import { TranslateService } from '@ngx-translate/core';
 import { Platform } from '@angular/cdk/platform';
 
-import { AagtAppConfig } from './core';
 import { navLocale as navigationEnglish } from './core';
 import { takeUntil } from 'rxjs/operators';
 
@@ -35,16 +35,16 @@ export class AppComponent implements OnInit, OnDestroy {
     private _fuseTranslationLoaderService: FuseTranslationLoaderService,
     private _translateService: TranslateService,
        private _platform: Platform,
-    private _aagtConfig: AagtAppConfig
+    _aagtConfig: AagtAppConfig
 ) {
     // Get default navigation
-    this.navigation = _aagtConfig.fuseNavigation;
+    // this.navigation = _aagtConfig.fuseNavigation;
 
     // Register the navigation to the service
-    this._fuseNavigationService.register('main', this.navigation);
+    // this._fuseNavigationService.register('dashboard', this.navigation);
 
     // Set the main navigation as our current navigation
-    this._fuseNavigationService.setCurrentNavigation('main');
+    /// this._fuseNavigationService.setCurrentNavigation('dashboard');
 
     // Add languages
     this._translateService.addLangs(['en', 'tr']);

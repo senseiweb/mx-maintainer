@@ -75,7 +75,7 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
             }
         ];
 
-        this.navigation = _aagtConfig.fuseNavigation;
+        // this.navigation = _aagtConfig.fuseNavigation;
 
         this._unsubscribeAll = new Subject();
     }

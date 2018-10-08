@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard.component';
 import { StatusBoardComponent } from './status-board';
 import { AagtAppConfig } from 'app/core';
 import { FuseNavigation } from '@fuse/types';
+import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 const routes: Routes = [{
   path: 'dashboard',
@@ -26,19 +27,13 @@ const routes: Routes = [{
 export class DashboardRoutingModule {
 
   private dashboardNavConfig: Array<FuseNavigation> = [{
-    id: 'dashboard',
-    title: 'Dashboards',
-    type: 'group',
-    children: [{
-      id: 'dash-status-board',
-      title: 'Status Boards',
-      type: 'item',
-      icon: 'charts'
-    }]
+    id: 'dash-status-board',
+    title: 'Status Boards',
+    type: 'item'
   }];
 
-  constructor(aagtConfg: AagtAppConfig) {
-    this.dashboardNavConfig.forEach(navConfig => aagtConfg.fuseNavigation.push(navConfig));
+  constructor(navService: FuseNavigationService, _aagtConfig: AagtAppConfig) {
+    this.dashboardNavConfig.forEach(navItem => navService.addNavigationItem(navItem, 'dashboard'));
   }
 }
 

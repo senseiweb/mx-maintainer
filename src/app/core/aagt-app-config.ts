@@ -2,12 +2,15 @@ import { Injectable } from '@angular/core';
 import { SPUserProfileProperties } from './entities/sp-user-profile-prop';
 import { FuseConfig, FuseNavigation } from '@fuse/types';
 import { Route } from '@angular/router';
+import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type aagtNavUnion = aagtNav | routeNav;
 export type aagtNav = Omit<FuseNavigation, 'children'>;
 export type routeNav = Omit<Route, 'children'>;
-
+export interface AgtNavConfig {
+  [index: string]: FuseNavigation;
+}
 export interface AagtNavigationItem extends aagtNav, routeNav {
   children?: Array<aagtNav | routeNav>;
 }
@@ -79,7 +82,24 @@ export class AagtAppConfig {
     }
   };
 
-  constructor() {
+  private aagtNavConfig: AgtNavConfig = {
+    dashboard: {
+      id: 'dashboard',
+      title: 'Dashboard',
+      icon: 'dashboard',
+      type: 'collapsable',
+      children: []
+    },
+    genie: {
+      id: 'genie',
+      title: 'Genie',
+      icon: 'contacts',
+      type: 'item',
+      children: []
+    }
+  };
+
+  constructor(fuseNavService: FuseNavigationService) {
     const spConfigInit = localStorage.getItem('AppConfig');
     const initConfig = spConfigInit ? JSON.parse(spConfigInit) : this.demoConfig as AppInitData;
     this.rawRequestDigest = initConfig.requestDigestRaw;
@@ -87,7 +107,10 @@ export class AagtAppConfig {
     this.requestDigestExpire = new Date(initConfig.requestDigestRaw.split(',')[1]);
     this.appWebUrl = initConfig.requestDigestRaw;
     this.currentUser = initConfig.currUser;
+
+    Object.keys(this.aagtNavConfig).map(navItemKey => fuseNavService.addNavigationItem(navItemKey, this.aagtNavConfig[navItemKey]));
+    fuseNavService.setCurrentNavigation('dashboard');
   }
 
-  fuseNavigation: Array<AagtNavigationItem> = [];
+
 }

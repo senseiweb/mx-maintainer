@@ -21,11 +21,12 @@ import { AppRoutingModule } from './app-routing.module';
     AppComponent
   ],
   imports: [
+    AppRoutingModule,
+
     BrowserModule,
     AppSharedModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
-    DashboardModule,
     TranslateModule.forRoot(),
 
     // Material moment date module
@@ -39,7 +40,7 @@ import { AppRoutingModule } from './app-routing.module';
     // App modules
     CoreModule,
     FusecLayoutModule,
-    AppRoutingModule
+    DashboardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

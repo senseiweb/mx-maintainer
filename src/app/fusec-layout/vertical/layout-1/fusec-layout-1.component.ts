@@ -23,7 +23,7 @@ export class FusecVerticalLayout1Component implements OnInit, OnDestroy {
         _aagtConfig: AagtAppConfig
     ) {
         // Set the defaults
-        this.navigation = _aagtConfig.fuseNavigation;
+        // this.navigation = _aagtConfig.fuseNavigation;
 
         // Set the private defaults
         this._unsubscribeAll = new Subject();
