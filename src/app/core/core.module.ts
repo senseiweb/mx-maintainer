@@ -1,9 +1,9 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import { EmProviderService, BaseRepoService} from './data';
+import { EmProviderService, BaseRepoService, GenerationRepoService} from './data';
 import { AppSharedModule  } from 'app/app-shared.module';
 import {
   EntityBase,
-  GeneratorOps,
+  Generation,
   SpAppConfig,
   ActionItem,
   AssetTriggerTask,
@@ -29,7 +29,8 @@ import {
     AagtAppConfig,
     BaseRepoService,
     EntityBase,
-    GeneratorOps,
+    Generation, ,
+    GenerationRepoService,
     SpAppConfig,
     ActionItem,
     AssetTriggerTask,

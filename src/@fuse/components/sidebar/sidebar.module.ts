@@ -10,5 +10,6 @@ import { FuseSidebarComponent } from './sidebar.component';
         FuseSidebarComponent
     ]
 })
-export class FuseSidebarModule {
+export class FuseSidebarModule
+{
 }

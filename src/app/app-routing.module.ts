@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AagtAppConfig } from 'app/core';
 
 const appRoutes: Routes = [
   {
@@ -29,6 +30,6 @@ const appRoutes: Routes = [
   ]
 })
 export class AppRoutingModule {
-  constructor() {  }
+  constructor(_aagtAppConfig: AagtAppConfig) {  }
 
 }

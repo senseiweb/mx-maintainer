@@ -1,4 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 import { NgModule } from '@angular/core';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import 'hammerjs';
@@ -21,9 +23,9 @@ import { AppRoutingModule } from './app-routing.module';
     AppComponent
   ],
   imports: [
-    AppRoutingModule,
-
+    CoreModule,
     BrowserModule,
+    BrowserAnimationsModule,
     AppSharedModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
@@ -38,7 +40,7 @@ import { AppRoutingModule } from './app-routing.module';
     FuseSidebarModule,
 
     // App modules
-    CoreModule,
+    AppRoutingModule,
     FusecLayoutModule,
     DashboardModule
   ],

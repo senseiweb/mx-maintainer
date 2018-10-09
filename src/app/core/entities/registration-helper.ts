@@ -10,7 +10,7 @@ export class RegistrationHelper {
         private _assetTrigger: et.AssetTriggerTask,
         private _asset: et.Asset,
         private _assumption: et.Assumption,
-        private _genOp: et.GeneratorOps,
+        private _genOp: et.Generation,
         private _producer: et.Producer,
         private _spAppConfig: et.SpAppConfig,
         private _spMetadata: et.SpMetadata,

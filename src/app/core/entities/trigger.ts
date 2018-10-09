@@ -1,6 +1,6 @@
 import { EntityBase } from './_entity-base';
 import { Injectable } from '@angular/core';
-import { GeneratorOps } from './generation';
+import { Generation } from './generation';
 
 @Injectable()
 export class Trigger extends EntityBase {
@@ -22,8 +22,9 @@ export class Trigger extends EntityBase {
   }
 
   milestone: string;
-  triggerStart: Date;
-  triggerStop: Date;
+  generationOffset?: number;
+  triggerStart?: Date;
+  triggerStop?: Date;
 
   initializer(entity: Trigger) { }
 

@@ -3,17 +3,13 @@ import { SPUserProfileProperties } from './entities/sp-user-profile-prop';
 import { FuseConfig, FuseNavigation } from '@fuse/types';
 import { Route } from '@angular/router';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { basicNavStructure, genMgrNavStructure } from './app-nav-structure';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type aagtNavUnion = aagtNav | routeNav;
 export type aagtNav = Omit<FuseNavigation, 'children'>;
 export type routeNav = Omit<Route, 'children'>;
-export interface AgtNavConfig {
-  [index: string]: FuseNavigation;
-}
-export interface AagtNavigationItem extends aagtNav, routeNav {
-  children?: Array<aagtNav | routeNav>;
-}
+
 
 export interface AppInitData {
   requestDigestRaw: string;
@@ -30,6 +26,7 @@ export interface UserGrpInitData {
   id: number;
   title: string;
 }
+
 @Injectable()
 export class AagtAppConfig {
 
@@ -57,7 +54,7 @@ export class AagtAppConfig {
         customBackgroundColor: true,
         background: 'fuse-navy-900',
         hidden: false,
-        position: 'below-fixed'
+        position: 'above-static'
       },
       sidepanel: {
         hidden: false,
@@ -82,24 +79,9 @@ export class AagtAppConfig {
     }
   };
 
-  private aagtNavConfig: AgtNavConfig = {
-    dashboard: {
-      id: 'dashboard',
-      title: 'Dashboard',
-      icon: 'dashboard',
-      type: 'collapsable',
-      children: []
-    },
-    genie: {
-      id: 'genie',
-      title: 'Genie',
-      icon: 'contacts',
-      type: 'item',
-      children: []
-    }
-  };
+  userNavStructure: Array<FuseNavigation> = basicNavStructure;
 
-  constructor(fuseNavService: FuseNavigationService) {
+  constructor(private fuseNavService: FuseNavigationService) {
     const spConfigInit = localStorage.getItem('AppConfig');
     const initConfig = spConfigInit ? JSON.parse(spConfigInit) : this.demoConfig as AppInitData;
     this.rawRequestDigest = initConfig.requestDigestRaw;
@@ -107,10 +89,22 @@ export class AagtAppConfig {
     this.requestDigestExpire = new Date(initConfig.requestDigestRaw.split(',')[1]);
     this.appWebUrl = initConfig.requestDigestRaw;
     this.currentUser = initConfig.currUser;
-
-    Object.keys(this.aagtNavConfig).map(navItemKey => fuseNavService.addNavigationItem(navItemKey, this.aagtNavConfig[navItemKey]));
-    fuseNavService.setCurrentNavigation('dashboard');
+    this.currentUser.groups.push({title: 'Genie', id: 9});
+    this.addGroupBasedNav(this.currentUser.groups);
+    fuseNavService.register('default', this.userNavStructure);
+    fuseNavService.setCurrentNavigation('default');
   }
 
 
+  private addGroupBasedNav(grpData: UserGrpInitData[]): void {
+    if (!grpData.length) { return; }
+    grpData.forEach(grp => {
+      switch (grp.title) {
+        case 'Genie':
+          this.userNavStructure = this.userNavStructure.concat(genMgrNavStructure);
+          break;
+      }
+    });
+
+  }
 }

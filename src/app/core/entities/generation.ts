@@ -3,10 +3,11 @@ import { Injectable } from '@angular/core';
 import { Assumption } from './assumption';
 import { Trigger } from './trigger';
 
+export type GenStatus = 'Draft' | 'Planned' | 'Active' | 'Historical';
 
 @Injectable()
-export class GeneratorOps extends EntityBase {
-    shortName = 'Generator';
+export class Generation extends EntityBase {
+    shortName = 'Generation';
 
     constructor(private _assumption: Assumption,
                      private _trigger: Trigger) {
@@ -26,6 +27,10 @@ export class GeneratorOps extends EntityBase {
         this.entityDefinition.dataProperties.ISO = {
             dataType: this.dt.String,
             isNullable: true
+        };
+        this.entityDefinition.dataProperties.Status = {
+            dataType: this.dt.String,
+            isNullable: false,
         };
         this.entityDefinition.dataProperties.NumberAssetsRequired = {
             dataType: this.dt.Int16,
@@ -51,11 +56,15 @@ export class GeneratorOps extends EntityBase {
         Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
     }
 
-    title: string;
-    active: boolean;
-    iso: string;
-    assumptions: Array<Assumption>;
-    triggers: Array<Trigger>;
+    title?: string;
+    active?: boolean;
+    iso?: string;
+    status?: GenStatus;
+    numberAssetsRequired?: number;
+    startDateTime?: Date;
+    stopDateTime?: Date;
+    assumptions?: Array<Assumption>;
+    triggers?: Array<Trigger>;
 
-    initializer(entity: GeneratorOps) { }
+    initializer(entity: Generation) { }
 }

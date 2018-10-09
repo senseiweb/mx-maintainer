@@ -5,9 +5,9 @@ import 'breeze-client-labs/breeze.metadata-helper';
 import { MetadataStore, EntityActionSymbol } from 'breeze';
 import { Injectable } from '@angular/core';
 
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export declare type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-export type ConfigKeys = '' | '';
+export type ConfigKeys = 'isolist' | '';
 
 export type etDef = Omit<breeze.config.EntityTypeDef, 'dataProperties'|'navigationProperties'>;
 
@@ -60,12 +60,12 @@ export class EntityBase implements Entity {
         EditorId: { dataType: this.dt.Int32 }
     };
 
-    id: number;
-    modified: Date;
-    created: Date;
-    authorId: number;
-    editorId: number;
-    __metadata: SpMetadata;
+    id?: number;
+    modified?: Date;
+    created?: Date;
+    authorId?: number;
+    editorId?: number;
+    __metadata?: SpMetadata;
 
     get $typeName(): string {
         if (!this.entityAspect) {return; }

@@ -4,7 +4,7 @@ import { MatButtonModule, MatIconModule, MatMenuModule, MatToolbarModule } from 
 
 import { FuseSearchBarModule, FuseShortcutsModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
-
+import { AagtAppConfig } from 'app/core';
 import { FusecToolbarComponent } from './fusec-toolbar.component';
 
 @NgModule({
@@ -27,4 +27,10 @@ import { FusecToolbarComponent } from './fusec-toolbar.component';
     ]
 })
 export class FusecToolbarModule {
+    userName: string;
+
+    constructor(_aagtConfig: AagtAppConfig) {
+        const usrProps = _aagtConfig.currentUser.profileProperties;
+        this.userName = `${usrProps.FirstName}, ${usrProps.LastName}`;
+    }
 }

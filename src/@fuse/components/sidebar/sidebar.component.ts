@@ -1,14 +1,5 @@
 import {
-    ChangeDetectorRef,
-    Component,
-    ElementRef,
-    EventEmitter,
-    HostBinding,
-    HostListener,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output, Renderer2, RendererStyleFlags2, ViewEncapsulation
+    ChangeDetectorRef, Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, ViewEncapsulation
 } from '@angular/core';
 import { animate, AnimationBuilder, AnimationPlayer, style } from '@angular/animations';
 import { ObservableMedia } from '@angular/flex-layout';
@@ -87,7 +78,18 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
     @HostBinding('class.animations-enabled')
     private _animationsEnabled: boolean;
 
-
+    /**
+     * Constructor
+     *
+     * @param {AnimationBuilder} _animationBuilder
+     * @param {ChangeDetectorRef} _changeDetectorRef
+     * @param {ElementRef} _elementRef
+     * @param {FuseConfigService} _fuseConfigService
+     * @param {FuseMatchMediaService} _fuseMatchMediaService
+     * @param {FuseSidebarService} _fuseSidebarService
+     * @param {ObservableMedia} _observableMedia
+     * @param {Renderer2} _renderer
+     */
     constructor(
         private _animationBuilder: AnimationBuilder,
         private _changeDetectorRef: ChangeDetectorRef,

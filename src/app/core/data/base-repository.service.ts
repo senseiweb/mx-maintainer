@@ -24,6 +24,10 @@ export class BaseRepoService<T> {
     return this.executeQuery(query);
   }
 
+  protected createBase(options?: Pick<T, Exclude<keyof T, keyof EntityBase>>): T {
+    return this.entityManager.createEntity(this.entityType, options) as any;
+  }
+
   protected baseQuery(): breeze.EntityQuery {
     return breeze.EntityQuery.from(this.resourceName);
   }
