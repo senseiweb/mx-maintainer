@@ -5,19 +5,18 @@ export interface SpConfigValue {
   [index: string]: string;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SpAppConfig extends EntityBase {
 
-  shortName = 'SpAppConfig';
   private _configValue = '{}';
 
   constructor() {
-    super();
+    super('SpAppConfig');
     this.self = this;
-    this.entityDefinition.shortName = this.shortName;
-    this.entityDefinition.defaultResourceName = `/lists/getByTitle('${this.shortName}')/items`;
-    this.entityDefinition.dataProperties.ConfigKey = { dataType: this.dt.String, isNullable: false };
-    this.entityDefinition.dataProperties.ConfigValue = { dataType: this.dt.String, isNullable: false };
+    this.entityDefinition.dataProperties.configKey = { dataType: this.dt.String, isNullable: false };
+    this.entityDefinition.dataProperties.configValue = { dataType: this.dt.String, isNullable: false };
 
     Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
   }

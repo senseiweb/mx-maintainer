@@ -40,9 +40,9 @@ import { AppRoutingModule } from './app-routing.module';
     FuseSidebarModule,
 
     // App modules
-    AppRoutingModule,
     FusecLayoutModule,
-    DashboardModule
+    DashboardModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

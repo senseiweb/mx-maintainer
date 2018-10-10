@@ -5,42 +5,41 @@ import { Trigger } from './trigger';
 
 export type GenStatus = 'Draft' | 'Planned' | 'Active' | 'Historical';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+  })
 export class Generation extends EntityBase {
-    shortName = 'Generation';
 
     constructor(private _assumption: Assumption,
                      private _trigger: Trigger) {
-        super();
+        super('Generation');
         this.self = this;
-        this.entityDefinition.shortName = this.shortName;
-        this.entityDefinition.defaultResourceName = `/lists/getByTitle('${this.shortName}')/items`;
 
-        this.entityDefinition.dataProperties.Title = {
+        this.entityDefinition.dataProperties.title = {
             dataType: this.dt.String,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.Active = {
+        this.entityDefinition.dataProperties.active = {
             dataType: this.dt.Boolean,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.ISO = {
+        this.entityDefinition.dataProperties.iso = {
             dataType: this.dt.String,
             isNullable: true
         };
-        this.entityDefinition.dataProperties.Status = {
+        this.entityDefinition.dataProperties.status = {
             dataType: this.dt.String,
             isNullable: false,
         };
-        this.entityDefinition.dataProperties.NumberAssetsRequired = {
+        this.entityDefinition.dataProperties.numberAssetsRequired = {
             dataType: this.dt.Int16,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.StartDateTime = {
+        this.entityDefinition.dataProperties.startDateTime = {
             dataType: this.dt.DateTime,
             isNullable: true
         };
-        this.entityDefinition.dataProperties.StopDateTime = {
+        this.entityDefinition.dataProperties.stopDateTime = {
             dataType: this.dt.DateTime
         };
         // this.entityDefinition.navigationProperties.Assumptions = {

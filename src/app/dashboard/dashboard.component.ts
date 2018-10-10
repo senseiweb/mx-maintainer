@@ -3,6 +3,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
 import { AagtAppConfig } from '../core';
+import { DashboardUowService } from './dashboard-uow.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,7 +11,7 @@ import { AagtAppConfig } from '../core';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-
+  allGenerations;
   // userLastName: string;
   // dateNow = Date.now();
   // widgets = {
@@ -20,10 +21,11 @@ export class DashboardComponent implements OnInit {
   //     tempUnit: []
   //   }
   // };
-  constructor() {
+  constructor(private uow: DashboardUowService) {
   }
 
   ngOnInit() {
+    this.allGenerations = this.uow.allGenerations;
   }
 
 }

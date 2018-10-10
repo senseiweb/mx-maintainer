@@ -7,6 +7,10 @@ const appRoutes: Routes = [
     path: '',
     redirectTo: '/dashboard/status-board',
     pathMatch: 'full'
+  }, {
+    path: 'aagt-index.html',
+    redirectTo: 'aagt-index.html#/dashboard/status-board',
+    pathMatch: 'full'
   },
   {
     path: 'genie',

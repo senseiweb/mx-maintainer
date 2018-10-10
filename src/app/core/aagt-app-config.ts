@@ -87,7 +87,7 @@ export class AagtAppConfig {
     this.rawRequestDigest = initConfig.requestDigestRaw;
     this.requestDigestKey = initConfig.requestDigestRaw.split(',')[0];
     this.requestDigestExpire = new Date(initConfig.requestDigestRaw.split(',')[1]);
-    this.appWebUrl = initConfig.requestDigestRaw;
+    this.appWebUrl = initConfig.appWebUrl;
     this.currentUser = initConfig.currUser;
     this.currentUser.groups.push({title: 'Genie', id: 9});
     this.addGroupBasedNav(this.currentUser.groups);

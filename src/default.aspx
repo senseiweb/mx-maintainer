@@ -7,6 +7,21 @@
 <html lang="en">
 <head>
 <meta name="WebPartPageExpansion" content="full" />
+<script>
+  (function(){
+    if(!window.performance) {
+      console.error('Unable to detect, browswer performance...continuing normal load!');
+      return;
+    }
+    var isReloaded = performance.navigation.type === 1;
+    var gotConfigKey = localStorage.getItem('AppConfig') === null;
+    console.log('isReloaded is: ' + isReloaded);
+    console.log('gotConfigKey is: ' + gotConfigKey);
+    if (isReloaded && gotConfigKey) {
+      window.location.replace('aagt-index.html');
+    }
+  })();
+</script>
 <SharePoint:ScriptLink Name="MicrosoftAjax.js" runat="server" Defer="False" Localizable="false" __designer:Preview="&lt;script src=&quot;/_layouts/15/microsoftajax.js?rev=Civ3pT%2FplWDqWJ69HuRuNQ%3D%3D&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/init.js?rev=Xpo7ARBt8xBROO1h5n3s6g%3D%3D&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/1033/initstrings.js?rev=S11vfGURQYVuACMEY0tLTg%3D%3D&quot;&gt;&lt;/script&gt;
@@ -213,7 +228,6 @@ text-decoration:none;
           }
         </style>
       </head>
-
       <body>
         <form runat="server">
           <SharePoint:FormDigest ID="FormDigest1" runat="server" __designer:Preview="" __designer:Values="&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;FormDigest1&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"></SharePoint:FormDigest>
@@ -279,7 +293,7 @@ text-decoration:none;
                 localStorage.setItem('AppConfig', JSON.stringify(appConfig));
                 SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.Cancel);
                 SP.UI.ModalDialog.showWaitScreenWithNoClose("Done!...", "Starting AAGT app");
-                window.location.replace(appConfig.appWebUrl + '/aagt-index.html');
+                window.location.replace('aagt-index.html');
               }, function (sender, error) {
                 SP.UI.ModalDialog.showModalDialog(dialogOptions);
                 console.log("Critical Error: failed to get data from the server--> " + error.get_message());

@@ -8,7 +8,7 @@ import { GenAssetRepoService } from 'app/core/data/gen-asset-repo.service';
 import { GenerationAsset } from 'app/core/entities/generation-asset';
 
 @Injectable()
-export class GenieUowService {
+export class DashboardUowService {
 
   allGenerations: Array<Generation>;
   allAssets: Array<Asset>;

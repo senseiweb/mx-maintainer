@@ -1,21 +1,19 @@
 import { EntityBase } from './_entity-base';
 import { Injectable } from '@angular/core';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WorkShift extends EntityBase {
 
-  shortName = 'WorkShift';
-
   constructor() {
-    super();
+    super('WorkShift');
     this.self = this;
-    this.entityDefinition.shortName = this.shortName;
-    this.entityDefinition.defaultResourceName = `/lists/getByTitle('${this.shortName}')/items`;
-    this.entityDefinition.dataProperties.ShortTitle = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.TeamsOnShift = { dataType: this.dt.Int16 };
-    this.entityDefinition.dataProperties.ShiftStart = { dataType: this.dt.Int16 };
-    this.entityDefinition.dataProperties.ShiftLength = { dataType: this.dt.Int16 };
-    this.entityDefinition.dataProperties.ShiftLayover = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.shortTitle = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.teamsOnShift = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.shiftStart = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.shiftLength = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.shiftLayover = { dataType: this.dt.Int16 };
 
     Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
   }

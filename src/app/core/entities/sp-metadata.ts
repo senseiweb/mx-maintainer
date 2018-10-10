@@ -1,11 +1,17 @@
+import { Injectable } from '@angular/core';
 import { EntityBase } from './_entity-base';
+import { unwatchFile } from 'fs';
 
+
+@Injectable({
+  providedIn: 'root'
+})
 export class SpMetadata extends EntityBase {
-  shortName = '__metadata';
 
   constructor() {
-    super();
+    super('__metadata');
     this.self = this;
+    this.entityDefinition.defaultResourceName = undefined;
     this.entityDefinition.isComplexType = true;
     this.entityDefinition.shortName = this.shortName;
     this.entityDefinition.navigationProperties = undefined;

@@ -2,7 +2,6 @@ import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import { SpMetadata } from './sp-metadata';
 import * as breeze from 'breeze-client';
 import 'breeze-client-labs/breeze.metadata-helper';
-import { MetadataStore, EntityActionSymbol } from 'breeze';
 import { Injectable } from '@angular/core';
 
 export declare type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -31,21 +30,22 @@ export interface SpEntityDef extends etDef {
     navigationProperties?: NavMembers;
 }
 
-@Injectable()
 export class EntityBase implements Entity {
     shortName: string;
     entityAspect: EntityAspect;
     entityType: EntityType;
     entityDefinition = {
         dataProperties: {},
-        navigationProperties: {}
+        navigationProperties: {},
+        shortName: '',
+        defaultResourceName: '',
     } as SpEntityDef;
 
     protected dt = breeze.DataType;
     self: any;
 
     coreProperties: DataMembers = {
-        Id: {
+        id: {
             dataType: this.dt.Int32,
             isPartOfKey: true,
         },
@@ -54,10 +54,10 @@ export class EntityBase implements Entity {
             dataType: null,
             isNullable: false
         },
-        Modified: { dataType: this.dt.DateTime},
-        Created: { dataType: this.dt.DateTime },
-        AuthorId: { dataType: this.dt.Int32 },
-        EditorId: { dataType: this.dt.Int32 }
+        modified: { dataType: this.dt.DateTime},
+        created: { dataType: this.dt.DateTime },
+        authorId: { dataType: this.dt.Int32 },
+        editorId: { dataType: this.dt.Int32 }
     };
 
     id?: number;
@@ -66,6 +66,12 @@ export class EntityBase implements Entity {
     authorId?: number;
     editorId?: number;
     __metadata?: SpMetadata;
+
+    constructor(shortName: string) {
+        this.entityDefinition.shortName = shortName;
+        this.shortName = shortName;
+        this.entityDefinition.defaultResourceName = `lists/getByTitle('${shortName}')/items`;
+    }
 
     get $typeName(): string {
         if (!this.entityAspect) {return; }

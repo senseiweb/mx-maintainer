@@ -6,3 +6,15 @@
         background: map-get($foreground, divider);
     }
 }
+
+img {
+    &.avatar {
+        background: url('assets/images/avatars/profile.jpg') no-repeat;
+        background-size: cover;
+    }
+
+    &.logo {
+        background: url('assets/images/logos/aagt-logo.png') no-repeat;
+        background-size: cover;
+    }
+}

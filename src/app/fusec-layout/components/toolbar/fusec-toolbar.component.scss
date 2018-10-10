@@ -1,5 +1,17 @@
 @import "src/@fuse/scss/fuse";
 
+img {
+    &.avatar {
+        background: url('/assets/images/avatars/profile.jpg') no-repeat;
+        background-size: cover;
+    }
+
+    &.logo-icon {
+        background: url('/assets/images/logos/aagt-logo.png') no-repeat;
+        background-size: cover;
+    }
+}
+
 fusec-toolbar {
     position: relative;
     display: flex;

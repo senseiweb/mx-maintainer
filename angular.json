@@ -35,8 +35,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/",
-              "deployUrl": "https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/",
+              "baseHref": "/sites/12042/wing/5bw/5mxg/5mos/programs/codi/aagt/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

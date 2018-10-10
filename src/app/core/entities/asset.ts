@@ -1,23 +1,20 @@
 import { EntityBase } from './_entity-base';
 import { Injectable } from '@angular/core';
-import { AssetTriggerTask } from './asset-trigger-task';
+import { GenerationAsset } from './generation-asset';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class Asset extends EntityBase {
 
-  shortName = 'Asset';
-
   constructor(
-    private _assetTriggerTask: AssetTriggerTask
+    private gnerationAsset: GenerationAsset
   ) {
-    super();
+    super('Asset');
     this.self = this;
-    this.entityDefinition.shortName = this.shortName;
-    this.entityDefinition.defaultResourceName = `/lists/getByTitle('${this.shortName}')/items`;
-    this.entityDefinition.dataProperties.Health = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.LinePosition = { dataType: this.dt.Int16 };
-    this.entityDefinition.dataProperties.Alias = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.Notes = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.health = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.alias = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
 
     // this.entityDefinition.navigationProperties.AssetTriggerTasks = {
     //  entityTypeName: this._assetTriggerTask.shortName,
@@ -27,10 +24,9 @@ export class Asset extends EntityBase {
   }
 
   health: string;
-  linePosition: number;
   alias: string;
   notes: string;
-  triggerTasks: Array<AssetTriggerTask>;
+  triggerAssets: Array<GenerationAsset>;
 
   initializer(entity: Asset) { }
 

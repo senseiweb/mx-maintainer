@@ -24,6 +24,7 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
     navigation: any;
     selectedLanguage: any;
     userStatusOptions: any[];
+    userName: string;
 
     private _unsubscribeAll: Subject<any>;
 
@@ -33,6 +34,9 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _translateService: TranslateService,
         private _aagtConfig: AagtAppConfig
     ) {
+        const userProps = this._aagtConfig.currentUser.profileProperties;
+        this.userName = `${userProps.FirstName} ${userProps.LastName}`;
+
         // Set the defaults
         this.userStatusOptions = [
             {

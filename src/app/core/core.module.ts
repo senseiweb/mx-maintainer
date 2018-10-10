@@ -1,9 +1,16 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import { EmProviderService, BaseRepoService, GenerationRepoService} from './data';
+import {
+  EmProviderService,
+  BaseRepoService,
+  GenerationRepoService,
+  GenAssetRepoService,
+  TriggerRepoService,
+  AssetRepoService
+} from './data';
 import { AppSharedModule  } from 'app/app-shared.module';
 import {
-  EntityBase,
   Generation,
+  GenerationAsset,
   SpAppConfig,
   ActionItem,
   AssetTriggerTask,
@@ -14,29 +21,32 @@ import {
   SpMetadata,
   Trigger,
   TriggerProductionCapability,
-  WorkShift,
-  AagtAppConfig
+  WorkShift
 } from './entities';
 
+import { AagtAppConfig } from './aagt-app-config';
+import * as navStructure from './app-nav-structure';
+
 @NgModule({
-  imports: [
-    AppSharedModule
-  ],
+  imports: [],
   exports: [
   ],
   providers: [
     EmProviderService,
-    AagtAppConfig,
     BaseRepoService,
-    EntityBase,
-    Generation, ,
     GenerationRepoService,
+    GenAssetRepoService,
+    TriggerRepoService,
+    AagtAppConfig,
+    Generation,
+    GenerationAsset,
     SpAppConfig,
     ActionItem,
     AssetTriggerTask,
     Asset,
     Assumption,
     Producer,
+    AssetRepoService,
     RegistrationHelper,
     SpAppConfig,
     SpMetadata,
@@ -48,7 +58,7 @@ import {
 })
 export class CoreModule {
 
-  constructor(@Optional() @SkipSelf()core: CoreModule) {
+  constructor(@Optional() @SkipSelf() core: CoreModule) {
     if (core) {
       throw new Error('Core Module is injected only once into the main app module');
     }

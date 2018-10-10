@@ -3,7 +3,9 @@ import * as breeze from 'breeze-client';
 import 'breeze-client-labs/breeze.metadata-helper';
 import { Injectable } from '@angular/core';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+  })
 export class RegistrationHelper {
     constructor(
         private _actionItem: et.ActionItem,

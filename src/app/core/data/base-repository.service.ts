@@ -6,14 +6,14 @@ import { EntityBase } from '../entities/_entity-base';
 @Injectable({
   providedIn: 'root'
 })
-export class BaseRepoService<T> {
+export class BaseRepoService<T extends EntityBase> {
   protected entityManager: breeze.EntityManager;
   protected resourceName: string;
   protected entityType: string;
   protected isCachedBundle: boolean;
   protected _defaultFetchStrategy: breeze.FetchStrategySymbol;
 
-  constructor(_entityData: EntityBase, _entityService: EmProviderService, ) {
+  constructor(_entityData: EntityBase, _entityService: EmProviderService) {
     this.entityManager = _entityService.coreEntityManager;
     this.resourceName = _entityData.entityDefinition.defaultResourceName;
     this.entityType = _entityData.shortName;
