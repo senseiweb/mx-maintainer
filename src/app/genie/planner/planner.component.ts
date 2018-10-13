@@ -3,9 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { GenieUowService } from '../genie-uow.service';
-import { Generation, Asset } from '../../core';
+import { Generation, Asset, genStatusEnum } from '../../core';
 import { GenerationAsset } from 'app/core/entities/generation-asset';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { EventEmitter } from 'protractor';
 
 @Component({
@@ -29,16 +28,14 @@ export class PlannerComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private uow: GenieUowService,
-    private formBuilder: FormBuilder
-  ) { }
+    private uow: GenieUowService  ) { }
 
   ngOnInit() {
 
     this.genId = +this.route.snapshot.paramMap.get('id');
     this.plannedGen = this.uow.planGen(this.genId);
     console.log(this.plannedGen);
-    this.isLinear = this.plannedGen.status === 'Draft';
+    this.isLinear = this.plannedGen.status === genStatusEnum.draft;
     this.allAssets = this.uow.allAssets;
     this.getAlreadyAssignedAssets();
   }

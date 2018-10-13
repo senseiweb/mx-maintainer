@@ -5,13 +5,13 @@ import {
   GenerationRepoService,
   GenAssetRepoService,
   TriggerRepoService,
-  AssetRepoService
+  AssetRepoService,
+  SpConfigDataRepoService
 } from './data';
-import { AppSharedModule  } from 'app/app-shared.module';
 import {
   Generation,
   GenerationAsset,
-  SpAppConfig,
+  SpConfigData,
   ActionItem,
   AssetTriggerTask,
   Asset,
@@ -40,7 +40,8 @@ import * as navStructure from './app-nav-structure';
     AagtAppConfig,
     Generation,
     GenerationAsset,
-    SpAppConfig,
+    SpConfigData,
+    SpConfigDataRepoService,
     ActionItem,
     AssetTriggerTask,
     Asset,
@@ -48,7 +49,6 @@ import * as navStructure from './app-nav-structure';
     Producer,
     AssetRepoService,
     RegistrationHelper,
-    SpAppConfig,
     SpMetadata,
     Trigger,
     TriggerProductionCapability,

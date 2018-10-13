@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService } from './base-repository.service';
-import { Generation } from '../entities';
+import { Generation, genStatusEnum } from '../entities';
 import { EmProviderService } from './em-provider';
 
 
@@ -14,6 +14,6 @@ export class GenerationRepoService extends BaseRepoService<Generation> {
   }
 
   createDraftGen(): Generation {
-    return this.createBase({status: 'Draft'});
+    return this.createBase({status: genStatusEnum.draft});
   }
 }

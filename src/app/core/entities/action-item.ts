@@ -1,4 +1,4 @@
-import { EntityBase } from './_entity-base';
+import { EntityBase, dt, baseDataProperties } from './_entity-base';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -7,15 +7,14 @@ import { Injectable } from '@angular/core';
 export class ActionItem extends EntityBase {
   constructor() {
     super('ActionItem');
-    this.self = this;
-    this.entityDefinition.dataProperties.action = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.shortCode = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.action = { dataType: dt.String };
+    this.entityDefinition.dataProperties.shortCode = { dataType: dt.String };
+    this.entityDefinition.dataProperties.duration = { dataType: dt.Int16 };
 
     // this.entityDefinition.navigationProperties.Producer = {
     //   entityTypeName: ''
     // };
-    Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
+    Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
   }
 
   title: string;

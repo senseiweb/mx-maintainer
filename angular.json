@@ -52,6 +52,24 @@
               "vendorChunk": false,
               "buildOptimizer": true
             },
+            "sharepoint-dev":{
+              "baseHref": "/sites/12042/wing/5bw/5mxg/5mos/programs/codi/aagt/",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.share.ts"
+                }
+              ],
+              "optimization": false,
+              "outputHashing": "none",
+              "sourceMap": true,
+              "extractCss": false,
+              "namedChunks": true,
+              "aot": false,
+              "extractLicenses": false,
+              "vendorChunk": true,
+              "buildOptimizer": false
+            },
           "ec": {
               "sourceMap": true,
               "extractCss": true

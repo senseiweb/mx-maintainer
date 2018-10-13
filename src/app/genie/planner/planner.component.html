@@ -20,64 +20,115 @@
             <div class="content p-24" fusePerfectScrollbar>
                   <mat-horizontal-stepper [linear]="isLinear" #stepper>
                     <mat-step [completed]="step1completed">
-                        <div>
+                      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+                          <div fxFlex="60">
+                            <div>
+                                <h3 fxLayout="row" fxLayoutAlign="center center">Overview</h3>
+                            </div>
+                            <div class="step1content">
                                 <form fxLayout="column">
-                                        <ng-template matStepLabel>
-                                            <span *ngIf="isLinear">Provide General Generation Information</span>
-                                            <span *ngIf="!isLinear">Update Generation Information</span>
-                                        </ng-template>
-                                        <mat-form-field>
-                                          <input matInput
-                                          [(ngModel)]="plannedGen.title"
-                                          placeholder="Generation Title"
-                                          required>
-                                        </mat-form-field>
-                                        <mat-form-field>
-                                            <mat-select
-                                            placeholder="In Support Of"
-                                            required
-                                            [(ngModel)]="plannedGen.iso">
-                                                <mat-option *ngFor="let op of isoOperations"
-                                                        [value]="op.shortcode">
-                                                          {{op.displayName}}
-                                                </mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
-                                        <mat-form-field>
-                                                <input matInput
-                                                placeholder="Number of Required Assets"
-                                                type="number"
-                                                [(ngModel)]="plannedGen.numberAssetsRequired"
-                                                required>
-                                              </mat-form-field>
-                                         <mat-form-field>
-                                                <input matInput
-                                                [matDatepicker]="planStartPicker"
-                                                [(ngModel)]="plannedGen.startDateTime"
-                                                placeholder="Planned Start date">
-                                                <mat-datepicker-toggle matSuffix [for]="planStartPicker"></mat-datepicker-toggle>
-                                                <mat-datepicker #planStartPicker></mat-datepicker>
-                                        </mat-form-field>
-                                        <mat-form-field>
-                                                <input matInput
-                                                [matDatepicker]="planStopPicker"
-                                                [(ngModel)]="plannedGen.stopDateTime"
-                                                placeholder="Planned Stop date">
-                                                <mat-datepicker-toggle matSuffix [for]="planStopPicker"></mat-datepicker-toggle>
-                                                <mat-datepicker #planStopPicker></mat-datepicker>
-                                        </mat-form-field>
-                                        <div>
-                                          <button mat-raised-button matStepperNext>Next: Triggers</button>
-                                        </div>
-                                      </form>
-                        </div>
-                        <div>
-                                <mat-selection-list #assets [(ngModel)]="genAssetsSelected" (ngModelChange)="assignedAssetModelChange($event)">
-                                        <mat-list-option *ngFor="let asset of allAssets" [value="asset.id"]>
-                                          {{asset.alias}}
-                                        </mat-list-option>
-                                      </mat-selection-list>
+                                    <ng-template matStepLabel>
+                                        <span *ngIf="isLinear">Provide General Generation Information</span>
+                                        <span *ngIf="!isLinear">Update Generation Information</span>
+                                    </ng-template>
+                                    <mat-form-field>
+                                      <input matInput
+                                      name="genTitle"
+                                      [(ngModel)]="plannedGen.title"
+                                      placeholder="Generation Title"
+                                      required>
+                                    </mat-form-field>
+                                    <mat-form-field>
+                                        <mat-select
+                                        placeholder="In Support Of"
+                                        name="iso"
+                                        required
+                                        [(ngModel)]="plannedGen.iso">
+                                            <mat-option *ngFor="let op of isoOperations"
+                                                    [value]="op.shortcode">
+                                                      {{op.displayName}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-form-field>
+                                            <input matInput
+                                            name="numRequired"
+                                            readonly
+                                            placeholder="Number of Required Assets"
+                                            type="number"
+                                            [(ngModel)]="plannedGen.numberAssetsRequired"
+                                            required>
+                                          </mat-form-field>
+                                     <mat-form-field>
+                                            <input matInput
+                                            name="startDate"
+                                            [matDatepicker]="planStartPicker"
+                                            [(ngModel)]="plannedGen.startDateTime"
+                                            placeholder="Planned Start date">
+                                            <mat-datepicker-toggle matSuffix [for]="planStartPicker"></mat-datepicker-toggle>
+                                            <mat-datepicker #planStartPicker></mat-datepicker>
+                                    </mat-form-field>
+                                    <mat-form-field>
+                                            <input matInput
+                                            name="stopDate"
+                                            [matDatepicker]="planStopPicker"
+                                            [(ngModel)]="plannedGen.stopDateTime"
+                                            placeholder="Planned Stop date">
+                                            <mat-datepicker-toggle matSuffix [for]="planStopPicker"></mat-datepicker-toggle>
+                                            <mat-datepicker #planStopPicker></mat-datepicker>
+                                    </mat-form-field>
+                                  </form>
+                            </div>
 
+                      </div>
+                      <div fxFlex="40">
+                        <div>
+                            <h3 fxLayout="row" fxLayoutAlign="center center">Select Asset Available for Generation</h3>
+                        </div>
+                        <div class="step1content inner-scroll" fusePerfectScrollbar>
+                            <mat-selection-list #assets [(ngModel)]="genAssetsSelected" (ngModelChange)="assignedAssetModelChange($event)">
+                                <mat-list-option *ngFor="let asset of allAssets" [value="asset.id"]>
+                                  {{asset.alias}}
+                                </mat-list-option>
+                                <mat-list-option>
+test1                                        </mat-list-option>
+<mat-list-option>
+test1                                        </mat-list-option>
+
+<mat-list-option>
+test1                                        </mat-list-option>
+
+<mat-list-option>
+test1                                        </mat-list-option>
+
+<mat-list-option>
+test1                                        </mat-list-option>
+
+<mat-list-option>
+  test1                                        </mat-list-option>
+  <mat-list-option>
+      test1                                        </mat-list-option>
+      <mat-list-option>
+          test1                                        </mat-list-option>
+          <mat-list-option>
+              test1                                        </mat-list-option>
+              <mat-list-option>
+                  test1                                        </mat-list-option>
+                  <mat-list-option>
+                      test1                                        </mat-list-option>
+
+
+                              </mat-selection-list>
+                        </div>
+
+
+
+                      </div>
+
+                      </div>
+                      <mat-divider></mat-divider>
+                      <div class="pt-12">
+                          <button mat-raised-button matStepperNext>Next: Triggers</button>
                         </div>
                     </mat-step>
                     <mat-step [completed]="step2completed">

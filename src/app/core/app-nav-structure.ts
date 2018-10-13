@@ -22,7 +22,7 @@ export const basicNavStructure: Array<FuseNavigation>  = [{
     }]
   }];
 
-export const genMgrNavStructure: Array<FuseNavigation> = [{
+export const genMgrNavStructure: FuseNavigation = {
   id: 'appGenMgr',
   title: 'Generation Management',
   type: 'group',
@@ -35,17 +35,27 @@ export const genMgrNavStructure: Array<FuseNavigation> = [{
       id: 'genlist',
       title: 'Generations',
       type: 'item',
-      url: '/genie'
+      url: '/genie/list',
+      exactMatch: true
     }, {
       id: 'genplanner',
       title: 'Planner',
       type: 'item',
-      url: '/genie/planner'
+      url: '/genie/planner/0',
     }
     ]
   }]
-}];
+};
 
-
-
-
+export const kingMakerNavStructure: FuseNavigation = {
+  id: 'appKingMaker',
+  title: 'Administration',
+  type: 'group',
+  children: [{
+    id: 'kmConfig',
+    title: 'Configuration',
+    icon: '',
+    type: 'item',
+    url: '/king-maker/configurations'
+  }]
+};

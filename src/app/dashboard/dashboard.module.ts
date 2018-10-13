@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { DashboardComponent } from './dashboard.component';
+import { DashBaseComponent } from './dash-base/dash-base.component';
 import { StatusBoardComponent } from './status-board';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DashboardRoutingModule } from './dashboard-routing.module';
@@ -9,7 +9,7 @@ import { DashboardUowService } from './dashboard-uow.service';
 @NgModule({
   declarations: [
     StatusBoardComponent,
-    DashboardComponent
+    DashBaseComponent
   ],
   imports: [
     NgxChartsModule,

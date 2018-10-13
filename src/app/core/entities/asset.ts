@@ -1,4 +1,4 @@
-import { EntityBase } from './_entity-base';
+import { EntityBase, dt, baseDataProperties} from './_entity-base';
 import { Injectable } from '@angular/core';
 import { GenerationAsset } from './generation-asset';
 
@@ -11,16 +11,15 @@ export class Asset extends EntityBase {
     private gnerationAsset: GenerationAsset
   ) {
     super('Asset');
-    this.self = this;
-    this.entityDefinition.dataProperties.health = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.alias = { dataType: this.dt.String };
-    this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.health = { dataType: dt.String };
+    this.entityDefinition.dataProperties.alias = { dataType: dt.String };
+    this.entityDefinition.dataProperties.notes = { dataType: dt.String };
 
     // this.entityDefinition.navigationProperties.AssetTriggerTasks = {
     //  entityTypeName: this._assetTriggerTask.shortName,
     //  foreignKeyNames: ['AssetId']
     // };
-    Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
+    Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
   }
 
   health: string;

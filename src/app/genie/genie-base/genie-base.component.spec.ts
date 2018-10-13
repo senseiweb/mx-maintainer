@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GenieComponent } from './genie.component';
+import { GenieComponent } from './genie-base/genie-base.component';
 
 describe('GenMgrComponent', () => {
   let component: GenieComponent;

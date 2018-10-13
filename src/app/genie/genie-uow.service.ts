@@ -1,14 +1,24 @@
 import { Injectable, OnInit } from '@angular/core';
-import { GenerationRepoService, Generation, Asset } from '../core';
 import { TriggerRepoService } from '../core/data/trigger-repo.service';
 import * as breeze from 'breeze-client';
-import { AssetRepoService } from 'app/core/data/asset-repo.service';
-import { all } from 'q';
-import { GenAssetRepoService } from 'app/core/data/gen-asset-repo.service';
+import {
+  GenerationRepoService,
+  Generation,
+  Asset,
+  GenAssetRepoService,
+  AssetRepoService,
+  SpConfigDataRepoService
+} from 'app/core/';
+
 import { GenerationAsset } from 'app/core/entities/generation-asset';
+import {
+  Router, Resolve,
+  RouterStateSnapshot,
+  ActivatedRouteSnapshot,
+} from '@angular/router';
 
 @Injectable()
-export class GenieUowService {
+export class GenieUowService implements Resolve<any> {
 
   allGenerations: Array<Generation>;
   allAssets: Array<Asset>;
@@ -16,14 +26,21 @@ export class GenieUowService {
   constructor(private genRepo: GenerationRepoService,
     private triggerRepo: TriggerRepoService,
     private assetRepo: AssetRepoService,
+    private spCfgRepo: SpConfigDataRepoService,
     private genAssetRepo: GenAssetRepoService
   ) {
-    this.init();
   }
 
-  init(): void {
-    this.genRepo.all()
-      .then(generations => this.allGenerations = generations);
+  resolve(route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Promise<any> {
+    console.log('hit the resolver');
+    return new Promise((resolve, reject) => {
+      const generations = this.genRepo.all();
+      const assets = this.assetRepo.all();
+       const configs = this.spCfgRepo.getIsoTypes();
+      return Promise.all([generations, configs, assets]).then(() => { resolve(); }, reject);
+    });
   }
 
   planGen(genId?: number): Generation {
@@ -37,8 +54,8 @@ export class GenieUowService {
     return this.genRepo.createDraftGen();
   }
 
-  getAllAssets(): void {
-    this.assetRepo.all().then(assets => this.allAssets = assets);
+  async getAllAssets(): Promise<any> {
+    this.allAssets = await this.assetRepo.all();
   }
 
   getAssignedAssets(genId: number): Promise<Array<GenerationAsset>> {

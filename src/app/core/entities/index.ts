@@ -4,7 +4,7 @@ export * from './asset';
 export * from './assumption';
 export * from './generation';
 export * from './producer';
-export * from './sp-app-config';
+export * from './sp-config-data';
 export * from './sp-metadata';
 export * from './trigger-production-capability';
 export * from './trigger';

@@ -1,4 +1,4 @@
-import { EntityBase } from './_entity-base';
+import { EntityBase, dt, baseDataProperties} from './_entity-base';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -9,13 +9,12 @@ export class Assumption extends EntityBase {
 
    constructor() {
      super('Assumption');
-     this.self = this;
-     this.entityDefinition.dataProperties.area = { dataType: this.dt.String, isNullable: false };
-     this.entityDefinition.dataProperties.category = { dataType: this.dt.String, isNullable: false };
-     this.entityDefinition.dataProperties.remarks = { dataType: this.dt.String, isNullable: true };
-     this.entityDefinition.dataProperties.generatorId = { dataType: this.dt.Int32, isNullable: false };
+     this.entityDefinition.dataProperties.area = { dataType: dt.String, isNullable: false };
+     this.entityDefinition.dataProperties.category = { dataType: dt.String, isNullable: false };
+     this.entityDefinition.dataProperties.remarks = { dataType: dt.String, isNullable: true };
+     this.entityDefinition.dataProperties.generatorId = { dataType: dt.Int32, isNullable: false };
 
-     Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
+     Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
    }
 
   area: string;

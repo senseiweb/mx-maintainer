@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
 import { EmProviderService } from './em-provider';
-import { EntityBase } from '../entities/_entity-base';
+import { EntityBase, bareEntity } from '../entities/_entity-base';
 
 @Injectable({
   providedIn: 'root'
@@ -19,12 +19,18 @@ export class BaseRepoService<T extends EntityBase> {
     this.entityType = _entityData.shortName;
   }
 
-  all(): Promise<Array<T>> {
+  async all(): Promise<Array<T>> {
     const query = this.baseQuery();
-    return this.executeQuery(query);
+    return <any> await this.executeQuery(query)
+      .then(data => {
+        this.isCachedBundle = true;
+        this._defaultFetchStrategy = breeze.FetchStrategy.FromLocalCache;
+        console.log(data);
+        return data;
+    });
   }
 
-  protected createBase(options?: Pick<T, Exclude<keyof T, keyof EntityBase>>): T {
+  protected createBase(options?: bareEntity<T>): T {
     return this.entityManager.createEntity(this.entityType, options) as any;
   }
 
@@ -36,6 +42,7 @@ export class BaseRepoService<T extends EntityBase> {
     const queryType = query.using(fetchStrat || this._defaultFetchStrategy);
     return <any>this.entityManager.executeQuery(queryType)
       .then((data) => {
+        console.log(data.results);
         return data.results;
       })
       .catch(this.queryFailed);
@@ -48,6 +55,7 @@ export class BaseRepoService<T extends EntityBase> {
   withId(key: number): Promise<T> {
     return this.entityManager.fetchEntityByKey(this.entityType, key, true)
       .then((data) => {
+        console.log(data.entity);
         return <T><any>data.entity;
       }).catch(this.queryFailed);
   }
@@ -63,6 +71,7 @@ export class BaseRepoService<T extends EntityBase> {
   }
 
   queryFailed(error): Promise<any> {
+    console.log(error);
    return Promise.reject('queryfailed');
   }
 }

@@ -2,15 +2,15 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
-import { AagtAppConfig } from '../core';
-import { DashboardUowService } from './dashboard-uow.service';
+import { AagtAppConfig } from '../../core';
+import { DashboardUowService } from '../dashboard-uow.service';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  selector: 'dash-base',
+  templateUrl: './dash-base.component.html',
+  styleUrls: ['./dash-base.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashBaseComponent implements OnInit {
   allGenerations;
   // userLastName: string;
   // dateNow = Date.now();

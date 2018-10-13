@@ -14,7 +14,7 @@ export class RegistrationHelper {
         private _assumption: et.Assumption,
         private _genOp: et.Generation,
         private _producer: et.Producer,
-        private _spAppConfig: et.SpAppConfig,
+        private _spConfigData: et.SpConfigData,
         private _spMetadata: et.SpMetadata,
         private _triggerProdCap: et.TriggerProductionCapability,
         private _trigger: et.Trigger,
@@ -28,7 +28,7 @@ export class RegistrationHelper {
         this._assumption.registerMe(store, helper);
         this._genOp.registerMe(store, helper);
         this._producer.registerMe(store, helper);
-        this._spAppConfig.registerMe(store, helper);
+        this._spConfigData.registerMe(store, helper);
         this._spMetadata.registerMe(store, helper);
         this._triggerProdCap.registerMe(store, helper);
         this._trigger.registerMe(store, helper);

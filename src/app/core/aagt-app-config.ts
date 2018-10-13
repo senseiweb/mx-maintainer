@@ -4,6 +4,7 @@ import { FuseConfig, FuseNavigation } from '@fuse/types';
 import { Route } from '@angular/router';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { basicNavStructure, genMgrNavStructure } from './app-nav-structure';
+import { SpConfigData } from './entities';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type aagtNavUnion = aagtNav | routeNav;
@@ -15,6 +16,7 @@ export interface AppInitData {
   requestDigestRaw: string;
   appWebUrl: string;
   currUser: UserInitData;
+  configSettings?: SpConfigData[];
 }
 export interface UserInitData {
   id: string;
@@ -68,6 +70,7 @@ export class AagtAppConfig {
   rawRequestDigest: string;
   currentUser = {} as UserInitData;
   appWebUrl: string;
+  initSpConfigData: { id: number, configKey: string; configValue: string }[];
   demoConfig: AppInitData = {
     requestDigestRaw: '3728829323,10-Oct-2018',
     appWebUrl: 'https://example.com',
@@ -81,20 +84,21 @@ export class AagtAppConfig {
 
   userNavStructure: Array<FuseNavigation> = basicNavStructure;
 
-  constructor(private fuseNavService: FuseNavigationService) {
-    const spConfigInit = localStorage.getItem('AppConfig');
-    const initConfig = spConfigInit ? JSON.parse(spConfigInit) : this.demoConfig as AppInitData;
+  constructor(fuseNavService: FuseNavigationService) {
+    const lclStorage = localStorage.getItem('AppConfig');
+    const initConfig = lclStorage ? JSON.parse(lclStorage) : this.demoConfig as AppInitData;
     this.rawRequestDigest = initConfig.requestDigestRaw;
     this.requestDigestKey = initConfig.requestDigestRaw.split(',')[0];
     this.requestDigestExpire = new Date(initConfig.requestDigestRaw.split(',')[1]);
     this.appWebUrl = initConfig.appWebUrl;
     this.currentUser = initConfig.currUser;
-    this.currentUser.groups.push({title: 'Genie', id: 9});
+    this.initSpConfigData = initConfig.configSettings || [];
+    this.currentUser.groups.push({ title: 'Genie', id: 9 });
+    this.currentUser.groups.push({ title: 'KingMaker', id: 10 });
     this.addGroupBasedNav(this.currentUser.groups);
     fuseNavService.register('default', this.userNavStructure);
     fuseNavService.setCurrentNavigation('default');
   }
-
 
   private addGroupBasedNav(grpData: UserGrpInitData[]): void {
     if (!grpData.length) { return; }
@@ -105,6 +109,5 @@ export class AagtAppConfig {
           break;
       }
     });
-
   }
 }

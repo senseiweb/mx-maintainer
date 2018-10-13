@@ -1,9 +1,14 @@
-import { EntityBase } from './_entity-base';
+import { EntityBase, dt, baseDataProperties} from './_entity-base';
 import { Injectable } from '@angular/core';
 import { Assumption } from './assumption';
 import { Trigger } from './trigger';
 
-export type GenStatus = 'Draft' | 'Planned' | 'Active' | 'Historical';
+export enum genStatusEnum {
+    draft = 'Draft',
+    planned = 'Planned',
+    active = 'Active',
+    historical = 'Historical'
+}
 
 @Injectable({
     providedIn: 'root'
@@ -13,34 +18,33 @@ export class Generation extends EntityBase {
     constructor(private _assumption: Assumption,
                      private _trigger: Trigger) {
         super('Generation');
-        this.self = this;
 
         this.entityDefinition.dataProperties.title = {
-            dataType: this.dt.String,
+            dataType: dt.String,
             isNullable: false
         };
         this.entityDefinition.dataProperties.active = {
-            dataType: this.dt.Boolean,
+            dataType: dt.Boolean,
             isNullable: false
         };
         this.entityDefinition.dataProperties.iso = {
-            dataType: this.dt.String,
+            dataType: dt.String,
             isNullable: true
         };
         this.entityDefinition.dataProperties.status = {
-            dataType: this.dt.String,
+            dataType: dt.String,
             isNullable: false,
         };
         this.entityDefinition.dataProperties.numberAssetsRequired = {
-            dataType: this.dt.Int16,
+            dataType: dt.Int16,
             isNullable: false
         };
         this.entityDefinition.dataProperties.startDateTime = {
-            dataType: this.dt.DateTime,
+            dataType: dt.DateTime,
             isNullable: true
         };
         this.entityDefinition.dataProperties.stopDateTime = {
-            dataType: this.dt.DateTime
+            dataType: dt.DateTime
         };
         // this.entityDefinition.navigationProperties.Assumptions = {
         //    entityTypeName: this._assumption.shortName,
@@ -52,13 +56,13 @@ export class Generation extends EntityBase {
         //    associationName: 'GeneratorTriggers',
         //    foreignKeyNames: ['GenerationId']
         //  };
-        Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
+        Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
     }
 
     title?: string;
     active?: boolean;
     iso?: string;
-    status?: GenStatus;
+    status?: genStatusEnum;
     numberAssetsRequired?: number;
     startDateTime?: Date;
     stopDateTime?: Date;

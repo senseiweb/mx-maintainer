@@ -1,4 +1,4 @@
-import { EntityBase } from './_entity-base';
+import { EntityBase, dt, baseDataProperties} from './_entity-base';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -8,10 +8,9 @@ export class Producer extends EntityBase {
 
   constructor() {
     super('Producer');
-    this.self = this;
-    this.entityDefinition.dataProperties.teamType = { dataType: this.dt.String, isNullable: false };
+    this.entityDefinition.dataProperties.teamType = { dataType: dt.String, isNullable: false };
 
-    Object.assign(this.entityDefinition.dataProperties, this.coreProperties);
+    Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
   }
 
   teamType: string;

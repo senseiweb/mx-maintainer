@@ -7,6 +7,21 @@
 <html lang="en">
 <head>
 <meta name="WebPartPageExpansion" content="full" />
+<script>
+  (function(){
+    if(!window.performance) {
+      console.error('Unable to detect, browswer performance...continuing normal load!');
+      return;
+    }
+    var isReloaded = performance.navigation.type === 1;
+    var gotConfigKey = localStorage.getItem('AppConfig') === null;
+    console.log('isReloaded is: ' + isReloaded);
+    console.log('gotConfigKey is: ' + gotConfigKey);
+    if (isReloaded && gotConfigKey) {
+      window.location.replace('aagt-index.html');
+    }
+  })();
+</script>
 <SharePoint:ScriptLink Name="MicrosoftAjax.js" runat="server" Defer="False" Localizable="false" __designer:Preview="&lt;script src=&quot;/_layouts/15/microsoftajax.js?rev=Civ3pT%2FplWDqWJ69HuRuNQ%3D%3D&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/init.js?rev=Xpo7ARBt8xBROO1h5n3s6g%3D%3D&quot;&gt;&lt;/script&gt;
 &lt;script type=&quot;text/javascript&quot; src=&quot;/_layouts/15/1033/initstrings.js?rev=S11vfGURQYVuACMEY0tLTg%3D%3D&quot;&gt;&lt;/script&gt;
@@ -250,22 +265,34 @@ text-decoration:none;
             try {
               var clientCtx = new SP.ClientContext(appConfig.appWebUrl);
               var peopleManager = new SP.UserProfiles.PeopleManager(clientCtx);
+              var followingMgr = new SP.Social.SocialFollowingManager(clientCtx);
+              var actorInfo = new SP.Social.ScoialActorInfo();
               var oWeb = clientCtx.get_web();
+              var oConfigList = clientCtx.get_web().get_lists().getByTitle('SpAppConfig');
+              var camlQuery = new SP.CamlQuery();
+              camlQuery.set_viewXml(
+                      '<View><Query><Where><BeginsWith><FieldRef Name=\'ConfigKey\'/>' +
+                      '<Value Type=\'Text\'>app_</Value></BeginsWith></Where></Query>' +
+                      '<RowLimit>50</RowLimit></View>');
+              var configSettings = oConfigList.getItems(camlQuery);
               var oUser = oWeb.get_currentUser();
               oUser.retrieve();
               var groups = oUser.get_groups();
               clientCtx.load(oWeb);
               clientCtx.load(groups);
+              clientCtx.load(configSettings);
               var profileProperties = peopleManager.getMyProperties();
               clientCtx.load(profileProperties);
               clientCtx.executeQueryAsync(function () {
                 console.log(profileProperties);
+                console.log(configSettings);
                 var rUser = oWeb.get_currentUser();;
                 var tempUser = {};
                 appConfig.currUser.id = rUser.get_id();
                 appConfig.currUser.profileProperties = profileProperties.get_userProfileProperties();
                 appConfig.currUser.loginName = rUser.get_loginName();
                 appConfig.currUser.groups = [];
+                appConfig.configSettings = configSettings;
                 var grpEnum = groups.getEnumerator();
                 var i = 0;
                 while (grpEnum.moveNext()) {

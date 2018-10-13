@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: 'app-genie',
-  templateUrl: './genie.component.html',
-  styleUrls: ['./genie.component.scss'],
+  selector: 'genie-base',
+  templateUrl: './genie-base.component.html',
+  styleUrls: ['./genie-base.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class GenieComponent implements OnInit {
+export class GenieBaseComponent implements OnInit {
 
   constructor() { }
 

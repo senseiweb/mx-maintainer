@@ -228,6 +228,7 @@ text-decoration:none;
           }
         </style>
       </head>
+
       <body>
         <form runat="server">
           <SharePoint:FormDigest ID="FormDigest1" runat="server" __designer:Preview="" __designer:Values="&lt;P N=&#39;InDesign&#39; T=&#39;False&#39; /&gt;&lt;P N=&#39;ID&#39; ID=&#39;1&#39; T=&#39;FormDigest1&#39; /&gt;&lt;P N=&#39;Page&#39; ID=&#39;2&#39; /&gt;&lt;P N=&#39;TemplateControl&#39; R=&#39;2&#39; /&gt;&lt;P N=&#39;AppRelativeTemplateSourceDirectory&#39; R=&#39;-1&#39; /&gt;"></SharePoint:FormDigest>
@@ -264,12 +265,22 @@ text-decoration:none;
             try {
               var clientCtx = new SP.ClientContext(appConfig.appWebUrl);
               var peopleManager = new SP.UserProfiles.PeopleManager(clientCtx);
+              var followingMgr = new SP.Social.SocialFollowingManager(clientCtx);
+              var actorInfo = new SP.Social.SocialActorInfo();
               var oWeb = clientCtx.get_web();
+              var oConfigList = clientCtx.get_web().get_lists().getByTitle('SpConfigData');
+              var camlQuery = new SP.CamlQuery();
+              camlQuery.set_viewXml(
+                      '<View><Query><Where><BeginsWith><FieldRef Name="Title"/>' +
+                      '<Value Type="Text">app-</Value></BeginsWith></Where></Query>' +
+                      '<RowLimit>50</RowLimit></View>');
+              var configSettings = oConfigList.getItems(camlQuery);
               var oUser = oWeb.get_currentUser();
               oUser.retrieve();
               var groups = oUser.get_groups();
               clientCtx.load(oWeb);
               clientCtx.load(groups);
+              clientCtx.load(configSettings);
               var profileProperties = peopleManager.getMyProperties();
               clientCtx.load(profileProperties);
               clientCtx.executeQueryAsync(function () {
@@ -280,6 +291,17 @@ text-decoration:none;
                 appConfig.currUser.profileProperties = profileProperties.get_userProfileProperties();
                 appConfig.currUser.loginName = rUser.get_loginName();
                 appConfig.currUser.groups = [];
+                appConfig.configSettings = [];
+                var configEnum = configSettings.getEnumerator();
+                while (configEnum.moveNext()) {
+                  var currItem = configEnum.get_current();
+                  appConfig.configSettings.push({
+                    id: currItem.get_id(),
+                    configKey: currItem.get_item('Title'),
+                    configValue: currItem.get_item('ConfigValue')
+                  })
+                }
+                console.log(appConfig.configSettings);
                 var grpEnum = groups.getEnumerator();
                 var i = 0;
                 while (grpEnum.moveNext()) {
@@ -293,7 +315,7 @@ text-decoration:none;
                 localStorage.setItem('AppConfig', JSON.stringify(appConfig));
                 SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.Cancel);
                 SP.UI.ModalDialog.showWaitScreenWithNoClose("Done!...", "Starting AAGT app");
-                window.location.replace('aagt-index.html');
+                window.location.replace('./aagt-index.html');
               }, function (sender, error) {
                 SP.UI.ModalDialog.showModalDialog(dialogOptions);
                 console.log("Critical Error: failed to get data from the server--> " + error.get_message());
