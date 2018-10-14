@@ -16,12 +16,10 @@ const routes: Routes = [{
   }, {
     path: 'list',
     component: ListGenyComponent,
-    resolve: { done: GenieUowService }
   },
   {
     path: 'planner/:id',
     component: PlannerComponent,
-    resolve: { done: GenieUowService }
   }]
 }];
 

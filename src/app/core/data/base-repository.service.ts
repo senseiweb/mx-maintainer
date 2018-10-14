@@ -17,6 +17,7 @@ export class BaseRepoService<T extends EntityBase> {
     this.entityManager = _entityService.coreEntityManager;
     this.resourceName = _entityData.entityDefinition.defaultResourceName;
     this.entityType = _entityData.shortName;
+    this._defaultFetchStrategy = breeze.FetchStrategy.FromServer;
   }
 
   async all(): Promise<Array<T>> {
@@ -25,7 +26,6 @@ export class BaseRepoService<T extends EntityBase> {
       .then(data => {
         this.isCachedBundle = true;
         this._defaultFetchStrategy = breeze.FetchStrategy.FromLocalCache;
-        console.log(data);
         return data;
     });
   }
@@ -39,6 +39,8 @@ export class BaseRepoService<T extends EntityBase> {
   }
 
   protected executeQuery(query: breeze.EntityQuery, fetchStrat?: breeze.FetchStrategySymbol): Promise<Array<T>> {
+    console.log(`fetch strategy: ${fetchStrat}`);
+    console.log(`default strategy: ${this._defaultFetchStrategy}`);
     const queryType = query.using(fetchStrat || this._defaultFetchStrategy);
     return <any>this.entityManager.executeQuery(queryType)
       .then((data) => {

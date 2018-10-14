@@ -70,6 +70,6 @@ export class AssetsFakeDb implements FakeSpDb<Asset>  {
   }
 
   get entities(): any {
-    return JSON.stringify({ d: this.bareAssetEntity });
+    return this.bareAssetEntity;
   }
 }

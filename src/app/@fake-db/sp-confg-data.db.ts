@@ -7,14 +7,14 @@ export class SpConfigDataFakeDb implements FakeSpDb<SpConfigData> {
   private bareSpCfgDataEntity: bareEntity<SpConfigData>[] = [];
 
   constructor() {
-    const isoTypeEntity = {} as bareEntity<SpCfgIsoType>;
-    isoTypeEntity.configKey = configKeyEnum.isoTypes;
-    isoTypeEntity.configValue = ['Hetic Roller', 'Global Thunder', 'World of Waldo'];
+    const isoTypeEntity = {} as any;
+    isoTypeEntity.Title = configKeyEnum.isoTypes;
+    isoTypeEntity.ConfigValue = ['Hetic Roller', 'Global Thunder', 'World of Waldo'];
     isoTypeEntity.id = 1;
     this.bareSpCfgDataEntity.push(isoTypeEntity);
   }
 
   get entities(): any {
-    return JSON.stringify({ d: this.bareSpCfgDataEntity });
+    return this.bareSpCfgDataEntity;
   }
 }

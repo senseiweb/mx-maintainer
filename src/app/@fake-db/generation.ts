@@ -23,6 +23,6 @@ export class GenerationFakeDb implements FakeSpDb<Generation> {
   }
 
   get entities(): any {
-    return JSON.stringify({ d: this.bareGenerationEntity });
+    return this.bareGenerationEntity;
   }
 }

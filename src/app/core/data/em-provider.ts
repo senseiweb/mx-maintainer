@@ -25,7 +25,7 @@ export class EmProviderService {
     dataAdapter.getRequestDigest = () => this._aagtConfig.rawRequestDigest;
 
     const clientToServerNameDictionary = {
-      'SpConfigData#SP.AAGT': { configKey: 'Title' }
+      'SpConfigData:#SP.AAGT': { configKey: 'Title' }
     };
     const nc = <any> breeze.NamingConvention;
     const convention = new nc.NamingConventionWithDictionary(
