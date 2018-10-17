@@ -54,17 +54,27 @@ export class AssetsFakeDb implements FakeSpDb<Asset>  {
   'West Virginia',
   'Wisconsin',
   'Wyoming'];
-  private bareAssetEntity: bareEntity<Asset>[] = [];
+  private bareAssetEntity: bareEntity<any>[] = [];
   constructor() {
     this.stateNames.forEach((state, i) => {
-      const entity = {} as bareEntity<Asset>;
-      entity.id = i + 1;
-      entity.alias = state;
-      entity.health = <string>faker.random.arrayElement(['FMC', 'PMC', 'NMC']);
-      entity.authorId = faker.random.number({ min: 1, max: 10 });
-      entity.editorId = faker.random.number({ min: 1, max: 10 });
-      entity.created = faker.date.past(2018);
-      entity.modified = faker.date.past(2018);
+      const itemGuid = faker.random.uuid();
+      const entity = {} as bareEntity<any>;
+      entity.Id = i + 1;
+      entity.ID = i + 1;
+      entity.Alias = state;
+      entity.AuthorId = faker.random.number({ min: 1, max: 10 });
+      entity.EditorId = faker.random.number({ min: 1, max: 10 });
+      entity.Created = faker.date.past(2018);
+      entity.Modified = faker.date.past(2018);
+      entity.Notes = '';
+      entity.__metadata = {
+        etag: entity.Id,
+        id: `Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`,
+        type: 'SP.Data.AssetListItem',
+        // tslint:disable-next-line:max-line-length
+        uri: `https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`
+
+      };
       this.bareAssetEntity.push(entity);
     });
   }

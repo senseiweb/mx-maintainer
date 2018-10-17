@@ -13,3 +13,5 @@ export * from './registration-helper';
 export * from './sp-user-profile-prop';
 export * from './_entity-base';
 export * from './generation-asset';
+export * from './task';
+export * from './trigger-task';

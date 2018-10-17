@@ -8,9 +8,19 @@ export class SpConfigDataFakeDb implements FakeSpDb<SpConfigData> {
 
   constructor() {
     const isoTypeEntity = {} as any;
+    const isoTypeItemGuid = faker.random.uuid();
     isoTypeEntity.Title = configKeyEnum.isoTypes;
     isoTypeEntity.ConfigValue = ['Hetic Roller', 'Global Thunder', 'World of Waldo'];
-    isoTypeEntity.id = 1;
+    isoTypeEntity.Id = 1;
+    isoTypeEntity.ID = 1;
+    isoTypeEntity.__metadata = {
+      etag: isoTypeEntity.Id,
+      id: `Web/Lists(guid'${isoTypeItemGuid}')/Items(${isoTypeEntity.Id})`,
+      type: 'SP.Data.SpConfigDataListItem',
+      // tslint:disable-next-line:max-line-length
+      uri: `https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/_api/Web/Lists(guid'${isoTypeItemGuid}')/Items(${isoTypeEntity.Id})`
+
+    };
     this.bareSpCfgDataEntity.push(isoTypeEntity);
   }
 

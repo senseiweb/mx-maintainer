@@ -1,19 +1,21 @@
-import { EntityBase, dt, baseDataProperties} from './_entity-base';
+import * as ebase from './_entity-base';
 import { Injectable } from '@angular/core';
+
+export class Producer extends ebase.SpEntityBase {
+  teamType: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class Producer extends EntityBase {
+export class ProducerMetadata extends ebase.MetadataBase {
 
   constructor() {
     super('Producer');
-    this.entityDefinition.dataProperties.teamType = { dataType: dt.String, isNullable: false };
+    this.entityDefinition.dataProperties.teamType = { dataType: this.dt.String, isNullable: false };
 
-    Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
+    Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
   }
-
-  teamType: string;
 
   initializer(entity: Producer) { }
 

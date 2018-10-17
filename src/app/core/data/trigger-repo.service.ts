@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService } from './base-repository.service';
-import { Trigger, SpConfigData, configKeyEnum, SpCfgIsoType } from '../entities';
+import { Trigger, TriggerMetadata, configKeyEnum, SpCfgIsoType } from '../entities';
 import { EmProviderService } from './em-provider';
 
 @Injectable({
@@ -8,8 +8,8 @@ import { EmProviderService } from './em-provider';
 })
 export class TriggerRepoService extends BaseRepoService<Trigger> {
 
-  constructor(trigger: Trigger, emService: EmProviderService) {
-    super(trigger, emService);
+  constructor(triggerMeta: TriggerMetadata, emService: EmProviderService) {
+    super(triggerMeta, emService);
   }
 
 }

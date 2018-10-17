@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService } from './base-repository.service';
 import { EmProviderService } from './em-provider';
-import { Asset } from '../entities';
+import { Asset, AssetMetadata } from '../entities';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AssetRepoService extends BaseRepoService<Asset> {
 
-constructor(entityService: EmProviderService, asset: Asset) {
-  super(asset, entityService);
+constructor(entityService: EmProviderService, assetMeta: AssetMetadata) {
+  super(assetMeta, entityService);
 
  }
 }

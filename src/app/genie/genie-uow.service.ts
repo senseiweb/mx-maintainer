@@ -21,7 +21,6 @@ import {
 export class GenieUowService implements Resolve<any> {
 
   allGenerations: Array<Generation>;
-  allAssets: Array<Asset>;
 
   constructor(private genRepo: GenerationRepoService,
     private triggerRepo: TriggerRepoService,
@@ -44,7 +43,7 @@ export class GenieUowService implements Resolve<any> {
   }
 
   planGen(genId?: number): Generation {
-    if (genId) {
+    if (genId !== 0) {
       const genPredicate = breeze.Predicate.create('id', breeze.FilterQueryOp.Equals, genId);
       const triggerPredicate = breeze.Predicate.create('id', breeze.FilterQueryOp.Equals, genId);
       this.triggerRepo.where(triggerPredicate);
@@ -54,8 +53,11 @@ export class GenieUowService implements Resolve<any> {
     return this.genRepo.createDraftGen();
   }
 
-  async getAllAssets(): Promise<any> {
-    this.allAssets = await this.assetRepo.all();
+  async getAllAssets(): Promise<Array<Asset>> {
+    const data = await this.assetRepo.all();
+    // tslint:disable-next-line:no-console
+    console.info(`return this info for getAllAssets==> ${data}`);
+    return Promise.resolve(data);
   }
 
   getAssignedAssets(genId: number): Promise<Array<GenerationAsset>> {

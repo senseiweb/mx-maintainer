@@ -1,4 +1,4 @@
-import { EntityBase, dt, baseDataProperties} from './_entity-base';
+import * as ebase from './_entity-base';
 import { Injectable } from '@angular/core';
 import { Assumption } from './assumption';
 import { Trigger } from './trigger';
@@ -10,41 +10,54 @@ export enum genStatusEnum {
     historical = 'Historical'
 }
 
+export class Generation extends ebase.SpEntityBase {
+    title?: string;
+    active?: boolean;
+    iso?: string;
+    status?: genStatusEnum;
+    numberAssetsRequired?: number;
+    startDateTime?: Date;
+    stopDateTime?: Date;
+    draftAssets?: Array<number>;
+    assumptions?: Array<Assumption>;
+    triggers?: Array<Trigger>;
+}
+
+
 @Injectable({
     providedIn: 'root'
   })
-export class Generation extends EntityBase {
+export class GenerationMetadata extends ebase.MetadataBase {
 
-    constructor(private _assumption: Assumption,
-                     private _trigger: Trigger) {
+    constructor() {
         super('Generation');
 
         this.entityDefinition.dataProperties.title = {
-            dataType: dt.String,
+            dataType: this.dt.String,
             isNullable: false
         };
         this.entityDefinition.dataProperties.active = {
-            dataType: dt.Boolean,
+            dataType: this.dt.Boolean,
             isNullable: false
         };
         this.entityDefinition.dataProperties.iso = {
-            dataType: dt.String,
+            dataType: this.dt.String,
             isNullable: true
         };
         this.entityDefinition.dataProperties.status = {
-            dataType: dt.String,
+            dataType: this.dt.String,
             isNullable: false,
         };
         this.entityDefinition.dataProperties.numberAssetsRequired = {
-            dataType: dt.Int16,
+            dataType: this.dt.Int16,
             isNullable: false
         };
         this.entityDefinition.dataProperties.startDateTime = {
-            dataType: dt.DateTime,
+            dataType: this.dt.DateTime,
             isNullable: true
         };
         this.entityDefinition.dataProperties.stopDateTime = {
-            dataType: dt.DateTime
+            dataType: this.dt.DateTime
         };
         // this.entityDefinition.navigationProperties.Assumptions = {
         //    entityTypeName: this._assumption.shortName,
@@ -56,18 +69,7 @@ export class Generation extends EntityBase {
         //    associationName: 'GeneratorTriggers',
         //    foreignKeyNames: ['GenerationId']
         //  };
-        Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
+        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
-
-    title?: string;
-    active?: boolean;
-    iso?: string;
-    status?: genStatusEnum;
-    numberAssetsRequired?: number;
-    startDateTime?: Date;
-    stopDateTime?: Date;
-    assumptions?: Array<Assumption>;
-    triggers?: Array<Trigger>;
-
     initializer(entity: Generation) { }
 }

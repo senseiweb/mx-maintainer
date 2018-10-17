@@ -9,19 +9,19 @@ import {
   SpConfigDataRepoService
 } from './data';
 import {
-  Generation,
-  GenerationAsset,
-  SpConfigData,
-  ActionItem,
-  AssetTriggerTask,
-  Asset,
-  Assumption,
-  Producer,
+  GenerationMetadata,
+  GenerationAssetMetadata,
+  SpConfigDataMetadata,
+  ActionItemMetadata,
+  AssetTriggerTaskMetadata,
+  AssetMetadata,
+  AssumptionMetadata,
+  ProducerMetadata,
   RegistrationHelper,
-  SpMetadata,
-  Trigger,
-  TriggerProductionCapability,
-  WorkShift
+  SpMetadataMetadata,
+  TriggerMetadata,
+  TriggerProductionCapabilityMetadata,
+  WorkShiftMetadata
 } from './entities';
 
 import { AagtAppConfig } from './aagt-app-config';
@@ -38,21 +38,21 @@ import * as navStructure from './app-nav-structure';
     GenAssetRepoService,
     TriggerRepoService,
     AagtAppConfig,
-    Generation,
-    GenerationAsset,
-    SpConfigData,
+    GenerationMetadata,
+    GenerationAssetMetadata,
+    SpConfigDataMetadata,
     SpConfigDataRepoService,
-    ActionItem,
-    AssetTriggerTask,
-    Asset,
-    Assumption,
-    Producer,
+    ActionItemMetadata,
+    AssetTriggerTaskMetadata,
+    AssetMetadata,
+    AssumptionMetadata,
+    ProducerMetadata,
     AssetRepoService,
     RegistrationHelper,
-    SpMetadata,
-    Trigger,
-    TriggerProductionCapability,
-    WorkShift
+    SpMetadataMetadata,
+    TriggerMetadata,
+    TriggerProductionCapabilityMetadata,
+    WorkShiftMetadata
   ],
   declarations: []
 })

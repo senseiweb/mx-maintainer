@@ -31,29 +31,38 @@ export interface SpEntityDef extends etDef {
     navigationProperties?: NavMembers;
 }
 
-export const dt = breeze.DataType;
 
-export const baseDataProperties: DataMembers = {
-    id: {
-        dataType: dt.Int32,
-        isPartOfKey: true,
-    },
-    '__metadata': {
-        complexTypeName: '__metadata',
-        dataType: null,
-        isNullable: false
-    },
-    modified: { dataType: dt.DateTime },
-    created: { dataType: dt.DateTime },
-    authorId: { dataType: dt.Int32 },
-    editorId: { dataType: dt.Int32 }
-};
-
-
-export class EntityBase implements Entity {
-    shortName?: string;
+export class SpEntityBase implements Entity {
     entityAspect: EntityAspect;
     entityType: EntityType;
+    id?: number;
+    modified?: Date;
+    created?: Date;
+    authorId?: number;
+    editorId?: number;
+    __metadata?: SpMetadata;
+}
+
+export class MetadataBase {
+
+    protected dt = breeze.DataType;
+
+    protected baseDataProperties: DataMembers = {
+        id: {
+            dataType: this.dt.Int32,
+            isPartOfKey: true,
+        },
+        '__metadata': {
+            complexTypeName: '__metadata',
+            dataType: null,
+            isNullable: false
+        },
+        modified: { dataType: this.dt.DateTime },
+        created: { dataType: this.dt.DateTime },
+        authorId: { dataType: this.dt.Int32 },
+        editorId: { dataType: this.dt.Int32 }
+    };
+
     entityDefinition = {
         dataProperties: {},
         navigationProperties: {},
@@ -61,25 +70,15 @@ export class EntityBase implements Entity {
         defaultResourceName: '',
     } as SpEntityDef;
 
-    id?: number;
-    modified?: Date;
-    created?: Date;
-    authorId?: number;
-    editorId?: number;
-    __metadata?: SpMetadata;
-
     constructor(shortName: string) {
         this.entityDefinition.shortName = shortName;
-        this.shortName = shortName;
         this.entityDefinition.defaultResourceName = `lists/getByTitle('${shortName}')/items`;
     }
 
-    get $typeName(): string {
-        if (!this.entityAspect) {return; }
-        return this.entityAspect.getKey().entityType.shortName;
-    }
-
-    initializer(entity: Entity): void { }
+    // get $typeName(): string {
+    //     if (!this.entityAspect) {return; }
+    //     return this.entityAspect.getKey().entityType.shortName;
+    // }
 
     private addDefaultSelect(type: EntityType): EntityType {
         const customPropExist = type.custom;
@@ -101,10 +100,16 @@ export class EntityBase implements Entity {
         return type;
     }
 
-    registerMe(store: breeze.MetadataStore, metadataHelper: breeze.config.MetadataHelper): void {
+    registerMe(store: breeze.MetadataStore,
+        metadataHelper: breeze.config.MetadataHelper,
+        spEntity: any,
+        initializer?: (entity: Entity) => void): void {
+
         const addedType = metadataHelper.addTypeToStore(store, this.entityDefinition as any) as EntityType;
-        store.registerEntityTypeCtor(this.shortName, this.constructor, this.initializer);
-        // store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
+        store.registerEntityTypeCtor(this.entityDefinition.shortName, spEntity , initializer);
+        if (this.entityDefinition.defaultResourceName) {
+            store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
+        }
         this.addDefaultSelect(addedType);
 
     }

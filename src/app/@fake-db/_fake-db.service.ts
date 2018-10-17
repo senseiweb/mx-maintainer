@@ -58,7 +58,7 @@ export class FakeDbService implements InMemoryDbService {
 
     responseInterceptor(resOptions: ResponseOptions, reqInfo: RequestInfo) {
         const method = reqInfo.method.toUpperCase();
-        resOptions.body = JSON.stringify({ d: resOptions.body });
+        resOptions.body = JSON.stringify({ d: { results: resOptions.body } });
         const body = JSON.stringify(resOptions);
         console.log(`responseInterceptor: ${method} ${reqInfo.req.url}: \n${body}`);
 

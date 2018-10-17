@@ -7,31 +7,32 @@ import { Injectable } from '@angular/core';
     providedIn: 'root'
   })
 export class RegistrationHelper {
+
     constructor(
-        private _actionItem: et.ActionItem,
-        private _assetTrigger: et.AssetTriggerTask,
-        private _asset: et.Asset,
-        private _assumption: et.Assumption,
-        private _genOp: et.Generation,
-        private _producer: et.Producer,
-        private _spConfigData: et.SpConfigData,
-        private _spMetadata: et.SpMetadata,
-        private _triggerProdCap: et.TriggerProductionCapability,
-        private _trigger: et.Trigger,
-        private _workShift: et.WorkShift) {
+        private _actionItemMetadata: et.ActionItemMetadata,
+        private _assetMetadata: et.AssetMetadata,
+        private _assetTriggerMetadata: et.AssetTriggerTaskMetadata,
+        private _assumptionMetadata: et.AssumptionMetadata,
+        private _genOpMetadata: et.GenerationMetadata,
+        private _producerMetadata: et.ProducerMetadata,
+        private _spConfigDataMetadata: et.SpConfigDataMetadata,
+        private _spMetadataMetadata: et.SpMetadataMetadata,
+        private _triggerProdCapMetadata: et.TriggerProductionCapabilityMetadata,
+        private _triggerMetadata: et.TriggerMetadata,
+        private _workShiftMetadata: et.WorkShiftMetadata) {
     }
 
     register(store: breeze.MetadataStore, helper: breeze.config.MetadataHelper): void {
-        this._actionItem.registerMe(store, helper);
-        this._assetTrigger.registerMe(store, helper);
-        this._asset.registerMe(store, helper);
-        this._assumption.registerMe(store, helper);
-        this._genOp.registerMe(store, helper);
-        this._producer.registerMe(store, helper);
-        this._spConfigData.registerMe(store, helper);
-        this._spMetadata.registerMe(store, helper);
-        this._triggerProdCap.registerMe(store, helper);
-        this._trigger.registerMe(store, helper);
-        this._workShift.registerMe(store, helper);
+        this._assetMetadata.registerMe(store, helper, et.Asset, this._assetMetadata.initializer);
+        this._actionItemMetadata.registerMe(store, helper, et.ActionItem, this._actionItemMetadata.initializer);
+        this._assetTriggerMetadata.registerMe(store, helper, et.AssetTriggerTask, this._assetTriggerMetadata.initializer);
+        this._assumptionMetadata.registerMe(store, helper, et.Assumption, this._assumptionMetadata.initializer);
+        this._genOpMetadata.registerMe(store, helper, et.Generation, this._genOpMetadata.initializer);
+        this._producerMetadata.registerMe(store, helper, et.Producer, this._producerMetadata.initializer);
+        this._spConfigDataMetadata.registerMe(store, helper, et.SpConfigData, this._spConfigDataMetadata.initializer);
+        this._spMetadataMetadata.registerMe(store, helper, et.SpMetadata);
+        this._triggerProdCapMetadata.registerMe(store, helper, et.TriggerProductionCapability, this._triggerProdCapMetadata.initializer);
+        this._triggerMetadata.registerMe(store, helper, et.Trigger, this._triggerMetadata.initializer);
+        this._workShiftMetadata.registerMe(store, helper, et.WorkShift, this._workShiftMetadata.initializer);
     }
 }

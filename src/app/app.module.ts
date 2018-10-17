@@ -32,7 +32,7 @@ import { environment } from 'environments/environment';
     AppSharedModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
-    environment.production ?
+    environment.production || environment.sharepoint ?
       [] :
       InMemoryWebApiModule.forRoot(FakeDbService),
     TranslateModule.forRoot(),

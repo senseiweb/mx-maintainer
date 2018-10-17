@@ -1,4 +1,4 @@
-import { EntityBase, dt, baseDataProperties} from './_entity-base';
+import * as ebase from './_entity-base';
 import { Injectable } from '@angular/core';
 
 export enum configKeyEnum {
@@ -23,23 +23,8 @@ export interface SpCfgGrpId extends SpCfg<SpCfgAppGrpId> {
   configKey: configKeyEnum.groupIder;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class SpConfigData extends EntityBase {
-
+export class SpConfigData extends ebase.SpEntityBase {
   private _configValue = '{}';
-
-  constructor() {
-    super('SpConfigData');
-    this.entityDefinition.dataProperties.configKey = {
-      dataType: dt.String,
-      isNullable: false
-    };
-    this.entityDefinition.dataProperties.configValue = { dataType: dt.String, isNullable: false };
-
-    Object.assign(this.entityDefinition.dataProperties, baseDataProperties);
-  }
 
   configKey: configKeyEnum;
 
@@ -53,6 +38,24 @@ export class SpConfigData extends EntityBase {
     } else {
       this._configValue = JSON.stringify(cv);
     }
+  }
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SpConfigDataMetadata extends ebase.MetadataBase {
+
+
+  constructor() {
+    super('SpConfigData');
+    this.entityDefinition.dataProperties.configKey = {
+      dataType: this.dt.String,
+      isNullable: false
+    };
+    this.entityDefinition.dataProperties.configValue = { dataType: this.dt.String, isNullable: false };
+
+    Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
   }
 
   initializer(entity: SpConfigData) {
