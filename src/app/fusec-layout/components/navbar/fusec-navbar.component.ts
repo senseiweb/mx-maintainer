@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, Renderer2, ViewEncapsulation } from '@angular/core';
-import { AagtAppConfig } from 'app/core';
+import { AppConfigService } from 'app/core';
 
 @Component({
     selector     : 'fusec-navbar',
@@ -15,7 +15,7 @@ export class FusecNavbarComponent {
         private _elementRef: ElementRef,
         private _renderer: Renderer2) {
         // Set the private defaults
-        this._variant = AagtAppConfig.defaultFuseConfig.layout.navbar.variant;
+        this._variant = AppConfigService.defaultFuseConfig.layout.navbar.variant;
     }
 
     get variant(): string {

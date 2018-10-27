@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
-import { AagtAppConfig } from 'app/core';
+import { UserService } from 'app/core';
 
 @Component({
     selector     : 'fusec-toolbar',
@@ -32,10 +32,9 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _fuseConfigService: FuseConfigService,
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
-        private _aagtConfig: AagtAppConfig
+        private userService: UserService
     ) {
-        const userProps = this._aagtConfig.currentUser.profileProperties;
-        this.userName = `${userProps.FirstName} ${userProps.LastName}`;
+        this.userName = this.userService.saluation.rankName();
 
         // Set the defaults
         this.userStatusOptions = [
@@ -79,7 +78,7 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
             }
         ];
 
-        this.navigation = _aagtConfig.userNavStructure;
+        // this.navigation = _aagtConfig.userNavStructure;
 
         this._unsubscribeAll = new Subject();
     }

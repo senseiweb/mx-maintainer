@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 
-import { AagtAppConfig } from './core';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
@@ -34,9 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _fuseSplashScreenService: FuseSplashScreenService,
     private _fuseTranslationLoaderService: FuseTranslationLoaderService,
     private _translateService: TranslateService,
-       private _platform: Platform,
-    _aagtConfig: AagtAppConfig
-) {
+       private _platform: Platform) {
     // Get default navigation
     // this.navigation = _aagtConfig.fuseNavigation;
 

@@ -1,21 +1,25 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AagtAppConfig } from 'app/core';
+import { SpDataRepoService } from './data';
 
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/dashboard/status-board',
-    pathMatch: 'full'
+    redirectTo: '/aagt/dashboard/status-board',
+    pathMatch: 'full',
+    resolve: [{initializer: SpDataRepoService}]
   },
   {
-    path: 'genie',
-    loadChildren: './genie/genie.module#GenieModule'
-  },
-  {
-    path: 'king-maker',
-    loadChildren: './king-maker/king-maker.module#KingMakerModule'
+    path: 'aagt',
+    loadChildren: './aagt/aagt.module#AagtModule'
   }
+  // {
+  //   path: 'program-manager',
+  //   loadChildren: './program-manager/prog-mgr.module#ProgMgrModule'
+  // }, {
+  //   path: 'mocc',
+  //   loadChildren: './mocc/mocc.module#MoccModule'
+  // }
   // { path: '**', component: PageNotFoundComponent }
 ];
 
@@ -34,6 +38,6 @@ const appRoutes: Routes = [
   ]
 })
 export class AppRoutingModule {
-  constructor(_aagtAppConfig: AagtAppConfig) {  }
+  constructor() {  }
 
 }

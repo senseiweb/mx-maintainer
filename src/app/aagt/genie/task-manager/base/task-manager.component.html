@@ -1,0 +1,94 @@
+<div id="task" class="page-layout carded left-sidebar inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- SIDEBAR -->
+    <fuse-sidebar class="sidebar" name="tm-sidebar" position="left" lockedOpen="gt-md">
+        <tm-sidebar></tm-sidebar>
+    </fuse-sidebar>
+    <!-- / SIDEBAR -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- CONTENT HEADER -->
+        <div class="header" fxLayout="row" fxLayoutAlign="start center">
+
+            <div class="search-wrapper" fxFlex fxLayout="row" fxLayoutAlign="start center">
+
+                <button mat-icon-button class="sidebar-toggle" fxHide.gt-md
+                        (click)="toggleSidebar('tm-sidebar')">
+                    <mat-icon>menu</mat-icon>
+                </button>
+
+                <div class="search" flex fxLayout="row" fxLayoutAlign="start center">
+                    <mat-icon>search</mat-icon>
+                    <input [formControl]="searchInput" placeholder="Search for a task" fxFlex>
+                </div>
+            </div>
+
+        </div>
+        <!-- / CONTENT HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card" [ngClass]="{'current-task-selected':currentTask}">
+
+            <!-- CONTENT TOOLBAR -->
+            <div class="toolbar px-24 py-8">
+
+                <div class="task-selection" fxFlex="row" fxLayoutAlign="start center">
+                    <mat-checkbox (click)="toggleSelectAll()" [checked]="hasSelectedTasks"
+                                  [indeterminate]="isIndeterminate"></mat-checkbox>
+
+                    <button mat-icon-button [matMenuTriggerFor]="selectMenu">
+                        <mat-icon>arrow_drop_down</mat-icon>
+                    </button>
+
+                    <mat-menu #selectMenu="matMenu">
+                        <button mat-menu-item (click)="selectTasks()">All</button>
+                        <button mat-menu-item (click)="deselectTasks()">None</button>
+                        <button mat-menu-item (click)="selectTasks('read', true)">Read</button>
+                        <button mat-menu-item (click)="selectTasks('read', false)">Unread</button>
+                        <button mat-menu-item (click)="selectTasks('starred', true)">Starred</button>
+                        <button mat-menu-item (click)="selectTasks('starred', false)">Unstarred</button>
+                        <button mat-menu-item (click)="selectTasks('important', true)">Important</button>
+                        <button mat-menu-item (click)="selectTasks('important', false)">Unimportant</button>
+                    </mat-menu>
+
+                    <div class="toolbar-separator" *ngIf="hasSelectedTasks"></div>
+
+                    <button mat-icon-button [matMenuTriggerFor]="labelMenu" *ngIf="hasSelectedTasks">
+                        <mat-icon class="secondary-text">label</mat-icon>
+                    </button>
+                    <mat-menu #labelMenu="matMenu">
+                        <button mat-menu-item *ngFor="let tag of tags" (click)="toggleTagOnSelectedTasks(tag.id)">
+                            {{tag.tagTitle}}
+                        </button>
+                    </mat-menu>
+                </div>
+
+                <div *ngIf="currentTask" fxHide.gt-lg>
+                    <button mat-icon-button (click)="deselectCurrentTask()">
+                        <mat-icon class="secondary-text">arrow_back</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+            <!-- / CONTENT TOOLBAR -->
+
+            <!-- CONTENT -->
+            <div class="content" fxFlexAlign="row">
+                <tm-list fusePerfectScrollbar fxFlex></tm-list>
+                <tm-details fusePerfectScrollbar fxFlex></tm-details>
+            </div>
+            <!-- / CONTENT -->
+
+        </div>
+        <!-- / CONTENT CARD -->
+
+    </div>
+    <!-- / CENTER -->
+
+</div>

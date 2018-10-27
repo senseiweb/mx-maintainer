@@ -1,59 +1,61 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import {
-  EmProviderService,
-  BaseRepoService,
-  GenerationRepoService,
-  GenAssetRepoService,
-  TriggerRepoService,
-  AssetRepoService,
-  SpConfigDataRepoService
-} from './data';
-import {
-  GenerationMetadata,
-  GenerationAssetMetadata,
-  SpConfigDataMetadata,
-  ActionItemMetadata,
-  AssetTriggerTaskMetadata,
-  AssetMetadata,
-  AssumptionMetadata,
-  ProducerMetadata,
-  RegistrationHelper,
-  SpMetadataMetadata,
-  TriggerMetadata,
-  TriggerProductionCapabilityMetadata,
-  WorkShiftMetadata
-} from './entities';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import 'hammerjs';
 
-import { AagtAppConfig } from './aagt-app-config';
-import * as navStructure from './app-nav-structure';
+import { HttpClientModule } from '@angular/common/http';
+import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
+import { FakeAagtDbService } from 'app/@fake-db';
+import { TranslateModule } from '@ngx-translate/core';
+import { FuseModule } from '@fuse/fuse.module';
+import { FusecLayoutModule } from 'app/fusec-layout/fusec-layout.module';
+import { FuseProgressBarModule, FuseSidebarModule } from '@fuse/components';
+import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
+import { environment } from 'environments/environment';
+
+import { AppConfigService } from './app-config.service';
+import { UserService } from './app-user.service';
 
 @NgModule({
-  imports: [],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    BreezeBridgeHttpClientModule,
+    HttpClientModule,
+    environment.production || environment.sharepoint ?
+    [] :
+    InMemoryWebApiModule.forRoot(FakeAagtDbService),
+    TranslateModule.forRoot(),
+
+    // Material moment date module
+    MatMomentDateModule,
+
+    // Fuse modules
+    FuseModule.forRoot(AppConfigService.defaultFuseConfig),
+    FuseProgressBarModule,
+    FuseSidebarModule,
+
+    // App modules
+    FusecLayoutModule,
+  ],
   exports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    BreezeBridgeHttpClientModule,
+    HttpClientModule,
+
+    // Material moment date module
+    MatMomentDateModule,
+
+    // Fuse modules
+    FuseProgressBarModule,
+    FuseSidebarModule,
+
+    // App modules
+    FusecLayoutModule
   ],
-  providers: [
-    EmProviderService,
-    BaseRepoService,
-    GenerationRepoService,
-    GenAssetRepoService,
-    TriggerRepoService,
-    AagtAppConfig,
-    GenerationMetadata,
-    GenerationAssetMetadata,
-    SpConfigDataMetadata,
-    SpConfigDataRepoService,
-    ActionItemMetadata,
-    AssetTriggerTaskMetadata,
-    AssetMetadata,
-    AssumptionMetadata,
-    ProducerMetadata,
-    AssetRepoService,
-    RegistrationHelper,
-    SpMetadataMetadata,
-    TriggerMetadata,
-    TriggerProductionCapabilityMetadata,
-    WorkShiftMetadata
-  ],
+  providers: [UserService, AppConfigService],
   declarations: []
 })
 export class CoreModule {
