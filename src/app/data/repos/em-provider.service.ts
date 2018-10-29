@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { UserService } from './app-user.service';
 import * as breeze from 'breeze-client';
 import * as eb from '../models/_entity-base';
 import 'breeze-client-labs/breeze.labs.dataservice.abstractrest';
 import 'breeze-client-labs/breeze.namingConventionWithDictionary';
 import 'breeze-client-labs/breeze.labs.dataservice.sharepoint';
+import { SpDataRepoService } from './sp-data-repo.service';
 
 export class EmProviderConfig {
   entities: Array<eb.Instantiable<eb.MetadataBase<eb.SpEntityBase>>>;
@@ -26,13 +26,13 @@ export class EmProviderService {
   //   nameSpace: ''
   // };
   constructor(
-    private userService: UserService,
+    private spData: SpDataRepoService,
     private config: EmProviderConfig
   ) {
 
     const dataAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true) as any;
 
-    dataAdapter.getRequestDigest = () => this.userService.getRequestDigest();
+    dataAdapter.getRequestDigest = () => this.spData.getRequestDigest(config.serviceEndpoint);
 
     const clientToServerNameDictionary = {
       'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' }

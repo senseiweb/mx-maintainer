@@ -6,7 +6,6 @@ import 'hammerjs';
 
 import { HttpClientModule } from '@angular/common/http';
 import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { FakeAagtDbService } from 'app/@fake-db';
 import { TranslateModule } from '@ngx-translate/core';
 import { FuseModule } from '@fuse/fuse.module';
 import { FusecLayoutModule } from 'app/fusec-layout/fusec-layout.module';
@@ -15,6 +14,7 @@ import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 import { environment } from 'environments/environment';
 
 import { FuseConfig } from '@fuse/types';
+import { FakeDbService } from 'app/@fake-db/_fake-db.service';
 
 const defaultFuseConfig: FuseConfig = {
   colorTheme: 'theme-default',
@@ -58,7 +58,9 @@ const defaultFuseConfig: FuseConfig = {
     HttpClientModule,
     environment.production || environment.sharepoint ?
     [] :
-    InMemoryWebApiModule.forRoot(FakeAagtDbService),
+      InMemoryWebApiModule.forRoot(FakeDbService, {
+        apiBase: 'https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/'
+    }),
     TranslateModule.forRoot(),
 
     // Material moment date module

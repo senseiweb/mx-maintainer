@@ -11,7 +11,8 @@
     "paths": {
       "@fuse": [
         "@fuse/"
-      ]
+      ],
+      "sp-jsom":["node_modules/@microsoft/sp-jsom"]
     },
     "target": "es5",
     "typeRoots": [

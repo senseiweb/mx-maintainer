@@ -5,9 +5,8 @@ import { Observable } from 'rxjs/observable';
 import { Observer } from 'rxjs/Observer';
 import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
 import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
-
+import * as moment from 'moment';
+import { environment } from 'environments/environment.prod';
 
 @Injectable({ providedIn: 'root' })
 // At times it is easier to retrieve things using the
@@ -22,11 +21,25 @@ export class SpDataRepoService implements Resolve<any> {
   clientWeb: SP.Web;
    peopleManger: SP.UserProfiles.PeopleManager;
   isInitializer = false;
-
+  SP: any;
   constructor(
     private tagsMetadata: MxmTagMetadata,
     private http: HttpClient
-  ) {}
+  ) {
+    if (!environment.development) {
+      this.SP = {
+        ClientContext: {
+          get_current: () => { }
+        },
+        UserProfiles: {
+          PeopleManager: () => { },
+        },
+        Social: {
+          SocialActorInfo: () => { }
+        }
+      };
+    }
+  }
 
   async resolve(): Promise<any> {
     if (this.isInitializer) { return Promise.resolve(); }
@@ -70,18 +83,23 @@ export class SpDataRepoService implements Resolve<any> {
     return spMxmTagList as any;
   }
 
-  async getRequestDigest(contextSite: string): Promise<string> {
+  async getRequestDigest(contextSite: string): Promise<{rawDigest: string, localExpireTime: moment.Moment}> {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json;odata=verbose',
+        'Accept': 'application/json;odata=verbose'
       })
     };
     try {
-      const response = await this.http.post(`${contextSite}\\_api\\contextinfo`, httpOptions);
+      const response = await this.http.post(`${contextSite}/_api/contextinfo`, {}, httpOptions).toPromise();
       console.log(response);
-      return response['RequestDigest'];
+      const rawdigest = response['d']['GetContextWebInformation']['FormDigestValue'];
+      const timeOut = response['d']['GetContextWebInformation']['FormDigestTimeoutSeconds'];
+      const currentTime = moment();
+      currentTime.add(timeOut, 'seconds');
+      return { rawDigest: rawdigest, localExpireTime: currentTime };
     } catch (e) {
-      console.log('Error getting request digest ' + e);
+      console.error(e);
     }
   }
 
@@ -125,18 +143,5 @@ export class SpDataRepoService implements Resolve<any> {
         document.getElementsByTagName('body')[0].appendChild(scriptElement);
       }
     });
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      console.error('An error occurred:', error.error.message);
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
-    return throwError('Something bad happened; please try again later.');
   }
 }
