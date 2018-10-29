@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ScriptModel, ScriptStore, ScriptKey } from 'app/app-script-model';
+import {Location } from '@angular/common';
 import { Observable } from 'rxjs/observable';
 import { Observer } from 'rxjs/Observer';
 import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
@@ -19,13 +20,15 @@ export class SpDataRepoService implements Resolve<any> {
   isInitializer = false;
 
   constructor(
-    private tagsMetadata: MxmTagMetadata
+    private tagsMetadata: MxmTagMetadata,
+    private location: Location
   ) {}
 
   async resolve(): Promise<any> {
     if (this.isInitializer) { return Promise.resolve(); }
-    this.situeUrl = _spPageContextInfo.siteAbsoluteUrl;
-    this.spClientCtx = new SP.ClientContext(_spPageContextInfo.siteAbsoluteUrl);
+    console.log(this.location.path(false));
+    this.situeUrl = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
+    this.spClientCtx = new SP.ClientContext(this.situeUrl);
     this.clientWeb = this.spClientCtx.get_web();
     this.peopleManger = new SP.UserProfiles.PeopleManager(this.spClientCtx);
     this.followingManager = new SP.Social.SocialFollowingManager(this.spClientCtx);
