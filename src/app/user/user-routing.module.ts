@@ -8,7 +8,7 @@ const userRoutes: Routes = [
   {
     path: 'user',
     component: UserBaseComponent,
-    resolve: [{init: SpDataRepoService}],
+    resolve: {init: SpDataRepoService},
     children: [{
       path: 'dashboard',
       component: UserDashComponent
