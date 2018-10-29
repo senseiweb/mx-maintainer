@@ -5,10 +5,11 @@ import { catchError } from 'rxjs/operators';
 
 import * as availNav from 'app/core/app-nav-structure';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-// import { environment } from 'environments/environment';
+import { environment } from 'environments/environment';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { SPUserProfileProperties } from 'app/data';
 import { SpDataRepoService } from './sp-data-repo.service';
+import { FuseNavigation } from '@fuse/types';
 
 export interface UserGrpInitData {
   id: number;
@@ -41,7 +42,8 @@ export class UserService implements Resolve<any> {
   preferredTheme = '';
   profileProps: SPUserProfileProperties  = {};
   requestDigestExpiration = 0;
-  requsstDigestToken = '';
+  requestDigestToken = '';
+  defaultNavStructure: Array<FuseNavigation> = [];
   id: number;
   saluation = {
     lastName: this.profileProps.LastName,
@@ -60,11 +62,10 @@ export class UserService implements Resolve<any> {
     private fuseNavigation: FuseNavigationService
   ) {
 
-    // if (!environment.production) {
-    //   this.myGroups.push({ id: 0, title: 'Genie' });
-    //   this.myGroups.push({ id: 1, title: 'KingMaker' });
-    // }
-    // this.setNavStructure();
+    if (!environment.production) {
+      this.myGroups.push({ id: 0, title: 'Genie' });
+      this.myGroups.push({ id: 1, title: 'KingMaker' });
+    }
   }
 
   async resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<any> {
@@ -101,7 +102,7 @@ export class UserService implements Resolve<any> {
 
   getRequestDigest(): string {
     if (this.requestDigestExpiration > 2) {
-      return this.requsstDigestToken;
+      return this.requestDigestToken;
     }
 
     this.http.post(`${this.spData.situeUrl}\\_api\\contextinfo`, this.httpOptions)
@@ -115,19 +116,20 @@ export class UserService implements Resolve<any> {
   }
 
   setNavStructure(): void {
-    const defaultNavStructure = availNav.basicNavStructure;
+    if (this.defaultNavStructure.length) { return; }
+    this.defaultNavStructure = availNav.basicNavStructure;
     this.myGroups.forEach(grp => {
       switch (grp.title) {
         case 'Genie':
-          defaultNavStructure.concat(availNav.makeAagtNavStructure());
+          this.defaultNavStructure.concat(availNav.makeAagtNavStructure());
           break;
         case 'KingMaker':
-          defaultNavStructure.concat(availNav.kingMakerNavStructure);
+          this.defaultNavStructure.concat(availNav.kingMakerNavStructure);
           break;
       }
-      this.fuseNavigation.register('userDefault', defaultNavStructure);
-      this.fuseNavigation.setCurrentNavigation('userDefault');
     });
+    this.fuseNavigation.register('userDefault', this.defaultNavStructure);
+    this.fuseNavigation.setCurrentNavigation('userDefault');
   }
 
 

@@ -8,6 +8,7 @@ import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
 import { UserService } from 'app/data';
+import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 @Component({
     selector     : 'fusec-toolbar',
@@ -32,10 +33,9 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _fuseConfigService: FuseConfigService,
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
+        private _navService: FuseNavigationService,
         private userService: UserService
     ) {
-        this.userName = this.userService.saluation.rankName();
-
         // Set the defaults
         this.userStatusOptions = [
             {
@@ -78,8 +78,6 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
             }
         ];
 
-        // this.navigation = _aagtConfig.userNavStructure;
-
         this._unsubscribeAll = new Subject();
     }
 
@@ -94,7 +92,11 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
             });
 
         // Set the selected language from default languages
-        this.selectedLanguage = _.find(this.languages, {'id': this._translateService.currentLang});
+        this.selectedLanguage = _.find(this.languages, { 'id': this._translateService.currentLang });
+        this.userService.setNavStructure();
+        this.userName = this.userService.saluation.rankName();
+        this.navigation = this._navService.getCurrentNavigation();
+
     }
 
 
