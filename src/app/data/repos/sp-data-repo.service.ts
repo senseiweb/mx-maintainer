@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ScriptModel, ScriptStore, ScriptKey } from 'app/app-script-model';
-import {Location } from '@angular/common';
 import { Observable } from 'rxjs/observable';
 import { Observer } from 'rxjs/Observer';
 import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
+import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+
 
 @Injectable({ providedIn: 'root' })
 // At times it is easier to retrieve things using the
 // the sharepoint JSOM libraries and cached them for later use
 export class SpDataRepoService implements Resolve<any> {
+  mxMaintainerContextSite = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
   followingManager: SP.Social.SocialFollowingManager;
   actorInfo: SP.Social.SocialActorInfo;
   spClientCtx: SP.ClientContext;
@@ -21,14 +25,13 @@ export class SpDataRepoService implements Resolve<any> {
 
   constructor(
     private tagsMetadata: MxmTagMetadata,
-    private location: Location
+    private http: HttpClient
   ) {}
 
   async resolve(): Promise<any> {
     if (this.isInitializer) { return Promise.resolve(); }
-    console.log(this.location.path(false));
-    this.situeUrl = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
-    this.spClientCtx = new SP.ClientContext(this.situeUrl);
+    const digestValue = await this.getRequestDigest(this.mxMaintainerContextSite);
+    this.spClientCtx = SP.ClientContext.get_current();
     this.clientWeb = this.spClientCtx.get_web();
     this.peopleManger = new SP.UserProfiles.PeopleManager(this.spClientCtx);
     this.followingManager = new SP.Social.SocialFollowingManager(this.spClientCtx);
@@ -65,6 +68,21 @@ export class SpDataRepoService implements Resolve<any> {
       });
     });
     return spMxmTagList as any;
+  }
+
+  async getRequestDigest(contextSite: string): Promise<string> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    try {
+      const response = await this.http.post(`${contextSite}\\_api\\contextinfo`, httpOptions);
+      console.log(response);
+      return response['RequestDigest'];
+    } catch (e) {
+      console.log('Error getting request digest ' + e);
+    }
   }
 
   private spQueryBuild(spQueryPart: string): SP.CamlQuery {
@@ -107,5 +125,18 @@ export class SpDataRepoService implements Resolve<any> {
         document.getElementsByTagName('body')[0].appendChild(scriptElement);
       }
     });
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      console.error('An error occurred:', error.error.message);
+    } else {
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong,
+      console.error(
+        `Backend returned code ${error.status}, ` +
+        `body was: ${error.error}`);
+    }
+    return throwError('Something bad happened; please try again later.');
   }
 }

@@ -1,7 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 
 import * as availNav from 'app/core/app-nav-structure';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
@@ -32,12 +29,7 @@ export interface UserGrpInitData {
 
 @Injectable({providedIn: 'root'})
 export class UserService implements Resolve<any> {
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-RequestDigest': ''
-    })
-  };
+
   myGroups: Array<{ id: number, title: string }> = [];
   preferredTheme = '';
   profileProps: SPUserProfileProperties  = {};
@@ -57,7 +49,6 @@ export class UserService implements Resolve<any> {
   // http = {} as any;
 
   constructor(
-    private http: HttpClient,
     private spData: SpDataRepoService,
     private fuseNavigation: FuseNavigationService
   ) {
@@ -100,21 +91,6 @@ export class UserService implements Resolve<any> {
   logout(): void {
   }
 
-  getRequestDigest(): string {
-    if (this.requestDigestExpiration > 2) {
-      return this.requestDigestToken;
-    }
-
-    this.http.post(`${this.spData.situeUrl}\\_api\\contextinfo`, this.httpOptions)
-      .pipe(catchError(this.handleError))
-      .subscribe((data) => {
-        console.log(data);
-        // Perform logic for new digest expiration
-        return data['RequestDigest'];
-      });
-
-  }
-
   setNavStructure(): void {
     if (this.defaultNavStructure.length) { return; }
     this.defaultNavStructure = availNav.basicNavStructure;
@@ -130,20 +106,5 @@ export class UserService implements Resolve<any> {
     });
     this.fuseNavigation.register('userDefault', this.defaultNavStructure);
     this.fuseNavigation.setCurrentNavigation('userDefault');
-  }
-
-
-
-  private handleError(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      console.error('An error occurred:', error.error.message);
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
-    return throwError('Something bad happened; please try again later.');
   }
 }
