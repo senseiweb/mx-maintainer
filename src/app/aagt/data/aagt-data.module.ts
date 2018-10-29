@@ -4,7 +4,7 @@ import {
   GenAssetRepoService,
   TriggerRepoService,
   AssetRepoService,
-  TagsRepoService
+  TagRepoService
 } from './repos';
 
 import {
@@ -13,12 +13,10 @@ import {
   AssetMetadata,
   AssumptionMetadata,
   GenerationMetadata,
-  ProducerMetadata,
-  TaskMetadata,
-  TriggerProductionCapabilityMetadata,
+  TeamMetadata,
+  TeamAvailabilityMetadata,
   TriggerMetadata,
-  WorkShiftMetadata,
-  TriggerTaskMetadata
+  TriggerActionMetadata
 } from './models';
 
 
@@ -30,12 +28,10 @@ const appEntities = [
   AssetMetadata,
   AssumptionMetadata,
   GenerationMetadata,
-  ProducerMetadata,
-  TaskMetadata,
-  TriggerProductionCapabilityMetadata,
-  TriggerTaskMetadata,
+  TeamMetadata,
+  TeamAvailabilityMetadata,
+  TriggerActionMetadata,
   TriggerMetadata,
-  WorkShiftMetadata,
   MxmTagMetadata
 ];
 
@@ -44,7 +40,7 @@ const repos = [
   GenAssetRepoService,
   TriggerRepoService,
   AssetRepoService,
-  TagsRepoService
+  TagRepoService
 ] as any;
 
 @NgModule({

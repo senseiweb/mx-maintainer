@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
-import { UserService } from 'app/core';
+import { UserService } from 'app/data';
 
 @Component({
     selector     : 'fusec-toolbar',

@@ -14,8 +14,41 @@ import { FuseProgressBarModule, FuseSidebarModule } from '@fuse/components';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 import { environment } from 'environments/environment';
 
-import { AppConfigService } from './app-config.service';
-import { UserService } from './app-user.service';
+import { FuseConfig } from '@fuse/types';
+
+const defaultFuseConfig: FuseConfig = {
+  colorTheme: 'theme-default',
+  customScrollbars: true,
+  layout: {
+    style: 'fusec-vertical-layout-3',
+    width: 'fullwidth',
+    navbar: {
+      primaryBackground: 'fuse-navy-700',
+      secondaryBackground: 'fuse-navy-900',
+      folded: false,
+      hidden: false,
+      position: 'left',
+      variant: 'fusec-vertical-style-2'
+    },
+    toolbar: {
+      customBackgroundColor: false,
+      background: 'fuse-white-500',
+      hidden: false,
+      position: 'above-fixed',
+    },
+    footer: {
+      customBackgroundColor: true,
+      background: 'fuse-navy-900',
+      hidden: false,
+      position: 'above-static'
+    },
+    sidepanel: {
+      hidden: false,
+      position: 'right'
+    }
+  }
+};
+
 
 @NgModule({
   imports: [
@@ -32,7 +65,7 @@ import { UserService } from './app-user.service';
     MatMomentDateModule,
 
     // Fuse modules
-    FuseModule.forRoot(AppConfigService.defaultFuseConfig),
+    FuseModule.forRoot(defaultFuseConfig),
     FuseProgressBarModule,
     FuseSidebarModule,
 
@@ -55,7 +88,7 @@ import { UserService } from './app-user.service';
     // App modules
     FusecLayoutModule
   ],
-  providers: [UserService, AppConfigService],
+  providers: [],
   declarations: []
 })
 export class CoreModule {

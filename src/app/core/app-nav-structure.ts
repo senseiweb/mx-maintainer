@@ -29,7 +29,7 @@ export function makeAagtNavStructure(): Array<FuseNavigation> {
     id: 'statusboard',
     title: 'Status Boards',
     type: 'item',
-    url: '/aagt/dashboard/status-board'
+    url: '/aagt/dashboard/aagt-dash'
   });
   return [{
     id: 'appAagt',
@@ -52,7 +52,7 @@ export function makeAagtNavStructure(): Array<FuseNavigation> {
         type: 'item',
         url: 'aagt/genie/planner/0',
       }, {
-        id: 'taskManager',
+        id: 'actionManager',
         title: 'Task Management',
         type: 'item',
         url: 'aagt/genie/task-manager/all'

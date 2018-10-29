@@ -4,7 +4,6 @@ import { MatButtonModule, MatIconModule, MatMenuModule, MatToolbarModule } from 
 
 import { FuseSearchBarModule, FuseShortcutsModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
-import { UserService } from 'app/core';
 import { FusecToolbarComponent } from './fusec-toolbar.component';
 
 @NgModule({
@@ -27,9 +26,6 @@ import { FusecToolbarComponent } from './fusec-toolbar.component';
     ]
 })
 export class FusecToolbarModule {
-    userName: string;
-
-    constructor(userService: UserService) {
-        this.userName = userService.saluation.rankName();
+    constructor() {
     }
 }

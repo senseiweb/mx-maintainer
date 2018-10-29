@@ -23,7 +23,7 @@ export interface UserInitData {
   groups?: Array<any>;
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AppConfigService {
 
   static defaultFuseConfig: FuseConfig = {

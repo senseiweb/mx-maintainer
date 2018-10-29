@@ -5,7 +5,7 @@ import { AagtDashboardComponent } from './dashboard/aagt-dash.component';
 const aagtRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/aagt/status-board',
+    redirectTo: '/aagt/dashboard',
     pathMatch: 'full'
   },
   {

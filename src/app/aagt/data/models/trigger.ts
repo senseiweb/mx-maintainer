@@ -4,6 +4,7 @@ import { Agent } from 'https';
 import { AagtModule } from 'app/aagt/aagt.module';
 
 export class Trigger extends ebase.SpEntityBase {
+  title: string;
   milestone: string;
   generationOffset?: number;
   triggerStart?: Date;
@@ -20,7 +21,9 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
 
   constructor() {
     super('Trigger');
+    this.entityDefinition.dataProperties.title = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.milestone = { dataType: this.dt.String };
+    this.entityDefinition.dataProperties.generationOffset = { dataType: this.dt.Int16 };
     this.entityDefinition.dataProperties.triggerStart = { dataType: this.dt.DateTime };
     this.entityDefinition.dataProperties.triggerStop = { dataType: this.dt.DateTime };
     this.entityDefinition.dataProperties.generationId = { dataType: this.dt.Int32, isNullable: false };

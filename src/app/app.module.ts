@@ -3,6 +3,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core';
 import { DataModule } from './data/data.module';
+import { UserModule } from './user/user.module';
 
 @NgModule({
   declarations: [
@@ -10,8 +11,9 @@ import { DataModule } from './data/data.module';
   ],
   imports: [
     CoreModule,
+    AppRoutingModule,
     DataModule.forRoot(),
-    AppRoutingModule
+    UserModule
   ],
   providers: [],
   bootstrap: [AppComponent]

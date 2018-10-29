@@ -35,7 +35,7 @@
           },
           "configurations": {
             "production": {
-              "baseHref": "/sites/10918/wing/5bw/5mxg/5mos/programs/codi/aagt/",
+              "baseHref": "/sites/10918/mx-maintainer/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -53,7 +53,7 @@
               "buildOptimizer": true
             },
             "sharepoint-dev":{
-              "baseHref": "/sites/12042/wing/5bw/5mxg/5mos/programs/codi/aagt/",
+              "baseHref": "/sites/10918/mx-maintainer/",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

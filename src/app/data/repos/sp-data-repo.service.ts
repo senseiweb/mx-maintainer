@@ -3,7 +3,7 @@ import { Resolve } from '@angular/router';
 import { ScriptModel, ScriptStore, ScriptKey } from 'app/app-script-model';
 import { Observable } from 'rxjs/observable';
 import { Observer } from 'rxjs/Observer';
-import { MxAppEnum, MxmTag, MxmTagMetadata } from '../models';
+import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
 
 @Injectable({ providedIn: 'root' })
 // At times it is easier to retrieve things using the
@@ -12,6 +12,7 @@ export class SpDataRepoService implements Resolve<any> {
   followingManager: SP.Social.SocialFollowingManager;
   actorInfo: SP.Social.SocialActorInfo;
   spClientCtx: SP.ClientContext;
+  situeUrl: string;
   private scripts: Array<ScriptModel> = [];
   clientWeb: SP.Web;
    peopleManger: SP.UserProfiles.PeopleManager;
@@ -23,6 +24,7 @@ export class SpDataRepoService implements Resolve<any> {
 
   async resolve(): Promise<any> {
     if (this.isInitializer) { return Promise.resolve(); }
+    this.situeUrl = _spPageContextInfo.siteAbsoluteUrl;
     this.spClientCtx = new SP.ClientContext(_spPageContextInfo.siteAbsoluteUrl);
     this.clientWeb = this.spClientCtx.get_web();
     this.peopleManger = new SP.UserProfiles.PeopleManager(this.spClientCtx);
@@ -38,7 +40,7 @@ export class SpDataRepoService implements Resolve<any> {
     this.isInitializer = true;
   }
 
-  async fetchAppTags(supportedApp: MxAppEnum): Promise<Array<MxmTag>> {
+  async fetchAppTags(supportedApp: MxAppEnum): Promise<Array<MxFilterTag>> {
     const spMxmTagList = this.clientWeb
       .get_lists()
       .getByTitle(this.tagsMetadata.entityDefinition.shortName);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserService, AppConfigService } from 'app/core';
+import { UserService } from './app-user.service';
 import * as breeze from 'breeze-client';
 import * as eb from '../models/_entity-base';
 import 'breeze-client-labs/breeze.labs.dataservice.abstractrest';
@@ -19,12 +19,15 @@ export class EmProviderService {
   activate = false;
   entityManager: breeze.EntityManager;
   servicePoint: string;
-
+  // userService = {} as any;
+  // config = {
+  //   entities: [],
+  //   serviceEndpoint: '',
+  //   nameSpace: ''
+  // };
   constructor(
-    private appConfig: AppConfigService,
     private userService: UserService,
     private config: EmProviderConfig
-
   ) {
 
     const dataAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true) as any;

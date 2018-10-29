@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SpDataRepoService } from './data';
+import { UserBaseComponent } from './user/user-base/user-base.component';
 
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/aagt/dashboard/status-board',
+    redirectTo: '/user/dashboard/',
     pathMatch: 'full',
     resolve: [{initializer: SpDataRepoService}]
   },

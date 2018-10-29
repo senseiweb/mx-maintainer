@@ -5,11 +5,11 @@ import { ListGenyComponent } from './list-geny/list-geny.component';
 import { PlannerComponent, Step1Component, Step2Component } from './planner';
 import { GenieUowService } from './genie-uow.service';
 import {
-  TaskManagerComponent,
-  TmListComponent,
-  TmDetailsComponent,
-  TmSidebarComponent
-} from './task-manager';
+  ActionManagerComponent,
+  AmListComponent,
+  AmDetailsComponent,
+  AmSidebarComponent
+} from './action-manager';
 
 const routes: Routes = [{
   path: '',
@@ -28,8 +28,8 @@ const routes: Routes = [{
     component: PlannerComponent,
   },
   {
-    path: 'task-manager',
-    component: TaskManagerComponent
+    path: 'action-manager',
+    component: ActionManagerComponent
   }]
 }];
 
@@ -42,9 +42,9 @@ export class GenMgrRoutingMoudle {}
 export const routedComponents = [GenieBaseComponent,
   ListGenyComponent,
   PlannerComponent,
-  TaskManagerComponent,
-  TmListComponent,
-  TmDetailsComponent,
-  TmSidebarComponent,
+  ActionManagerComponent,
+  AmListComponent,
+  AmDetailsComponent,
+  AmSidebarComponent,
   Step1Component,
   Step2Component];

@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { AppSharedModule } from 'app/app-shared.module';
 import { GenMgrRoutingMoudle, routedComponents  } from './genie-routing.module';
 import { GenieUowService } from './genie-uow.service';
-import { TaskManagerModule } from './task-manager/';
+import { ActionManagerModule } from './action-manager/';
 
 @NgModule({
   imports: [
     CommonModule,
     AppSharedModule,
     GenMgrRoutingMoudle,
-    TaskManagerModule
+    ActionManagerModule
   ],
   providers: [GenieUowService],
   declarations: routedComponents
