@@ -10,6 +10,7 @@ export class ActionItem extends ebase.SpEntityBase {
   assignedTeamType: string;
   status: string;
   get tags(): Array<MxFilterTag> {
+    if (!this.entityAspect) { return []; }
     const em = this.entityAspect.entityManager;
     return this.mxFilterTagId.results.map(tagId => {
       return em.getEntityByKey('MxFilterTag', tagId) as MxFilterTag;

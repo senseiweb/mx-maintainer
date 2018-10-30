@@ -1,36 +1,42 @@
 import { bareEntity } from 'app/data';
 import { Generation } from 'app/aagt/data';
 import * as faker from 'faker';
-import { FakeSpDb } from './fake-aagt-backend.service';
 
-export class GenerationFakeDb implements FakeSpDb<Generation> {
+export class GenerationFakeDb {
   static dbKey = 'Generation';
-  private bareGenerationEntity: bareEntity<Generation|any>[] = [];
-
+  private bareGenerationEntity: bareEntity<Generation>[] = [];
   constructor() {
     for (let index = 0; index < 7; index++) {
-      const entity = {} as bareEntity<Generation | any>;
+      const entity = {} as bareEntity<Generation>;
       const itemGuid = faker.random.uuid();
-      entity.Id = index + 1;
-      entity.ID = index + 1;
-      entity.Active = faker.random.boolean();
-      entity.Iso = faker.lorem.words(1);
-      entity.Status = <any>faker.random.arrayElement(['Draft', 'Planned', 'Active', 'Historical']);
-      entity.NumberAssetsRequired = faker.random.number({ min: 0, max: 10 });
-      entity.Title = faker.lorem.words(2);
-      entity.StartDateTime = faker.date.future(2018);
-      entity.StopDateTime = faker.date.future(2018);
-      entity.AuthorId = faker.random.number({ min: 1, max: 10 });
-      entity.EditorId = faker.random.number({ min: 1, max: 10 });
-      entity.Created = faker.date.past(2018);
-      entity.Modified = faker.date.past(2018);
+      entity.id = index + 1;
+      entity.iD = index + 1 as any;
+      entity.active = faker.random.boolean();
+      entity.iso = faker.lorem.words(1);
+      entity.status = <any>faker.random.arrayElement(['Draft', 'Planned', 'Active', 'Historical']);
+      entity.numberAssetsRequired = faker.random.number({ min: 0, max: 10 });
+      entity.title = faker.lorem.words(2);
+      entity.startDateTime = faker.date.future(2018);
+      entity.stopDateTime = faker.date.future(2018);
+      entity.authorId = faker.random.number({ min: 1, max: 10 });
+      entity.editorId = faker.random.number({ min: 1, max: 10 });
+      entity.created = faker.date.past(2018);
+      entity.modified = faker.date.past(2018);
       entity.__metadata = {
-        etag: `'${entity.Id}'`,
-        id: `Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`,
+        etag: `'${entity.id}'`,
+        id: `Web/Lists(guid'${itemGuid}')/Items(${entity.id})`,
         type: 'SP.Data.GenerationListItem',
         // tslint:disable-next-line:max-line-length
-        uri: `https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`
+        uri: `https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.id})`
       };
+      for (const prop in entity) {
+        if (entity.hasOwnProperty(prop)) {
+          const newKey = prop.charAt(0).toUpperCase() + prop.substring(1);
+          console.log(`Old Property -> ${prop} | New Property -> ${newKey}`);
+          delete Object.assign(entity, { [newKey]: entity[prop] })[prop];
+          console.log(entity);
+        }
+      }
       this.bareGenerationEntity.push(entity);
     }
   }

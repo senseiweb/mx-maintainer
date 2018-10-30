@@ -1,9 +1,8 @@
 import { bareEntity } from 'app/data';
 import { Asset } from 'app/aagt/data';
 import * as faker from 'faker';
-import { FakeSpDb } from './fake-aagt-backend.service';
 
-export class AssetsFakeDb implements FakeSpDb<Asset>  {
+export class AssetsFakeDb  {
   static dbKey = 'Asset';
   private stateNames = ['Alabama',
   'Alaska',
@@ -73,7 +72,7 @@ export class AssetsFakeDb implements FakeSpDb<Asset>  {
         id: `Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`,
         type: 'SP.Data.AssetListItem',
         // tslint:disable-next-line:max-line-length
-        uri: `https://cs2.eis.af.mil/sites/12042/wing/5bw/5mxg/5mos/programs/codi/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`
+        uri: `https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.Id})`
 
       };
       this.bareAssetEntity.push(entity);

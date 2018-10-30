@@ -14,22 +14,32 @@ export const basicNavStructure: Array<FuseNavigation> = [{
     title: 'Dashboards',
     icon: 'dashboard',
     type: 'collapsable',
-    children: []
+    children: [{
+      id: 'userDash',
+      title: 'User',
+      type: 'item',
+      url: '/user/dashboard'
+    }]
   }]
 }];
 
 function addADashboard(dashboard: FuseNavigation): void {
-  basicNavStructure.filter(navItem =>
+  const dashboardHolder = basicNavStructure.filter(navItem =>
     navItem.id === 'appMetrics')[0]
-    .children.filter(navItem =>
-      navItem.id === 'dashboards')[0].children.push(dashboard);
+    .children
+    .filter(navItem =>
+      navItem.id === 'dashboards')[0];
+
+  if (!dashboardHolder.children.some(d => d.id === dashboard.id)) {
+    dashboardHolder.children.push(dashboard);
+  }
 }
 export function makeAagtNavStructure(): Array<FuseNavigation> {
   addADashboard({
-    id: 'statusboard',
-    title: 'Status Boards',
+    id: 'aagtDash',
+    title: 'A/AGT OPS',
     type: 'item',
-    url: '/aagt/dashboard/aagt-dash'
+    url: '/aagt/dashboard'
   });
   return [{
     id: 'appAagt',
@@ -53,24 +63,26 @@ export function makeAagtNavStructure(): Array<FuseNavigation> {
         url: 'aagt/genie/planner/0',
       }, {
         id: 'actionManager',
-        title: 'Task Management',
+        title: 'Action Management',
         type: 'item',
-        url: 'aagt/genie/task-manager/all'
+        url: 'aagt/genie/action-manager/all'
       }
       ]
     }]
   }];
 }
 
-export const kingMakerNavStructure: FuseNavigation = {
-  id: 'appKingMaker',
-  title: 'Administration',
-  type: 'group',
-  children: [{
-    id: 'kmConfig',
-    title: 'Configuration',
-    icon: '',
-    type: 'item',
-    url: '/king-maker/configurations'
-  }]
-};
+export function makeKingMakerNavStructure(): Array<FuseNavigation> {
+  return [{
+    id: 'appKingMaker',
+    title: 'Administration',
+    type: 'group',
+    children: [{
+      id: 'kmConfig',
+      title: 'Configuration',
+      icon: '',
+      type: 'item',
+      url: '/king-maker/configurations'
+    }]
+  }];
+}

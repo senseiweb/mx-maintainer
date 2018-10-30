@@ -8,8 +8,8 @@ import { AagtModule } from 'app/aagt/aagt.module';
 })
 export class GenAssetRepoService extends BaseRepoService<GenerationAsset> {
 
-  constructor(genAssetMeta: GenerationAssetMetadata, entityService: EmProviderService) {
-    super(genAssetMeta, entityService);
+  constructor(entityService: EmProviderService) {
+    super('GenerationAsset', entityService);
   }
 
 }

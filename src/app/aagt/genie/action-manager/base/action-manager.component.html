@@ -6,7 +6,7 @@
 
     <!-- SIDEBAR -->
     <fuse-sidebar class="sidebar" name="am-sidebar" position="left" lockedOpen="gt-md">
-        <tm-sidebar></tm-sidebar>
+        <am-sidebar></am-sidebar>
     </fuse-sidebar>
     <!-- / SIDEBAR -->
 
@@ -19,13 +19,13 @@
             <div class="search-wrapper" fxFlex fxLayout="row" fxLayoutAlign="start center">
 
                 <button mat-icon-button class="sidebar-toggle" fxHide.gt-md
-                        (click)="toggleSidebar('tm-sidebar')">
+                        (click)="toggleSidebar('am-sidebar')">
                     <mat-icon>menu</mat-icon>
                 </button>
 
                 <div class="search" flex fxLayout="row" fxLayoutAlign="start center">
                     <mat-icon>search</mat-icon>
-                    <input [formControl]="searchInput" placeholder="Search for a task" fxFlex>
+                    <input [formControl]="searchInput" placeholder="Search for a action" fxFlex>
                 </div>
             </div>
 
@@ -59,18 +59,18 @@
 
                     <div class="toolbar-separator" *ngIf="hasSelectedTasks"></div>
 
-                    <button mat-icon-button [matMenuTriggerFor]="labelMenu" *ngIf="hasSelectedTasks">
+                    <button mat-icon-button [matMenuTriggerFor]="labelMenu" *ngIf="hasSelectedActions">
                         <mat-icon class="secondary-text">label</mat-icon>
                     </button>
                     <mat-menu #labelMenu="matMenu">
-                        <button mat-menu-item *ngFor="let tag of tags" (click)="toggleTagOnSelectedTasks(tag.id)">
-                            {{tag.tagTitle}}
+                        <button mat-menu-item *ngFor="let action of actions" (click)="toggleTagOnSelectedTasks(action.id)">
+                            {{action.title}}
                         </button>
                     </mat-menu>
                 </div>
 
-                <div *ngIf="currentTask" fxHide.gt-lg>
-                    <button mat-icon-button (click)="deselectCurrentTask()">
+                <div *ngIf="currentAction" fxHide.gt-lg>
+                    <button mat-icon-button (click)="deselectCurrentAction()">
                         <mat-icon class="secondary-text">arrow_back</mat-icon>
                     </button>
                 </div>
@@ -80,8 +80,8 @@
 
             <!-- CONTENT -->
             <div class="content" fxFlexAlign="row">
-                <tm-list fusePerfectScrollbar fxFlex></tm-list>
-                <tm-details fusePerfectScrollbar fxFlex></tm-details>
+                <am-list fusePerfectScrollbar fxFlex></am-list>
+                <am-details fusePerfectScrollbar fxFlex></am-details>
             </div>
             <!-- / CONTENT -->
 

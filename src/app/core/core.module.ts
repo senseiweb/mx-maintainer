@@ -59,7 +59,7 @@ const defaultFuseConfig: FuseConfig = {
     environment.production || environment.sharepoint ?
     [] :
       InMemoryWebApiModule.forRoot(FakeDbService, {
-        apiBase: 'https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/'
+        apiBase: 'https://cs2.eis.af.mil/sites/10918/mx-maintainer/'
     }),
     TranslateModule.forRoot(),
 

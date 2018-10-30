@@ -5,6 +5,7 @@ import {
     ResponseOptions,
     RequestInfo
 } from 'angular-in-memory-web-api';
+import { AssetsFakeDb, GenerationFakeDb } from './aagt';
 
 export class FakeDbService implements InMemoryDbService {
   private resourceRegEx = /'(\w+)'/i;
@@ -14,7 +15,7 @@ export class FakeDbService implements InMemoryDbService {
   constructor() {
   }
 
-  private getDatabase<T>(inMemDb: any, dbFunc: any): void {
+  private getDatabase(inMemDb: any, dbFunc: any): void {
     const propName = dbFunc.dbKey;
     const newedUpClass = new dbFunc();
     inMemDb[propName] = newedUpClass.entities;
@@ -24,32 +25,30 @@ export class FakeDbService implements InMemoryDbService {
 
   createDb(): any {
     const inMemDb = {} as any;
+    this.getDatabase(inMemDb, AssetsFakeDb);
+    this.getDatabase(inMemDb, GenerationFakeDb);
     return inMemDb;
   }
 
-  // parseRequestUrl(url: string, utils: RequestInfoUtilities): ParsedRequestUrl {
-  //   const clean_url = decodeURIComponent(url);
-  //   const filterParams = this.implementFilterOps(clean_url);
-  //   const resource = clean_url.match(this.resourceRegEx)[1];
-  //   let newUrl: string;
+  parseRequestUrl(url: string, utils: RequestInfoUtilities): ParsedRequestUrl {
+    const clean_url = decodeURIComponent(url);
+    const filterParams = this.implementFilterOps(clean_url);
+    const resource = clean_url.match(this.resourceRegEx)[1];
+    const newUrl = utils.parseRequestUrl(url);
 
-  //   if (filterParams !== null) {
-  //     newUrl = `api/${resource}?${filterParams}`;
-  //     console.log(`the filter url => ${newUrl}`);
-  //   } else {
-  //     newUrl = `api/${resource}`;
-  //   }
-  //   const parsed = utils.parseRequestUrl(newUrl);
-  //   console.log(`parseRequestUrl override of '${clean_url}':`, parsed);
-  //   return parsed;
-  // }
+    if (filterParams !== null) {
+        newUrl.apiBase = `api/${resource}?${filterParams}`;
+        console.log(`the filter url => ${newUrl}`);
+    } else {
+      newUrl.collectionName = resource;
+      newUrl.id = null;
+    }
+    console.log(`parseRequestUrl override of '${clean_url}':`, newUrl);
+    return newUrl;
+  }
 
   responseInterceptor(resOptions: ResponseOptions, reqInfo: RequestInfo) {
-    const method = reqInfo.method.toUpperCase();
     resOptions.body = JSON.stringify({ d: { results: resOptions.body } });
-    const body = JSON.stringify(resOptions);
-    console.log(`responseInterceptor: ${method} ${reqInfo.req.url}: \n${body}`);
-
     return resOptions;
   }
 

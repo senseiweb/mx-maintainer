@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 import { ActionItem } from 'app/aagt/data/';
-import { ActionManagerUow } from '../action-manager-uow.service';
+import { ActionManagerUow } from '../../action-manager-uow.service';
 import { MxFilterTag } from 'app/data';
 
 @Component({

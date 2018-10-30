@@ -29,12 +29,21 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<GenerationAsset>
     this.entityDefinition.dataProperties.health = { dataType: this.dt.String };
     this.entityDefinition.dataProperties.mxPosition = { dataType: this.dt.Int16 };
     this.entityDefinition.dataProperties.generationId = { dataType: this.dt.Int16 };
-    this.entityDefinition.dataProperties.assetId = { dataType: this.dt.Int16 };
+    this.entityDefinition.dataProperties.assetId = { dataType: this.dt.Int16, isNullable: false };
 
-    // this.entityDefinition.navigationProperties.AssetTriggerTasks = {
-    //  entityTypeName: this._assetTriggerTask.shortName,
-    //  foreignKeyNames: ['AssetId']
-    // };
+    this.entityDefinition.navigationProperties = {
+      asset: {
+        entityTypeName: 'Asset',
+        foreignKeyNames: ['assetId'],
+        associationName: 'Asset_Generations'
+      },
+      generation: {
+        entityTypeName: 'Generation',
+        associationName: 'Generation_Assets',
+        foreignKeyNames: ['generationId']
+      }
+    };
+
     Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
   }
 

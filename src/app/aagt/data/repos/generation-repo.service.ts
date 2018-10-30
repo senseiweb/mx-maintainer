@@ -9,12 +9,12 @@ import * as breeze from 'breeze-client';
 })
 export class GenerationRepoService extends BaseRepoService<Generation> {
 
-  constructor(generationMeta: GenerationMetadata, entityService: EmProviderService) {
-    super(generationMeta, entityService);
+  constructor(entityService: EmProviderService) {
+    super('Generation', entityService);
   }
 
   createDraftGen(): Generation {
-    const existingDraft = this.entityManager.getEntities(this.entityTypeName, breeze.EntityState.Added)[0];
+    const existingDraft = this.entityManager.getEntities(this.entityType.shortName, breeze.EntityState.Added)[0] as Generation;
     if (existingDraft) {
       return existingDraft;
     }

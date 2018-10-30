@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Assumption } from './assumption';
 import { Trigger } from './trigger';
 import { AagtModule } from 'app/aagt/aagt.module';
+import { GenerationAsset } from './generation-asset';
 
 export enum genStatusEnum {
     draft = 'Draft',
@@ -12,16 +13,17 @@ export enum genStatusEnum {
 }
 
 export class Generation extends ebase.SpEntityBase {
-    title?: string;
-    active?: boolean;
-    iso?: string;
-    status?: genStatusEnum;
-    numberAssetsRequired?: number;
-    startDateTime?: Date;
-    stopDateTime?: Date;
-    draftAssets?: Array<number>;
-    assumptions?: Array<Assumption>;
-    triggers?: Array<Trigger>;
+    title: string;
+    active: boolean;
+    iso: string;
+    status: genStatusEnum;
+    numberAssetsRequired: number;
+    startDateTime: Date;
+    stopDateTime: Date;
+    draftAssets: Array<number>;
+    assumptions: Array<Assumption>;
+    triggers: Array<Trigger>;
+    generationAssets: Array<GenerationAsset>;
 }
 
 
@@ -62,16 +64,13 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
         this.entityDefinition.dataProperties.stopDateTime = {
             dataType: this.dt.DateTime
         };
-        // this.entityDefinition.navigationProperties.Assumptions = {
-        //    entityTypeName: this._assumption.shortName,
-        //    associationName: 'GeneratorAssumptions',
-        //    foreignKeyNames: ['GenerationId']
-        // };
-        // this.entityDefinition.navigationProperties.Generation = {
-        //    entityTypeName: this._trigger.shortName,
-        //    associationName: 'GeneratorTriggers',
-        //    foreignKeyNames: ['GenerationId']
-        //  };
+        this.entityDefinition.navigationProperties = {
+            generationAssets: {
+                entityTypeName: 'GenerationAsset',
+                associationName: 'Generation_Assets',
+                isScalar: false
+            }
+        };
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
     initializer(entity: Generation) { }

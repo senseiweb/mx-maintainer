@@ -4,7 +4,8 @@ import {
   GenAssetRepoService,
   TriggerRepoService,
   AssetRepoService,
-  TagRepoService
+  TagRepoService,
+  ActionItemRepo
 } from './repos';
 
 import {
@@ -16,11 +17,12 @@ import {
   TeamMetadata,
   TeamAvailabilityMetadata,
   TriggerMetadata,
-  TriggerActionMetadata
+  TriggerActionMetadata,
+  GenerationAssetMetadata
 } from './models';
 
 
-import { DataModule, MxmTagMetadata } from 'app/data';
+import { DataModule, MxmTagMetadata, SpMetadataMetadata } from 'app/data';
 
 const appEntities = [
   ActionItemMetadata,
@@ -28,7 +30,9 @@ const appEntities = [
   AssetMetadata,
   AssumptionMetadata,
   GenerationMetadata,
+  GenerationAssetMetadata,
   TeamMetadata,
+  SpMetadataMetadata as any,
   TeamAvailabilityMetadata,
   TriggerActionMetadata,
   TriggerMetadata,
@@ -38,6 +42,7 @@ const appEntities = [
 const repos = [
   GenerationRepoService,
   GenAssetRepoService,
+  ActionItemRepo,
   TriggerRepoService,
   AssetRepoService,
   TagRepoService
@@ -47,7 +52,7 @@ const repos = [
   imports: [
     DataModule.forFeature({
       entities: appEntities,
-      serviceEndpoint: '5mos/programs/codi/',
+      serviceEndpoint: '/aagt',
       nameSpace: 'SP.Data.Aagt'
     })  ],
   exports: [

@@ -6,20 +6,16 @@ import { PlannerComponent, Step1Component, Step2Component } from './planner';
 import { GenieUowService } from './genie-uow.service';
 import {
   ActionManagerComponent,
-  AmListComponent,
   AmDetailsComponent,
+  AmListComponent,
   AmSidebarComponent
 } from './action-manager';
 
 const routes: Routes = [{
-  path: '',
+  path: 'genie',
   component: GenieBaseComponent,
-  resolve: { done: GenieUowService },
+  resolve: { genieUow: GenieUowService },
   children: [{
-    path: '',
-    redirectTo: '/genie/list',
-    pathMatch: 'full'
-  }, {
     path: 'list',
     component: ListGenyComponent,
   },
@@ -29,7 +25,23 @@ const routes: Routes = [{
   },
   {
     path: 'action-manager',
-    component: ActionManagerComponent
+    component: ActionManagerComponent,
+    children: [{
+      path: 'all',
+      component: ActionManagerComponent,
+    },
+    {
+      path: 'all/:actionId',
+      component: ActionManagerComponent,
+    },
+    {
+      path: 'tag/:tagHandle',
+      component: ActionManagerComponent
+    },
+    {
+      path: 'tag/:tagHandle/:actionId',
+      component: ActionManagerComponent
+    }]
   }]
 }];
 
@@ -41,10 +53,10 @@ export class GenMgrRoutingMoudle {}
 
 export const routedComponents = [GenieBaseComponent,
   ListGenyComponent,
-  PlannerComponent,
   ActionManagerComponent,
   AmListComponent,
   AmDetailsComponent,
   AmSidebarComponent,
+  PlannerComponent,
   Step1Component,
   Step2Component];

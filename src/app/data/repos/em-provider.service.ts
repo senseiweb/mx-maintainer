@@ -19,20 +19,20 @@ export class EmProviderService {
   activate = false;
   entityManager: breeze.EntityManager;
   servicePoint: string;
+  isInitializer = false;
   // userService = {} as any;
   // config = {
   //   entities: [],
   //   serviceEndpoint: '',
   //   nameSpace: ''
   // };
-  constructor(
-    private spData: SpDataRepoService,
-    private config: EmProviderConfig
-  ) {
+  constructor(private spData: SpDataRepoService, private config: EmProviderConfig) { this.init(); }
 
+  protected init(): void {
+    if (this.isInitializer) { return; }
     const dataAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true) as any;
 
-    dataAdapter.getRequestDigest = () => this.spData.getRequestDigest(config.serviceEndpoint);
+    dataAdapter.getRequestDigest = () => this.spData.getRequestDigest(this.spData.situeUrl + this.config.serviceEndpoint);
 
     const clientToServerNameDictionary = {
       'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' }
@@ -44,7 +44,7 @@ export class EmProviderService {
     convention.setAsDefault();
 
     const dataService = new breeze.DataService({
-      serviceName: `${_spPageContextInfo.siteAbsoluteUrl}/${this.config.serviceEndpoint}`,
+      serviceName: `${this.spData.situeUrl}${this.config.serviceEndpoint}/_api/web`,
       hasServerMetadata: false
     });
     this.servicePoint = dataService.serviceName;
@@ -58,6 +58,7 @@ export class EmProviderService {
       const e = new entity() as eb.MetadataBase<eb.SpEntityBase>;
       const type = metaHelper.addTypeToStore(store,
         e.entityDefinition as any) as breeze.EntityType;
+      console.log(type.shortName);
       store.registerEntityTypeCtor(type.shortName,
         e.metadataFor, e.initializer);
 

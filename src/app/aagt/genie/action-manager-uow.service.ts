@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FuseUtils } from '@fuse/utils';
-import { ActionItem, ActionItemRepo } from '../../data';
+import { ActionItem, ActionItemRepo } from '../data';
 import { UserService } from 'app/data';
 import { TagRepoService } from 'app/aagt/data/repos';
 import { MxFilterTag, MxKnownFilters } from 'app/data';
-
 
 @Injectable()
 export class ActionManagerUow implements Resolve<any> {

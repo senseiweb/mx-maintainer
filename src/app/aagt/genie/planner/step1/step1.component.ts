@@ -12,11 +12,11 @@ export class Step1Component implements OnInit {
   allAssets: Array<Asset> = [];
   @Input() plannedGen: Generation;
   isoOperations: Array<{ shortcode: string, displayName: string }>;
-
-  constructor(private uow: GenieUowService) { }
+  genAssetsSelected = [];
+  constructor() { }
 
   ngOnInit() {
-    this.uow.getAllAssets().then(assets =>  this.allAssets = assets);
+    // this.uow.getAllAssets().then(assets =>  this.allAssets = assets);
   }
 
   assignedAssetModelChange(selectedAssets: Array<number>): void {

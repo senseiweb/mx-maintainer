@@ -11,10 +11,6 @@ const aagtRoutes: Routes = [
   {
     path: 'dashboard',
     component: AagtDashboardComponent
-  },
-  {
-    path: 'genie',
-    loadChildren: './genie/genie.module#GenieModule',
   }
 ];
 export const routedComponents = [AagtDashboardComponent];

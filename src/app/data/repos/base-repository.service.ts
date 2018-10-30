@@ -3,7 +3,6 @@ import * as breeze from 'breeze-client';
 import * as moment from 'moment';
 import { EmProviderService } from './em-provider.service';
 import {
-  MetadataBase,
   bareEntity,
   SpEntityBase
 } from '../models/_entity-base';
@@ -14,44 +13,53 @@ import {
 })
 export class BaseRepoService<T extends SpEntityBase> {
   protected entityManager: breeze.EntityManager;
+  protected entityType: breeze.EntityType;
   protected resourceName: string;
-  protected entityTypeName: string;
   private cachedDate: moment.Moment;
   private cachedAll: boolean;
   private queryCache: {
     [index: string]: moment.Moment
   } = {};
+  private inFlightCalls: {
+    [index: string]: Promise<Array<T>> | Promise<T> | null
+  } = {};
 
   protected defaultFetchStrategy: breeze.FetchStrategySymbol;
 
-  constructor(_entityData: MetadataBase<any>, _entityService: EmProviderService) {
+  constructor(entityTypeName: string, _entityService: EmProviderService) {
+    this.entityType = _entityService.entityManager.metadataStore.getEntityType(entityTypeName) as breeze.EntityType;
     this.entityManager = _entityService.entityManager;
-    this.resourceName = _entityData.entityDefinition.defaultResourceName;
-    this.entityTypeName = _entityData.entityDefinition.shortName;
+    this.resourceName = this.entityType.defaultResourceName;
     this.defaultFetchStrategy = breeze.FetchStrategy.FromServer;
   }
 
-  async all(): Promise<Array<T>> {
+  all(): Promise<Array<T>> {
     const query = this.baseQuery();
-    // tslint:disable-next-line:no-console
-    console.info(`all assets request on ${this.entityTypeName} and query ${query}`);
+    console.warn(`all assets request on ${this.entityType.shortName} and query ${query}`);
     if (this.isCachedBundle()) {
       return Promise.resolve(this.executeCacheQuery(query));
     }
-    try {
-      const data = await this.executeQuery(query);
-      this.isCachedBundle(true);
-      // tslint:disable-next-line:no-console
-      console.info(`return this info ==>`);
-      console.log(data);
-      return Promise.resolve(data) as Promise<Array<T>>;
-    } catch (error) {
-      return this.queryFailed(error);
-    }
+    if (this.inFlightCalls.all) { return this.inFlightCalls.all as Promise<Array<T>>; }
+
+    this.inFlightCalls.all = new Promise(async (resolve, reject) => {
+      try {
+        const data = await this.executeQuery(query);
+        this.isCachedBundle(true);
+        // tslint:disable-next-line:no-console
+        console.info(`return this info ==>`);
+        console.log(data);
+        resolve(data);
+      } catch (error) {
+        return reject(this.queryFailed(error));
+      } finally {
+        this.inFlightCalls.all = null;
+      }
+    }) as any;
+    return this.inFlightCalls.all as Promise<Array<T>>;
   }
 
   protected createBase(options?: bareEntity<T>): T {
-    return this.entityManager.createEntity(this.entityTypeName, options) as any;
+    return this.entityManager.createEntity(this.entityType.shortName, options) as any;
   }
 
   protected baseQuery(): breeze.EntityQuery {
@@ -100,7 +108,7 @@ export class BaseRepoService<T extends SpEntityBase> {
 
   async withId(key: number): Promise<T> {
     try {
-      const data = await this.entityManager.fetchEntityByKey(this.entityTypeName, key, true);
+      const data = await this.entityManager.fetchEntityByKey(this.entityType.shortName, key, true);
       return Promise.resolve(data.entity) as Promise<T>;
     } catch (error) {
       return this.queryFailed(error);

@@ -8,8 +8,8 @@ import { AagtModule } from 'app/aagt/aagt.module';
 })
 export class ActionItemRepo extends BaseRepoService<ActionItem> {
 
-  constructor(actionItemMeta: ActionItemMetadata, emService: EmProviderService) {
-    super(actionItemMeta, emService);
+  constructor(emService: EmProviderService) {
+    super('ActionItem', emService);
   }
 
 }

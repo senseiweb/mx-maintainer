@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import * as availNav from 'app/core/app-nav-structure';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { environment } from 'environments/environment';
@@ -13,20 +12,6 @@ export interface UserGrpInitData {
   title: string;
 }
 
-// @Injectable()
-// export class UserService {
-//   requestDigestExpiration = 0;
-//   requsstDigestToken = '';
-//   id: number;
-//   saluation = {
-//     lastName: 'lastName',
-//     firstName: 'firstName',
-//     title: '',
-//     rankName: () => `${this.saluation.firstName} ${this.saluation.lastName}`
-//   };
-//   getRequestDigest = () => 'digest';
-//  }
-
 @Injectable({providedIn: 'root'})
 export class UserService implements Resolve<any> {
 
@@ -35,7 +20,11 @@ export class UserService implements Resolve<any> {
   profileProps: SPUserProfileProperties  = {};
   requestDigestExpiration = 0;
   requestDigestToken = '';
-  defaultNavStructure: Array<FuseNavigation> = [];
+  navStructure = {
+    name: '',
+    navItems: [] as Array<FuseNavigation>
+  };
+
   id: number;
   saluation = {
     lastName: this.profileProps.LastName,
@@ -55,7 +44,6 @@ export class UserService implements Resolve<any> {
 
     if (!environment.production) {
       this.myGroups.push({ id: 0, title: 'Genie' });
-      this.myGroups.push({ id: 1, title: 'KingMaker' });
     }
   }
 
@@ -88,23 +76,38 @@ export class UserService implements Resolve<any> {
       console.error(`error getting user info ==> ${error}`);
     }
   }
+
   logout(): void {
   }
 
   setNavStructure(): void {
-    if (this.defaultNavStructure.length) { return; }
-    this.defaultNavStructure = availNav.basicNavStructure;
+    let newNavName = 'userDefault';
+    let navItems = availNav.basicNavStructure;
+
     this.myGroups.forEach(grp => {
+      let grpNavItems: Array<FuseNavigation>;
+
       switch (grp.title) {
         case 'Genie':
-          this.defaultNavStructure.concat(availNav.makeAagtNavStructure());
+          grpNavItems = availNav.makeAagtNavStructure();
           break;
         case 'KingMaker':
-          this.defaultNavStructure.concat(availNav.kingMakerNavStructure);
+          grpNavItems = availNav.makeKingMakerNavStructure();
           break;
       }
+      navItems = navItems.concat(grpNavItems);
+      newNavName += `-${grpNavItems[0].id}`;
     });
-    this.fuseNavigation.register('userDefault', this.defaultNavStructure);
-    this.fuseNavigation.setCurrentNavigation('userDefault');
+
+    if (this.navStructure.name === newNavName) {
+      return;
+    } else {
+      this.navStructure.name = newNavName;
+      this.navStructure.navItems = navItems;
+    }
+    console.log(`Name Created: ${newNavName}`);
+    console.log(this.navStructure);
+    this.fuseNavigation.register(this.navStructure.name, navItems);
+    this.fuseNavigation.setCurrentNavigation(this.navStructure.name);
   }
 }

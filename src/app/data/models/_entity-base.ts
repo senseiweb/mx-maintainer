@@ -9,42 +9,56 @@ export interface Instantiable<T> {
 
 export declare type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'initializer' | 'entityDefinition' | '$typeName' | 'registerMe';
+declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefinition' | '$typeName';
 
-export declare type bareEntity<T> = Pick<T, Exclude<keyof T, keyof breeze.Entity |ExtreBareEntityProps>>;
+export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof breeze.Entity | ExtreBareEntityProps>>>;
 
 declare type etDef = Omit<breeze.config.EntityTypeDef, 'dataProperties'|'navigationProperties'>;
 
 declare type dtDef = Omit<breeze.config.DataPropertyDef, 'dataType'>;
 
+declare type navDef = Omit<breeze.config.NavigationPropertyDef, 'foreignKeyNames'>;
+
 export interface SpDataDef extends dtDef {
     dataType: breeze.DataTypeSymbol;
     hasMany?: boolean;
 }
-export interface SpNavDef extends dtDef {
-    dataType: breeze.DataTypeSymbol;
+export interface SpNavDef<T> extends navDef {
+    foreignKeyNames?: Array<keyof bareEntity<T>>;
 }
 export type DataMembers<T> = {
     [key in keyof bareEntity<T>]: SpDataDef;
 };
-export interface NavMembers {
-    [key: string]: breeze.config.NavigationPropertyDef;
+
+export interface Type<T> extends Function {
+    new (...args: any[]): T;
 }
+export type ClientNameDict<T> = {
+    [bkey in keyof bareEntity<T>]: string
+};
+export type NavMembers<T> = {
+    [key in keyof bareEntity<T>]: SpNavDef<T>;
+};
 export interface SpEntityDef<T> extends etDef {
     dataProperties: DataMembers<T>;
     isComplexType: boolean;
-    navigationProperties?: NavMembers;
+    navigationProperties?: NavMembers<T>;
 }
-
 export class SpEntityBase implements Entity {
+    // sharepoint includes this property but we dont use it;
+    iD: number;
     entityAspect: EntityAspect;
     entityType: EntityType;
-    id?: number;
-    modified?: Date;
-    created?: Date;
-    authorId?: number;
-    editorId?: number;
+    id: number;
+    modified: Date;
+    created: Date;
+    authorId: number;
+    editorId: number;
     __metadata?: SpMetadata;
+    // get $typeName(): string {
+    //     if (!this.entityAspect) {return; }
+    //     return this.entityType.shortName;
+    // }
 }
 
 export class MetadataBase<T> {
@@ -76,15 +90,18 @@ export class MetadataBase<T> {
 
     metadataFor: Instantiable<T>;
 
+    translateDictionary = {} as {
+        isUsed: boolean;
+        name: string;
+        dict: Array<ClientNameDict<T>>
+    };
+
     constructor(shortName: string) {
         this.entityDefinition.shortName = shortName;
+        this.translateDictionary.isUsed = false;
+        this.translateDictionary.name = shortName;
         this.entityDefinition.defaultResourceName = `lists/getByTitle('${shortName}')/items`;
     }
-
-    // get $typeName(): string {
-    //     if (!this.entityAspect) {return; }
-    //     return this.entityAspect.getKey().entityType.shortName;
-    // }
 
     private addDefaultSelect(type: EntityType): EntityType {
         const customPropExist = type.custom;

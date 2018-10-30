@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/data';
-import { Asset, AssetMetadata } from '../models';
+import { Asset } from '../models';
 import { AagtModule } from 'app/aagt/aagt.module';
 
 @Injectable({
@@ -8,7 +8,7 @@ import { AagtModule } from 'app/aagt/aagt.module';
 })
 export class AssetRepoService extends BaseRepoService<Asset> {
 
-constructor(entityService: EmProviderService, assetMeta: AssetMetadata) {
-  super(assetMeta, entityService);
+constructor(entityService: EmProviderService) {
+  super('Asset', entityService);
  }
 }
