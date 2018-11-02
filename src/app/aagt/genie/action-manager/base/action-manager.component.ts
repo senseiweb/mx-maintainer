@@ -6,8 +6,8 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 import { ActionItem } from 'app/aagt/data/';
-import { ActionManagerUow } from '../../action-manager-uow.service';
 import { MxFilterTag } from 'app/data';
+import { ActionManagerUow } from '../../action-manager-uow.service';
 
 @Component({
     selector: 'genie-action-manager',
@@ -19,11 +19,11 @@ import { MxFilterTag } from 'app/data';
 export class ActionManagerComponent implements OnInit, OnDestroy {
     hasSelectedActions: boolean;
     isIndeterminate: boolean;
-    filters: Array<MxFilterTag>;
-    tags: Array<MxFilterTag>;
+    filters: MxFilterTag[];
+    tags: MxFilterTag[];
     searchInput: FormControl;
     currentAction: ActionItem;
-
+    triggerRoute = false;
     private _unsubscribeAll: Subject<any>;
 
     constructor(private _fuseSidebarService: FuseSidebarService,
@@ -43,16 +43,11 @@ export class ActionManagerComponent implements OnInit, OnDestroy {
                 }, 0);
             });
 
-        this.actionUow.onFiltersChanged
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(folders => {
-                this.filters = this.actionUow.filters;
-            });
-
         this.actionUow.onTagsChanged
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(tags => {
-                this.tags = this.actionUow.tags;
+                this.tags = tags.filter(t => !t.isFilter);
+                this.filters = tags.filter(t => t.isFilter);
             });
 
         this.searchInput.valueChanges
@@ -67,11 +62,11 @@ export class ActionManagerComponent implements OnInit, OnDestroy {
 
         this.actionUow.onCurrentActionChanged
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(([currentTask, formType]) => {
-                if (!currentTask) {
+            .subscribe((curr) => {
+                if (!curr.action) {
                     this.currentAction = null;
                 } else {
-                    this.currentAction = currentTask;
+                    this.currentAction = curr.action;
                 }
             });
     }
@@ -82,8 +77,8 @@ export class ActionManagerComponent implements OnInit, OnDestroy {
         this._unsubscribeAll.complete();
     }
 
-    deselectCurrentTask(): void {
-        this.actionUow.onCurrentActionChanged.next([null, null]);
+    deselectCurrentAction(): void {
+        this.actionUow.onCurrentActionChanged.next({action: null, mode: null});
     }
 
 
@@ -91,16 +86,16 @@ export class ActionManagerComponent implements OnInit, OnDestroy {
         this.actionUow.toggleSelectAll();
     }
 
-    selectTasks(filterParameter?, filterValue?): void {
-        this.actionUow.selectTasks(filterParameter, filterValue);
+    selectActions(filterParameter?, filterValue?): void {
+        this.actionUow.selectActions(filterParameter, filterValue);
     }
 
-    deselectTasks(): void {
-        this.actionUow.deselectTasks();
+    deselectActions(): void {
+        this.actionUow.deselectActions();
     }
 
-    toggleTagOnSelectedTasks(tagId): void {
-        this.actionUow.toggleSelectedTask(tagId);
+    toggleTagOnSelectedActions(tagId): void {
+        this.actionUow.toggleSelectedAction(tagId);
     }
 
     toggleSidebar(name): void {

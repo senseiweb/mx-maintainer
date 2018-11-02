@@ -5,7 +5,7 @@ import {
     ResponseOptions,
     RequestInfo
 } from 'angular-in-memory-web-api';
-import { AssetsFakeDb, GenerationFakeDb } from './aagt';
+import { AssetsFakeDb, GenerationFakeDb, ActionItemFakeDb, MxFilterTagFakeDb } from './aagt';
 
 export class FakeDbService implements InMemoryDbService {
   private resourceRegEx = /'(\w+)'/i;
@@ -27,6 +27,8 @@ export class FakeDbService implements InMemoryDbService {
     const inMemDb = {} as any;
     this.getDatabase(inMemDb, AssetsFakeDb);
     this.getDatabase(inMemDb, GenerationFakeDb);
+    this.getDatabase(inMemDb, ActionItemFakeDb);
+    this.getDatabase(inMemDb, MxFilterTagFakeDb);
     return inMemDb;
   }
 

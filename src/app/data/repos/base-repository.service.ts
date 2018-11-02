@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
 import * as moment from 'moment';
-import { EmProviderService } from './em-provider.service';
 import {
   bareEntity,
   SpEntityBase
 } from '../models/_entity-base';
+import { EmProviderService } from './em-provider.service';
 
 
 @Injectable({
@@ -21,7 +21,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     [index: string]: moment.Moment
   } = {};
   private inFlightCalls: {
-    [index: string]: Promise<Array<T>> | Promise<T> | null
+    [index: string]: Promise<T[]> | Promise<T> | null
   } = {};
 
   protected defaultFetchStrategy: breeze.FetchStrategySymbol;
@@ -33,13 +33,13 @@ export class BaseRepoService<T extends SpEntityBase> {
     this.defaultFetchStrategy = breeze.FetchStrategy.FromServer;
   }
 
-  all(): Promise<Array<T>> {
+  all(): Promise<T[]> {
     const query = this.baseQuery();
     console.warn(`all assets request on ${this.entityType.shortName} and query ${query}`);
     if (this.isCachedBundle()) {
       return Promise.resolve(this.executeCacheQuery(query));
     }
-    if (this.inFlightCalls.all) { return this.inFlightCalls.all as Promise<Array<T>>; }
+    if (this.inFlightCalls.all) { return this.inFlightCalls.all as Promise<T[]>; }
 
     this.inFlightCalls.all = new Promise(async (resolve, reject) => {
       try {
@@ -55,7 +55,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.inFlightCalls.all = null;
       }
     }) as any;
-    return this.inFlightCalls.all as Promise<Array<T>>;
+    return this.inFlightCalls.all as Promise<T[]>;
   }
 
   protected createBase(options?: bareEntity<T>): T {
@@ -86,18 +86,18 @@ export class BaseRepoService<T extends SpEntityBase> {
     return true;
   }
 
-  protected async executeQuery(query: breeze.EntityQuery, fetchStrat?: breeze.FetchStrategySymbol): Promise<Array<T>> {
+  protected async executeQuery(query: breeze.EntityQuery, fetchStrat?: breeze.FetchStrategySymbol): Promise<T[]> {
     try {
       const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
       const dataQueryResult = await this.entityManager.executeQuery(queryType);
-      return Promise.resolve(dataQueryResult.results) as Promise<Array<T>>;
+      return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
     } catch (error) {
       return this.queryFailed(error);
     }
   }
 
-  protected executeCacheQuery(query: breeze.EntityQuery): Array<T> {
-    const localCache = this.entityManager.executeQueryLocally(query) as Array<T>;
+  protected executeCacheQuery(query: breeze.EntityQuery): T[] {
+    const localCache = this.entityManager.executeQueryLocally(query) as T[];
     console.log(`from local cache ==> ${localCache}`);
     return localCache;
   }
@@ -115,7 +115,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
   }
 
-  async where(predicate: breeze.Predicate, refreshFromServer = false): Promise<Array<T>> {
+  async where(predicate: breeze.Predicate, refreshFromServer = false): Promise<T[]> {
     // tslint:disable-next-line:no-console
     console.info(`A where predicate was passed ==> ${predicate.toString()}`);
     const query = this.baseQuery().where(predicate);
@@ -133,9 +133,9 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
   }
 
-  whereInCache(predicate: breeze.Predicate): Array<T> {
+  whereInCache(predicate: breeze.Predicate): T[] {
     const query = this.baseQuery().where(predicate);
-    return <Array<any>>this.executeCacheQuery(query);
+    return this.executeCacheQuery(query) as any[];
   }
 
   queryFailed(error): Promise<any> {

@@ -1,5 +1,5 @@
-import * as ebase from 'app/data/models/_entity-base';
 import { Injectable } from '@angular/core';
+import * as ebase from 'app/data/models/_entity-base';
 
 export enum MxAppEnum {
   aagt = 'aagt'
@@ -13,6 +13,7 @@ export class MxFilterTag extends ebase.SpEntityBase {
   tagIcon: string;
   isFilter: boolean;
   appReference: MxAppEnum;
+
 }
 
 @Injectable({providedIn: 'root'})

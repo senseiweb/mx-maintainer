@@ -1,12 +1,12 @@
+// tslint:disable:no-submodule-imports
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
-import { ScriptModel, ScriptStore, ScriptKey } from 'app/app-script-model';
-import { Observable } from 'rxjs/observable';
-import { Observer } from 'rxjs/Observer';
-import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
-import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as moment from 'moment';
-import { environment } from 'environments/environment.prod';
+import { Observable, Observer} from 'rxjs';
+import { environment } from '../../../environments';
+import { ScriptKey, ScriptModel, ScriptStore } from '../../app-script-model';
+import { MxAppEnum, MxFilterTag, MxmTagMetadata } from '../models';
 
 @Injectable({ providedIn: 'root' })
 // At times it is easier to retrieve things using the
@@ -17,7 +17,7 @@ export class SpDataRepoService implements Resolve<any> {
   actorInfo: SP.Social.SocialActorInfo;
   spClientCtx: SP.ClientContext;
   situeUrl: string;
-  private scripts: Array<ScriptModel> = [];
+  private scripts: ScriptModel[] = [];
   clientWeb: SP.Web;
    peopleManger: SP.UserProfiles.PeopleManager;
   isInitializer = false;
@@ -59,7 +59,7 @@ export class SpDataRepoService implements Resolve<any> {
     this.isInitializer = true;
   }
 
-  async fetchAppTags(supportedApp: MxAppEnum): Promise<Array<MxFilterTag>> {
+  async fetchAppTags(supportedApp: MxAppEnum): Promise<MxFilterTag[]> {
     const spMxmTagList = this.clientWeb
       .get_lists()
       .getByTitle(this.tagsMetadata.entityDefinition.shortName);

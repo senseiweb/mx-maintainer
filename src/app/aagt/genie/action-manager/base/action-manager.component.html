@@ -1,4 +1,4 @@
-<div id="actions" class="page-layout carded left-sidebar inner-scroll">
+<div id="action" class="page-layout carded left-sidebar inner-scroll">
 
     <!-- TOP BACKGROUND -->
     <div class="top-bg accent"></div>
@@ -6,7 +6,7 @@
 
     <!-- SIDEBAR -->
     <fuse-sidebar class="sidebar" name="am-sidebar" position="left" lockedOpen="gt-md">
-        <am-sidebar></am-sidebar>
+        <am-sidebar [sbHasTriggers]="triggerRoute"></am-sidebar>
     </fuse-sidebar>
     <!-- / SIDEBAR -->
 
@@ -33,13 +33,13 @@
         <!-- / CONTENT HEADER -->
 
         <!-- CONTENT CARD -->
-        <div class="content-card" [ngClass]="{'current-task-selected':currentTask}">
+        <div class="content-card" [ngClass]="{'current-action-selected':currentAction}">
 
             <!-- CONTENT TOOLBAR -->
             <div class="toolbar px-24 py-8">
 
                 <div class="task-selection" fxFlex="row" fxLayoutAlign="start center">
-                    <mat-checkbox (click)="toggleSelectAll()" [checked]="hasSelectedTasks"
+                    <mat-checkbox (click)="toggleSelectAll()" [checked]="hasSelectedActions"
                                   [indeterminate]="isIndeterminate"></mat-checkbox>
 
                     <button mat-icon-button [matMenuTriggerFor]="selectMenu">
@@ -47,24 +47,24 @@
                     </button>
 
                     <mat-menu #selectMenu="matMenu">
-                        <button mat-menu-item (click)="selectTasks()">All</button>
-                        <button mat-menu-item (click)="deselectTasks()">None</button>
-                        <button mat-menu-item (click)="selectTasks('read', true)">Read</button>
-                        <button mat-menu-item (click)="selectTasks('read', false)">Unread</button>
-                        <button mat-menu-item (click)="selectTasks('starred', true)">Starred</button>
-                        <button mat-menu-item (click)="selectTasks('starred', false)">Unstarred</button>
-                        <button mat-menu-item (click)="selectTasks('important', true)">Important</button>
-                        <button mat-menu-item (click)="selectTasks('important', false)">Unimportant</button>
+                        <button mat-menu-item (click)="selectActions()">All</button>
+                        <button mat-menu-item (click)="deselectActions()">None</button>
+                        <button mat-menu-item (click)="selectActions('read', true)">Read</button>
+                        <button mat-menu-item (click)="selectActions('read', false)">Unread</button>
+                        <button mat-menu-item (click)="selectActions('starred', true)">Critical</button>
+                        <button mat-menu-item (click)="selectActions('starred', false)">Un-Critical</button>
+                        <button mat-menu-item (click)="selectActions('important', true)">Important</button>
+                        <button mat-menu-item (click)="selectActions('important', false)">Unimportant</button>
                     </mat-menu>
 
-                    <div class="toolbar-separator" *ngIf="hasSelectedTasks"></div>
+                    <div class="toolbar-separator" *ngIf="hasSelectedActions"></div>
 
                     <button mat-icon-button [matMenuTriggerFor]="labelMenu" *ngIf="hasSelectedActions">
                         <mat-icon class="secondary-text">label</mat-icon>
                     </button>
                     <mat-menu #labelMenu="matMenu">
-                        <button mat-menu-item *ngFor="let action of actions" (click)="toggleTagOnSelectedTasks(action.id)">
-                            {{action.title}}
+                        <button mat-menu-item *ngFor="let tag of tags" (click)="toggleTagOnSelectedActions(tag.id)">
+                            {{tag.tagTitle}}
                         </button>
                     </mat-menu>
                 </div>

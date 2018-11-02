@@ -32,9 +32,7 @@ export class GenerationFakeDb {
       for (const prop in entity) {
         if (entity.hasOwnProperty(prop)) {
           const newKey = prop.charAt(0).toUpperCase() + prop.substring(1);
-          console.log(`Old Property -> ${prop} | New Property -> ${newKey}`);
           delete Object.assign(entity, { [newKey]: entity[prop] })[prop];
-          console.log(entity);
         }
       }
       this.bareGenerationEntity.push(entity);

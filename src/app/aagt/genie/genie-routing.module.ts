@@ -8,8 +8,10 @@ import {
   ActionManagerComponent,
   AmDetailsComponent,
   AmListComponent,
+  AmListItemComponent,
   AmSidebarComponent
 } from './action-manager';
+import { ActionManagerUow } from './action-manager-uow.service';
 
 const routes: Routes = [{
   path: 'genie',
@@ -26,6 +28,7 @@ const routes: Routes = [{
   {
     path: 'action-manager',
     component: ActionManagerComponent,
+    resolve: {data: ActionManagerUow},
     children: [{
       path: 'all',
       component: ActionManagerComponent,
@@ -56,6 +59,7 @@ export const routedComponents = [GenieBaseComponent,
   ActionManagerComponent,
   AmListComponent,
   AmDetailsComponent,
+  AmListItemComponent,
   AmSidebarComponent,
   PlannerComponent,
   Step1Component,

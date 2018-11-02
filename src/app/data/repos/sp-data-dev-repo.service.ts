@@ -1,12 +1,11 @@
+// tslint:disable:no-submodule-imports
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
-import { ScriptModel, ScriptStore, ScriptKey } from 'app/app-script-model';
-import { Observable } from 'rxjs/observable';
-import { Observer } from 'rxjs/Observer';
-import { MxAppEnum, MxFilterTag, MxmTagMetadata, SPUserProfileProperties } from '../models';
-import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import * as moment from 'moment';
-import { environment } from 'environments/environment.prod';
+import { Observable, Observer } from 'rxjs';
+import { ScriptKey, ScriptModel, ScriptStore } from '../../app-script-model';
+import { MxAppEnum, MxFilterTag, MxmTagMetadata, SPUserProfileProperties } from '../models';
 
 @Injectable({ providedIn: 'root' })
 // At times it is easier to retrieve things using the
@@ -17,10 +16,11 @@ export class SpDataRepoService implements Resolve<any> {
   actorInfo: SP.Social.SocialActorInfo;
   spClientCtx: any;
   situeUrl: string;
-  private scripts: Array<ScriptModel> = [];
+  private scripts: ScriptModel[] = [];
   clientWeb: any;
   peopleManger: any;
   isInitializer = false;
+  filterTags: MxFilterTag[];
   SP: any;
   constructor(
     private tagsMetadata: MxmTagMetadata,
@@ -77,12 +77,17 @@ export class SpDataRepoService implements Resolve<any> {
   async resolve(): Promise<any> {
     if (this.isInitializer) { return Promise.resolve(); }
     const digestValue = await this.getRequestDigest(this.mxMaintainerContextSite);
+    let data = await this.http
+      .get(`${this.mxMaintainerContextSite}/_api/web/list/('MxFilterTag')/items`)
+      .toPromise() as any;
+    data = JSON.parse(data);
+    this.filterTags = data.d.results;
+    console.log(this.filterTags);
     this.isInitializer = true;
   }
 
-  async fetchAppTags(supportedApp: MxAppEnum): Promise<Array<MxFilterTag>> {
-    const fiterTags = [] as any;
-    return Promise.resolve(fiterTags);
+  async fetchAppTags(supportedApp: MxAppEnum): Promise<MxFilterTag[]> {
+    return Promise.resolve(this.filterTags);
   }
 
   async getRequestDigest(contextSite: string): Promise<{ rawDigest: string, localExpireTime: moment.Moment }> {

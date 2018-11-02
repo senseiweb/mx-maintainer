@@ -1,5 +1,9 @@
 {
-    "extends": "../tslint.json",
+    "extends": [
+        "tslint:recommended",
+        "../tslint.json",
+        "tslint-config-prettier"
+    ],
     "linterOptions": {
         "exclude": [
             "@fuse/**"

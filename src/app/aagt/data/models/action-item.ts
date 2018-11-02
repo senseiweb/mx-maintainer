@@ -1,22 +1,35 @@
-import * as ebase from 'app/data/models/_entity-base';
 import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
 import { MxFilterTag, SpMultiLookup } from 'app/data';
+import * as ebase from 'app/data/models/_entity-base';
 
 export class ActionItem extends ebase.SpEntityBase {
   action: string;
   shortCode: string;
-  duration: string;
+  duration: number;
   assignedTeamType: string;
   status: string;
-  get tags(): Array<MxFilterTag> {
+  notes: string;
+  get important(): boolean {
+    if (!this.tags.length) { return false; }
+    return this.tags.some(tag => tag.tagHandle === 'important');
+  }
+  get critical(): boolean {
+    if (!this.tags.length) { return false; }
+    return this.tags.some(tag => tag.tagHandle === 'critical');
+  }
+  get completed(): boolean {
+    if (!this.tags.length) { return false; }
+    return this.tags.some(tag => tag.tagHandle === 'done');
+  }
+  get tags(): MxFilterTag[] {
     if (!this.entityAspect) { return []; }
     const em = this.entityAspect.entityManager;
-    return this.mxFilterTagId.results.map(tagId => {
+    return this.mxFilterTagId ? this.mxFilterTagId.results.map(tagId => {
       return em.getEntityByKey('MxFilterTag', tagId) as MxFilterTag;
-    });
+    }) : [];
   }
-  set tags(tags: Array<MxFilterTag>) {
+  set tags(tags: MxFilterTag[]) {
     const tagIds = tags.map(t => t.id);
     this.mxFilterTagId.results = tagIds;
   }

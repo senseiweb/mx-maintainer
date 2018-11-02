@@ -8,3 +8,4 @@ export * from './team-availability';
 export * from './trigger';
 export * from './generation-asset';
 export * from './trigger-action';
+export * from './action-item';

@@ -1,6 +1,6 @@
 @import "src/@fuse/scss/fuse";
 
-actions {
+#action {
     width: 100%;
 
     .center {
@@ -51,7 +51,7 @@ actions {
                     display: none !important;
                 }
 
-                &.current-todo-selected {
+                &.current-action-selected {
 
                     .toolbar {
                         padding-left: 16px !important;
@@ -63,11 +63,11 @@ actions {
 
                     .content {
 
-                        todo-list {
+                        action-list {
                             display: none !important;
                         }
 
-                        todo-details {
+                        action-details {
                             display: flex !important;
                         }
                     }

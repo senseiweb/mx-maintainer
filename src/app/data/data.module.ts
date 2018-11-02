@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
 import {
-  EmProviderService,
+  MxmTagMetadata,
+  SpMetadataMetadata,
+  SpMultiLookupMeta
+} from './models';
+import {
   BaseRepoService,
+  EmProviderService,
   SpDataRepoService,
   UserService,
 } from './repos/';
-import {
-  SpMetadataMetadata,
-  SpMultiLookupMeta,
-  MxmTagMetadata
-} from './models';
 
 import { ModuleWithProviders } from '@angular/compiler/src/core';
-import { EmProviderConfig } from './repos/em-provider.service';
+import { EmProviderConfig } from './repos/em-provider-config';
 
 const appEntities = [SpMetadataMetadata, SpMultiLookupMeta, MxmTagMetadata] as any;
 
@@ -20,13 +20,7 @@ const appEntities = [SpMetadataMetadata, SpMultiLookupMeta, MxmTagMetadata] as a
   imports: [],
   exports: [
   ],
-  providers: [
-    EmProviderService,
-    UserService,
-    BaseRepoService,
-    SpDataRepoService,
-    SpMetadataMetadata
-  ].concat(appEntities),
+  providers: [EmProviderService],
   declarations: []
 })
 export class DataModule {
@@ -37,7 +31,11 @@ export class DataModule {
       providers: [{
         provide: EmProviderConfig,
         useValue: mainConfig
-      }]
+      }, UserService,
+        BaseRepoService,
+      SpDataRepoService,
+      SpMetadataMetadata
+    ].concat(appEntities)
     };
   }
 

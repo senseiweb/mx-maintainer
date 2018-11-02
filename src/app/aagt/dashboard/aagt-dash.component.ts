@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 import { fuseAnimations } from '@fuse/animations';
+import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
 @Component({
   selector: 'dashboard-aagt',

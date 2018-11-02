@@ -7,6 +7,7 @@ import { ActionItem, ActionItemRepo } from '../data';
 import { UserService } from 'app/data';
 import { TagRepoService } from 'app/aagt/data/repos';
 import { MxFilterTag, MxKnownFilters } from 'app/data';
+import { Action } from 'rxjs/internal/scheduler/Action';
 
 @Injectable()
 export class ActionManagerUow implements Resolve<any> {
@@ -15,16 +16,14 @@ export class ActionManagerUow implements Resolve<any> {
     selectedActions: Array<ActionItem>;
     currentAction: ActionItem;
     searchText: string;
-    filters: Array<MxFilterTag>;
     tags: Array<MxFilterTag>;
     routeParams: any;
 
-    onActionChanged: BehaviorSubject<any>;
-    onSelectedActionChanged: BehaviorSubject<any>;
-    onCurrentActionChanged: BehaviorSubject<any>;
-    onFiltersChanged: BehaviorSubject<any>;
-    onTagsChanged: BehaviorSubject<any>;
-    onSearchTextChanged: BehaviorSubject<any>;
+    onActionsChanged: BehaviorSubject<Array<ActionItem>>;
+    onSelectedActionChanged: BehaviorSubject<Array<ActionItem>>;
+    onCurrentActionChanged: BehaviorSubject<{action?: ActionItem, mode?: string}>;
+    onTagsChanged: BehaviorSubject<Array<MxFilterTag>>;
+    onSearchTextChanged: BehaviorSubject<string>;
     onNewActionClicked: Subject<any>;
 
     constructor(
@@ -37,11 +36,10 @@ export class ActionManagerUow implements Resolve<any> {
         // this.taskModel = new taskMeta.metadataFor();
         this.selectedActions = [];
         this.searchText = '';
-        this.onActionChanged = new BehaviorSubject([]);
-        this.onSelectedActionChanged = new BehaviorSubject([]);
-        this.onCurrentActionChanged = new BehaviorSubject([]);
-        this.onFiltersChanged = new BehaviorSubject([]);
-        this.onTagsChanged = new BehaviorSubject([]);
+        this.onActionsChanged = new BehaviorSubject([] as Array<ActionItem>);
+        this.onSelectedActionChanged = new BehaviorSubject([] as Array<ActionItem>);
+        this.onCurrentActionChanged = new BehaviorSubject({} as any);
+        this.onTagsChanged = new BehaviorSubject([] as Array<MxFilterTag>);
         this.onSearchTextChanged = new BehaviorSubject('');
         this.onNewActionClicked = new Subject();
     }
@@ -50,18 +48,17 @@ export class ActionManagerUow implements Resolve<any> {
       this.routeParams = route.params;
         await Promise.all([
             this.getTags(),
-            this.getFilters(),
-            this.getTasks()
+            this.getActions()
         ]);
         if (this.routeParams.taskId) {
-            this.setCurrentTask(this.routeParams.taskId);
+            this.setCurrentAction(this.routeParams.taskId);
         } else {
-            this.setCurrentTask();
+            this.setCurrentAction();
         }
 
         this.onSearchTextChanged.subscribe(searchText => {
             this.searchText = searchText;
-            this.getTasks();
+            this.getActions();
         });
     }
 
@@ -69,7 +66,7 @@ export class ActionManagerUow implements Resolve<any> {
         try {
             const tagFilters = await this.tagsRepo.fetchTags();
             if (tagFilters.length) {
-                this.tags = tagFilters.filter(tf => !tf.isFilter);
+                this.tags = tagFilters;
                 this.onTagsChanged.next(this.tags);
             }
             return Promise.resolve(this.tags);
@@ -79,44 +76,31 @@ export class ActionManagerUow implements Resolve<any> {
 
     }
 
-    async getFilters(): Promise<any> {
+    async getActions(): Promise<Array<ActionItem>> {
         try {
-            const tagFilters = await this.tagsRepo.fetchTags();
-            if (tagFilters.length) {
-                this.tags = tagFilters.filter(tf => tf.isFilter);
-                this.onFiltersChanged.next(this.tags);
-            }
-            return Promise.resolve(this.tags);
-        } catch (e) {
-
-        }
-    }
-
-    async getTasks(): Promise<Array<ActionItem>> {
-        try {
-            this.tags = await this.tagsRepo.all();
+            this.actions = await this.actionRepo.all();
             if ( this.routeParams.tagHandle ) {
-                return this.getTasksByTag(this.routeParams.tagHandle);
+                return this.getActionsByTag(this.routeParams.tagHandle);
             }
 
             if ( this.routeParams.filterHandle ) {
-                return this.getTasksByFilter(this.routeParams.filterHandle);
+                return this.getActionsByFilter(this.routeParams.filterHandle);
             }
 
-            return this.getTaskByParams();
+            return this.getActionByParams();
         } catch (e) {
             console.error(e);
         }
 
     }
 
-    getTaskByParams(): Array<ActionItem> {
+    getActionByParams(): Array<ActionItem> {
         this.actions = FuseUtils.filterArrayByString(this.actions, this.searchText);
-        this.onActionChanged.next(this.actions);
+        this.onActionsChanged.next(this.actions);
         return this.actions;
     }
 
-    getTasksByFilter(handle: MxKnownFilters): Array<ActionItem> {
+    getActionsByFilter(handle: MxKnownFilters): Array<ActionItem> {
         let filteredTasks: Array<ActionItem>;
 
         switch (handle) {
@@ -126,21 +110,21 @@ export class ActionManagerUow implements Resolve<any> {
 
         }
         this.actions = FuseUtils.filterArrayByString(filteredTasks, this.searchText);
-        this.onTagsChanged.next(this.actions);
+        this.onActionsChanged.next(this.actions);
         return this.actions;
     }
 
-    getTasksByTag(handle: string): Array<ActionItem> {
+    getActionsByTag(handle: string): Array<ActionItem> {
             this.actions = this.actions.filter(task => {
                 task.tags.filter(tag => tag.tagHandle === handle);
             });
 
             this.actions = FuseUtils.filterArrayByString(this.tags, this.searchText);
-            this.onTagsChanged.next(this.actions);
+            this.onActionsChanged.next(this.actions);
             return this.actions;
     }
 
-    toggleSelectedTask(id: number): void {
+    toggleSelectedAction(id: number): void {
         // First, check if we already have that todo as selected...
         let selectedItemIndex;
         const alreadySelected = this.selectedActions.find((task, i) => {
@@ -160,14 +144,14 @@ export class ActionManagerUow implements Resolve<any> {
 
     toggleSelectAll(): void {
         if ( this.selectedActions.length > 0 ) {
-            this.deselectTasks();
+            this.deselectActions();
         } else {
-            this.selectTasks();
+            this.selectActions();
         }
 
     }
 
-    selectTasks(filterParameter?: string, filterValue?: string): void {
+    selectActions(filterParameter?: string, filterValue?: string): void {
         this.selectedActions = [];
 
         // If there is no filter, select all todos
@@ -185,19 +169,19 @@ export class ActionManagerUow implements Resolve<any> {
         this.onSelectedActionChanged.next(this.selectedActions);
     }
 
-    deselectTasks(): void {
+    deselectActions(): void {
         this.selectedActions = [];
 
         // Trigger the next event
         this.onSelectedActionChanged.next(this.selectedActions);
     }
 
-    setCurrentTask(id?: number): void {
+    setCurrentAction(id?: number): void {
         this.currentAction = this.actions.find(task => {
             return task.id === id;
         });
 
-        this.onCurrentActionChanged.next([this.currentAction, 'edit']);
+        this.onCurrentActionChanged.next({ action: this.currentAction, mode: 'edit' });
 
         const tagHandle    = this.routeParams.tagHandle,
             filterHandle = this.routeParams.filterHandle;
@@ -213,19 +197,19 @@ export class ActionManagerUow implements Resolve<any> {
         }
     }
 
-    toggleTagOnSelectedTasks(tagId: number): void {
-        this.selectedActions.map(task => {
-            this.toggleTagOnTask(tagId, task);
+    toggleTagOnSelectedActions(tagId: number): void {
+        this.selectedActions.map(action => {
+            this.toggleTagOnAction(tagId, action);
         });
     }
 
-    toggleTagOnTask(tagId: number, task: ActionItem): void {
-        const index = task.tags.findIndex(tag => tag.id === tagId);
+    toggleTagOnAction(tagId: number, action: ActionItem): void {
+        const index = action.tags.findIndex(tag => tag.id === tagId);
 
         if ( index !== -1 ) {
-            task.tags.splice(index, 1);
+            action.tags.splice(index, 1);
         } else {
-            task.tags.push(this.tags.find(tag => tag.id === tagId));
+            action.tags.push(this.tags.find(tag => tag.id === tagId));
         }
 
         this.updateTask();
