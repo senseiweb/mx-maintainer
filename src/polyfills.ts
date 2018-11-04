@@ -84,7 +84,6 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
 /**
  * Fix for ngx-chart to work on ie11
  */
-if ( typeof SVGElement.prototype.contains === 'undefined' )
-{
+if ( typeof SVGElement.prototype.contains === 'undefined' ) {
     SVGElement.prototype.contains = HTMLDivElement.prototype.contains;
 }

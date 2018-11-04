@@ -4,32 +4,29 @@ import { Team } from './team';
 import { AagtModule } from 'app/aagt/aagt.module';
 
 export class TeamAvailability extends ebase.SpEntityBase {
-  availabilityTitle: string;
-  teamId: number;
-  availDateTime: Date;
-  nonavailDateTime: Date;
-  manHoursAvail: number;
-  team: Team;
+    availabilityTitle: string;
+    teamId: number;
+    availDateTime: Date;
+    nonavailDateTime: Date;
+    manHoursAvail: number;
+    team: Team;
 }
 
 @Injectable({
-  providedIn: AagtModule
+    providedIn: AagtModule
 })
 export class TeamAvailabilityMetadata extends ebase.MetadataBase<TeamAvailability> {
 
-  metadataFor = TeamAvailability;
+    metadataFor = TeamAvailability;
 
-  constructor() {
-    super('TeamAvailability');
-    this.entityDefinition.dataProperties.availabilityTitle = { dataType: this.dt.String, isNullable: false };
-    this.entityDefinition.dataProperties.teamId = { dataType: this.dt.Int32, isNullable: false };
-    this.entityDefinition.dataProperties.availDateTime = { dataType: this.dt.DateTime, isNullable: false};
-    this.entityDefinition.dataProperties.nonavailDateTime = { dataType: this.dt.DateTime, isNullable: false };
-    this.entityDefinition.dataProperties.manHoursAvail = { dataType: this.dt.Int32, isNullable: false };
+    constructor () {
+        super('TeamAvailability');
+        this.entityDefinition.dataProperties.availabilityTitle = { dataType: this.dt.String, isNullable: false };
+        this.entityDefinition.dataProperties.teamId = { dataType: this.dt.Int32, isNullable: false };
+        this.entityDefinition.dataProperties.availDateTime = { dataType: this.dt.DateTime, isNullable: false };
+        this.entityDefinition.dataProperties.nonavailDateTime = { dataType: this.dt.DateTime, isNullable: false };
+        this.entityDefinition.dataProperties.manHoursAvail = { dataType: this.dt.Int32, isNullable: false };
 
-    Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
-  }
-
-  initializer(entity: TeamAvailability) { }
-
+        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+    }
 }

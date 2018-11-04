@@ -1,10 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { GenieUowService } from '../genie-uow.service';
 import { Generation, GenerationAsset, genStatusEnum } from 'app/aagt/data';
-import { EventEmitter } from 'protractor';
+import { GenieUowService } from '../genie-uow.service';
 
 @Component({
   selector: 'app-planner',
@@ -21,8 +18,8 @@ export class PlannerComponent implements OnInit {
   step2completed: boolean;
   step3completed: boolean;
   step4completed: boolean;
-  genAssetsSelected: Array<GenerationAsset> = [];
-  assignedAssets: Array<GenerationAsset>;
+  genAssetsSelected: GenerationAsset[] = [];
+  assignedAssets: GenerationAsset[];
 
   constructor(
     private route: ActivatedRoute,

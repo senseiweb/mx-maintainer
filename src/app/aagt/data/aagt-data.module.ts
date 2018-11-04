@@ -1,32 +1,31 @@
 import { NgModule } from '@angular/core';
 import {
-  GenerationRepoService,
-  GenAssetRepoService,
-  TriggerRepoService,
+  ActionItemRepo,
   AssetRepoService,
+  GenAssetRepoService,
+  GenerationRepoService,
   TagRepoService,
-  ActionItemRepo
+  TriggerRepoService
 } from './repos';
 
 import {
   ActionItemMetadata,
-  AssetTriggerTaskMetadata,
   AssetMetadata,
+  AssetTriggerActionMetadata,
   AssumptionMetadata,
+  GenerationAssetMetadata,
   GenerationMetadata,
-  TeamMetadata,
   TeamAvailabilityMetadata,
-  TriggerMetadata,
+  TeamMetadata,
   TriggerActionMetadata,
-  GenerationAssetMetadata
+  TriggerMetadata
 } from './models';
-
 
 import { DataModule, MxmTagMetadata, SpMetadataMetadata } from 'app/data';
 
 const appEntities = [
   ActionItemMetadata,
-  AssetTriggerTaskMetadata,
+  AssetTriggerActionMetadata,
   AssetMetadata,
   AssumptionMetadata,
   GenerationMetadata,
@@ -54,13 +53,12 @@ const repos = [
       entities: appEntities,
       serviceEndpoint: '/aagt',
       nameSpace: 'SP.Data.Aagt'
-    })  ],
-  exports: [
+    })
   ],
+  exports: [],
   providers: appEntities.concat(repos),
   declarations: []
 })
 export class AagtDataModule {
-  constructor() {
-  }
+  constructor() {}
 }

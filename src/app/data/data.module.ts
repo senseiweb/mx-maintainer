@@ -5,7 +5,6 @@ import {
   SpMultiLookupMeta
 } from './models';
 import {
-  BaseRepoService,
   EmProviderService,
   SpDataRepoService,
   UserService,
@@ -32,7 +31,6 @@ export class DataModule {
         provide: EmProviderConfig,
         useValue: mainConfig
       }, UserService,
-        BaseRepoService,
       SpDataRepoService,
       SpMetadataMetadata
     ].concat(appEntities)

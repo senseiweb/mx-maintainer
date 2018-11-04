@@ -1,6 +1,5 @@
 import { Component, OnInit, Input} from '@angular/core';
 import { Generation, Asset } from 'app/aagt/data';
-import { GenieUowService } from 'app/aagt/genie';
 
 @Component({
   selector: 'genie-plan-step1',
@@ -9,7 +8,7 @@ import { GenieUowService } from 'app/aagt/genie';
 })
 export class Step1Component implements OnInit {
 
-  allAssets: Array<Asset> = [];
+  allAssets: Asset[] = [];
   @Input() plannedGen: Generation;
   isoOperations: Array<{ shortcode: string, displayName: string }>;
   genAssetsSelected = [];
@@ -19,7 +18,7 @@ export class Step1Component implements OnInit {
     // this.uow.getAllAssets().then(assets =>  this.allAssets = assets);
   }
 
-  assignedAssetModelChange(selectedAssets: Array<number>): void {
+  assignedAssetModelChange(selectedAssets: number[]): void {
     this.plannedGen.numberAssetsRequired = selectedAssets.length;
     console.log(selectedAssets);
   }

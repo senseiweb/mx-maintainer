@@ -1,5 +1,5 @@
 export * from './action-item';
-export * from './asset-trigger-task';
+export * from './asset-trigger-action';
 export * from './asset';
 export * from './assumption';
 export * from './generation';

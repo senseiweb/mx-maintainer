@@ -20,21 +20,21 @@ export class Generation extends ebase.SpEntityBase {
     numberAssetsRequired: number;
     startDateTime: Date;
     stopDateTime: Date;
-    draftAssets: Array<number>;
-    assumptions: Array<Assumption>;
-    triggers: Array<Trigger>;
-    generationAssets: Array<GenerationAsset>;
+    draftAssets: number[];
+    assumptions: Assumption[];
+    triggers: Trigger[];
+    generationAssets: GenerationAsset[];
 }
 
 
 @Injectable({
     providedIn: AagtModule
-  })
+})
 export class GenerationMetadata extends ebase.MetadataBase<Generation> {
 
     metadataFor = Generation;
 
-    constructor() {
+    constructor () {
         super('Generation');
 
         this.entityDefinition.dataProperties.title = {
@@ -73,5 +73,4 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
         };
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
-    initializer(entity: Generation) { }
 }

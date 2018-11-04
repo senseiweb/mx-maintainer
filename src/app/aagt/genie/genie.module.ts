@@ -1,20 +1,16 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { AppSharedModule } from 'app/app-shared.module';
-import { GenMgrRoutingMoudle, routedComponents  } from './genie-routing.module';
 import { GenieUowService } from './genie-uow.service';
-import { ActionManagerUow } from './action-manager-uow.service';
-import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import {  GenieRoutingModule, routedComponents } from './genie-routing.module';
+import { AimUowService } from './action-item-manager/aim-uow.service';
 
 @NgModule({
-  imports: [
-    NgxDnDModule,
-    CommonModule,
-    AppSharedModule,
-    GenMgrRoutingMoudle
-  ],
-  providers: [GenieUowService, ActionManagerUow],
-  declarations: routedComponents
+    imports: [
+        AppSharedModule,
+        GenieRoutingModule
+    ],
+    providers: [GenieUowService, AimUowService],
+    declarations: routedComponents
 })
 export class GenieModule {
- }
+}

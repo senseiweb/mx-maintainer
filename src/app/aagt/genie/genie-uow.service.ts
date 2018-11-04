@@ -1,25 +1,24 @@
-import { Injectable, OnInit } from '@angular/core';
-import { TriggerRepoService } from '../data';
+import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
+import { TriggerRepoService } from '../data';
 import {
-  GenerationRepoService,
+  Asset,
+  AssetRepoService,
+  GenAssetRepoService,
   Generation,
   GenerationAsset,
-  Asset,
-  GenAssetRepoService,
-  AssetRepoService
+  GenerationRepoService
 } from '../data';
 
 import {
-  Router, Resolve,
+  ActivatedRouteSnapshot, Resolve,
   RouterStateSnapshot,
-  ActivatedRouteSnapshot,
 } from '@angular/router';
 
 @Injectable()
 export class GenieUowService implements Resolve<any> {
 
-  allGenerations: Array<Generation>;
+  allGenerations: Generation[];
 
   constructor(private genRepo: GenerationRepoService,
     private triggerRepo: TriggerRepoService,
@@ -28,8 +27,8 @@ export class GenieUowService implements Resolve<any> {
   ) {
   }
 
-  resolve(route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot,
+  resolve(_route: ActivatedRouteSnapshot,
+    _state: RouterStateSnapshot,
   ): Promise<any> {
     console.log('hit the resolver');
     return new Promise((resolve, reject) => {
@@ -50,14 +49,14 @@ export class GenieUowService implements Resolve<any> {
     return this.genRepo.createDraftGen();
   }
 
-  async getAllAssets(): Promise<Array<Asset>> {
+  async getAllAssets(): Promise<Asset[]> {
     const data = await this.assetRepo.all();
     // tslint:disable-next-line:no-console
     console.info(`return this info for getAllAssets==> ${data}`);
     return Promise.resolve(data);
   }
 
-  getAssignedAssets(genId: number): Promise<Array<GenerationAsset>> {
+  getAssignedAssets(genId: number): Promise<GenerationAsset[]> {
     const genAssetPredicate = breeze.Predicate.create('generationId', breeze.FilterQueryOp.Equals, genId);
     return this.genAssetRepo.where(genAssetPredicate);
   }

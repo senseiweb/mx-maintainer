@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
 import * as moment from 'moment';
 import {
@@ -7,10 +6,6 @@ import {
 } from '../models/_entity-base';
 import { EmProviderService } from './em-provider.service';
 
-
-@Injectable({
-  providedIn: 'root'
-})
 export class BaseRepoService<T extends SpEntityBase> {
   protected entityManager: breeze.EntityManager;
   protected entityType: breeze.EntityType;

@@ -123,7 +123,7 @@ export class MetadataBase<T> {
         return type;
     }
 
-    initializer(entity: T) { }
+    initializer(_entity: T) { }
 
     registerMe(store: breeze.MetadataStore,
         metadataHelper: breeze.config.MetadataHelper,

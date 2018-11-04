@@ -1,16 +1,16 @@
 import {
     InMemoryDbService,
-    RequestInfoUtilities,
     ParsedRequestUrl,
-    ResponseOptions,
-    RequestInfo
+    RequestInfo,
+    RequestInfoUtilities,
+    ResponseOptions
 } from 'angular-in-memory-web-api';
-import { AssetsFakeDb, GenerationFakeDb, ActionItemFakeDb, MxFilterTagFakeDb } from './aagt';
+import { ActionItemFakeDb, AssetsFakeDb, GenerationFakeDb, MxFilterTagFakeDb } from './aagt';
 
 export class FakeDbService implements InMemoryDbService {
   private resourceRegEx = /'(\w+)'/i;
-  private filterRegEx = /(?<=\$filter=)(?<filterProp>\w+)|(?<=\s)(?<operation>\w{2,3})(?=\s)|(?<=\s)'(?<filterVal>\S+?)'/gmi;
-  private urlBase = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
+  // private filterRegEx = /(?<=\$filter=)(?<filterProp>\w+)|(?<=\s)(?<operation>\w{2,3})(?=\s)|(?<=\s)'(?<filterVal>\S+?)'/gmi;
+  // private urlBase = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
 
   constructor() {
   }
@@ -49,7 +49,7 @@ export class FakeDbService implements InMemoryDbService {
     return newUrl;
   }
 
-  responseInterceptor(resOptions: ResponseOptions, reqInfo: RequestInfo) {
+  responseInterceptor(resOptions: ResponseOptions, _reqInfo: RequestInfo) {
     resOptions.body = JSON.stringify({ d: { results: resOptions.body } });
     return resOptions;
   }
@@ -91,7 +91,7 @@ export class FakeDbService implements InMemoryDbService {
     }
     const filterRegEx = /\$filter=(?<filterProp>\w+)\s+?(?<operator>\w{2,3})\W'(?<findValue>\S+?)'/i;
     console.log(`for url: ${filterUrl}`);
-    const foundMatches = <any>filterUrl.match(filterRegEx);
+    const foundMatches = filterUrl.match(filterRegEx) as any;
 
     const filterQuery = `${foundMatches.groups.filterProp}=^${foundMatches.groups.findValue}`;
     console.log(`filter done => ${filterQuery}`);

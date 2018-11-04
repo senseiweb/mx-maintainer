@@ -16,13 +16,9 @@ const aagtRoutes: Routes = [
 export const routedComponents = [AagtDashboardComponent];
 
 @NgModule({
-  imports: [
-    RouterModule.forChild(aagtRoutes)
-  ],
-  exports: [
-    RouterModule
-  ]
+  imports: [RouterModule.forChild(aagtRoutes)],
+  exports: [RouterModule]
 })
 export class AagtRoutingModule {
-  constructor() {  }
+  constructor() {}
 }

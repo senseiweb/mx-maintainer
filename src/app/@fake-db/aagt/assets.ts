@@ -1,5 +1,4 @@
 import { bareEntity } from 'app/data';
-import { Asset } from 'app/aagt/data';
 import * as faker from 'faker';
 
 export class AssetsFakeDb  {

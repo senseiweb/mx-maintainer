@@ -1,66 +1,51 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { GenieBaseComponent } from './genie-base/genie-base.component';
+import { ActionItemsComponent } from './action-item-manager';
 import { ListGenyComponent } from './list-geny/list-geny.component';
-import { PlannerComponent, Step1Component, Step2Component } from './planner';
-import { GenieUowService } from './genie-uow.service';
-import {
-  ActionManagerComponent,
-  AmDetailsComponent,
-  AmListComponent,
-  AmListItemComponent,
-  AmSidebarComponent
-} from './action-manager';
-import { ActionManagerUow } from './action-manager-uow.service';
 
-const routes: Routes = [{
-  path: 'genie',
-  component: GenieBaseComponent,
-  resolve: { genieUow: GenieUowService },
-  children: [{
-    path: 'list',
-    component: ListGenyComponent,
-  },
-  {
-    path: 'planner/:id',
-    component: PlannerComponent,
-  },
-  {
-    path: 'action-manager',
-    component: ActionManagerComponent,
-    resolve: {data: ActionManagerUow},
-    children: [{
-      path: 'all',
-      component: ActionManagerComponent,
-    },
+export const routedComponents = [
+    GenieBaseComponent,
+    ActionItemsComponent,
+    ListGenyComponent
+];
+
+const featureRoutes: Routes = [
     {
-      path: 'all/:actionId',
-      component: ActionManagerComponent,
-    },
-    {
-      path: 'tag/:tagHandle',
-      component: ActionManagerComponent
-    },
-    {
-      path: 'tag/:tagHandle/:actionId',
-      component: ActionManagerComponent
-    }]
-  }]
-}];
+        path: 'genie',
+        component: GenieBaseComponent,
+        children: [{
+            path: '',
+            redirectTo: 'list'
+        },
+        {
+            path: 'list',
+            component: ListGenyComponent
+
+        },
+        {
+            path: 'action-items',
+            component: ActionItemsComponent
+        }]
+    }
+    // {
+    //   path: 'program-manager',
+    //   loadChildren: './program-manager/prog-mgr.module#ProgMgrModule'
+    // }, {
+    //   path: 'mocc',
+    //   loadChildren: './mocc/mocc.module#MoccModule'
+    // }
+    // { path: '**', component: PageNotFoundComponent }
+];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+    imports: [
+        RouterModule.forChild(featureRoutes)
+    ],
+    exports: [
+        RouterModule
+    ]
 })
-export class GenMgrRoutingMoudle {}
-
-export const routedComponents = [GenieBaseComponent,
-  ListGenyComponent,
-  ActionManagerComponent,
-  AmListComponent,
-  AmDetailsComponent,
-  AmListItemComponent,
-  AmSidebarComponent,
-  PlannerComponent,
-  Step1Component,
-  Step2Component];
+export class GenieRoutingModule {
+    constructor() { }
+}

@@ -1,8 +1,6 @@
 {
     "extends": [
-        "tslint:recommended",
-        "../tslint.json",
-        "tslint-config-prettier"
+        "../tslint.json"
     ],
     "linterOptions": {
         "exclude": [

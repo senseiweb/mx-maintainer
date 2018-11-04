@@ -34,5 +34,5 @@ export class MxmTagMetadata extends ebase.MetadataBase<MxFilterTag> {
     // };
     Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
   }
-  initializer(entity: MxFilterTag) { }
+  initializer(_entity: MxFilterTag) { }
 }

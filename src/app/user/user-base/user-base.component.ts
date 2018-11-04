@@ -9,7 +9,8 @@ export class UserBaseComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+    ngOnInit() {
+        console.log('base loaded');
   }
 
 }

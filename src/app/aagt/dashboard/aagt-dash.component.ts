@@ -3,51 +3,51 @@ import { fuseAnimations } from '@fuse/animations';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
 @Component({
-  selector: 'dashboard-aagt',
-  templateUrl: './aagt-dash.component.html',
-  styleUrls: ['./aagt-dash.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  animations   : fuseAnimations
+    selector: 'dashboard-aagt',
+    templateUrl: './aagt-dash.component.html',
+    styleUrls: ['./aagt-dash.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    animations: fuseAnimations
 })
 export class AagtDashboardComponent implements OnInit {
 
-  generations = [{
-    name: 'Test Generation 1'
-  }, {
-      name: 'Test Generation 2'
+    generations = [{
+        name: 'Test Generation 1'
+    }, {
+        name: 'Test Generation 2'
     }];
 
-  dateNow = Date.now();
+    dateNow = Date.now();
 
-  widgets: any;
+    widgets: any;
 
-  constructor(private _fuseSidebarService: FuseSidebarService) { }
+    constructor (private _fuseSidebarService: FuseSidebarService) { }
 
-  ngOnInit() {
-    this.widgets = {
-      weatherWidget: {
-        locations: {
-          Minot: {
-            name: 'Minot',
-            icon: 'icon-rainy2',
-            temp: {
-              C: '22',
-              F: '72'
-            },
-            windSpeed: {
-              KMH: 12,
-              MPH: 7.5
-            },
-            windDirection: 'NW',
-            rainProbability: '98%'
-          }
-        },
-        currentLocation: 'Minot'
-      }
-    };
-  }
+    ngOnInit() {
+        this.widgets = {
+            weatherWidget: {
+                locations: {
+                    Minot: {
+                        name: 'Minot',
+                        icon: 'icon-rainy2',
+                        temp: {
+                            C: '22',
+                            F: '72'
+                        },
+                        windSpeed: {
+                            KMH: 12,
+                            MPH: 7.5
+                        },
+                        windDirection: 'NW',
+                        rainProbability: '98%'
+                    }
+                },
+                currentLocation: 'Minot'
+            }
+        };
+    }
 
-  toggleSidebar(name: string): void {
-    this._fuseSidebarService.getSidebar(name).toggleOpen();
-  }
+    toggleSidebar(name: string): void {
+        this._fuseSidebarService.getSidebar(name).toggleOpen();
+    }
 }
