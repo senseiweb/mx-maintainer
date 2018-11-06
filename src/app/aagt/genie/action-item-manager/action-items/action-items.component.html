@@ -14,7 +14,7 @@
                <!-- APP TITLE -->
                <div class="logo mb-24 mb-md-0" fxLayout="row" fxLayoutAlign="start center">
                     <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
-                         shopping_basket
+                         format_list_bulleted
                     </mat-icon>
                     <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
                          Action Items
@@ -26,14 +26,14 @@
                <div class="search-wrapper mx-32 mx-md-0">
                     <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
                          <mat-icon>search</mat-icon>
-                         <input #filter placeholder="Search for a product">
+                         <input #filter placeholder="Search for an action">
                     </div>
                </div>
                <!-- / SEARCH -->
 
                <!-- ADD BUTTON -->
                <button mat-raised-button [routerLink]="'/apps/e-commerce/products/new'" class="add-product-button fuse-white mt-24 mt-md-0">
-                    <span>ADD NEW ACTION ITEM</span>
+                    <span>ADD ACTION ITEM</span>
                </button>
                <!-- / ADD BUTTON -->
 
@@ -85,7 +85,7 @@
                          <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-xs>Duration</mat-header-cell>
                          <mat-cell *matCellDef="let actionItem" fxHide fxShow.gt-xs>
                               <p class="price text-truncate">
-                                   {{actionItem.duration | currency:'USD':'symbol'}}
+                                   {{actionItem.duration | minutesExpand}}
                               </p>
                          </mat-cell>
                     </ng-container>

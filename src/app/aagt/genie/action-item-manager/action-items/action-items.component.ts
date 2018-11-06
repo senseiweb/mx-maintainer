@@ -5,7 +5,8 @@ import { fuseAnimations } from '@fuse/animations';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AimUowService } from '../aim-uow.service';
-import { FilesDataSource } from './action-item-datasource';
+import { FilesDataSource } from 'app/data/';
+import { ActionItem } from 'app/aagt/data';
 
 @Component({
     selector: 'app-action-items',
@@ -15,7 +16,7 @@ import { FilesDataSource } from './action-item-datasource';
     encapsulation: ViewEncapsulation.None
 })
 export class ActionItemsComponent implements OnInit {
-    dataSource: FilesDataSource;
+    dataSource: FilesDataSource<ActionItem[]>;
     displayedColumns = ['id', 'shortCode', 'action', 'assignedTeamType', 'duration', 'availability', 'notes'];
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -34,7 +35,10 @@ export class ActionItemsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataSource = new FilesDataSource(this.aimUow, this.paginator, this.sort, this.route);
+        this.dataSource = new FilesDataSource(this.route.snapshot.data.actionItems,
+            this.paginator,
+            this.sort,
+            this.aimUow.onActionItemsChanged);
 
         fromEvent(this.filter.nativeElement, 'keyup')
             .pipe(

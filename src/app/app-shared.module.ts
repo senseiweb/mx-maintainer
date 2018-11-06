@@ -11,7 +11,7 @@ import {
     MatSidenavModule, MatSliderModule, MatSlideToggleModule, MatSnackBarModule, MatSortModule,
     MatStepperModule, MatTableModule, MatTabsModule, MatToolbarModule, MatTooltipModule, MatTreeModule
 } from '@angular/material';
-
+import { PipesModule } from './pipes';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { FuseSharedModule } from '@fuse/shared.module';
 import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
@@ -19,6 +19,7 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
 @NgModule({
   imports: [
     CommonModule,
+    PipesModule,
     CdkTableModule,
     CdkTreeModule,
     MatAutocompleteModule,
@@ -103,7 +104,8 @@ import { FuseWidgetModule, FuseSidebarModule } from '@fuse/components';
     MatTreeModule,
     FuseSharedModule,
     FuseWidgetModule,
-    FuseSidebarModule]
+    FuseSidebarModule,
+    PipesModule]
 })
 export class AppSharedModule {
 

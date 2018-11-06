@@ -6,28 +6,26 @@ import { ActionItem } from 'app/aagt/data';
 import { bareEntity } from 'app/data';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AimUowService } from '../aim-uow.service';
 
-export class FilesDataSource extends DataSource<ActionItem> {
+export class FilesDataSource<T> extends DataSource<T> {
 
     private filterChange = new BehaviorSubject('');
-    private filterDataChange: BehaviorSubject<ActionItem[]>;
+    private filterDataChange: BehaviorSubject<T[]>;
     constructor (
-        private aimUow: AimUowService,
+        private tableData: T[],
         private matPaginator: MatPaginator,
         private matSort: MatSort,
-        route: ActivatedRoute
+        private dataSourceObsverable: BehaviorSubject<T>
     ) {
         super();
         this.filterDataChange = new BehaviorSubject('') as any;
-        this.filterData = route.snapshot.data.actionItems;
-        console.log(route);
-        console.log(aimUow);
+        this.filteredData = tableData;
+        console.log(tableData);
     }
 
-    connect(): Observable<ActionItem[]> {
+    connect(): Observable<T[]> {
         const displayDataChanges = [
-            this.aimUow.onActionItemsChanged,
+            this.dataSourceObsverable,
             this.matPaginator.page,
             this.filterChange,
             this.matSort.sortChange
@@ -36,7 +34,7 @@ export class FilesDataSource extends DataSource<ActionItem> {
         return merge(...displayDataChanges)
             .pipe(
                 map(() => {
-                    let data = this.aimUow.actions.slice();
+                    let data = this.tableData.slice();
                     data = this.filterData(data);
                     this.filteredData = [...data];
                     data = this.sortData(data);
@@ -57,34 +55,28 @@ export class FilesDataSource extends DataSource<ActionItem> {
         this.filterChange.next(filter);
     }
 
-    get filteredData(): ActionItem[] {
+    get filteredData(): T[] {
         return this.filterDataChange.value;
     }
 
-    set filteredData(value: ActionItem[]) {
+    set filteredData(value: T[]) {
         this.filterDataChange.next(value);
     }
 
-    filterData(data: ActionItem[]): ActionItem[] {
+    filterData(data: T[]): T[] {
         if (!this.filter) {
             return data;
         }
-        return FuseUtils.filterArrayByString(data, this.filter) as ActionItem[];
+        return FuseUtils.filterArrayByString(data, this.filter) as T[];
     }
 
-    sortData(data: ActionItem[]): ActionItem[] {
+    sortData(data: T[]): T[] {
         if (!this.matSort.active || this.matSort.direction === '') {
             return data;
         }
-        return data.sort((a: bareEntity<ActionItem>, b: bareEntity<ActionItem>) => {
-            let propA: number | string = '';
-            let propB: number | string = '';
-
-            switch (this.matSort.active) {
-                case 'id':
-                    [propA, propB] = [a.id, b.id];
-                    break;
-            }
+        return data.sort((a: any, b: any) => {
+            const propA: number | string = a[this.matSort.active];
+            const propB: number | string = b[this.matSort.active];
 
             const valueA = isNaN(+propA) ? propA : +propA;
             const valueB = isNaN(+propB) ? propB : +propB;

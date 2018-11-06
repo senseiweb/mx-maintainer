@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { GenieBaseComponent } from './genie-base/genie-base.component';
 import { ActionItemsComponent } from './action-item-manager';
 import { ListGenyComponent } from './list-geny/list-geny.component';
+import { AimUowService } from './action-item-manager/aim-uow.service';
 
 export const routedComponents = [
     GenieBaseComponent,
@@ -25,7 +26,8 @@ const featureRoutes: Routes = [
         },
         {
             path: 'action-items',
-            component: ActionItemsComponent
+            component: ActionItemsComponent,
+            resolve: {actionItems: AimUowService}
         }]
     }
     // {
