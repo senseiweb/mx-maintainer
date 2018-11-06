@@ -8,4 +8,8 @@ export class ActionItemRepo extends BaseRepoService<ActionItem> {
     constructor (emService: EmProviderService) {
         super('ActionItem', emService);
     }
+
+    create(): ActionItem {
+        return this.createBase({ availableForUse: false });
+    }
 }

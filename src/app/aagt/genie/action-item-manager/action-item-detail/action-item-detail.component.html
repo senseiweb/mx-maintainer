@@ -1,3 +1,148 @@
-<p>
-  action-item-detail works!
-</p>
+<div id="actionItem" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent" fxLayout="row" fxLayoutAlign="space-between center">
+
+            <!-- APP TITLE -->
+            <div fxLayout="row" fxLayoutAlign="start center">
+
+                <button mat-icon-button class="mr-0 mr-sm-16" [routerLink]="'/apps/e-commerce/products'">
+                    <mat-icon>arrow_back</mat-icon>
+                </button>
+
+                <!-- <div class="product-image mr-8 mr-sm-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+                    <img *ngIf="product.images[0]" [src]="product.images[0].url">
+                    <img *ngIf="!product.images[0]" [src]="'assets/images/ecommerce/product-image-placeholder.png'">
+                </div> -->
+
+                <div fxLayout="column" fxLayoutAlign="start start"
+                     [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
+                    <div class="h2" *ngIf="pageType ==='edit'">
+                        {{actionItem.action}}
+                    </div>
+                    <div class="h2" *ngIf="pageType ==='new'">
+                        New Action Item
+                    </div>
+                    <div class="subtitle secondary-text">
+                        <span>Action Item Detail</span>
+                    </div>
+                </div>
+            </div>
+            <!-- / APP TITLE -->
+
+            <button mat-raised-button
+                    class="save-actionItem-button"
+                    [disabled]="actionItemForm.invalid || actionItemForm.pristine"
+                    *ngIf="pageType ==='new'" (click)="saveActionItem()">
+                <span *ngIf="pageType ==='new'">ADD</span>
+                <span *ngIf="pageType ==='edit'">SAVE</span>
+            </button>
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <form name="actionItemForm" [formGroup]="actionItemForm" class="actionItem w-100-p" fxLayout="column" fxFlex>
+
+                        <div class="tab-content p-24" fusePerfectScrollbar fxLayout="column">
+
+                                <div fxLayout="row" fxLayoutAlign="space-between">
+
+                                        <mat-form-field appearance="outline" floatLabel="always" fxFlex="50">
+                                                <mat-label>Action</mat-label>
+                                                <input matInput placeholder="Action"
+                                                       name="action"
+                                                       formControlName="action"
+                                                       required>
+                                            </mat-form-field>
+                        
+                                            <mat-form-field appearance="outline" floatLabel="always" fxFlex="50">
+                                                <mat-label>Action Short Code</mat-label>
+                                                <input matInput placeholder="Action Short Code"
+                                                       name="shortCode"
+                                                       formControlName="shortCode"
+                                                       required>
+                                            </mat-form-field>
+                                </div>
+                                <div fxLayout="row" fxLayoutAlign="space-between">
+                                        <mat-form-field appearance="outline" floatLabel="always" fxFlex="50">
+                                                <mat-label>Duration</mat-label>
+                                                <input matInput placeholder="Duration"
+                                                       name="duration"
+                                                       formControlName="duration">
+                                                <span matSuffix>minutes</span>
+                                            </mat-form-field>
+                                            <mat-form-field appearance="outline" floatLabel="always" fxFlex="50">
+                                                    <mat-label>Assigned Team Type</mat-label>
+                                                    <mat-select formControlName="assignedTeamType"
+                                                    required>
+                                            <mat-option *ngFor="let teamType of teamTypes"
+                                                        [value]="teamType.id">
+                                                {{team.name}}
+                                            </mat-option>
+                                        </mat-select>
+                                                    <input matInput placeholder="Select a Team Type"
+                                                           name="assignedTeamType"
+                                                           formControlName="assignedTeamType"
+                                                           type="number">
+                                                    <span matPrefix>$&nbsp;</span>
+                                            </mat-form-field>
+                                </div>
+                                <table class="simple" *ngIf="actionItem.notes">
+                                        <thead>
+                                            <tr>
+                                                <th>Note</th>
+                                                <th>Added On</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+    
+                                            <tr *ngFor="let note of order.notes">
+                                                <td>
+                                                    <span class="notes h6 p-4">
+                                                        {{note.note}}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span>
+                                                        {{noted.date | date}}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                <mat-form-field appearance="outline" floatLabel="always" class="w-100-p">
+                                        <mat-label>Notes </mat-label>
+                                        <textarea matInput placeholder="Notes"
+                                                  name="notes"
+                                                  formControlName="notes"
+                                                  rows="3">
+                                        </textarea>
+                                    </mat-form-field>
+                                    <button mat-raised-button class="mat-accent"
+                                            [disabled]="notes.invalid">
+                                        Add Note
+                                    </button>
+                            </div>
+                </form>
+            </div>
+            <!-- / CONTENT -->
+
+        </div>
+        <!-- / CONTENT CARD -->
+
+    </div>
+    <!-- / CENTER -->
+
+</div>
