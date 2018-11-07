@@ -103,7 +103,7 @@ export class MetadataBase<T> {
         this.entityDefinition.defaultResourceName = `lists/getByTitle('${shortName}')/items`;
     }
 
-    private addDefaultSelect(type: EntityType): EntityType {
+    addDefaultSelect(type: EntityType): EntityType {
         const customPropExist = type.custom;
         const excludeProps = ['__metadata'];
 
@@ -125,17 +125,17 @@ export class MetadataBase<T> {
 
     initializer(_entity: T) { }
 
-    registerMe(store: breeze.MetadataStore,
-        metadataHelper: breeze.config.MetadataHelper,
-        spEntity: any,
-        initializer?: (entity: Entity) => void): void {
+    // registerMe(store: breeze.MetadataStore,
+    //     metadataHelper: breeze.config.MetadataHelper,
+    //     spEntity: any,
+    //     initializer?: (entity: Entity) => void): void {
 
-        const addedType = metadataHelper.addTypeToStore(store, this.entityDefinition as any) as EntityType;
-        store.registerEntityTypeCtor(this.entityDefinition.shortName, spEntity , initializer);
-        if (this.entityDefinition.defaultResourceName) {
-            store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
-        }
-        this.addDefaultSelect(addedType);
+    //     const addedType = metadataHelper.addTypeToStore(store, this.entityDefinition as any) as EntityType;
+    //     store.registerEntityTypeCtor(this.entityDefinition.shortName, spEntity , initializer);
+    //     if (this.entityDefinition.defaultResourceName) {
+    //         store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
+    //     }
+    //     this.addDefaultSelect(addedType);
 
-    }
+    // }
 }

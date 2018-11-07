@@ -6,7 +6,7 @@ export class ActionItem extends ebase.SpEntityBase {
     action: string;
     shortCode: string;
     duration: number;
-    assignedTeamType: string;
+    teamType: string;
     availableForUse: boolean;
     notes: string;
     // get important(): boolean {
@@ -45,7 +45,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
         this.entityDefinition.dataProperties.shortCode = {
             dataType: this.dt.String
         };
-        this.entityDefinition.dataProperties.assignedTeamType = {
+        this.entityDefinition.dataProperties.teamType = {
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };

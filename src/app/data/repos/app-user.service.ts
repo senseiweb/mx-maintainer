@@ -5,7 +5,7 @@ import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from 'app/data';
 import { environment } from 'environments/environment';
-import { SpDataRepoService } from './sp-data-repo.service';
+import { SpDataRepoService } from './base-spjsom-repo.service';
 
 export interface IUserGrpInitData {
     id: number;

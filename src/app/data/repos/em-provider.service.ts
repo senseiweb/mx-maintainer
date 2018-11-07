@@ -1,32 +1,25 @@
 import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
-// tslint:disable:no-submodule-imports
 import 'breeze-client-labs/breeze.labs.dataservice.abstractrest';
 import 'breeze-client-labs/breeze.labs.dataservice.sharepoint';
 import 'breeze-client-labs/breeze.namingConventionWithDictionary';
 import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
-import { SpDataRepoService } from './sp-data-repo.service';
+import { SpRootDataService } from './sp-root-data.service';
 
 @Injectable({ providedIn: 'root' })
 export class EmProviderService {
     activate = false;
     entityManager: breeze.EntityManager;
     servicePoint: string;
-    isInitializer = false;
-    // userService = {} as any;
-    // config = {
-    //   entities: [],
-    //   serviceEndpoint: '',
-    //   nameSpace: ''
-    // };
-    constructor(private spData: SpDataRepoService, private config: EmProviderConfig) { this.init(); }
+
+    constructor(private spRooData: SpRootDataService, private config: EmProviderConfig) { this.init(); }
 
     protected init(): void {
-        if (this.isInitializer) { return; }
+
         const dataAdapter = breeze.config.initializeAdapterInstance('dataService', 'SharePointOData', true) as any;
 
-        dataAdapter.getRequestDigest = () => this.spData.getRequestDigest(this.spData.situeUrl + this.config.serviceEndpoint);
+        dataAdapter.getRequestDigest = () => this.spRooData.getRequestDigest();
 
         const clientToServerNameDictionary = {
             'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' }
@@ -38,7 +31,7 @@ export class EmProviderService {
         convention.setAsDefault();
 
         const dataService = new breeze.DataService({
-            serviceName: `${this.spData.situeUrl}${this.config.serviceEndpoint}/_api/web`,
+            serviceName: `${this.spRooData.appSite}${this.config.serviceEndpoint}/_api/web`,
             hasServerMetadata: false
         });
         this.servicePoint = dataService.serviceName;
@@ -54,7 +47,7 @@ export class EmProviderService {
                 e.entityDefinition as any) as breeze.EntityType;
             store.registerEntityTypeCtor(type.shortName,
                 e.metadataFor, e.initializer);
-
+            e.addDefaultSelect(type);
         });
     }
 }
