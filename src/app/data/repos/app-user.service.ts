@@ -5,7 +5,7 @@ import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from 'app/data';
 import { environment } from 'environments/environment';
-import { SpDataRepoService } from './base-spjsom-repo.service';
+import { SpRepoService } from './sp-repo.service';
 
 export interface IUserGrpInitData {
     id: number;
@@ -32,49 +32,35 @@ export class UserService implements Resolve<any> {
         title: '',
         rankName: () => `${this.saluation.firstName} ${this.saluation.lastName}`
     };
+
     spAccountName;
-    // fuseNavigation = {} as any;
-    // spData = {} as any;
-    // http = {} as any;
 
     constructor(
-        private spData: SpDataRepoService,
+        private spRootData: SpRepoService,
         private fuseNavigation: FuseNavigationService
     ) {
-
         if (!environment.production) {
             this.myGroups.push({ id: 0, title: 'Genie' });
         }
     }
 
-    async resolve(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Promise<any> {
-        const clCtx = this.spData.spClientCtx;
-        const spUserProfile = this.spData.peopleManger.getMyProperties();
-        const spUserInfo = this.spData.clientWeb.get_currentUser();
-        spUserInfo.retrieve();
-        const userGroups = spUserInfo.get_groups();
-        clCtx.load(spUserInfo);
-        clCtx.load(userGroups);
-        clCtx.load(spUserProfile);
-        try {
-            await new Promise((resolve, reject) => {
-                clCtx.executeQueryAsync(resolve, (_sender, error) => {
-                    reject(error.get_message());
-                });
+    async resolve(): Promise<any> {
+        this.profileProps = this.spRootData.peopleManager
+            .getMyProperties()
+            .get_userProfileProperties();
+
+        this.id = this.spRootData.spUser.get_id();
+        this.spAccountName = this.spRootData.spUser.get_userId();
+        const groups = this.spRootData.spUser.get_groups();
+        const iterator = groups.getEnumerator();
+        while (iterator.moveNext()) {
+            const currRec = iterator.get_current();
+            this.myGroups.push({
+                title: currRec.get_title(),
+                id: currRec.get_id()
             });
-            this.id = spUserInfo.get_id();
-            this.spAccountName = spUserInfo.get_userId();
-            this.profileProps = spUserProfile.get_userProfileProperties();
-            const grpIterator = userGroups.getEnumerator();
-            while (grpIterator.moveNext()) {
-                this.myGroups.push({
-                    title: grpIterator.get_current().get_title(),
-                    id: grpIterator.get_current().get_id()
-                });
-            }
-        } catch (error) {
-            console.error(`error getting user info ==> ${error}`);
         }
+        this.setNavStructure();
     }
 
     logout(): void {

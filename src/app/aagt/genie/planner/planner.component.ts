@@ -26,9 +26,8 @@ export class PlannerComponent implements OnInit {
     private uow: GenieUowService  ) { }
 
   ngOnInit() {
-    this.genId = +this.route.snapshot.paramMap.get('id');
+    this.genId = this.route.snapshot.params.id;
     this.plannedGen = this.uow.planGen(this.genId);
-    console.log(this.plannedGen);
     this.isLinear = this.plannedGen.status === genStatusEnum.draft;
     this.getAlreadyAssignedAssets();
   }

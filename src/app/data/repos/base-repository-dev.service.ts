@@ -26,7 +26,6 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.entityManager = _entityService.entityManager;
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = breeze.FetchStrategy.FromServer;
-        console.log(`base created from ${entityTypeName}`);
     }
 
     all(): Promise<T[]> {
@@ -55,6 +54,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
 
     protected createBase(options?: bareEntity<T>): T {
+        console.log(this.entityManager.exportEntities);
         return this.entityManager.createEntity(this.entityType.shortName, options) as any;
     }
 
@@ -86,7 +86,6 @@ export class BaseRepoService<T extends SpEntityBase> {
         try {
             const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
             const dataQueryResult = await this.entityManager.executeQuery(queryType);
-            console.log(dataQueryResult);
             return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
         } catch (error) {
             return this.queryFailed(error);
@@ -95,7 +94,7 @@ export class BaseRepoService<T extends SpEntityBase> {
 
     protected executeCacheQuery(query: breeze.EntityQuery): T[] {
         const localCache = this.entityManager.executeQueryLocally(query) as T[];
-        console.log(localCache);
+        console.log(`from local cache ==> ${localCache}`);
         return localCache;
     }
 
@@ -113,8 +112,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
 
     async where(predicate: breeze.Predicate, refreshFromServer = false): Promise<T[]> {
-        // tslint:disable-next-line:no-console
-        console.info(`A where predicate was passed ==> ${predicate.toString()}`);
+        console.log(`A where predicate was passed ==> ${predicate.toString()}`);
         const query = this.baseQuery().where(predicate);
         const lastQueryed = this.queryCache[predicate.toString()];
         const now = moment();

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { MatPaginator, MatSort } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
@@ -15,9 +15,9 @@ import { ActionItem } from 'app/aagt/data';
     animations: fuseAnimations,
     encapsulation: ViewEncapsulation.None
 })
-export class ActionItemsComponent implements OnInit {
-    dataSource: FilesDataSource<ActionItem[]>;
-    displayedColumns = ['id', 'shortCode', 'action', 'assignedTeamType', 'duration', 'availability', 'notes'];
+export class ActionItemsComponent implements OnInit, OnDestroy {
+    dataSource: FilesDataSource<ActionItem>;
+    displayedColumns = ['id', 'shortCode', 'action', 'teamType', 'duration', 'availability'];
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
 
@@ -51,5 +51,10 @@ export class ActionItemsComponent implements OnInit {
                 this.dataSource.filter = this.filter.nativeElement.value;
             });
 
+    }
+
+    ngOnDestroy() {
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
     }
 }

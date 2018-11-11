@@ -1,6 +1,5 @@
 import { Observable, Observer } from 'rxjs';
 import { ScriptKey, ScriptModel, ScriptStore } from '../../app-script-model';
-import { AagtListName } from 'app/aagt/data';
 
 // At times it is easier to retrieve things using the
 // the sharepoint JSOM libraries and cached them for later use
@@ -19,7 +18,6 @@ export class BaseSpJsom {
     }
 
     async getSpContext(): Promise<any> {
-        console.log(AagtListName.ActionItem);
         this.appCtx = new SP.ClientContext(this.appSite);
         this.followingManager = new SP.Social.SocialFollowingManager(this.appCtx);
         this.appCtx.load(this.followingManager);
@@ -31,6 +29,9 @@ export class BaseSpJsom {
     }
 
     async getChoiceValues(listName: string, columnName: string): Promise<string[]> {
+        if (listName === 'ActionItem' && columnName === 'TeamType') {
+            return ['EW', 'Load Team', 'Tow Team', 'Specialist-Com/Nav'];
+        }
         const list = this.appList.getByTitle(listName);
         const field = list.get_fields().getByInternalNameOrTitle(columnName);
         const choiceField = this.appCtx.castTo(field, SP.FieldChoice) as SP.FieldChoice;

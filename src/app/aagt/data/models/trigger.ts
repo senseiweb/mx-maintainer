@@ -1,6 +1,8 @@
 import * as ebase from 'app/data/models/_entity-base';
 import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 
 export class Trigger extends ebase.SpEntityBase {
     title: string;
@@ -12,14 +14,14 @@ export class Trigger extends ebase.SpEntityBase {
 }
 
 @Injectable({
-    providedIn: AagtModule
+    providedIn: AagtDataModule
 })
 export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
 
     metadataFor = Trigger;
 
     constructor () {
-        super('Trigger');
+        super(aagtCfg.AagtListName.Trigger);
         this.entityDefinition.dataProperties.title = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.milestone = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.generationOffset = { dataType: this.dt.Int16 };

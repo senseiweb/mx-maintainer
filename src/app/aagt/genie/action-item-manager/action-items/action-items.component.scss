@@ -64,7 +64,7 @@ app-action-items {
             min-height: 64px;
         }
 
-        .product {
+        .action-items {
             position: relative;
             cursor: pointer;
             height: 84px;
@@ -77,36 +77,30 @@ app-action-items {
         }
 
         .mat-column-id {
-            flex: 0 1 84px;
+            flex: 0 1 94px;
         }
 
-        .mat-column-image {
-            flex: 0 1 84px;
-
-            .product-image {
-                width: 52px;
-                height: 52px;
-                border: 1px solid rgba(0, 0, 0, .12);
-            }
+        .mat-column-shortCode {
+            flex: 0 1 200px;
         }
 
-        .mat-column-category {
-            flex: 0 1 240px;
+        .mat-column-action {
+            flex: 0 1 350px;
         }
 
-        .mat-column-price {
-            flex: 0 1 160px;
+        .mat-column-team-type {
+            flex: 0 1 290px;
         }
 
-        .mat-column-quantity {
-            flex: 0 1 160px;
+        .mat-column-duration {
+            flex: 0 1 290px;
         }
 
-        .mat-column-active {
-            flex: 0 1 80px;
+        .mat-column-availability {
+            flex: 0 1 110px;
         }
 
-        .quantity-indicator {
+        .availability {
             display: inline-block;
             vertical-align: middle;
             width: 8px;

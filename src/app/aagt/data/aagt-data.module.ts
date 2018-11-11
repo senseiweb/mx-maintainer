@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
-import {
-  ActionItemRepo,
-  AssetRepoService,
-  GenAssetRepoService,
-  GenerationRepoService,
-  TagRepoService,
-  TriggerRepoService
-} from './repos';
+// import {
+//   ActionItemRepo,
+//   AssetRepoService,
+//   GenAssetRepoService,
+//   GenerationRepoService,
+//   TriggerRepoService,
+//   SpAagtRepoService
+// } from './repos';
 
 import {
   ActionItemMetadata,
@@ -21,31 +21,32 @@ import {
   TriggerMetadata
 } from './models';
 
-import { DataModule, MxmTagMetadata, SpMetadataMetadata } from 'app/data';
+import { MxmTagMetadata, SpMetadataMetadata } from '../../data';
+import { DataModule } from '../../data/data.module';
 
 const appEntities = [
-  ActionItemMetadata,
-  AssetTriggerActionMetadata,
-  AssetMetadata,
-  AssumptionMetadata,
-  GenerationMetadata,
-  GenerationAssetMetadata,
-  TeamMetadata,
-  SpMetadataMetadata as any,
-  TeamAvailabilityMetadata,
-  TriggerActionMetadata,
-  TriggerMetadata,
-  MxmTagMetadata
+    ActionItemMetadata,
+    AssetTriggerActionMetadata,
+    AssetMetadata,
+    AssumptionMetadata,
+    GenerationMetadata,
+    GenerationAssetMetadata,
+    TeamMetadata,
+    SpMetadataMetadata as any,
+    TeamAvailabilityMetadata,
+    TriggerActionMetadata,
+    TriggerMetadata,
+    MxmTagMetadata
 ];
 
-const repos = [
-  GenerationRepoService,
-  GenAssetRepoService,
-  ActionItemRepo,
-  TriggerRepoService,
-  AssetRepoService,
-  TagRepoService
-] as any;
+// const repos = [
+//     GenerationRepoService,
+//     GenAssetRepoService,
+//     SpAagtRepoService,
+//     ActionItemRepo,
+//     TriggerRepoService,
+//     AssetRepoService
+// ] as any;
 
 @NgModule({
   imports: [
@@ -56,7 +57,7 @@ const repos = [
     })
   ],
   exports: [],
-  providers: appEntities.concat(repos),
+  providers: [],
   declarations: []
 })
 export class AagtDataModule {

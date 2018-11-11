@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
 import * as ebase from 'app/data/models/_entity-base';
-
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 export class ActionItem extends ebase.SpEntityBase {
     action: string;
     shortCode: string;
@@ -35,12 +36,12 @@ export class ActionItem extends ebase.SpEntityBase {
     // mxFilterTagId: SpMultiLookup;
 }
 
-@Injectable({ providedIn: AagtModule })
+@Injectable({ providedIn: AagtDataModule })
 export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
     metadataFor = ActionItem;
 
     constructor () {
-        super('ActionItem');
+        super(aagtCfg.AagtListName.ActionItem);
         this.entityDefinition.dataProperties.action = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.shortCode = {
             dataType: this.dt.String
@@ -49,7 +50,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
-
+        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
         Object.assign(
             this.entityDefinition.dataProperties,
             this.baseDataProperties

@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
 import { Asset } from './asset';
 import { Generation } from './generation';
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 
 export type AssetStatus = 'FMC' | 'PMC' | 'NMC';
 
@@ -17,14 +19,14 @@ export class GenerationAsset extends ebase.SpEntityBase {
 }
 
 @Injectable({
-    providedIn: AagtModule
+    providedIn: AagtDataModule
 })
 export class GenerationAssetMetadata extends ebase.MetadataBase<GenerationAsset> {
 
     metadataFor = GenerationAsset;
 
     constructor () {
-        super('GenerationAsset');
+        super(aagtCfg.AagtListName.GenAsset);
         this.entityDefinition.dataProperties.title = { dataType: this.dt.String, isNullable: false };
         this.entityDefinition.dataProperties.health = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.mxPosition = { dataType: this.dt.Int16 };

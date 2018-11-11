@@ -6,7 +6,7 @@ import {
 } from './models';
 import {
   EmProviderService,
-  SpDataRepoService,
+  SpRepoService,
   UserService,
 } from './repos/';
 
@@ -25,16 +25,13 @@ const appEntities = [SpMetadataMetadata, SpMultiLookupMeta, MxmTagMetadata] as a
 export class DataModule {
   static forRoot(): ModuleWithProviders {
     const mainConfig = { entities: appEntities };
-    return {
-      ngModule: DataModule,
-      providers: [{
-        provide: EmProviderConfig,
-        useValue: mainConfig
-      }, UserService,
-      SpDataRepoService,
-      SpMetadataMetadata
-    ].concat(appEntities)
-    };
+      return {
+          ngModule: DataModule,
+          providers: [{
+              provide: EmProviderConfig,
+              useValue: mainConfig
+          }]
+      };
   }
 
   static forFeature(config: EmProviderConfig) {
@@ -46,7 +43,5 @@ export class DataModule {
       }]
     };
   }
-  constructor() {
-
-  }
+  constructor() {}
 }

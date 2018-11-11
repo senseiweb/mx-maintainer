@@ -4,12 +4,14 @@ import * as moment from 'moment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Resolve } from '@angular/router';
 
-@Injectable()
-export class SpRootDataService extends BaseSpJsom implements Resolve<any> {
+@Injectable({providedIn: 'root'})
+export class SpRepoService extends BaseSpJsom implements Resolve<any> {
 
     peopleManger: SP.UserProfiles.PeopleManager;
     requestDigest: string;
     digestExpiry: moment.Moment;
+    peopleManager: SP.UserProfiles.PeopleManager;
+    spUser: SP.User;
 
     constructor(private http: HttpClient) {
         super('');
@@ -18,16 +20,18 @@ export class SpRootDataService extends BaseSpJsom implements Resolve<any> {
     async resolve(): Promise<any> {
         this.requestDigest = await this.getRequestDigest(this.appSite) as string;
         this.appCtx = SP.ClientContext.get_current();
-        this.peopleManger = new SP.UserProfiles.PeopleManager(this.appCtx);
+        const peopleManger = new SP.UserProfiles.PeopleManager(this.appCtx);
         this.appWeb = this.appCtx.get_web();
+        const spUserProfile = peopleManger.getMyProperties();
+        this.spUser = this.appWeb.get_currentUser();
+        this.spUser.retrieve();
+        const userGroups = this.spUser.get_groups();
         this.appCtx.load(this.appWeb);
+        this.appCtx.load(this.spUser);
         this.appCtx.load(this.peopleManger);
-        await new Promise((resolve, reject) => {
-            this.appCtx.executeQueryAsync(resolve, (_sender, error) => {
-                console.error(`Critical Error: failed to get data from the server--> ${error.get_message()}`);
-                reject(error.get_message());
-            });
-        });
+        this.appCtx.load(userGroups);
+        this.appCtx.load(spUserProfile);
+        await this.appCtx.executeQueryAsync(Promise.resolve, this.spQueryFailed);
     }
 
     async getRequestDigest(contextSite?: string): Promise<string> {

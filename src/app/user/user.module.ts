@@ -4,7 +4,10 @@ import { UserRoutingModule, routedComponents } from './user-routing.module';
 
 @NgModule({
   declarations: routedComponents,
-  imports: [ AppSharedModule, UserRoutingModule ],
+    imports: [
+        AppSharedModule,
+        UserRoutingModule
+    ],
   exports: [],
   providers: [],
 })

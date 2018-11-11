@@ -3,6 +3,8 @@ import { AagtModule } from 'app/aagt/aagt.module';
 import * as ebase from 'app/data/models/_entity-base';
 import { GenerationAsset } from './generation-asset';
 import { TriggerAction } from './trigger-action';
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 
 export class AssetTriggerAction extends ebase.SpEntityBase {
     sequence: number;
@@ -20,14 +22,14 @@ export class AssetTriggerAction extends ebase.SpEntityBase {
     triggerAction: TriggerAction;
 }
 
-@Injectable({ providedIn: AagtModule })
+@Injectable({ providedIn: AagtDataModule })
 export class AssetTriggerActionMetadata extends ebase.MetadataBase<
 AssetTriggerAction
 > {
     metadataFor = AssetTriggerAction;
 
     constructor () {
-        super('AssetTriggerTask');
+        super(aagtCfg.AagtListName.AssetTrigAct);
         this.entityDefinition.dataProperties.actionStatus = {
             dataType: this.dt.String
         };

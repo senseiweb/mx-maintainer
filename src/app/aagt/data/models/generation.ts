@@ -4,6 +4,8 @@ import { Assumption } from './assumption';
 import { Trigger } from './trigger';
 import { AagtModule } from 'app/aagt/aagt.module';
 import { GenerationAsset } from './generation-asset';
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 
 export enum genStatusEnum {
     draft = 'Draft',
@@ -28,14 +30,14 @@ export class Generation extends ebase.SpEntityBase {
 
 
 @Injectable({
-    providedIn: AagtModule
+    providedIn: AagtDataModule
 })
 export class GenerationMetadata extends ebase.MetadataBase<Generation> {
 
     metadataFor = Generation;
 
     constructor () {
-        super('Generation');
+        super(aagtCfg.AagtListName.Gen);
 
         this.entityDefinition.dataProperties.title = {
             dataType: this.dt.String,

@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import { AagtModule } from 'app/aagt/aagt.module';
 import { BaseRepoService, EmProviderService } from 'app/data';
-import { ActionItem } from '../models';
+import { BaseSpJsom } from 'app/data/repos/base-spjsom-repo.service';
+import { ActionItem, AagtListName } from '../models';
+import { AagtDataModule } from '../aagt-data.module';
 
-@Injectable({ providedIn: AagtModule })
+@Injectable({ providedIn: AagtDataModule })
 export class ActionItemRepo extends BaseRepoService<ActionItem> {
     constructor (emService: EmProviderService) {
-        super('ActionItem', emService);
+        super(AagtListName.ActionItem, emService);
     }
 
     create(): ActionItem {
-        return this.createBase({ availableForUse: false });
+        return this.createBase({ action: 'this is a test' , availableForUse: false });
     }
 }

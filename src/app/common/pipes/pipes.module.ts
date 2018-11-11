@@ -4,12 +4,9 @@ import { MinutesExpand } from './minutes-moment-formatter.pipe';
 
 
 @NgModule({
-    declarations: [
-        MinutesExpand
-    ],
+    declarations: [MinutesExpand],
     imports: [],
-    exports: [
-        MinutesExpand
-    ]
+    exports: [MinutesExpand],
+    providers: []
 })
 export class PipesModule { }

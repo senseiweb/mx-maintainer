@@ -1,6 +1,8 @@
 import * as ebase from 'app/data/models/_entity-base';
 import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
+import * as aagtCfg from './sp-aagt-config';
+import { AagtDataModule } from '../aagt-data.module';
 
 export class Assumption extends ebase.SpEntityBase {
     area: string;
@@ -10,7 +12,7 @@ export class Assumption extends ebase.SpEntityBase {
 }
 
 @Injectable({
-    providedIn: AagtModule
+    providedIn: AagtDataModule
 })
 export class AssumptionMetadata extends ebase.MetadataBase<Assumption> {
 

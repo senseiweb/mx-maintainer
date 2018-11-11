@@ -32,7 +32,7 @@
                <!-- / SEARCH -->
 
                <!-- ADD BUTTON -->
-               <button mat-raised-button [routerLink]="'/apps/e-commerce/products/new'" class="add-product-button fuse-white mt-24 mt-md-0">
+               <button mat-raised-button [routerLink]="'../action-items/new'" class="add-action-item-button fuse-white mt-24 mt-md-0">
                     <span>ADD ACTION ITEM</span>
                </button>
                <!-- / ADD BUTTON -->
@@ -71,11 +71,11 @@
                     </ng-container>
 
                     <!-- Assigned Team Type Column -->
-                    <ng-container matColumnDef="assignedTeamType">
+                    <ng-container matColumnDef="teamType">
                          <mat-header-cell *matHeaderCellDef fxHide mat-sort-header fxShow.gt-md>Assiged Team Type</mat-header-cell>
                          <mat-cell *matCellDef="let actionItem" fxHide fxShow.gt-md>
-                              <p class="category text-truncate">
-                                   {{actionItem.assignedTeamType}}
+                              <p class="team-type text-truncate">
+                                   {{actionItem.teamType}}
                               </p>
                          </mat-cell>
                     </ng-container>
@@ -84,7 +84,7 @@
                     <ng-container matColumnDef="duration">
                          <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-xs>Duration</mat-header-cell>
                          <mat-cell *matCellDef="let actionItem" fxHide fxShow.gt-xs>
-                              <p class="price text-truncate">
+                              <p class="duration text-truncate">
                                    {{actionItem.duration | minutesExpand}}
                               </p>
                          </mat-cell>
@@ -99,18 +99,12 @@
                          </mat-cell>
                     </ng-container>
 
-                    <!-- Notes Column -->
-                    <ng-container matColumnDef="notes">
-                         <mat-header-cell *matHeaderCellDef mat-sort-header fxHide fxShow.gt-xs>Notes</mat-header-cell>
-                         <mat-cell *matCellDef="let actionItem" fxHide fxShow.gt-xs>
-                              <p class="text-truncate">{{actionItem.notes}}</p>
-                         </mat-cell>
-                    </ng-container>
-
                     <mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></mat-header-row>
 
-                    <mat-row *matRowDef="let actionItem; columns: displayedColumns;" class="action" matRipple
-                         [routerLink]="'/apps/e-commerce/products/'+actionItem.id+'/'+actionItem.handle">
+                    <mat-row *matRowDef="let actionItem; columns: displayedColumns;" 
+                    class="action" 
+                    matRipple
+                         [routerLink]="'../action-items/'+actionItem.id+''">
                     </mat-row>
 
                </mat-table>

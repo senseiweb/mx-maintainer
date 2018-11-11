@@ -11,7 +11,7 @@ export class MinutesExpand implements PipeTransform {
             return;
         }
         if (isNaN(+value)) { return value; }
-        const m = moment.duration(value, 'minutes') as any;
+        const m = moment.duration(+value, 'minutes') as any;
         return m.format('d [days], h [hours], m [minutes]');
     }
 }

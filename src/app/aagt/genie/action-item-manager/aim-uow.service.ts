@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActionItem, ActionItemRepo } from 'app/aagt/data';
 import { Resolve, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
-import { GenieModule } from '../genie.module';
 import { BehaviorSubject, throwError } from 'rxjs';
+import { AagtModule } from 'app/aagt/aagt.module';
+import { AagtDataModule } from 'app/aagt/data/aagt-data.module';
 
-@Injectable({ providedIn: GenieModule })
+@Injectable({ providedIn: AagtDataModule })
 export class AimUowService implements Resolve<ActionItem[]> {
 
     actions: ActionItem[];
@@ -19,9 +20,9 @@ export class AimUowService implements Resolve<ActionItem[]> {
     }
 
     async resolve(route: ActivatedRouteSnapshot): Promise<any> {
-        if (route.data.id) {
-            const actionItem = await this.getActionItem(route.data.id);
-            this.onActionItemChanged.next(actionItem);
+        if (route.params.id) {
+            const actionItem = await this.getActionItem(route.params.id);
+            return this.onActionItemChanged.next(actionItem);
         }
         const ais = await this.actionItemRepo.all();
         this.onActionItemsChanged.next(ais);

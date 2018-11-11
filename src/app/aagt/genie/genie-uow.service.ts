@@ -7,15 +7,17 @@ import {
   GenAssetRepoService,
   Generation,
   GenerationAsset,
-  GenerationRepoService
+    GenerationRepoService,
+
 } from '../data';
 
 import {
   ActivatedRouteSnapshot, Resolve,
   RouterStateSnapshot,
 } from '@angular/router';
+import { AagtDataModule } from '../data/aagt-data.module';
 
-@Injectable()
+@Injectable({providedIn: AagtDataModule})
 export class GenieUowService implements Resolve<any> {
 
   allGenerations: Generation[];
@@ -28,7 +30,7 @@ export class GenieUowService implements Resolve<any> {
   }
 
   resolve(_route: ActivatedRouteSnapshot,
-    _state: RouterStateSnapshot,
+    _state: RouterStateSnapshot
   ): Promise<any> {
     console.log('hit the resolver');
     return new Promise((resolve, reject) => {
@@ -38,8 +40,8 @@ export class GenieUowService implements Resolve<any> {
     });
   }
 
-  planGen(genId?: number): Generation {
-    if (genId !== 0) {
+  planGen(genId: number | string): Generation {
+    if (genId !== 'new') {
       const genPredicate = breeze.Predicate.create('id', breeze.FilterQueryOp.Equals, genId);
       const triggerPredicate = breeze.Predicate.create('id', breeze.FilterQueryOp.Equals, genId);
       this.triggerRepo.where(triggerPredicate);

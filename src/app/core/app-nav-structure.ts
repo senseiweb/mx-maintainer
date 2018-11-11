@@ -60,12 +60,13 @@ export function makeAagtNavStructure(): FuseNavigation[] {
                 id: 'genplanner',
                 title: 'Planner',
                 type: 'item',
-                url: 'aagt/genie/planner/0',
+                url: 'aagt/genie/planner/new',
             }, {
                 id: 'actionManager',
                 title: 'Action Management',
                 type: 'item',
-                url: 'aagt/genie/action-items'
+                url: 'aagt/genie/action-items',
+                exactMatch: false
             }
             ]
         }]

@@ -10,9 +10,9 @@ import { UserModule } from './user/user.module';
         AppComponent
     ],
     imports: [
+        DataModule.forRoot(),
         CoreModule,
         AppRoutingModule,
-        DataModule.forRoot(),
         UserModule
     ],
     providers: [],

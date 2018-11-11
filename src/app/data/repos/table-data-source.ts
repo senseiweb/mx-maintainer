@@ -1,9 +1,6 @@
 import { DataSource } from '@angular/cdk/table';
 import { MatPaginator, MatSort } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
 import { FuseUtils } from '@fuse/utils';
-import { ActionItem } from 'app/aagt/data';
-import { bareEntity } from 'app/data';
 import { BehaviorSubject, merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -15,7 +12,7 @@ export class FilesDataSource<T> extends DataSource<T> {
         private tableData: T[],
         private matPaginator: MatPaginator,
         private matSort: MatSort,
-        private dataSourceObsverable: BehaviorSubject<T>
+        private dataSourceObsverable: BehaviorSubject<T[]>
     ) {
         super();
         this.filterDataChange = new BehaviorSubject('') as any;

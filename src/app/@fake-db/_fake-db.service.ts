@@ -8,67 +8,66 @@ import {
 import { ActionItemFakeDb, AssetsFakeDb, GenerationFakeDb, MxFilterTagFakeDb } from './aagt';
 
 export class FakeDbService implements InMemoryDbService {
-  private resourceRegEx = /'(\w+)'/i;
-  // private filterRegEx = /(?<=\$filter=)(?<filterProp>\w+)|(?<=\s)(?<operation>\w{2,3})(?=\s)|(?<=\s)'(?<filterVal>\S+?)'/gmi;
-  // private urlBase = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
+    private resourceRegEx = /'(\w+)'/i;
+    // private filterRegEx = /(?<=\$filter=)(?<filterProp>\w+)|(?<=\s)(?<operation>\w{2,3})(?=\s)|(?<=\s)'(?<filterVal>\S+?)'/gmi;
+    // private urlBase = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
 
-  constructor() {
-  }
-
-  private getDatabase(inMemDb: any, dbFunc: any): void {
-    const propName = dbFunc.dbKey;
-    const newedUpClass = new dbFunc();
-    inMemDb[propName] = newedUpClass.entities;
-    console.log(`created db for: ${propName}`);
-    return inMemDb;
-  }
-
-  createDb(): any {
-    const inMemDb = {} as any;
-    this.getDatabase(inMemDb, AssetsFakeDb);
-    this.getDatabase(inMemDb, GenerationFakeDb);
-    this.getDatabase(inMemDb, ActionItemFakeDb);
-    this.getDatabase(inMemDb, MxFilterTagFakeDb);
-    return inMemDb;
-  }
-
-  parseRequestUrl(url: string, utils: RequestInfoUtilities): ParsedRequestUrl {
-    const clean_url = decodeURIComponent(url);
-    const filterParams = this.implementFilterOps(clean_url);
-    const resource = clean_url.match(this.resourceRegEx)[1];
-    const newUrl = utils.parseRequestUrl(url);
-
-    if (filterParams !== null) {
-        newUrl.apiBase = `api/${resource}?${filterParams}`;
-        console.log(`the filter url => ${newUrl}`);
-    } else {
-      newUrl.collectionName = resource;
-      newUrl.id = null;
+    constructor() {
     }
-    console.log(`parseRequestUrl override of '${clean_url}':`, newUrl);
-    return newUrl;
-  }
 
-  responseInterceptor(resOptions: ResponseOptions, _reqInfo: RequestInfo) {
-    resOptions.body = JSON.stringify({ d: { results: resOptions.body } });
-    return resOptions;
-  }
-
-  post(reqInfo: RequestInfo): any {
-    const endPoint = reqInfo.url.substring(reqInfo.url.lastIndexOf('/') + 1);
-    console.log(endPoint);
-    if (!endPoint) { return null; }
-    switch (endPoint.toLowerCase()) {
-      case 'contextinfo':
-        return reqInfo.utils.createResponse$(this.respondWithContextInfo);
+    private getDatabase(inMemDb: any, dbFunc: any): void {
+        const propName = dbFunc.dbKey;
+        const newedUpClass = new dbFunc();
+        inMemDb[propName] = newedUpClass.entities;
+        console.log(`created db for: ${propName}`);
+        return inMemDb;
     }
-  }
 
-  private respondWithContextInfo(): ResponseOptions {
-    const response: ResponseOptions = {};
-    response.status = 200;
-    response.headers.set('Content-Type', 'application/json;odata=verbose;charset=utf-8');
-    response.body = `{"d":
+    createDb(): any {
+        const inMemDb = {} as any;
+        this.getDatabase(inMemDb, AssetsFakeDb);
+        this.getDatabase(inMemDb, GenerationFakeDb);
+        this.getDatabase(inMemDb, ActionItemFakeDb);
+        this.getDatabase(inMemDb, MxFilterTagFakeDb);
+        return inMemDb;
+    }
+
+    parseRequestUrl(url: string, utils: RequestInfoUtilities): ParsedRequestUrl {
+        const clean_url = decodeURIComponent(url);
+        const filterParams = this.implementFilterOps(clean_url);
+        const resource = clean_url.match(this.resourceRegEx)[1];
+        const newUrl = utils.parseRequestUrl(url);
+        newUrl.collectionName = resource;
+        newUrl.id = null;
+        newUrl.query = null;
+        // if (filterParams !== null) {
+        //     newUrl.query = filterParams;
+        // }
+        console.log(`parseRequestUrl override of '${clean_url}':`, newUrl);
+        return newUrl;
+    }
+
+    responseInterceptor(resOptions: ResponseOptions, _reqInfo: RequestInfo) {
+        console.log(resOptions.body);
+        resOptions.body = JSON.stringify({ d: { results: resOptions.body } });
+        return resOptions;
+    }
+
+    post(reqInfo: RequestInfo): any {
+        const endPoint = reqInfo.url.substring(reqInfo.url.lastIndexOf('/') + 1);
+        console.log(endPoint);
+        if (!endPoint) { return null; }
+        switch (endPoint.toLowerCase()) {
+            case 'contextinfo':
+                return reqInfo.utils.createResponse$(this.respondWithContextInfo);
+        }
+    }
+
+    private respondWithContextInfo(): ResponseOptions {
+        const response: ResponseOptions = {};
+        response.status = 200;
+        response.headers.set('Content-Type', 'application/json;odata=verbose;charset=utf-8');
+        response.body = `{"d":
    {"GetContextWebInformation":
    {"__metadata":
    {"type":"SP.ContextWebInformation"},
@@ -82,20 +81,20 @@ export class FakeDbService implements InMemoryDbService {
    {"__metadata":
    {"type":"Collection(Edm.String)"},
    "results":["14.0.0.0","15.0.0.0"]},"WebFullUrl":"https://cs2.eis.af.mil/sites/10918/mx-maintainer"}}}`;
-    return response;
-  }
-
-  private implementFilterOps(filterUrl: string): string {
-    if (!filterUrl.includes('$filter')) {
-      return null;
+        return response;
     }
-    const filterRegEx = /\$filter=(?<filterProp>\w+)\s+?(?<operator>\w{2,3})\W'(?<findValue>\S+?)'/i;
-    console.log(`for url: ${filterUrl}`);
-    const foundMatches = filterUrl.match(filterRegEx) as any;
 
-    const filterQuery = `${foundMatches.groups.filterProp}=^${foundMatches.groups.findValue}`;
-    console.log(`filter done => ${filterQuery}`);
-    return filterQuery;
-  }
+    private implementFilterOps(filterUrl: string): string {
+        if (!filterUrl.includes('$filter')) {
+            return null;
+        }
+        const filterRegEx = /\$filter=(?<filterProp>\w+)\s+?(?<operator>\w{2,3})\W(?<findValue>\S+?)/i;
+        console.log(`for url: ${filterUrl}`);
+        const foundMatches = filterUrl.match(filterRegEx) as any;
+
+        const filterQuery = `${foundMatches.groups.filterProp}=^${foundMatches.groups.findValue}`;
+        console.log(`filter done => ${filterQuery}`);
+        return filterQuery;
+    }
 
 }

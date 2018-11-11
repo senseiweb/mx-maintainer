@@ -5,7 +5,7 @@ import 'breeze-client-labs/breeze.labs.dataservice.sharepoint';
 import 'breeze-client-labs/breeze.namingConventionWithDictionary';
 import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
-import { SpRootDataService } from './sp-root-data.service';
+import { SpRepoService } from './sp-repo.service';
 
 @Injectable({ providedIn: 'root' })
 export class EmProviderService {
@@ -13,7 +13,7 @@ export class EmProviderService {
     entityManager: breeze.EntityManager;
     servicePoint: string;
 
-    constructor(private spRooData: SpRootDataService, private config: EmProviderConfig) { this.init(); }
+    constructor(private spRooData: SpRepoService, private config: EmProviderConfig) { this.init(); }
 
     protected init(): void {
 

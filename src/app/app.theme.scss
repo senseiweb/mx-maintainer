@@ -77,6 +77,7 @@ $typography: mat-typography-config(
 @import "src/app/fusec-layout/components/chat-panel/fusec-chat-panel.theme";
 @import "src/app/fusec-layout/components/toolbar/fusec-toolbar.theme";
 @import "src/app/aagt/dashboard/aagt-dash.theme";
+@import "src/app/aagt/genie/action-item-manager/action-items/action-items.theme";
 
 // Define a mixin for easier access
 @mixin components-theme($theme) {
@@ -84,7 +85,8 @@ $typography: mat-typography-config(
     // Layout components
     @include chat-panel-theme($theme);
     @include toolbar-theme($theme);
-    @include dashboards-statusboard-theme($theme)
+    @include dashboards-statusboard-theme($theme);
+    @include gene-app-action-items-theme($theme);
 }
 
 // -----------------------------------------------------------------------------------------------------

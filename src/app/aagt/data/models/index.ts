@@ -9,3 +9,4 @@ export * from './trigger';
 export * from './generation-asset';
 export * from './trigger-action';
 export * from './action-item';
+export * from './sp-aagt-config';
