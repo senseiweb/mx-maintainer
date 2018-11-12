@@ -1,28 +1,36 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Generation, Asset } from 'app/aagt/data';
-import { GenieUowService } from '../../genie-uow.service';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
+import { PlannerUowService } from '../planner-uow.service';
 
 @Component({
     selector: 'genie-plan-step1',
     templateUrl: './step1.component.html',
     styleUrls: ['./step1.component.scss']
 })
-export class Step1Component implements OnInit {
+export class Step1Component implements OnInit, OnDestroy {
 
     allAssets: Asset[] = [];
     @Input() plannedGen: Generation;
-
-    isoOperations: Array<{ shortcode: string, displayName: string }>;
+    @Output() step1Status = new EventEmitter<boolean>();
+    isoOperations: string[];
     genAssetsSelected = [];
     step1FormGroup: FormGroup;
 
-    constructor(private uow: GenieUowService,
+    constructor(private uow: PlannerUowService,
     private formBuilder: FormBuilder) { }
 
     ngOnInit() {
-        this.uow.getAllAssets().then(assets => this.allAssets = assets);
         this.step1FormGroup = this.createStep1Form();
+        this.step1FormGroup.statusChanges.subscribe(() => {
+            this.step1Status.emit(this.step1FormGroup.valid);
+        });
+        this.allAssets = this.uow.allAssets;
+        this.isoOperations = this.uow.isoLookups;
+    }
+
+    ngOnDestroy() {
+
     }
 
     createStep1Form(): FormGroup {
@@ -38,7 +46,10 @@ export class Step1Component implements OnInit {
     }
 
     assignedAssetModelChange(selectedAssets: number[]): void {
-        this.plannedGen.numberAssetsRequired = selectedAssets.length;
+        this.step1FormGroup
+            .get('numberAssetsRequired')
+            .setValue(selectedAssets.length);
+
         console.log(selectedAssets);
     }
 }

@@ -29,11 +29,10 @@ export class GenerationFakeDb {
                 }
             }
             entity.__metadata = {
-                etag: `'${entity.id}'`,
-                id: `Web/Lists(guid'${itemGuid}')/Items(${entity.id})`,
+                etag: `'${index}'`,
+                id: `Web/Lists(guid'${itemGuid}')/Items(${index})`,
                 type: 'SP.Data.GenerationListItem',
-                // tslint:disable-next-line:max-line-length
-                uri: `https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/Web/Lists(guid'${itemGuid}')/Items(${entity.id})`
+                uri: `https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/Web/Lists(guid'${itemGuid}')/Items(${index})`
             };
 
             this.bareGenerationEntity.push(entity);

@@ -18,27 +18,27 @@
 
             <!-- CONTENT -->
             <div class="content p-24" fusePerfectScrollbar>
-                  <mat-horizontal-stepper [linear]="isLinear" #stepper>
-                    <mat-step [completed]="step1completed">
-                      <ng-template matStepLabel>
-                        <span *ngIf="isLinear">Provide General Generation Information</span>
-                        <span *ngIf="!isLinear">Update Generation Information</span>
-                    </ng-template>
-                    <genie-plan-step1 [plannedGen]="plannedGen"></genie-plan-step1>
+                <mat-horizontal-stepper [linear]="isLinear" #stepper>
+                    <mat-step [completed]="step1Completed">
+                        <ng-template matStepLabel>
+                            <span *ngIf="isLinear">Provide General Generation Information</span>
+                            <span *ngIf="!isLinear">Update Generation Information</span>
+                        </ng-template>
+                        <genie-plan-step1 [plannedGen]="plannedGen" (step1Status)="onCompleted(1, $event)"></genie-plan-step1>
                     </mat-step>
                     <mat-step [completed]="step2completed">
-                        <ng-template matStepLabel>Fill out your address</ng-template>
-
+                        <ng-template matStepLabel>Specify Triggers & Tasks</ng-template>
+                        <genie-plan-step2 [plannedGen]="plannedGen" (step2Status)="onCompleted(2, $event)"></genie-plan-step2>
                     </mat-step>
                     <mat-step>
-                      <ng-template matStepLabel>Done</ng-template>
-                      You are now done.
-                      <div>
-                        <button mat-button matStepperPrevious>Back</button>
-                        <button mat-button (click)="stepper.reset()">Reset</button>
-                      </div>
+                        <ng-template matStepLabel>Done</ng-template>
+                        You are now done.
+                        <div>
+                            <button mat-button matStepperPrevious>Back</button>
+                            <button mat-button (click)="stepper.reset()">Reset</button>
+                        </div>
                     </mat-step>
-                  </mat-horizontal-stepper>
+                </mat-horizontal-stepper>
             </div>
             <!-- / CONTENT -->
 

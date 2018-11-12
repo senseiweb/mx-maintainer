@@ -66,13 +66,13 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
         this.entityDefinition.dataProperties.stopDateTime = {
             dataType: this.dt.DateTime
         };
-        this.entityDefinition.navigationProperties = {
-            generationAssets: {
-                entityTypeName: 'GenerationAsset',
-                associationName: 'Generation_Assets',
-                isScalar: false
-            }
-        };
+        // this.entityDefinition.navigationProperties = {
+        //     generationAssets: {
+        //         entityTypeName: 'GenerationAsset',
+        //         associationName: 'Generation_Assets',
+        //         isScalar: false
+        //     }
+        // };
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
 }

@@ -6,12 +6,12 @@
         <div class="step1content">
             <form fxLayout="column" [formGroup]="step1FormGroup" fxFlex>
                 <mat-form-field>
-                    <input matInput name="title" formControlName="name" placeholder="Generation Title" required>
+                    <input matInput name="title" formControlName="title" placeholder="Generation Title" required>
                 </mat-form-field>
                 <mat-form-field>
                     <mat-select placeholder="In Support Of" name="iso" required formControlName="iso">
-                        <mat-option *ngFor="let op of isoOperations" [value]="op.shortcode">
-                            {{op.displayName}}
+                        <mat-option *ngFor="let op of isoOperations" [value]="op">
+                            {{op}}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>

@@ -14,6 +14,7 @@ import { AagtDataModule } from '../aagt-data.module';
 export class SpAagtRepoService extends BaseSpJsom {
 
     private teamTypeLookup: string[];
+    private isoLookup: string[];
 
     constructor() {
         super('/aagt');
@@ -30,5 +31,13 @@ export class SpAagtRepoService extends BaseSpJsom {
         }
         this.teamTypeLookup = await this.getChoiceValues(AagtListName.ActionItem, 'TeamType');
         return this.teamTypeLookup;
+    }
+
+    async getIsoLookup(): Promise<string[]> {
+        if (this.isoLookup) {
+           return Promise.resolve(this.isoLookup);
+        }
+        this.isoLookup = await this.getChoiceValues(AagtListName.Gen, 'Iso');
+        return this.isoLookup;
     }
 }

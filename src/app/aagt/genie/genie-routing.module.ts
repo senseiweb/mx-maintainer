@@ -7,7 +7,7 @@ import {
 } from './action-item-manager';
 import { ListGenyComponent } from './list-geny/list-geny.component';
 import { AimUowService } from './action-item-manager/aim-uow.service';
-import { PlannerComponent, Step1Component, Step2Component } from './planner';
+import { PlannerComponent, Step1Component, Step2Component, PlannerUowService } from './planner';
 
 export const routedComponents = [
     GenieBaseComponent,
@@ -35,6 +35,7 @@ const featureRoutes: Routes = [
             {
                 path: 'planner/:id',
                 component: PlannerComponent,
+                resolve: {init: PlannerUowService},
                 children: [
                     {
                         path: 'step1',

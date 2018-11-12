@@ -7,6 +7,7 @@ import { AagtDataModule } from '../aagt-data.module';
 
 export class Asset extends ebase.SpEntityBase {
     alias: string;
+    location: string;
     notes: string;
     assetGenerations: GenerationAsset[];
 }
@@ -18,15 +19,16 @@ export class AssetMetadata extends ebase.MetadataBase<Asset> {
     constructor () {
         super(aagtCfg.AagtListName.Asset);
         this.entityDefinition.dataProperties.alias = { dataType: this.dt.String };
+        this.entityDefinition.dataProperties.location = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
 
-        this.entityDefinition.navigationProperties = {
-            assetGenerations: {
-                entityTypeName: 'GenerationAsset',
-                isScalar: false,
-                associationName: 'Asset_Generations'
-            }
-        };
+        // this.entityDefinition.navigationProperties = {
+        //     assetGenerations: {
+        //         entityTypeName: 'GenerationAsset',
+        //         isScalar: false,
+        //         associationName: 'Asset_Generations'
+        //     }
+        // };
         Object.assign(
             this.entityDefinition.dataProperties,
             this.baseDataProperties

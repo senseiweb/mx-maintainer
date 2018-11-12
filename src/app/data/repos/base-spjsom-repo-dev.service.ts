@@ -32,6 +32,9 @@ export class BaseSpJsom {
         if (listName === 'ActionItem' && columnName === 'TeamType') {
             return ['EW', 'Load Team', 'Tow Team', 'Specialist-Com/Nav'];
         }
+        if (listName === 'Generation' && columnName === 'Iso') {
+            return ['None', 'Unknown', 'Global Thunder', 'Hectic Roller', 'Prairie Viligance'];
+        }
         const list = this.appList.getByTitle(listName);
         const field = list.get_fields().getByInternalNameOrTitle(columnName);
         const choiceField = this.appCtx.castTo(field, SP.FieldChoice) as SP.FieldChoice;
