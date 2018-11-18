@@ -20,7 +20,7 @@ declare type dtDef = Omit<breeze.config.DataPropertyDef, 'dataType'>;
 declare type navDef = Omit<breeze.config.NavigationPropertyDef, 'foreignKeyNames'>;
 
 export interface SpDataDef extends dtDef {
-    dataType: breeze.DataTypeSymbol;
+    dataType: breeze.DataType;
     hasMany?: boolean;
 }
 export interface SpNavDef<T> extends navDef {
@@ -106,7 +106,7 @@ export class MetadataBase<T> {
     addDefaultSelect(type: EntityType): EntityType {
         const customPropExist = type.custom;
         const excludeProps = ['__metadata'];
-
+// @ts-ignore
         if (!customPropExist || !customPropExist.defaultSelect) {
             const selectItems = [];
             type.dataProperties.forEach((prop) => {
@@ -117,6 +117,7 @@ export class MetadataBase<T> {
                 if (!customPropExist) {
                     type.custom = {};
                 }
+                // @ts-ignore
                 type.custom.defaultSelect = selectItems.join(',');
             }
         }

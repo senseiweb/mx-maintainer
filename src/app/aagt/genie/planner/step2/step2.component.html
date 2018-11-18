@@ -1,3 +1,52 @@
-<p>
-  step2 works!
-</p>
+<fuse-widget [@animate]="{value:'*',params:{y:'100%'}}" fxLayout="row" fxFlex="100" class="widget widget5">
+
+    <!-- Front -->
+    <div class="fuse-widget-front">
+
+        <div class="px-16 border-bottom" fxLayout="row wrap" fxLayoutAlign="space-between center">
+
+            <div fxFlex class="py-16 h3">Triggers</div>
+
+            <div fxFlex="0 1 auto" class="py-16" fxLayout="row">
+                <button>
+                    Create New Trigger
+                </button>
+                <mat-form-field floatLabel="never">
+                    <mat-select class="account-selection" placeholder="Trigger Selection" [ngModel]="currentTrigger">
+                        <mat-option *ngFor="let trigger of triggers" [value]="trigger.id">
+                            {{trigger.milestone}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div fxLayout="row wrap" fxLayoutAlign="start start" class="h-500">
+            <div class="ml-40 my-20 h-100-p" fxLayout="column" fxFlex="100" fxFlex.gt-sm="60">
+                <p-pickList class="h-100-p" fxFlex="100" [source]="allActionItems" [target]="selectedTriggers"
+                    [responsive]="true" sourceHeader="Available Action Items" targetHeader="Selected Action Items"
+                    (onMoveToTarget)="remove($event)" filterBy="shortCode,action" [showTargetFilter]="false"
+                    [showSourceControls]="false">
+                    <ng-template let-actionItem pTemplate="item">
+                        <div class="ui-helper-clearfix">
+                            <div>[{{actionItem.teamType}}]: {{actionItem.shortCode}}</div>
+                            <div>{{actionItem.action}} ({{actionItem.duration}} mins)</div>
+                        </div>
+                    </ng-template>
+                </p-pickList>
+            </div>
+
+            <div class="my-20" fxFlex="100" fxLayout="column" fxFlex.gt-sm="30">
+                <div class="h3" fxLayout="row" fxLayoutAlign="center">Trigger: {{currentTrigger?.milestone}}</div>
+                <mat-table #table [dataSource]="dataSource">
+                    <ng-container matColumnDef="sequence">
+                        <th mat-header-cell *matHeaderCellDef> Sequence </th>
+                        <td mat-cell *matCellDef="let triggerAction"> {{triggerAction.sequence}} </td>
+                    </ng-container>
+                </mat-table>
+            </div>
+        </div>
+    </div>
+    <!-- / Front -->
+
+</fuse-widget>

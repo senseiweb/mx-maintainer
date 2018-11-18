@@ -1,0 +1,14 @@
+@import "src/@fuse/scss/fuse";
+
+genie-plan-step2 {
+    .ui-picklist,
+    .ui-picklist-listwrapper
+    	{
+       height: 100%;
+
+       .ui-picklist-list{
+         height: 70%;
+       }
+
+   }
+}

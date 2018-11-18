@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as breeze from 'breeze-client';
-import { TriggerRepoService, SpAagtRepoService } from '../../data';
+import { TriggerRepoService, SpAagtRepoService, ActionItem, ActionItemRepo } from '../../data';
 import {
     Asset,
     AssetRepoService,
@@ -23,13 +23,15 @@ export class PlannerUowService implements Resolve<any> {
     allGenerations: Generation[];
     isoLookups: string[];
     allAssets: Asset[];
+    allActionItems: ActionItem[];
 
     constructor(
         private genRepo: GenerationRepoService,
         private triggerRepo: TriggerRepoService,
         private assetRepo: AssetRepoService,
         private genAssetRepo: GenAssetRepoService,
-        private spRepo: SpAagtRepoService
+        private spRepo: SpAagtRepoService,
+        private actionItemRepo: ActionItemRepo
     ) { }
 
     resolve(
@@ -40,8 +42,9 @@ export class PlannerUowService implements Resolve<any> {
         return new Promise((resolve, reject) => {
             const generations = this.genRepo.all().then(data => this.allGenerations = data);
             const assets = this.assetRepo.all().then(data => this.allAssets = data);
+            const ai = this.actionItemRepo.all().then(data => this.allActionItems = data);
             const isoLookups = this.spRepo.getIsoLookup().then((data) => this.isoLookups = data);
-            return Promise.all([generations, assets, isoLookups]).then(resolve, reject);
+            return Promise.all([generations, assets, isoLookups, ai]).then(resolve, reject);
         });
     }
 

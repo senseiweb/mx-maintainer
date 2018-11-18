@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { AagtModule } from 'app/aagt/aagt.module';
 import * as ebase from 'app/data/models/_entity-base';
 import { ActionItem } from './action-item';
 import { Trigger } from './trigger';
