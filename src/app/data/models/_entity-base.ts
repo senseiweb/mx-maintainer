@@ -1,6 +1,14 @@
-import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import { SpMetadata } from './sp-metadata';
-import * as breeze from 'breeze-client';
+import {
+    DataType,
+    DataTypeSymbol,
+    DataProperty,
+    NavigationPropertyOptions,
+    Entity,
+    EntityAspect,
+    EntityType,
+    EntityTypeOptions
+} from 'breeze-client';
 import 'breeze-client-labs/breeze.metadata-helper';
 
 export interface Instantiable<T> {
@@ -11,23 +19,23 @@ export declare type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefinition' | '$typeName';
 
-export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof breeze.Entity | ExtreBareEntityProps>>>;
+export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof Entity | ExtreBareEntityProps>>>;
 
-declare type etDef = Omit<breeze.config.EntityTypeDef, 'dataProperties'|'navigationProperties'>;
+declare type etDef = Omit<EntityTypeOptions, 'dataProperties'|'navigationProperties'>;
 
-declare type dtDef = Omit<breeze.config.DataPropertyDef, 'dataType'>;
+declare type dtDef = Omit<DataProperty, 'dataType'>;
 
-declare type navDef = Omit<breeze.config.NavigationPropertyDef, 'foreignKeyNames'>;
+declare type navDef = Omit<NavigationPropertyOptions, 'foreignKeyNames'>;
 
 export interface SpDataDef extends dtDef {
-    dataType: breeze.DataType;
+    dataType: DataTypeSymbol;
     hasMany?: boolean;
 }
 export interface SpNavDef<T> extends navDef {
     foreignKeyNames?: Array<keyof bareEntity<T>>;
 }
 export type DataMembers<T> = {
-    [key in keyof bareEntity<T>]: SpDataDef;
+    [key in keyof bareEntity<T>]: Partial<SpDataDef>;
 };
 
 export interface Type<T> extends Function {
@@ -37,7 +45,7 @@ export type ClientNameDict<T> = {
     [bkey in keyof bareEntity<T>]: string
 };
 export type NavMembers<T> = {
-    [key in keyof bareEntity<T>]: SpNavDef<T>;
+    [key in keyof bareEntity<T>]: Partial<SpNavDef<T>>;
 };
 export interface SpEntityDef<T> extends etDef {
     dataProperties: DataMembers<T>;
@@ -63,7 +71,7 @@ export class SpEntityBase implements Entity {
 
 export class MetadataBase<T> {
 
-    protected dt = breeze.DataType;
+    protected dt = DataType;
 
     protected baseDataProperties: DataMembers<SpEntityBase> = {
         id: {
@@ -104,9 +112,10 @@ export class MetadataBase<T> {
     }
 
     addDefaultSelect(type: EntityType): EntityType {
+        // @ts-ignore
         const customPropExist = type.custom;
         const excludeProps = ['__metadata'];
-// @ts-ignore
+
         if (!customPropExist || !customPropExist.defaultSelect) {
             const selectItems = [];
             type.dataProperties.forEach((prop) => {
@@ -115,6 +124,7 @@ export class MetadataBase<T> {
             });
             if (selectItems.length) {
                 if (!customPropExist) {
+                    // @ts-ignore
                     type.custom = {};
                 }
                 // @ts-ignore

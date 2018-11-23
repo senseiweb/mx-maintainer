@@ -1,6 +1,7 @@
 import { Observable, Observer } from 'rxjs';
 import { ScriptKey, ScriptModel, ScriptStore } from '../../app-script-model';
 
+
 // At times it is easier to retrieve things using the
 // the sharepoint JSOM libraries and cached them for later use
 export class BaseSpJsom {

@@ -1,36 +1,41 @@
-import { Component, OnInit, Input, Output, ViewChild, ViewEncapsulation, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
 import { Generation, ActionItem, Trigger, TriggerAction } from 'app/aagt/data';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
-import { FilesDataSource } from 'app/data';
-import { MatPaginator, MatSort } from '@angular/material';
 import { PlannerUowService } from '../planner-uow.service';
 import { BehaviorSubject } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
+import { MinutesExpand } from 'app/common';
+
+interface ITriggerActionItemShell {
+    id: number;
+    sequence: number;
+    shortCode: string;
+    duration: string;
+}
 
 @Component({
     selector: 'genie-plan-step2',
     templateUrl: './step2.component.html',
     styleUrls: ['./step2.component.scss'],
     animations: fuseAnimations,
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    providers: [MinutesExpand]
 })
 export class Step2Component implements OnInit {
     currentTrigger: Trigger;
-    dataSource: FilesDataSource<TriggerAction>;
+    dataSource: Array<ITriggerActionItemShell>;
     @Input() plannedGen: Generation;
 
-    @ViewChild(MatPaginator)
-    paginator: MatPaginator;
-
-    @ViewChild(MatSort)
-    sort: MatSort;
     triggers: Trigger[];
     allActionItems: ActionItem[];
-    selectedTriggers = [];
+    selectedTriggersAction = [];
     onActionItemsChanged: BehaviorSubject<ActionItem[]>;
     newTriggerForm: FormGroup;
 
+    columnsToDisplay: string[];
+
     constructor(private formBuilder: FormBuilder,
+        private minExpand: MinutesExpand,
         private planUow: PlannerUowService) {
     }
 
@@ -43,8 +48,18 @@ export class Step2Component implements OnInit {
         trig1.milestone = 'Warning Order';
         trig2.milestone = 'Execution Order';
         this.triggers = [trig1, trig2];
-        this.sortData();
+        this.columnsToDisplay = ['sequence', 'shortCode', 'duration'];
         this.dataSource = [] as any;
+    }
+
+    reshuffle($event: { items: ActionItem[] }): void {
+        this.dataSource = this.selectedTriggersAction.map((ai, i) => {
+            return {
+                sequence: i + 1,
+                shortCode: ai.shortCode,
+                duration: this.minExpand.transform(ai.duration as any)
+            } as ITriggerActionItemShell;
+        });
     }
 
     createTriggerForm(): FormGroup {
@@ -63,7 +78,7 @@ export class Step2Component implements OnInit {
         console.log($event);
     }
 
-    sortData(): void {
+    sortData(sortKey: string): void {
          this.allActionItems.sort((a: ActionItem, b: ActionItem) => {
             const propA: number | string = a.teamType ;
             const propB: number | string = b.teamType;

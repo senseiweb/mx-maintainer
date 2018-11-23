@@ -35,7 +35,7 @@ export class FakeDbService implements InMemoryDbService {
     parseRequestUrl(url: string, utils: RequestInfoUtilities): ParsedRequestUrl {
         const clean_url = decodeURIComponent(url);
         const filterParams = this.implementFilterOps(clean_url);
-        const resource = clean_url.match(this.resourceRegEx)[1];
+        const resource = clean_url.includes(`(`) ? clean_url.match(this.resourceRegEx)[1] : null;
         const newUrl = utils.parseRequestUrl(url);
         newUrl.collectionName = resource;
         newUrl.id = null;

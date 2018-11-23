@@ -1,4 +1,12 @@
-import * as breeze from 'breeze-client';
+import {
+    EntityManager,
+    EntityType,
+    EntityQuery,
+    Predicate,
+    FilterQueryOpSymbol,
+    FetchStrategySymbol,
+    FetchStrategy,
+} from 'breeze-client';
 import * as moment from 'moment';
 import {
     bareEntity,
@@ -7,8 +15,8 @@ import {
 import { EmProviderService } from './em-provider.service';
 
 export class BaseRepoService<T extends SpEntityBase> {
-    protected entityManager: breeze.EntityManager;
-    protected entityType: breeze.EntityType;
+    protected entityManager: EntityManager;
+    protected entityType: EntityType;
     protected resourceName: string;
     private cachedDate: moment.Moment;
     private cachedAll: boolean;
@@ -19,13 +27,13 @@ export class BaseRepoService<T extends SpEntityBase> {
         [index: string]: Promise<T[]> | Promise<T> | null
     } = {};
 
-    protected defaultFetchStrategy: breeze.FetchStrategySymbol;
+    protected defaultFetchStrategy: FetchStrategySymbol;
 
     constructor(entityTypeName: string, _entityService: EmProviderService) {
-        this.entityType = _entityService.entityManager.metadataStore.getEntityType(entityTypeName) as breeze.EntityType;
+        this.entityType = _entityService.entityManager.metadataStore.getEntityType(entityTypeName) as EntityType;
         this.entityManager = _entityService.entityManager;
         this.resourceName = this.entityType.defaultResourceName;
-        this.defaultFetchStrategy = breeze.FetchStrategy.FromServer;
+        this.defaultFetchStrategy = FetchStrategy.FromServer;
     }
 
     all(): Promise<T[]> {
@@ -58,15 +66,15 @@ export class BaseRepoService<T extends SpEntityBase> {
         return this.entityManager.createEntity(this.entityType.shortName, options) as any;
     }
 
-    protected baseQuery(): breeze.EntityQuery {
-        return breeze.EntityQuery.from(this.resourceName);
+    protected baseQuery(): EntityQuery {
+        return EntityQuery.from(this.resourceName);
     }
 
     protected isCachedBundle(refreshedAll?: true): boolean {
         if (refreshedAll) {
             this.cachedAll = true;
             this.cachedDate = moment();
-            this.defaultFetchStrategy = breeze.FetchStrategy.FromLocalCache;
+            this.defaultFetchStrategy = FetchStrategy.FromLocalCache;
             return false;
         }
 
@@ -75,14 +83,14 @@ export class BaseRepoService<T extends SpEntityBase> {
         const now = moment();
 
         if (this.cachedAll && this.cachedDate.diff(now, 'm') > 5) {
-            this.defaultFetchStrategy = breeze.FetchStrategy.FromServer;
+            this.defaultFetchStrategy = FetchStrategy.FromServer;
             this.cachedAll = false;
             return false;
         }
         return true;
     }
 
-    protected async executeQuery(query: breeze.EntityQuery, fetchStrat?: breeze.FetchStrategySymbol): Promise<T[]> {
+    protected async executeQuery(query: EntityQuery, fetchStrat?: FetchStrategySymbol): Promise<T[]> {
         try {
             const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
             const dataQueryResult = await this.entityManager.executeQuery(queryType);
@@ -92,14 +100,14 @@ export class BaseRepoService<T extends SpEntityBase> {
         }
     }
 
-    protected executeCacheQuery(query: breeze.EntityQuery): T[] {
+    protected executeCacheQuery(query: EntityQuery): T[] {
         const localCache = this.entityManager.executeQueryLocally(query) as T[];
         console.log(`from local cache ==> ${localCache}`);
         return localCache;
     }
 
-    makePredicate(property: keyof T, filter: breeze.FilterQueryOpSymbol, condition: string): breeze.Predicate {
-        return breeze.Predicate.create(property as any, filter, condition);
+    makePredicate(property: keyof T, filter: FilterQueryOpSymbol, condition: string): Predicate {
+        return Predicate.create(property as any, filter, condition);
     }
 
     async withId(key: number): Promise<T> {
@@ -111,14 +119,14 @@ export class BaseRepoService<T extends SpEntityBase> {
         }
     }
 
-    async where(predicate: breeze.Predicate, refreshFromServer = false): Promise<T[]> {
+    async where(predicate: Predicate, refreshFromServer = false): Promise<T[]> {
         console.log(`A where predicate was passed ==> ${predicate.toString()}`);
         const query = this.baseQuery().where(predicate);
         const lastQueryed = this.queryCache[predicate.toString()];
         const now = moment();
         try {
             if (refreshFromServer || (lastQueryed && lastQueryed.diff(now, 'm') >= 5)) {
-                const data = await this.executeQuery(query, breeze.FetchStrategy.FromServer);
+                const data = await this.executeQuery(query, FetchStrategy.FromServer);
                 this.queryCache[predicate.toString()] = moment();
                 return Promise.resolve(data);
             }
@@ -128,7 +136,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         }
     }
 
-    whereInCache(predicate: breeze.Predicate): T[] {
+    whereInCache(predicate: Predicate): T[] {
         const query = this.baseQuery().where(predicate);
         return this.executeCacheQuery(query) as any[];
     }

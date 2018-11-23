@@ -9,6 +9,9 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "paths": {
+            "breeze": [
+                "node_modules/breeze-client/breeze-debug"
+            ],
             "@fuse": [
                 "@fuse/"
             ],
@@ -18,9 +21,8 @@
         },
         "target": "es5",
         "typeRoots": [
-            "node_modules/@types",
-            "node_modules/breeze-client/src",
-            "src/@types"
+            "src/@types",
+            "node_modules/@types"
         ],
         "lib": [
             "es2017",

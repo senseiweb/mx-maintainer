@@ -8,8 +8,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { TranslateModule } from '@ngx-translate/core';
 import { FuseModule } from '@fuse/fuse.module';
-import 'breeze-client/breeze-client.es5';
-import 'breeze-client/adapters/adapter-model-library-backing-store.umd';
 import { FusecLayoutModule } from 'app/fusec-layout/fusec-layout.module';
 import { FuseProgressBarModule, FuseSidebarModule } from '@fuse/components';
 import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';

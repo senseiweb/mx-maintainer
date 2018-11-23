@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import * as breeze from 'breeze-client';
+import {
+    EntityManager,
+    EntityType,
+    EntityQuery,
+    FilterQueryOp,
+    Predicate,
+    FilterQueryOpSymbol,
+    FetchStrategySymbol,
+    FetchStrategy,
+} from 'breeze-client';
 import { TriggerRepoService, SpAagtRepoService, ActionItem, ActionItemRepo } from '../../data';
 import {
     Asset,
@@ -50,14 +59,14 @@ export class PlannerUowService implements Resolve<any> {
 
     planGen(genId: number | string): Generation {
         if (genId !== 'new') {
-            const genPredicate = breeze.Predicate.create(
+            const genPredicate = Predicate.create(
                 'id',
-                breeze.FilterQueryOp.Equals,
+                FilterQueryOp.Equals,
                 genId
             );
-            const triggerPredicate = breeze.Predicate.create(
+            const triggerPredicate = Predicate.create(
                 'id',
-                breeze.FilterQueryOp.Equals,
+                FilterQueryOp.Equals,
                 genId
             );
             this.triggerRepo.where(triggerPredicate);
@@ -67,9 +76,9 @@ export class PlannerUowService implements Resolve<any> {
     }
 
     getAssignedAssets(genId: number): Promise<GenerationAsset[]> {
-        const genAssetPredicate = breeze.Predicate.create(
+        const genAssetPredicate = Predicate.create(
             'generationId',
-            breeze.FilterQueryOp.Equals,
+            FilterQueryOp.Equals,
             genId
         );
         return this.genAssetRepo.where(genAssetPredicate);

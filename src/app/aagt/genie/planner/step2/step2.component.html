@@ -23,9 +23,13 @@
 
         <div fxLayout="row wrap" fxLayoutAlign="start start" class="h-500">
             <div class="ml-40 my-20 h-100-p" fxLayout="column" fxFlex="100" fxFlex.gt-sm="60">
-                <p-pickList class="h-100-p" fxFlex="100" [source]="allActionItems" [target]="selectedTriggers"
+                <p-pickList class="h-100-p" fxFlex="100" [source]="allActionItems" [target]="selectedTriggersAction"
                     [responsive]="true" sourceHeader="Available Action Items" targetHeader="Selected Action Items"
-                    (onMoveToTarget)="remove($event)" filterBy="shortCode,action" [showTargetFilter]="false"
+                    (onMoveToTarget)="reshuffle($event)"
+                    (onTargetReorder)="reshuffle($event)" 
+                    (onMoveAllToTarget)="reshuffle($event)"
+                    (onMoveAllToSource)="reshuffle($event)"
+                    (onMoveToSource)="reshuffle($event)"filterBy="shortCode,action" [showTargetFilter]="false"
                     [showSourceControls]="false">
                     <ng-template let-actionItem pTemplate="item">
                         <div class="ui-helper-clearfix">
@@ -36,13 +40,23 @@
                 </p-pickList>
             </div>
 
-            <div class="my-20" fxFlex="100" fxLayout="column" fxFlex.gt-sm="30">
+            <div id="triggerAssetContainer" class="my-20 inner-scroll" fxFlex="100" fxLayout="column" fxFlex.gt-sm="35" fusePerfectScrollbar>
                 <div class="h3" fxLayout="row" fxLayoutAlign="center">Trigger: {{currentTrigger?.milestone}}</div>
                 <mat-table #table [dataSource]="dataSource">
                     <ng-container matColumnDef="sequence">
-                        <th mat-header-cell *matHeaderCellDef> Sequence </th>
-                        <td mat-cell *matCellDef="let triggerAction"> {{triggerAction.sequence}} </td>
+                        <mat-header-cell *matHeaderCellDef> Sequence </mat-header-cell>
+                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.sequence}} </mat-cell>
                     </ng-container>
+                    <ng-container matColumnDef="shortCode">
+                        <mat-header-cell *matHeaderCellDef> ShortCode </mat-header-cell>
+                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.shortCode}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="duration">
+                        <mat-header-cell *matHeaderCellDef> Duration </mat-header-cell>
+                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.duration}} </mat-cell>
+                    </ng-container>
+                    <mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></mat-header-row>
+                    <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
                 </mat-table>
             </div>
         </div>
