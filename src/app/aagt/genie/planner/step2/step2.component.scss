@@ -2,46 +2,62 @@
 
 genie-plan-step2 {
 
-display: flex;
-flex: 1 1 auto;
-width: 100%;
+    #gp-step2{
 
-#triggerAssetContainer {
-    position: relative;
-    overflow: auto;
-  
-
-.mat-table {
-    width: 100%;
-    background: transparent;
-    box-shadow: none;
-
-    .mat-column-sequence {
-        width: 120px;
+        display: block;
+        position: relative;
+        perspective: 3000px;
+    
+        > div {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+    
+        > .fuse-widget-front {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            position: relative;
+            overflow: hidden;
+            visibility: visible;
+            width: 100%;
+            opacity: 1;
+            z-index: 10;
+            border-radius: 8px;
+            transition: transform 0.5s ease-out 0s, visibility 0s ease-in 0.2s, opacity 0s ease-in 0.2s;
+            transform: rotateY(0deg);
+            backface-visibility: hidden;
+        }
     }
 
-    .mat-column-shortCode {
-        width: 190px;
+    mat-select {
+        > .mat-select-trigger{ 
+            >.mat-select-value{
+                .mat-select-placeholder {
+                    color: white;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+        }
+        
     }
 
-    .mat-column-duration {
-        width: 280px;
+    .ui-picklist {
+        height: 550px;
+        .ui-picklist-list {
+            height: 84%;
+            &.ui-picklist-source-wrapper {
+                height: 10vh;
+            }
+            &.ui-picklist-target-wrapper {
+                padding-bottom: 0;
+            }
+        }
+       
     }
-
-    .mat-cell {
-        min-width: 0;
-    }
-}
-
-    .ui-picklist,
-    .ui-picklist-listwrapper
-    	{
-       height: 100%;
-
-       .ui-picklist-list{
-         height: 70%;
-       }
-
-   }
-}
+    
+   
 }

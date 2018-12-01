@@ -8,9 +8,7 @@ import {
 import { ListGenyComponent } from './list-geny/list-geny.component';
 import { AimUowService } from './action-item-manager/aim-uow.service';
 import { PlannerComponent, Step1Component, Step2Component, PlannerUowService } from './planner';
-import { TriggerListComponent } from './planner/step2/trigger-list/trigger-list.component';
-import { EditTriggerComponent } from './planner/step2/trigger-list/edit-trigger/edit-trigger.component';
-import { ActionCardComponent } from './planner/step2/trigger-list/action-card/action-card.component';
+import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
 
 export const routedComponents = [
     GenieBaseComponent,
@@ -20,9 +18,7 @@ export const routedComponents = [
     PlannerComponent,
     Step1Component,
     Step2Component,
-    TriggerListComponent,
-    EditTriggerComponent,
-    ActionCardComponent
+    NewTriggerDialogComponent
 ];
 
 const featureRoutes: Routes = [

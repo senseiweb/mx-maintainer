@@ -31,6 +31,21 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
         this.entityDefinition.dataProperties.averageExecutionTime = { dataType: this.dt.Int16, isNullable: false };
         this.entityDefinition.dataProperties.actionItemId = { dataType: this.dt.Int16, isNullable: false };
         this.entityDefinition.dataProperties.triggerId = { dataType: this.dt.Int16, isNullable: false };
+
+        this.entityDefinition.navigationProperties = {
+            trigger: {
+                entityTypeName: 'Trigger',
+                associationName: 'Trigger_Actions'
+            }
+        };
+
+        this.entityDefinition.navigationProperties = {
+            trigger: {
+                entityTypeName: 'Action',
+                associationName: 'Action_Triggers'
+            }
+        };
+
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
 

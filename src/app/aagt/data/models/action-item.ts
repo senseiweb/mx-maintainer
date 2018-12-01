@@ -51,6 +51,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
         this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
+
         Object.assign(
             this.entityDefinition.dataProperties,
             this.baseDataProperties

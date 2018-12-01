@@ -9,7 +9,7 @@ import {
     FetchStrategySymbol,
     FetchStrategy,
 } from 'breeze-client';
-import { TriggerRepoService, SpAagtRepoService, ActionItem, ActionItemRepo } from '../../data';
+import { TriggerRepoService, SpAagtRepoService, ActionItem, ActionItemRepo, Trigger } from '../../data';
 import {
     Asset,
     AssetRepoService,
@@ -55,6 +55,10 @@ export class PlannerUowService implements Resolve<any> {
             const isoLookups = this.spRepo.getIsoLookup().then((data) => this.isoLookups = data);
             return Promise.all([generations, assets, isoLookups, ai]).then(resolve, reject);
         });
+    }
+
+    newTrigger(): Trigger  {
+        return this.triggerRepo.newTrigger();
     }
 
     planGen(genId: number | string): Generation {

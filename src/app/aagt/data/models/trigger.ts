@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
+import { TriggerAction } from './trigger-action';
+import { Generation } from './generation';
 
 export class Trigger extends ebase.SpEntityBase {
     title: string;
@@ -11,6 +13,8 @@ export class Trigger extends ebase.SpEntityBase {
     triggerStart?: Date;
     triggerStop?: Date;
     generationId: number;
+    generation: Generation;
+    triggerActions: TriggerAction[];
 }
 
 @Injectable({
@@ -29,6 +33,20 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
         this.entityDefinition.dataProperties.triggerStop = { dataType: this.dt.DateTime };
         this.entityDefinition.dataProperties.generationId = { dataType: this.dt.Int32, isNullable: false };
 
+        this.entityDefinition.navigationProperties = {
+            generation: {
+                entityTypeName: 'Generation',
+                associationName: 'Generation_Triggers'
+            }
+        };
+
+        this.entityDefinition.navigationProperties = {
+            triggerActions: {
+                entityTypeName: 'TriggerAction',
+                associationName: 'Trigger_Actions',
+                isScalar: false
+            }
+        };
 
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }

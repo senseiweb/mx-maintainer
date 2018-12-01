@@ -1,66 +1,72 @@
-<fuse-widget [@animate]="{value:'*',params:{y:'100%'}}" fxLayout="row" fxFlex="100" class="widget widget5">
+<div id="gp-step2" [@animate]="{value:'*',params:{y:'100%'}}" fxLayout="row" fxFlex="100" class="widget widget5">
 
-    <!-- Front -->
     <div class="fuse-widget-front">
-
-        <div class="px-16 border-bottom" fxLayout="row wrap" fxLayoutAlign="space-between center">
-
+        <div class="px-16 border-bottom accent" fxFlex="0 1 auto" fxLayout="row">
             <div fxFlex class="py-16 h3">Triggers</div>
-
-            <div fxFlex="0 1 auto" class="py-16" fxLayout="row">
-                <button>
-                    Create New Trigger
-                </button>
                 <mat-form-field floatLabel="never">
-                    <mat-select class="account-selection" placeholder="Trigger Selection" [ngModel]="currentTrigger">
+                    <mat-select placeholder="Select Trigger" 
+                        [disabled]="triggersEmpty"
+                        [ngModel]="currentTrigger">
                         <mat-option *ngFor="let trigger of triggers" [value]="trigger.id">
                             {{trigger.milestone}}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-            </div>
+                <button class="mt-8" mat-icon-button [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
+                </button>
+                      <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="newTrigger()">
+                          <mat-icon>alarm_add</mat-icon>
+                          <span>New Trigger</span>
+                        </button>
+                        <button mat-menu-item 
+                        [disabled]="triggersEmpty" 
+                        (click)="editTrigger()">
+                          <mat-icon>alarm_on</mat-icon>
+                          <span>Edit Trigger</span>
+                        </button>
+                        <button mat-menu-item 
+                        [disabled]="triggersEmpty" 
+                        (click)="deleteTrigger()">
+                          <mat-icon>alarm_off</mat-icon>
+                          <span>Delete Trigger</span>
+                        </button>
+                      </mat-menu>
         </div>
 
-        <div fxLayout="row wrap" fxLayoutAlign="start start" class="h-500">
-            <div class="ml-40 my-20 h-100-p" fxLayout="column" fxFlex="100" fxFlex.gt-sm="60">
-                <p-pickList class="h-100-p" fxFlex="100" [source]="allActionItems" [target]="selectedTriggersAction"
-                    [responsive]="true" sourceHeader="Available Action Items" targetHeader="Selected Action Items"
-                    (onMoveToTarget)="reshuffle($event)"
-                    (onTargetReorder)="reshuffle($event)" 
-                    (onMoveAllToTarget)="reshuffle($event)"
-                    (onMoveAllToSource)="reshuffle($event)"
-                    (onMoveToSource)="reshuffle($event)"filterBy="shortCode,action" [showTargetFilter]="false"
-                    [showSourceControls]="false">
-                    <ng-template let-actionItem pTemplate="item">
-                        <div class="ui-helper-clearfix">
-                            <div>[{{actionItem.teamType}}]: {{actionItem.shortCode}}</div>
-                            <div>{{actionItem.action}} ({{actionItem.duration}} mins)</div>
+        <div class="ml-24 my-20">
+            <p-pickList [source]="allActionItems" 
+                [target]="selectedTriggersAction" 
+                [responsive]="true" 
+                sourceHeader="Available Action Items"
+                targetHeader="Selected Action Items" 
+                (onMoveToTarget)="addSequence($event)" 
+                (onTargetReorder)="reSequence()"
+                (onMoveAllToTarget)="addSequence($event)" 
+                (onMoveAllToSource)="removeSequence($event)" 
+                (onMoveToSource)="removeSequence($event)"
+                filterBy="shortCode,action" 
+                [showSourceControls]="false">
+                <ng-template let-actionItem pTemplate="item">
+                    <div class="ui-helper-clearfix">
+                        <div [hidden]="!!actionItem.sequence">
+                            <div fxLayout="row" fxLayoutAlign="space-around center">
+                                <span class="w-35-p">{{actionItem.teamType}}</span>
+                                <span class="w-50-p">{{actionItem.action}} [{{actionItem.shortCode}}]</span>
+                                <span clasas="w-15-p">({{actionItem.duration}} mins)</span>
+                            </div>
                         </div>
-                    </ng-template>
-                </p-pickList>
-            </div>
-
-            <div id="triggerAssetContainer" class="my-20 inner-scroll" fxFlex="100" fxLayout="column" fxFlex.gt-sm="35" fusePerfectScrollbar>
-                <div class="h3" fxLayout="row" fxLayoutAlign="center">Trigger: {{currentTrigger?.milestone}}</div>
-                <mat-table #table [dataSource]="dataSource">
-                    <ng-container matColumnDef="sequence">
-                        <mat-header-cell *matHeaderCellDef> Sequence </mat-header-cell>
-                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.sequence}} </mat-cell>
-                    </ng-container>
-                    <ng-container matColumnDef="shortCode">
-                        <mat-header-cell *matHeaderCellDef> ShortCode </mat-header-cell>
-                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.shortCode}} </mat-cell>
-                    </ng-container>
-                    <ng-container matColumnDef="duration">
-                        <mat-header-cell *matHeaderCellDef> Duration </mat-header-cell>
-                        <mat-cell *matCellDef="let triggerActionShell"> {{triggerActionShell.duration}} </mat-cell>
-                    </ng-container>
-                    <mat-header-row *matHeaderRowDef="columnsToDisplay; sticky: true"></mat-header-row>
-                    <mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></mat-row>
-                </mat-table>
-            </div>
+                        <div [hidden]="!actionItem.sequence">
+                            <div fxLayout="row" fxLayoutAlign="space-between center">
+                                <span class="w-20-p">{{actionItem.sequence}}</span>
+                                <span class="w-25-p">{{actionItem.shortCode}}</span>
+                                <span class="w-60-p">{{actionItem.formattedDuration}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-pickList>
         </div>
     </div>
-    <!-- / Front -->
-
-</fuse-widget>
+</div>

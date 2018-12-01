@@ -5,12 +5,17 @@ import { PlannerUowService } from '../planner-uow.service';
 import { BehaviorSubject } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
+import { MatDialog } from '@angular/material';
+import { NewTriggerDialogComponent } from './new-trigger/new-trigger-dialog';
 
 interface ITriggerActionItemShell {
-    id: number;
-    sequence: number;
-    shortCode: string;
-    duration: string;
+    id?: number;
+    sequence?: number;
+    shortCode?: string;
+    action?: string;
+    duration?: number;
+    formattedDuration: string;
+    teamType?: string;
 }
 
 @Component({
@@ -23,24 +28,35 @@ interface ITriggerActionItemShell {
 })
 export class Step2Component implements OnInit {
     currentTrigger: Trigger;
-    dataSource: Array<ITriggerActionItemShell>;
     @Input() plannedGen: Generation;
 
     triggers: Trigger[];
-    allActionItems: ActionItem[];
+    allActionItems: ITriggerActionItemShell[];
     selectedTriggersAction = [];
     onActionItemsChanged: BehaviorSubject<ActionItem[]>;
     newTriggerForm: FormGroup;
-
+    triggersEmpty = true;
     columnsToDisplay: string[];
 
     constructor(private formBuilder: FormBuilder,
         private minExpand: MinutesExpand,
+        private trigdialog: MatDialog,
         private planUow: PlannerUowService) {
     }
 
     ngOnInit() {
-        this.allActionItems = this.planUow.allActionItems;
+        this.allActionItems = this.planUow.allActionItems.map((ai) => {
+            return {
+                id: ai.id,
+                sequence: null,
+                duration: ai.duration,
+                shortCode: ai.shortCode,
+                teamType: ai.teamType,
+                action: ai.action,
+                formattedDuration: this.minExpand.transform(ai.duration as any)
+
+            } as ITriggerActionItemShell;
+        });
         const trig1 = new Trigger();
         const trig2 = new Trigger();
         trig1.id = 1;
@@ -48,17 +64,27 @@ export class Step2Component implements OnInit {
         trig1.milestone = 'Warning Order';
         trig2.milestone = 'Execution Order';
         this.triggers = [trig1, trig2];
-        this.columnsToDisplay = ['sequence', 'shortCode', 'duration'];
-        this.dataSource = [] as any;
     }
 
-    reshuffle($event: { items: ActionItem[] }): void {
-        this.dataSource = this.selectedTriggersAction.map((ai, i) => {
-            return {
-                sequence: i + 1,
-                shortCode: ai.shortCode,
-                duration: this.minExpand.transform(ai.duration as any)
-            } as ITriggerActionItemShell;
+    addSequence($event: { items: ActionItem[] }): void {
+        this.selectedTriggersAction.forEach((ai, i) => {
+            ai.sequence = i + 1;
+        });
+        console.log($event);
+    }
+
+    editTrigger(): void {
+        this.trigdialog.open()
+    }
+
+    removeSequence($event: { items: any[] }): void {
+        $event.items.forEach(i => i.sequence = null);
+        console.log($event);
+    }
+
+    reSequence(): void {
+        this.selectedTriggersAction.forEach((ai, i) => {
+            ai.sequence = i;
         });
     }
 
@@ -70,24 +96,17 @@ export class Step2Component implements OnInit {
     }
 
     newTrigger(): void {
-
+        this.trigdialog.open(NewTriggerDialogComponent)
+            .afterClosed()
+            .subscribe(data => {
+                if (data) { this.currentTrigger = data; }
+            });
+        console.log('new trigger requested');
     }
 
     remove($event): void {
-        this.dataSource = $event.items as any;
         console.log($event);
     }
 
-    sortData(sortKey: string): void {
-         this.allActionItems.sort((a: ActionItem, b: ActionItem) => {
-            const propA: number | string = a.teamType ;
-            const propB: number | string = b.teamType;
-
-            const valueA = isNaN(+propA) ? propA : +propA;
-            const valueB = isNaN(+propB) ? propB : +propB;
-
-            return (valueA < valueB ? -1 : 1);
-        });
-    }
 
 }
