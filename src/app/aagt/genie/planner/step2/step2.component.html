@@ -3,15 +3,18 @@
     <div class="fuse-widget-front">
         <div class="px-16 border-bottom accent" fxFlex="0 1 auto" fxLayout="row">
             <div fxFlex class="py-16 h3">Triggers</div>
-                <mat-form-field floatLabel="never">
-                    <mat-select placeholder="Select Trigger" 
-                        [disabled]="triggersEmpty"
-                        [ngModel]="currentTrigger">
-                        <mat-option *ngFor="let trigger of triggers" [value]="trigger.id">
-                            {{trigger.milestone}}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+            <form [formGroup]="triggerFormGroup">
+                    <mat-form-field floatLabel="never">
+                            <mat-select placeholder="Select Trigger" 
+                                formControlName="trigger"
+                                [compareWith]="compareTrigger">
+                                <mat-option *ngFor="let trigger of triggers" [value]="currentTrigger">
+                                    {{trigger.milestone}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+            </form>
+
                 <button class="mt-8" mat-icon-button [matMenuTriggerFor]="menu">
                         <mat-icon>more_vert</mat-icon>
                 </button>

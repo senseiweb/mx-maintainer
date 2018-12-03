@@ -57,8 +57,8 @@ export class PlannerUowService implements Resolve<any> {
         });
     }
 
-    newTrigger(): Trigger  {
-        return this.triggerRepo.newTrigger();
+    newTrigger(generationId: number): Trigger  {
+        return this.triggerRepo.newTrigger(generationId);
     }
 
     planGen(genId: number | string): Generation {

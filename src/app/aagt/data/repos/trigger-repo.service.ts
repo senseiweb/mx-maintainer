@@ -11,8 +11,8 @@ export class TriggerRepoService extends BaseRepoService<Trigger> {
         super(AagtListName.Trigger, emService);
     }
 
-    newTrigger(): Trigger {
-       return this.createBase();
+    newTrigger(generationId: number): Trigger {
+       return this.createBase({generationId});
     }
 
 }

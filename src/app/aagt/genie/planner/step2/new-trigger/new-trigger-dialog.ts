@@ -16,16 +16,11 @@ export class NewTriggerDialogComponent implements OnInit {
 
     constructor(private dialogRef: MatDialogRef<NewTriggerDialogComponent>,
         private formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA)  data: any,
-        private planUow: PlannerUowService) {
+        @Inject(MAT_DIALOG_DATA)  data: any) {
         this.currentTrigger = data;
     }
 
     ngOnInit(): void {
-        if (!this.currentTrigger) {
-            this.currentTrigger = this.planUow.newTrigger();
-            this.isNew = true;
-        }
         const trig = this.currentTrigger;
         this.triggerFormGroup = this.formBuilder.group({
             milestone: new FormControl(trig.milestone, Validators.required),
@@ -38,5 +33,11 @@ export class NewTriggerDialogComponent implements OnInit {
     cancel(): void {
         this.currentTrigger.entityAspect.rejectChanges();
         this.dialogRef.close();
+    }
+
+    saveChanges(): void {
+        this.currentTrigger.milestone = this.triggerFormGroup.get('milestone').value;
+        this.currentTrigger.generationOffset = this.triggerFormGroup.get('offset').value;
+        this.dialogRef.close(this.currentTrigger);
     }
 }

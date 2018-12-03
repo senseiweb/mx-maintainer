@@ -26,5 +26,5 @@
 <hr/>
 <div mat-dialog-actions>
   <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-button [mat-dialog-close]="currentTrigger" cdkFocusInitial>Ok</button>
+  <button mat-button (click)="saveChanges()" cdkFocusInitial>Ok</button>
 </div>

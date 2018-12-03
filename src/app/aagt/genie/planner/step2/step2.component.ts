@@ -30,11 +30,11 @@ export class Step2Component implements OnInit {
     currentTrigger: Trigger;
     @Input() plannedGen: Generation;
 
-    triggers: Trigger[];
+    triggers: Trigger[] = [];
     allActionItems: ITriggerActionItemShell[];
     selectedTriggersAction = [];
     onActionItemsChanged: BehaviorSubject<ActionItem[]>;
-    newTriggerForm: FormGroup;
+    triggerFormGroup: FormGroup;
     triggersEmpty = true;
     columnsToDisplay: string[];
 
@@ -64,6 +64,9 @@ export class Step2Component implements OnInit {
         trig1.milestone = 'Warning Order';
         trig2.milestone = 'Execution Order';
         this.triggers = [trig1, trig2];
+        this.triggerFormGroup = this.formBuilder.group({
+            trigger: new FormControl({value: null, disabled: !this.triggers.length})
+        });
     }
 
     addSequence($event: { items: ActionItem[] }): void {
@@ -71,6 +74,10 @@ export class Step2Component implements OnInit {
             ai.sequence = i + 1;
         });
         console.log($event);
+    }
+
+    compareTrigger(trig1: Trigger, trig2: Trigger): boolean {
+        return trig1 && trig2 ? trig1.id === trig2.id : trig1 === trig2;
     }
 
     editTrigger(): void {
@@ -94,21 +101,17 @@ export class Step2Component implements OnInit {
         });
     }
 
-    createTriggerForm(): FormGroup {
-        return this.formBuilder.group({
-            milestone: new FormControl(),
-            offset: new FormControl()
-        });
-    }
-
     newTrigger(): void {
-        this.trigdialog.open(NewTriggerDialogComponent)
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.data = this.planUow.newTrigger(this.plannedGen.id);
+        this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
             .subscribe(data => {
                 if (data) {
-                    this.currentTrigger = data;
                     this.triggersEmpty = false;
                     this.triggers.push(data);
+                    this.currentTrigger = data;
+                    this.triggerFormGroup.controls['trigger'].setValue = data;
                 }
             });
     }
