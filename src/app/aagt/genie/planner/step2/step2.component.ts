@@ -5,7 +5,7 @@ import { PlannerUowService } from '../planner-uow.service';
 import { BehaviorSubject } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogClose, MatDialogConfig } from '@angular/material';
 import { NewTriggerDialogComponent } from './new-trigger/new-trigger-dialog';
 
 interface ITriggerActionItemShell {
@@ -74,7 +74,13 @@ export class Step2Component implements OnInit {
     }
 
     editTrigger(): void {
-        this.trigdialog.open()
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.data = this.currentTrigger;
+        this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
+            .afterClosed()
+            .subscribe(data => {
+                if (data) { this.currentTrigger = data; }
+            });
     }
 
     removeSequence($event: { items: any[] }): void {
@@ -99,9 +105,12 @@ export class Step2Component implements OnInit {
         this.trigdialog.open(NewTriggerDialogComponent)
             .afterClosed()
             .subscribe(data => {
-                if (data) { this.currentTrigger = data; }
+                if (data) {
+                    this.currentTrigger = data;
+                    this.triggersEmpty = false;
+                    this.triggers.push(data);
+                }
             });
-        console.log('new trigger requested');
     }
 
     remove($event): void {
