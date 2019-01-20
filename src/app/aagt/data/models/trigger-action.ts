@@ -5,6 +5,15 @@ import { Trigger } from './trigger';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
 
+export interface ITriggerActionItemShell {
+    id?: number;
+    sequence?: number;
+    shortCode?: string;
+    action?: string;
+    duration?: number;
+    formattedDuration: string;
+    teamType?: string;
+}
 export class TriggerAction extends ebase.SpEntityBase {
     title: string;
     sequence: number;
@@ -30,19 +39,20 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
         this.entityDefinition.dataProperties.totalExecutionTime = { dataType: this.dt.Int16, isNullable: false };
         this.entityDefinition.dataProperties.averageExecutionTime = { dataType: this.dt.Int16, isNullable: false };
         this.entityDefinition.dataProperties.actionItemId = { dataType: this.dt.Int16, isNullable: false };
-        this.entityDefinition.dataProperties.triggerId = { dataType: this.dt.Int16, isNullable: false };
+        this.entityDefinition.dataProperties.triggerId = {
+            dataType: this.dt.Int16,
+            isNullable: false        };
 
         this.entityDefinition.navigationProperties = {
             trigger: {
-                entityTypeName: 'Trigger',
-                associationName: 'Trigger_Actions'
-            }
-        };
-
-        this.entityDefinition.navigationProperties = {
-            trigger: {
-                entityTypeName: 'Action',
-                associationName: 'Action_Triggers'
+                entityTypeName: aagtCfg.AagtListName.Trigger,
+                associationName: 'Trigger_Action',
+                foreignKeyNames: ['triggerId']
+            },
+            actionItem: {
+                entityTypeName: aagtCfg.AagtListName.ActionItem,
+                associationName: 'Action_Trigger',
+                foreignKeyNames: ['actionItemId']
             }
         };
 

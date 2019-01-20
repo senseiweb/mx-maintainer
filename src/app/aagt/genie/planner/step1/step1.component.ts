@@ -27,6 +27,9 @@ export class Step1Component implements OnInit, OnDestroy {
         });
         this.allAssets = this.uow.allAssets;
         this.isoOperations = this.uow.isoLookups;
+        this.genAssetsSelected = this.plannedGen.generationAssets.map(genAsset => {
+            return genAsset.asset.id;
+        });
     }
 
     ngOnDestroy() {
@@ -49,6 +52,22 @@ export class Step1Component implements OnInit, OnDestroy {
         this.step1FormGroup
             .get('numberAssetsRequired')
             .setValue(selectedAssets.length);
+
+        this.plannedGen.generationAssets.forEach(genAsset => {
+            if (!selectedAssets.some(id => genAsset.assetId === id)) {
+                genAsset.entityAspect.setDeleted();
+            }
+        });
+
+        selectedAssets.forEach(id => {
+            if (!this.plannedGen.generationAssets.some(genAsset => genAsset.assetId === id)) {
+                const data = {
+                    generationId: this.plannedGen.id,
+                    assetId: id
+                };
+                this.uow.getOrCreateGenerationAsset(data);
+            }
+        });
 
         console.log(selectedAssets);
     }

@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import {
-    EntityManager,
-    EntityType,
-    EntityQuery,
     FilterQueryOp,
-    Predicate,
-    FilterQueryOpSymbol,
-    FetchStrategySymbol,
-    FetchStrategy,
+    Predicate
 } from 'breeze-client';
-import { TriggerRepoService, SpAagtRepoService, ActionItem, ActionItemRepo, Trigger } from '../../data';
+import {
+    TriggerRepoService,
+    SpAagtRepoService,
+    ActionItem,
+    ActionItemRepo,
+    Trigger,
+    TriggerAction
+} from '../../data';
 import {
     Asset,
     AssetRepoService,
@@ -26,6 +27,7 @@ import {
 } from '@angular/router';
 
 import { AagtDataModule } from 'app/aagt/data/aagt-data.module';
+import { TriggerActionRepoService } from 'app/aagt/data/repos/trigger-action-repo.service';
 
 @Injectable({ providedIn: AagtDataModule })
 export class PlannerUowService implements Resolve<any> {
@@ -37,6 +39,7 @@ export class PlannerUowService implements Resolve<any> {
     constructor(
         private genRepo: GenerationRepoService,
         private triggerRepo: TriggerRepoService,
+        private triggerActionRepo: TriggerActionRepoService,
         private assetRepo: AssetRepoService,
         private genAssetRepo: GenAssetRepoService,
         private spRepo: SpAagtRepoService,
@@ -57,9 +60,18 @@ export class PlannerUowService implements Resolve<any> {
         });
     }
 
-    newTrigger(generationId: number): Trigger  {
+    getOrCreateGenerationAsset(data: { generationId: number, assetId: number }): GenerationAsset {
+        return this.genAssetRepo.getOrCreateGenerationAsset(data);
+    }
+
+    getOrCreateTriggerAction(data: { triggerId: number, actionItemId: number }): TriggerAction {
+        return this.triggerActionRepo.getOrCreateTriggerAction(data);
+    }
+
+    newTrigger(generationId: number): Trigger {
         return this.triggerRepo.newTrigger(generationId);
     }
+
 
     planGen(genId: number | string): Generation {
         if (genId !== 'new') {

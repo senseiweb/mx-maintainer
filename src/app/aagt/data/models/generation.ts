@@ -28,7 +28,6 @@ export class Generation extends ebase.SpEntityBase {
     generationAssets: GenerationAsset[];
 }
 
-
 @Injectable({
     providedIn: AagtDataModule
 })
@@ -69,18 +68,17 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
 
         this.entityDefinition.navigationProperties = {
             triggers: {
-                entityTypeName: 'Trigger',
+                entityTypeName: aagtCfg.AagtListName.Trigger,
                 associationName: 'Generation_Triggers',
                 isScalar: false
-            }
-        };
-        this.entityDefinition.navigationProperties = {
+            },
             generationAssets: {
-                entityTypeName: 'GenerationAsset',
+                entityTypeName: aagtCfg.AagtListName.GenAsset,
                 associationName: 'Generation_Assets',
                 isScalar: false
             }
         };
+
         Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
     }
 }

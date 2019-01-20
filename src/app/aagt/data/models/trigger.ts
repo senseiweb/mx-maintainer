@@ -3,12 +3,18 @@ import { Injectable } from '@angular/core';
 import { AagtModule } from 'app/aagt/aagt.module';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
-import { TriggerAction } from './trigger-action';
+import { TriggerAction, ITriggerActionItemShell } from './trigger-action';
 import { Generation } from './generation';
 
 export class Trigger extends ebase.SpEntityBase {
     title: string;
     milestone: string;
+    get completionTime(): number {
+        if (!this.triggerActions) { return; }
+        return this.triggerActions
+            .map(tra => tra.actionItem.duration)
+            .reduce((duration1, duration2) => duration1 + duration2, 0);
+    }
     generationOffset?: number;
     triggerStart?: Date;
     triggerStop?: Date;
@@ -35,15 +41,13 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
 
         this.entityDefinition.navigationProperties = {
             generation: {
-                entityTypeName: 'Generation',
-                associationName: 'Generation_Triggers'
-            }
-        };
-
-        this.entityDefinition.navigationProperties = {
+                entityTypeName: aagtCfg.AagtListName.Gen,
+                associationName: 'Generation_Triggers',
+                foreignKeyNames: ['generationId']
+            },
             triggerActions: {
-                entityTypeName: 'TriggerAction',
-                associationName: 'Trigger_Actions',
+                entityTypeName: aagtCfg.AagtListName.TriggerAct,
+                associationName: 'Trigger_Action',
                 isScalar: false
             }
         };

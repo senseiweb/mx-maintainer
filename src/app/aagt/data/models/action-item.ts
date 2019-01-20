@@ -3,6 +3,7 @@ import { AagtModule } from 'app/aagt/aagt.module';
 import * as ebase from 'app/data/models/_entity-base';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
+import { TriggerAction } from './trigger-action';
 export class ActionItem extends ebase.SpEntityBase {
     action: string;
     shortCode: string;
@@ -10,6 +11,7 @@ export class ActionItem extends ebase.SpEntityBase {
     teamType: string;
     availableForUse: boolean;
     notes: string;
+    actionTriggers: TriggerAction[];
     // get important(): boolean {
     //   if (!this.tags.length) { return false; }
     //   return this.tags.some(tag => tag.tagHandle === 'important');
@@ -51,6 +53,14 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
         this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
+
+        this.entityDefinition.navigationProperties = {
+            actionTriggers: {
+                entityTypeName: 'TriggerAction',
+                associationName: 'Action_Trigger',
+                isScalar: false
+            }
+        };
 
         Object.assign(
             this.entityDefinition.dataProperties,

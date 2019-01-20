@@ -1,6 +1,5 @@
 import * as ebase from 'app/data/models/_entity-base';
 import { Injectable } from '@angular/core';
-import { AagtModule } from 'app/aagt/aagt.module';
 import { Asset } from './asset';
 import { Generation } from './generation';
 import * as aagtCfg from './sp-aagt-config';
@@ -14,8 +13,8 @@ export class GenerationAsset extends ebase.SpEntityBase {
     mxPosition: number;
     asset: Asset;
     generation: Generation;
-    generationId: string;
-    assetId: string;
+    generationId: number;
+    assetId: number;
 }
 
 @Injectable({

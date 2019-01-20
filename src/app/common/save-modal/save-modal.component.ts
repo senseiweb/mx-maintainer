@@ -12,4 +12,8 @@ export class SaveModalDialogComponent {
 
     constructor(public saveDialogRef: MatDialogRef<SaveModalDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: any) { }
 
+    continue(): void {
+
+    }
+
 }

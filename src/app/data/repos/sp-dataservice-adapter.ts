@@ -8,7 +8,6 @@ import {
     EntityType,
     EntityKey,
     Entity,
-    EntityQuery,
     config,
     SaveContext,
     MappingContext,
@@ -18,9 +17,6 @@ import {
     SaveBundle,
     NodeContext
 } from 'breeze-client';
-import { Observable, defer } from 'rxjs';
-import { DataServiceAdapter, DataService } from 'breeze';
-
 
 interface ISaveRequest {
     requestUri?: string;
@@ -68,7 +64,7 @@ export class SpDataserviceAdapter {
         });
         this.jsonResultsAdapter['serverTypeNameToClient'] = this.serverTypeNameToClient;
         this.jsonResultsAdapter['clientTypeNameToServer'] = this.clientTypeNameToServer;
-        this.jsonResultsAdapter['typeMap'] = {'': { _mappedPropertiesCount: NaN } }
+        this.jsonResultsAdapter['typeMap'] = { '': { _mappedPropertiesCount: NaN } };
         SpDataserviceAdapter.prototype.jsonResultsAdapter = this.jsonResultsAdapter;
     }
 
@@ -240,10 +236,11 @@ export class SpDataserviceAdapter {
                 reject(error);
 
             };
+            // tslint:disable-next-line:no-unused-expression
             this.ajaxImpl.ajax(httpOptions) as any;
-        })
-    };
-    
+        });
+    }
+
     fetchMetadata(metadataStore: MetadataStore, dataService: any): Promise<any> {
         return Promise.reject(new Error('Fetch Metadata is not available on this adapter;'));
     }
@@ -496,7 +493,7 @@ export class SpDataserviceAdapter {
 
             if (!entityType) { return; }
 
-            if ((entityType._mappedPropertiesCount - entityType.navigationProperties) <= Object.keys(node).length - 1) {
+            if ((entityType._mappedPropertiesCount - entityType.navigationProperties.length) <= Object.keys(node).length - 1) {
                 result.entityType = entityType;
                 result.extraMetadata = node.__metadata;
             }

@@ -17,14 +17,13 @@
             <input matInput name="offset" formControlName="offset" placeholder="Offset from Generation Start" type="number">
             <span matSuffix>hours</span>
         </mat-form-field>
-        <div fxLayout="row">
-            <input type="date" name="start" formControlName="start" placeholder="Calculated Start" name="start" readonly>
-            <input type="date" name="stop" formControlName="stop" placeholder="Calculated End" name="end" readonly>
+        <div fxLayout="row" *ngIf="!!currentTrigger.triggerStart">
+            <input name="start" formControlName="start" placeholder="Calculated Start" name="start" readonly>
+            <input name="stop" formControlName="stop" placeholder="Calculated End" name="end" readonly>
         </div>
     </form>
 </div>
-<hr/>
-<div mat-dialog-actions>
+<div mat-dialog-actions fxLayoutAlign="start end">
   <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-button (click)="saveChanges()" cdkFocusInitial>Ok</button>
+  <button mat-button (click)="saveChanges()" cdkFocusInitial>Save</button>
 </div>

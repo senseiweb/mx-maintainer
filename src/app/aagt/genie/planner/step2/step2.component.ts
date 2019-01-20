@@ -1,22 +1,14 @@
-import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
-import { Generation, ActionItem, Trigger, TriggerAction } from 'app/aagt/data';
+import { Component, OnInit, Input, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Generation, ActionItem, Trigger, TriggerAction, ITriggerActionItemShell } from 'app/aagt/data';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { PlannerUowService } from '../planner-uow.service';
-import { BehaviorSubject } from 'rxjs';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
-import { MatDialog, MatDialogClose, MatDialogConfig } from '@angular/material';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 import { NewTriggerDialogComponent } from './new-trigger/new-trigger-dialog';
-
-interface ITriggerActionItemShell {
-    id?: number;
-    sequence?: number;
-    shortCode?: string;
-    action?: string;
-    duration?: number;
-    formattedDuration: string;
-    teamType?: string;
-}
+import { takeUntil } from 'rxjs/operators';
+import { ConfirmDeleteModalComponent } from 'app/common/confirm-delete-modal/confirm-delete-modal.component';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'genie-plan-step2',
@@ -26,58 +18,82 @@ interface ITriggerActionItemShell {
     encapsulation: ViewEncapsulation.None,
     providers: [MinutesExpand]
 })
-export class Step2Component implements OnInit {
+export class Step2Component implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     @Input() plannedGen: Generation;
 
     triggers: Trigger[] = [];
-    allActionItems: ITriggerActionItemShell[];
-    selectedTriggersAction = [];
-    onActionItemsChanged: BehaviorSubject<ActionItem[]>;
+    allActionItems: ActionItem[];
+    selectedTriggersAction: ActionItem[];
     triggerFormGroup: FormGroup;
-    triggersEmpty = true;
-    columnsToDisplay: string[];
+    private unsubscribeAll: Subject<any>;
 
     constructor(private formBuilder: FormBuilder,
-        private minExpand: MinutesExpand,
         private trigdialog: MatDialog,
+        private deleteDialog: MatDialog,
         private planUow: PlannerUowService) {
+        this.unsubscribeAll = new Subject();
+        this.selectedTriggersAction = [];
     }
 
     ngOnInit() {
-        this.allActionItems = this.planUow.allActionItems.map((ai) => {
-            return {
-                id: ai.id,
-                sequence: null,
-                duration: ai.duration,
-                shortCode: ai.shortCode,
-                teamType: ai.teamType,
-                action: ai.action,
-                formattedDuration: this.minExpand.transform(ai.duration as any)
-
-            } as ITriggerActionItemShell;
-        });
-        const trig1 = new Trigger();
-        const trig2 = new Trigger();
-        trig1.id = 1;
-        trig2.id = 2;
-        trig1.milestone = 'Warning Order';
-        trig2.milestone = 'Execution Order';
-        this.triggers = [trig1, trig2];
+        this.allActionItems = this.planUow.allActionItems;
+        this.allActionItems.filter((ai: ActionItem) => ai.availableForUse);
         this.triggerFormGroup = this.formBuilder.group({
-            trigger: new FormControl({value: null, disabled: !this.triggers.length})
+            trigger: new FormControl()
         });
+        this.triggerFormGroup.get('trigger').valueChanges
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe((selectedTrigger: Trigger) => {
+                if (!selectedTrigger) { return; }
+
+                this.allActionItems = this.allActionItems.concat(this.selectedTriggersAction.splice(0));
+
+                this.allActionItems.forEach(item => item['sequence'] = null);
+
+                selectedTrigger.triggerActions.forEach((item, i, a) => {
+                    const actionItemIndex = this.allActionItems
+                        .findIndex(ai => ai.id === item.actionItemId);
+                    const actionItem = this.allActionItems.splice(actionItemIndex, 1)[0];
+                    actionItem['sequence'] = item.sequence;
+                    this.selectedTriggersAction.push(actionItem as any);
+                });
+                this.sortActionItem(this.selectedTriggersAction, 'sequence');
+                this.sortActionItem(this.allActionItems, 'teamType');
+                this.currentTrigger = selectedTrigger;
+            });
     }
 
-    addSequence($event: { items: ActionItem[] }): void {
-        this.selectedTriggersAction.forEach((ai, i) => {
-            ai.sequence = i + 1;
+    ngOnDestroy(): void {
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
+    }
+
+    addShell($event: { items: ITriggerActionItemShell[] }): void {
+        $event.items.forEach(item  => {
+            const trigActEntity = this.planUow.getOrCreateTriggerAction({ triggerId: this.currentTrigger.id, actionItemId: item.id });
+            trigActEntity.sequence = item.sequence = this.selectedTriggersAction.findIndex(ai => ai.id === item.id) + 1;
         });
-        console.log($event);
     }
 
     compareTrigger(trig1: Trigger, trig2: Trigger): boolean {
         return trig1 && trig2 ? trig1.id === trig2.id : trig1 === trig2;
+    }
+
+    deleteTrigger(): void {
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.data = { deleteItem: 'Trigger' };
+        this.deleteDialog.open(ConfirmDeleteModalComponent, dialogCfg)
+            .afterClosed()
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(confirmDelete => {
+                if (!confirmDelete) { return; }
+                this.currentTrigger.triggerActions.forEach(tra => { tra.entityAspect.setDeleted(); });
+                this.currentTrigger.entityAspect.setDeleted();
+                const index = this.triggers.findIndex(trig => this.currentTrigger.id === trig.id);
+                this.triggers.splice(index, 1);
+            });
+
     }
 
     editTrigger(): void {
@@ -85,20 +101,12 @@ export class Step2Component implements OnInit {
         dialogCfg.data = this.currentTrigger;
         this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
+            .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(data => {
-                if (data) { this.currentTrigger = data; }
+                if (!data) {
+                    this.currentTrigger.entityAspect.rejectChanges();
+                }
             });
-    }
-
-    removeSequence($event: { items: any[] }): void {
-        $event.items.forEach(i => i.sequence = null);
-        console.log($event);
-    }
-
-    reSequence(): void {
-        this.selectedTriggersAction.forEach((ai, i) => {
-            ai.sequence = i;
-        });
     }
 
     newTrigger(): void {
@@ -106,19 +114,44 @@ export class Step2Component implements OnInit {
         dialogCfg.data = this.planUow.newTrigger(this.plannedGen.id);
         this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
+            .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(data => {
                 if (data) {
-                    this.triggersEmpty = false;
                     this.triggers.push(data);
-                    this.currentTrigger = data;
-                    this.triggerFormGroup.controls['trigger'].setValue = data;
+                    this.triggerFormGroup.controls['trigger']
+                        .setValue(data);
                 }
             });
     }
 
-    remove($event): void {
-        console.log($event);
+    removeShell($event: { items: ITriggerActionItemShell[] }): void {
+        $event.items.forEach(shell => {
+            const trigAct = this.currentTrigger.triggerActions
+                .filter(item => item.actionItemId === shell.id)[0];
+            trigAct.entityAspect.setDeleted();
+            shell.sequence = null;
+        });
     }
 
+    reSequence($event: { items: ITriggerActionItemShell[] }): void {
+        this.selectedTriggersAction.forEach((sta, i) => {
+            const relatedTrigger = this.currentTrigger
+                .triggerActions
+                .filter(item => item.actionItemId === sta.id)[0];
 
+            relatedTrigger.sequence = sta['sequence'] =  i + 1;
+        });
+    }
+
+    private sortActionItem(data: ActionItem[], key): ActionItem[] {
+        return data.sort((a: ActionItem, b: ActionItem) => {
+            const propA: number | string = a[key];
+            const propB: number | string = b[key];
+
+            const valueA = isNaN(+propA) ? propA : +propA;
+            const valueB = isNaN(+propB) ? propB : +propB;
+
+            return (valueA < valueB ? -1 : 1);
+        });
+    }
 }

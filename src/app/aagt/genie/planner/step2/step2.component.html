@@ -8,7 +8,7 @@
                             <mat-select placeholder="Select Trigger" 
                                 formControlName="trigger"
                                 [compareWith]="compareTrigger">
-                                <mat-option *ngFor="let trigger of triggers" [value]="currentTrigger">
+                                <mat-option *ngFor="let trigger of triggers" [(value)]="trigger">
                                     {{trigger.milestone}}
                                 </mat-option>
                             </mat-select>
@@ -24,31 +24,32 @@
                           <span>New Trigger</span>
                         </button>
                         <button mat-menu-item 
-                        [disabled]="triggersEmpty" 
+                        [disabled]="!triggers.length" 
                         (click)="editTrigger()">
                           <mat-icon>alarm_on</mat-icon>
                           <span>Edit Trigger</span>
                         </button>
                         <button mat-menu-item 
-                        [disabled]="triggersEmpty" 
+                        [disabled]="!triggers.length" 
                         (click)="deleteTrigger()">
                           <mat-icon>alarm_off</mat-icon>
                           <span>Delete Trigger</span>
                         </button>
                       </mat-menu>
         </div>
-
+        <span *ngIf="currentTrigger" fxLayoutAlign="space-around center">
+            Select Trigger Milestone: {{currentTrigger.milestone}} |  Minimum Completion Time: {{currentTrigger.completionTime | minutesExpand}}
+        </span>
         <div class="ml-24 my-20">
             <p-pickList [source]="allActionItems" 
                 [target]="selectedTriggersAction" 
                 [responsive]="true" 
                 sourceHeader="Available Action Items"
                 targetHeader="Selected Action Items" 
-                (onMoveToTarget)="addSequence($event)" 
-                (onTargetReorder)="reSequence()"
-                (onMoveAllToTarget)="addSequence($event)" 
-                (onMoveAllToSource)="removeSequence($event)" 
-                (onMoveToSource)="removeSequence($event)"
+                (onMoveToTarget)="addShell($event)" 
+                (onTargetReorder)="reSequence($event)"
+                (onMoveToSource)="removeShell($event)"
+                [disabled]="!currentTrigger"
                 filterBy="shortCode,action" 
                 [showSourceControls]="false">
                 <ng-template let-actionItem pTemplate="item">
@@ -64,7 +65,7 @@
                             <div fxLayout="row" fxLayoutAlign="space-between center">
                                 <span class="w-20-p">{{actionItem.sequence}}</span>
                                 <span class="w-25-p">{{actionItem.shortCode}}</span>
-                                <span class="w-60-p">{{actionItem.formattedDuration}}</span>
+                                <span class="w-60-p">{{actionItem.duration | minutesExpand}}</span>
                             </div>
                         </div>
                     </div>
