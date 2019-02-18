@@ -2,6 +2,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Component, Inject, OnInit, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Trigger } from 'app/aagt/data';
+import { existingMilestoneValidator } from './new-trigger.validator';
+import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
     selector: 'new-trigger-dialog',
@@ -15,6 +17,7 @@ export class NewTriggerDialogComponent implements OnInit {
 
     constructor(private dialogRef: MatDialogRef<NewTriggerDialogComponent>,
         private formBuilder: FormBuilder,
+        private uow: PlannerUowService,
         @Inject(MAT_DIALOG_DATA)  data: any) {
         this.currentTrigger = data;
     }
@@ -22,7 +25,7 @@ export class NewTriggerDialogComponent implements OnInit {
     ngOnInit(): void {
         const trig = this.currentTrigger;
         this.triggerFormGroup = this.formBuilder.group({
-            milestone: new FormControl(trig.milestone, Validators.required),
+            milestone: new FormControl(trig.milestone, [Validators.required, existingMilestoneValidator(this.uow.getAllMilestones())]),
             offset: new FormControl(trig.generationOffset),
             start: new FormControl(trig.triggerStart),
             stop: new FormControl(trig.triggerStop)
@@ -39,4 +42,6 @@ export class NewTriggerDialogComponent implements OnInit {
         this.currentTrigger.generationOffset = this.triggerFormGroup.get('offset').value;
         this.dialogRef.close(this.currentTrigger);
     }
+
+
 }

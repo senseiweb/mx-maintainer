@@ -48,8 +48,7 @@ export class BaseRepoService<T extends SpEntityBase> {
             try {
                 const data = await this.executeQuery(query);
                 this.isCachedBundle(true);
-                // tslint:disable-next-line:no-console
-                console.info(`return this info ==>`);
+                console.log(`return this info ==>`);
                 console.log(data);
                 resolve(data);
             } catch (error) {

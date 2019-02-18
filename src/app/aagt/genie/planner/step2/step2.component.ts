@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { Generation, ActionItem, Trigger, TriggerAction, ITriggerActionItemShell } from 'app/aagt/data';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { PlannerUowService } from '../planner-uow.service';
@@ -20,8 +20,7 @@ import { Subject } from 'rxjs';
 })
 export class Step2Component implements OnInit, OnDestroy {
     currentTrigger: Trigger;
-    @Input() plannedGen: Generation;
-
+    @Output() step2Status = new EventEmitter<boolean>();
     triggers: Trigger[] = [];
     allActionItems: ActionItem[];
     selectedTriggersAction: ActionItem[];
@@ -37,11 +36,13 @@ export class Step2Component implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.allActionItems = this.planUow.allActionItems;
-        this.allActionItems.filter((ai: ActionItem) => ai.availableForUse);
+        this.allActionItems = this.planUow.allActionItems.filter((ai: ActionItem) => ai.availableForUse);
         this.triggerFormGroup = this.formBuilder.group({
             trigger: new FormControl()
         });
+
+        this.updateStep2Status();
+
         this.triggerFormGroup.get('trigger').valueChanges
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe((selectedTrigger: Trigger) => {
@@ -71,8 +72,10 @@ export class Step2Component implements OnInit, OnDestroy {
 
     addShell($event: { items: ITriggerActionItemShell[] }): void {
         $event.items.forEach(item  => {
-            const trigActEntity = this.planUow.getOrCreateTriggerAction({ triggerId: this.currentTrigger.id, actionItemId: item.id });
-            trigActEntity.sequence = item.sequence = this.selectedTriggersAction.findIndex(ai => ai.id === item.id) + 1;
+            const trigActEntity = this.planUow
+                .getOrCreateTriggerAction({ triggerId: this.currentTrigger.id, actionItemId: item.id });
+            trigActEntity.sequence = item.sequence = this.selectedTriggersAction
+                .findIndex(ai => ai.id === item.id) + 1;
         });
     }
 
@@ -93,7 +96,7 @@ export class Step2Component implements OnInit, OnDestroy {
                 const index = this.triggers.findIndex(trig => this.currentTrigger.id === trig.id);
                 this.triggers.splice(index, 1);
             });
-
+        this.updateStep2Status();
     }
 
     editTrigger(): void {
@@ -111,7 +114,7 @@ export class Step2Component implements OnInit, OnDestroy {
 
     newTrigger(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.planUow.newTrigger(this.plannedGen.id);
+        dialogCfg.data = this.planUow.newTrigger(this.planUow.currentGen.id);
         this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
             .pipe(takeUntil(this.unsubscribeAll))
@@ -120,6 +123,7 @@ export class Step2Component implements OnInit, OnDestroy {
                     this.triggers.push(data);
                     this.triggerFormGroup.controls['trigger']
                         .setValue(data);
+                    this.updateStep2Status();
                 }
             });
     }
@@ -153,5 +157,9 @@ export class Step2Component implements OnInit, OnDestroy {
 
             return (valueA < valueB ? -1 : 1);
         });
+    }
+
+    private updateStep2Status(): void {
+        this.step2Status.emit(!!this.triggers.length);
     }
 }

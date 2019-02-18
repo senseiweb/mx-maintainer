@@ -7,7 +7,7 @@ import {
 } from './action-item-manager';
 import { ListGenyComponent } from './list-geny/list-geny.component';
 import { AimUowService } from './action-item-manager/aim-uow.service';
-import { PlannerComponent, Step1Component, Step2Component, PlannerUowService } from './planner';
+import { PlannerComponent, Step1Component, Step2Component, Step3Component, PlannerUowService } from './planner';
 import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
 
 export const routedComponents = [
@@ -18,6 +18,7 @@ export const routedComponents = [
     PlannerComponent,
     Step1Component,
     Step2Component,
+    Step3Component,
     NewTriggerDialogComponent
 ];
 
@@ -46,6 +47,10 @@ const featureRoutes: Routes = [
                     {
                         path: 'step2',
                         component: Step2Component
+                    },
+                    {
+                        path: 'step3',
+                        component: Step3Component
                     }
                 ]
             },

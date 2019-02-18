@@ -10,17 +10,23 @@ export class GenAssetRepoService extends BaseRepoService<GenerationAsset> {
         super(AagtListName.GenAsset, entityService);
     }
 
-    getOrCreateGenerationAsset(data: { generationId: number, assetId: number }): GenerationAsset {
+    createGenerationAsset(data: { generationId: number, assetId: number }): void {
         const deletedTrigAction = this.entityManager
-        .getEntities(this.entityType, EntityState.Deleted)
-        .filter((entity: GenerationAsset) => entity.generationId === data.generationId
-            && entity.assetId === data.assetId)[0] as GenerationAsset;
+            .getEntities(this.entityType, EntityState.Deleted)
+            .filter((entity: GenerationAsset) => entity.generationId === data.generationId
+                && entity.assetId === data.assetId)[0] as GenerationAsset;
 
-    if (deletedTrigAction) {
-        deletedTrigAction.entityAspect.setUnchanged();
-        return deletedTrigAction;
+        if (deletedTrigAction) {
+            deletedTrigAction.entityAspect.setUnchanged();
+        } else {
+            this.createBase(data);
+        }
     }
 
-        return this.createBase(data);
-    }
+    // getAllGenerationAssets(data: { gernationId: number, triggerId: number }): GenerationAsset[] {
+    //     return this.entityManager
+    //         .getEntities(this.entityType)
+    //         .filter((entity: GenerationAsset) => entity.generationId === data.gernationId &&
+    //             entity.triggerId === data.triggerId) as GenerationAsset[]
+    // }
 }

@@ -1,8 +1,14 @@
 <div id="gp-step2" [@animate]="{value:'*',params:{y:'100%'}}" fxLayout="row" fxFlex="100" class="widget widget5">
 
     <div class="fuse-widget-front">
-        <div class="px-16 border-bottom accent" fxFlex="0 1 auto" fxLayout="row">
-            <div fxFlex class="py-16 h3">Triggers</div>
+        <div class="px-16 border-bottom accent" fxFlex="1 1 auto" fxLayout="row" fxLayoutAlign="space-between center">
+            
+            <div class="h3">Triggers</div>
+
+            <div class="h3" *ngIf="currentTrigger">
+                    Select Trigger Milestone: {{currentTrigger.milestone}} |  Minimum Completion Time: {{currentTrigger.completionTime | minutesExpand}}
+            </div>
+            
             <form [formGroup]="triggerFormGroup">
                     <mat-form-field floatLabel="never">
                             <mat-select placeholder="Select Trigger" 
@@ -37,9 +43,7 @@
                         </button>
                       </mat-menu>
         </div>
-        <span *ngIf="currentTrigger" fxLayoutAlign="space-around center">
-            Select Trigger Milestone: {{currentTrigger.milestone}} |  Minimum Completion Time: {{currentTrigger.completionTime | minutesExpand}}
-        </span>
+
         <div class="ml-24 my-20">
             <p-pickList [source]="allActionItems" 
                 [target]="selectedTriggersAction" 

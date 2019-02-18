@@ -11,7 +11,6 @@ import { PlannerUowService } from '../planner-uow.service';
 export class Step1Component implements OnInit, OnDestroy {
 
     allAssets: Asset[] = [];
-    @Input() plannedGen: Generation;
     @Output() step1Status = new EventEmitter<boolean>();
     isoOperations: string[];
     genAssetsSelected = [];
@@ -27,7 +26,7 @@ export class Step1Component implements OnInit, OnDestroy {
         });
         this.allAssets = this.uow.allAssets;
         this.isoOperations = this.uow.isoLookups;
-        this.genAssetsSelected = this.plannedGen.generationAssets.map(genAsset => {
+        this.genAssetsSelected = this.uow.currentGen.generationAssets.map(genAsset => {
             return genAsset.asset.id;
         });
     }
@@ -37,7 +36,7 @@ export class Step1Component implements OnInit, OnDestroy {
     }
 
     createStep1Form(): FormGroup {
-        const stp = this.plannedGen;
+        const stp = this.uow.currentGen;
         return this.formBuilder.group({
             title: new FormControl(stp.title),
             active: new FormControl(stp.active),
@@ -53,22 +52,20 @@ export class Step1Component implements OnInit, OnDestroy {
             .get('numberAssetsRequired')
             .setValue(selectedAssets.length);
 
-        this.plannedGen.generationAssets.forEach(genAsset => {
+        this.uow.currentGen.generationAssets.forEach(genAsset => {
             if (!selectedAssets.some(id => genAsset.assetId === id)) {
                 genAsset.entityAspect.setDeleted();
             }
         });
 
         selectedAssets.forEach(id => {
-            if (!this.plannedGen.generationAssets.some(genAsset => genAsset.assetId === id)) {
+            if (!this.uow.currentGen.generationAssets.some(genAsset => genAsset.assetId === id)) {
                 const data = {
-                    generationId: this.plannedGen.id,
+                    generationId: this.uow.currentGen.id,
                     assetId: id
                 };
-                this.uow.getOrCreateGenerationAsset(data);
+                this.uow.createGenerationAsset(data);
             }
         });
-
-        console.log(selectedAssets);
     }
 }

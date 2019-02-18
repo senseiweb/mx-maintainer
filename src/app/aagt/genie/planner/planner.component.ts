@@ -12,12 +12,11 @@ import { PlannerUowService } from './planner-uow.service';
 export class PlannerComponent implements OnInit {
 
     genId: number;
-    plannedGen: Generation;
     isLinear: boolean;
     step1Completed: boolean;
-    step2completed: boolean;
-    step3completed: boolean;
-    step4completed: boolean;
+    step2Completed: boolean;
+    step3Completed: boolean;
+    step4Completed: boolean;
     genAssetsSelected: GenerationAsset[] = [];
     assignedAssets: GenerationAsset[];
 
@@ -27,17 +26,28 @@ export class PlannerComponent implements OnInit {
 
     ngOnInit() {
         this.genId = this.route.snapshot.params.id;
-        this.plannedGen = this.uow.planGen(this.genId);
-        this.isLinear = this.plannedGen.status === genStatusEnum.draft;
+        this.uow.planGen(this.genId);
+        this.isLinear = this.uow.currentGen.status === genStatusEnum.draft;
         this.getAlreadyAssignedAssets();
     }
 
     private getAlreadyAssignedAssets(): void {
-        if (this.plannedGen.entityAspect.entityState.isAdded()) { return; }
-        this.uow.getAssignedAssets(this.plannedGen.id);
+        if (this.uow.currentGen.entityAspect.entityState.isAdded()) { return; }
+        this.uow.getGenerationAssets();
     }
 
-    onCompleted($event): void {
-        this.step1Completed = $event;
+    onCompleted(id: number, $event: boolean): void {
+        switch (id) {
+            case 1:
+                this.step1Completed = $event;
+                break;
+            case 2:
+                this.step2Completed = $event;
+                break;
+            case 3:
+                this.step3Completed = $event;
+                break;
+        }
+
     }
 }

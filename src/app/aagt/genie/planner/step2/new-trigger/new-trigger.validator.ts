@@ -1,30 +1,10 @@
-import { Directive, Attribute } from '@angular/core';
-import { Validator, NG_VALIDATORS, FormControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
-@Directive({
-    selector: '[validateTriggerMilestone][formControlName],[validateTriggerMilestone][formControl],[validateTriggerMilestone][ngModel]',
-    providers: [
-        { provide: NG_VALIDATORS, useExisting: DupTriggerMilestoneValidator, multi: true }
-    ]
-})
-export class DupTriggerMilestoneValidator implements Validator {
-
-    constructor(@Attribute('validateTriggerMilestone') public validateTriggerMilestone: string) { }
-    
-    static ValidateTriggerMileston(c: FormControl): ValidationErrors {
-        
-    }
-
-
-    validate(c: r): ValidationErrors | null {
-        if (valid) {
-            return null;
+export function existingMilestoneValidator(milestones: string[]): ValidatorFn {
+    return (c: AbstractControl): {[key: string]: boolean} | null => {
+        if (c.value !== undefined && milestones.includes(c.value)) {
+            return { 'milestoneExists': true };
         }
-
-        return {
-            validatorName: {
-                valid: false
-            }
-        };
-    }
+        return null;
+    };
 }

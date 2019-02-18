@@ -106,7 +106,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         return localCache;
     }
 
-    makePredicate(property: keyof T, filter: FilterQueryOpSymbol, condition: string): Predicate {
+    makePredicate(property: keyof T, filter: FilterQueryOpSymbol, condition: string | number): Predicate {
         return Predicate.create(property as any, filter, condition);
     }
 

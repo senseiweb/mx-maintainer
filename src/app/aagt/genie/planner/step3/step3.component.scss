@@ -1,0 +1,43 @@
+@import "src/@fuse/scss/fuse";
+
+#genAssetTasks {
+
+    .header {
+
+        .search-wrapper {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 28px;
+            overflow: hidden;
+            @include mat-elevation(1);
+
+            .search {
+                width: 100%;
+                height: 36px;
+                line-height: 36px;
+                padding: 0 9px;
+
+                input {
+                    width: 100%;
+                    height: 36px;
+                    min-height: 36px;
+                    max-height: 36px;
+                    padding: 0 8px;
+                    border: none;
+                    outline: none;
+                }
+            }
+        }
+    }
+
+    .content {
+        overflow: hidden;
+
+        .sidebar {
+
+            &:not(.locked-open) {
+                background: white;
+            }
+        }
+    }
+}
