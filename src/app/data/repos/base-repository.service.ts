@@ -49,8 +49,6 @@ export class BaseRepoService<T extends SpEntityBase> {
             try {
                 const data = await this.executeQuery(query);
                 this.isCachedBundle(true);
-                console.log(`return this info ==>`);
-                console.log(data);
                 resolve(data);
             } catch (error) {
                 return reject(this.queryFailed(error));
@@ -120,13 +118,11 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
 
     async where(predicate: Predicate, refreshFromServer = false): Promise<T[]> {
-        // tslint:disable-next-line:no-console
-        console.info(`A where predicate was passed ==> ${predicate.toString()}`);
         const query = this.baseQuery().where(predicate);
         const lastQueryed = this.queryCache[predicate.toString()];
         const now = moment();
         try {
-            if (refreshFromServer || (lastQueryed && lastQueryed.diff(now, 'm') >= 5)) {
+            if (refreshFromServer || (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)) {
                 const data = await this.executeQuery(query, FetchStrategy.FromServer);
                 this.queryCache[predicate.toString()] = moment();
                 return Promise.resolve(data);

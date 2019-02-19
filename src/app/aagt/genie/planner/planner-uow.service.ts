@@ -148,11 +148,20 @@ export class PlannerUowService implements Resolve<any> {
     }
 
     getGenerationAssets(): void {
-        this.genAssetRepo
-            .where(this.generationPredicate)
-            .then(data => {
-                this.onGenerationAssetsChange.next(data);
-            });
+        const predicate = this.genAssetRepo.makePredicate('generationId', FilterQueryOp.Equals, this.currentGen.id);
+        if (this.currentGen.entityAspect.entityState.isAdded()) {
+            const localGenAsset = this.genAssetRepo
+                .whereInCache(predicate);
+            
+            this.onGenerationAssetsChange.next(localGenAsset);
+
+        } else {
+            this.genAssetRepo
+                .where(predicate)
+                .then(data => {
+                    this.onGenerationAssetsChange.next(data);
+                });
+        }
     }
 
     getTriggerActions(): void {

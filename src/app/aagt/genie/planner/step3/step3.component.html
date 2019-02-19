@@ -1,4 +1,4 @@
-<div id="genAssetTasks" class="simple left-sidebar inner-sidebar inner-scroll">
+<div id="genAssetTasks" class="page-layout simple left-sidebar inner-sidebar inner-scroll">
 
     <!-- HEADER -->
     <div class="header accent" fxLayout="column" fxLayoutAlign="start"
@@ -31,7 +31,7 @@
 
                 <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
                     <mat-icon>search</mat-icon>
-                    <input [formControl]="searchInput" placeholder="Search for a contact">
+                    <!-- <input [formControl]="searchInput" placeholder="Search for a contact"> -->
                 </div>
 
             </div>
@@ -50,11 +50,11 @@
     <div class="content">
 
         <!-- SIDEBAR -->
-        <fuse-sidebar class="sidebar" name="contacts-main-sidebar" position="left" lockedOpen="gt-sm">
+        <fuse-sidebar class="sidebar" name="gen-trig-sidebar" position="left" lockedOpen="gt-sm">
 
             <!-- SIDEBAR CONTENT -->
             <div class="content" fusePerfectScrollbar>
-                <!-- <contacts-main-sidebar [@animate]="{value:'*'}"></contacts-main-sidebar> -->
+                <gen-trig-sidebar [@animate]="{value:'*'}"></gen-trig-sidebar>
             </div>
             <!-- / SIDEBAR CONTENT -->
 

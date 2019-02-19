@@ -27,7 +27,7 @@ export class TriggerFakeDb {
             entity.__metadata = {
                 etag: `'${index}'`,
                 id: `Web/Lists(guid'${itemGuid}')/Items(${index})`,
-                type: 'SP.Data.GenerationListItem',
+                type: 'SP.Data.TriggerListItem',
                 uri: `https://cs2.eis.af.mil/sites/10918/mx-maintainer/_api/Web/Lists(guid'${itemGuid}')/Items(${index})`
             };
 

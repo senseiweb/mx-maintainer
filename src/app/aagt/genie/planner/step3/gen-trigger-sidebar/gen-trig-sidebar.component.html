@@ -3,47 +3,44 @@
     <div class="card">
 
         <!-- SIDEBAR HEADER -->
-        <div class="header p-24" fxLayout="row" fxLayoutAlign="start center">
+        <!-- <div class="header p-24" fxLayout="row" fxLayoutAlign="start center">
+        </div> -->
 
             <div class="content py-16" fusePerfectScrollbar>
+                    <div class="nav material2">
 
-                <div class="nav material2">
-    
-                    <div class="nav-item" aria-label="inbox">
-                        <a class="nav-link" matRipple (click)="filterActionsByTrigger()"
-                           [ngClass]="{'active accent':filterBy ==='all'}">
-                            <span class="title">All Triggers</span>
-                        </a>
+                            <div class="nav-item" aria-label="inbox">
+                                <a class="nav-link" matRipple (click)="filterActionsByTrigger()"
+                                    [ngClass]="{'active accent':triggerFilterBy ==='all'}">
+                                    <span class="title">All Triggers</span>
+                                </a>
+                            </div>
+        
+                            <div *ngFor="let trigger of triggerActions">
+                                <div class="nav-item" aria-label="generation triggers" (click)="filterActionsByTrigger(trigger)">
+                                    <a class="nav-link" matRipple [ngClass]="{'active accent':triggerFilterBy === trigger.id}">
+                                        <div class="title">trigger.milestone</div>
+                                    </a>
+                                </div>
+                            </div>
                     </div>
-
-                    <div *ngFor="let trigger of triggerActions">
-                        <div class="nav-item" aria-label="generation triggers" (click)="filterActionsByTrigger(trigger)">
-                            <a class="nav-link" matRipple [ngClass]="{'active accent':filterBy === trigger.id}">
-                                <div class="title">trigger.milestone</div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-    
             </div>
-        </div>
         <!-- / SIDEBAR HEADER -->
-
+<hr/>
         <!-- SIDEBAR CONTENT -->
         <div class="content py-16" fusePerfectScrollbar>
-            
             <div class="nav material2">
                 <div class="nav-item" aria-label="inbox">
                     <a class="nav-link" matRipple (click)="filterActionsByAsset()"
-                       [ngClass]="{'active accent':filterBy ==='all'}">
+                       [ngClass]="{'active accent':assetFilterBy ==='all'}">
                         <span class="title">All Assets</span>
                     </a>
                 </div>
 
-                <div **ngFor="let asset of genAssets | aysnc">
-                    <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(asset)">
-                        <a class="nav-link" matRipple [ngClass]="{'active accent':filterBy === asset.id}">
-                            <div class="title">{{asset.alias}}</div>
+                <div *ngFor="let genAsset of genAssets">
+                    <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(genAsset)">
+                        <a class="nav-link" matRipple [ngClass]="{'active accent':assetFilterBy === genAsset.id}">
+                            <div class="title">{{genAsset.asset.alias}}</div>
                         </a>
                     </div>
                 </div>

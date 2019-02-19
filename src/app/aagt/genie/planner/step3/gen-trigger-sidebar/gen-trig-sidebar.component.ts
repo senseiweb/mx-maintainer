@@ -10,7 +10,6 @@ import { PlannerUowService } from '../../planner-uow.service';
     styleUrls: ['./gen-trig-sidebar.component.scss']
 })
 export class GenTriggerSidebarComponent implements OnInit, OnDestroy {
-    @Input() plannedGen: Generation;
 
     trigger: Trigger;
     triggerFilterBy: number | 'all';
@@ -47,12 +46,14 @@ export class GenTriggerSidebarComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    filterActionsByAsset(genAsset: GenerationAsset | null): void {
-        if (genAsset === null) {
+    filterActionsByAsset(genAsset: GenerationAsset): void {
+        if (!genAsset) {
             this.planUow.onAssetFilterChange.next('all');
+            this.assetFilterBy = 'all';
+        } else {
+            this.planUow.onAssetFilterChange.next(genAsset.id);
+            this.assetFilterBy = genAsset.id;
         }
-        this.assetFilterBy = genAsset.id;
-        this.planUow.onAssetFilterChange.next(genAsset.id);
     }
 
     filterActionsByTrigger(trigAction: TriggerAction | null): void {

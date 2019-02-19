@@ -1,15 +1,15 @@
 <div id="gp-step2" [@animate]="{value:'*',params:{y:'100%'}}" fxLayout="row" fxFlex="100" class="widget widget5">
 
     <div class="fuse-widget-front">
-        <div class="px-16 border-bottom accent" fxFlex="1 1 auto" fxLayout="row" fxLayoutAlign="space-between center">
+        <div class="px-16 border-bottom accent" fxLayout="row" fxLayoutAlign="space-between center">
             
             <div class="h3">Triggers</div>
 
-            <div class="h3" *ngIf="currentTrigger">
-                    Select Trigger Milestone: {{currentTrigger.milestone}} |  Minimum Completion Time: {{currentTrigger.completionTime | minutesExpand}}
+            <div class="h3" *ngIf="currentTrigger" >
+                    Trigger: {{currentTrigger.milestone}} |  MCT: {{currentTrigger.completionTime | minutesExpand}}
             </div>
-            
-            <form [formGroup]="triggerFormGroup">
+            <div fxLayout="row">
+                                <form [formGroup]="triggerFormGroup">
                     <mat-form-field floatLabel="never">
                             <mat-select placeholder="Select Trigger" 
                                 formControlName="trigger"
@@ -19,12 +19,12 @@
                                 </mat-option>
                             </mat-select>
                         </mat-form-field>
-            </form>
+                </form>
 
                 <button class="mt-8" mat-icon-button [matMenuTriggerFor]="menu">
                         <mat-icon>more_vert</mat-icon>
                 </button>
-                      <mat-menu #menu="matMenu">
+                <mat-menu #menu="matMenu">
                         <button mat-menu-item (click)="newTrigger()">
                           <mat-icon>alarm_add</mat-icon>
                           <span>New Trigger</span>
@@ -41,7 +41,10 @@
                           <mat-icon>alarm_off</mat-icon>
                           <span>Delete Trigger</span>
                         </button>
-                      </mat-menu>
+                </mat-menu>
+            </div>
+
+
         </div>
 
         <div class="ml-24 my-20">
