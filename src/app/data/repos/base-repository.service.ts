@@ -6,13 +6,17 @@ import {
     FilterQueryOpSymbol,
     FetchStrategySymbol,
     FetchStrategy,
+    FilterQueryOp,
 } from 'breeze-client';
 import * as moment from 'moment';
 import {
     bareEntity,
+    EntityChildren,
+    FilterEntityCollection,
     SpEntityBase
 } from '../models/_entity-base';
 import { EmProviderService } from './em-provider.service';
+
 
 export class BaseRepoService<T extends SpEntityBase> {
     protected entityManager: EntityManager;
@@ -39,7 +43,6 @@ export class BaseRepoService<T extends SpEntityBase> {
 
     all(): Promise<T[]> {
         const query = this.baseQuery();
-        console.log(`all assets request on ${this.entityType.shortName} and query ${query}`);
         if (this.isCachedBundle()) {
             return Promise.resolve(this.executeCacheQuery(query));
         }
@@ -67,8 +70,8 @@ export class BaseRepoService<T extends SpEntityBase> {
         return EntityQuery.from(this.resourceName);
     }
 
-    protected isCachedBundle(refreshedAll?: true): boolean {
-        if (refreshedAll) {
+    protected isCachedBundle(refreshedData?: true): boolean {
+        if (refreshedData) {
             this.cachedAll = true;
             this.cachedDate = moment();
             this.defaultFetchStrategy = FetchStrategy.FromLocalCache;
@@ -104,7 +107,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         return localCache;
     }
 
-    makePredicate(property: keyof T, filter: FilterQueryOpSymbol, condition: string | number): Predicate {
+    makePredicate(property: keyof T, condition: string | number, filter = FilterQueryOp.Equals): Predicate {
         return Predicate.create(property as any, filter, condition);
     }
 
@@ -117,14 +120,20 @@ export class BaseRepoService<T extends SpEntityBase> {
         }
     }
 
-    async where(predicate: Predicate, refreshFromServer = false): Promise<T[]> {
-        const query = this.baseQuery().where(predicate);
-        const lastQueryed = this.queryCache[predicate.toString()];
+    async where(queryName: string, predicate: Predicate, includeChildren?: EntityChildren<T>, refreshFromServer = false): Promise<T[]> {
+        const query = this.baseQuery();
+
+        if (includeChildren) {
+            query.expand(includeChildren);
+        }
+
+        query.where(predicate);
+        const lastQueryed = this.queryCache[queryName];
         const now = moment();
         try {
             if (refreshFromServer || (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)) {
                 const data = await this.executeQuery(query, FetchStrategy.FromServer);
-                this.queryCache[predicate.toString()] = moment();
+                this.queryCache[queryName] = moment();
                 return Promise.resolve(data);
             }
             return Promise.resolve(this.executeCacheQuery(query));

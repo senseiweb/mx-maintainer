@@ -15,6 +15,19 @@ export interface Instantiable<T> {
     new(...args: any[]): T;
 }
 
+// export declare type Children<T> <keyof T, T extends any[] ? T : never;
+
+export declare type FilterType<T, U> = { [key in keyof T]: T extends U ? key : never }
+
+export declare type FilterEntityCollection<T> = keyof Partial<Pick<T,
+    { [K in keyof T]: T[K] extends Array<Entity> ? K : never }[keyof T]>>;
+
+export declare type EntityChildren<T> = Extract<FilterEntityCollection<T>, string>;
+
+// export declare type ChildrenPropws<T> = keyof Partial<Pick<T, {
+//         [K in keyof T]: Array<Entity> extends T[K] ? K : never;
+//        }[keyof T]>>;
+
 export declare type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefinition' | '$typeName';
@@ -52,6 +65,7 @@ export interface SpEntityDef<T> extends etDef {
     isComplexType: boolean;
     navigationProperties?: NavMembers<T>;
 }
+
 export class SpEntityBase implements Entity {
     // sharepoint includes this property but we dont use it;
     iD: number;

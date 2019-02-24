@@ -7,8 +7,17 @@ import {
 } from './action-item-manager';
 import { ListGenyComponent } from './list-geny/list-geny.component';
 import { AimUowService } from './action-item-manager/aim-uow.service';
-import { PlannerComponent, Step1Component, Step2Component, Step3Component, PlannerUowService, GenTriggerSidebarComponent } from './planner';
+import {
+    PlannerComponent,
+    Step1Component,
+    Step2Component,
+    Step3Component,
+    PlannerUowService,
+    AssetTriggerSidebarComponent
+} from './planner';
+
 import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
+import { AssetTriggerActionListComponent } from './planner/step3/asset-trigger-action-list/asset-trigger-action-list.component';
 
 export const routedComponents = [
     GenieBaseComponent,
@@ -19,7 +28,8 @@ export const routedComponents = [
     Step1Component,
     Step2Component,
     Step3Component,
-    GenTriggerSidebarComponent,
+    AssetTriggerSidebarComponent,
+    AssetTriggerActionListComponent,
     NewTriggerDialogComponent
 ];
 

@@ -21,9 +21,6 @@ export class Step3Component implements OnInit, OnDestroy {
     @Input() plannedGen: Generation;
 
     triggers: Trigger[] = [];
-    allActionItems: ActionItem[];
-    selectedTriggersAction: ActionItem[];
-    triggerFormGroup: FormGroup;
     private unsubscribeAll: Subject<any>;
 
     constructor(private formBuilder: FormBuilder,
@@ -31,35 +28,10 @@ export class Step3Component implements OnInit, OnDestroy {
         private deleteDialog: MatDialog,
         private planUow: PlannerUowService) {
         this.unsubscribeAll = new Subject();
-        this.selectedTriggersAction = [];
     }
 
     ngOnInit() {
-        this.allActionItems = this.planUow.allActionItems;
-        this.allActionItems.filter((ai: ActionItem) => ai.availableForUse);
-        this.triggerFormGroup = this.formBuilder.group({
-            trigger: new FormControl()
-        });
-        this.triggerFormGroup.get('trigger').valueChanges
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe((selectedTrigger: Trigger) => {
-                if (!selectedTrigger) { return; }
-
-                this.allActionItems = this.allActionItems.concat(this.selectedTriggersAction.splice(0));
-
-                this.allActionItems.forEach(item => item['sequence'] = null);
-
-                selectedTrigger.triggerActions.forEach((item, i, a) => {
-                    const actionItemIndex = this.allActionItems
-                        .findIndex(ai => ai.id === item.actionItemId);
-                    const actionItem = this.allActionItems.splice(actionItemIndex, 1)[0];
-                    actionItem['sequence'] = item.sequence;
-                    this.selectedTriggersAction.push(actionItem as any);
-                });
-                this.sortActionItem(this.selectedTriggersAction, 'sequence');
-                this.sortActionItem(this.allActionItems, 'teamType');
-                this.currentTrigger = selectedTrigger;
-            });
+        
     }
 
     ngOnDestroy(): void {

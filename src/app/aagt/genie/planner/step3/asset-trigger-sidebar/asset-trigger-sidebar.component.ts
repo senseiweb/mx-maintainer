@@ -5,18 +5,16 @@ import { Trigger, Asset, GenerationAsset, TriggerAction, Generation } from 'app/
 import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
-    selector: 'gen-trig-sidebar',
-    templateUrl: './gen-trig-sidebar.component.html',
-    styleUrls: ['./gen-trig-sidebar.component.scss']
+    selector: 'asset-trigger-sidebar',
+    templateUrl: './asset-trigger-sidebar.component.html',
+    styleUrls: ['./asset-trigger-sidebar.component.scss']
 })
-export class GenTriggerSidebarComponent implements OnInit, OnDestroy {
+export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
 
-    trigger: Trigger;
-    triggerFilterBy: number | 'all';
-    assetFilterBy: number | 'all';
-    genAssets: GenerationAsset[];
-    triggerActions: TriggerAction[];
-
+    triggerNames: string[];
+    triggerFilterBy: string;
+    assetFilterBy: string;
+    assetNames: string[];
     // Private
     private unsubscribeAll: Subject<any>;
 
@@ -33,11 +31,13 @@ export class GenTriggerSidebarComponent implements OnInit, OnDestroy {
         this.planUow.onTriggerActionsChange
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(trigActions => {
-                this.triggerActions = trigActions;
+                this.triggerNames = [...new Set(trigActions.map(ta => ta.trigger.milestone))];
             });
         this.planUow.onGenerationAssetsChange
             .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(genAssets => this.genAssets = genAssets);
+            .subscribe(genAssets => {
+                this.assetNames = [...new Set(genAssets.map(ga => ga.asset.alias))];
+            });
     }
 
     ngOnDestroy(): void {
@@ -46,22 +46,24 @@ export class GenTriggerSidebarComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    filterActionsByAsset(genAsset: GenerationAsset): void {
-        if (!genAsset) {
+    filterActionsByAsset(alias: string): void {
+        if (!alias) {
             this.planUow.onAssetFilterChange.next('all');
             this.assetFilterBy = 'all';
         } else {
-            this.planUow.onAssetFilterChange.next(genAsset.id);
-            this.assetFilterBy = genAsset.id;
+            this.planUow.onAssetFilterChange.next(alias);
+            this.assetFilterBy = alias;
         }
     }
 
-    filterActionsByTrigger(trigAction: TriggerAction | null): void {
-        if (trigAction === null) {
+    filterActionsByTrigger(trigName: string): void {
+        if (!trigName) {
             this.planUow.onTriggerFilterChange.next('all');
+            this.triggerFilterBy = 'all';
+        } else {
+            this.planUow.onTriggerFilterChange.next(trigName);
+            this.triggerFilterBy = trigName;
         }
-        this.triggerFilterBy = trigAction.id;
-        this.planUow.onTriggerFilterChange.next(trigAction.id);
     }
 }
 

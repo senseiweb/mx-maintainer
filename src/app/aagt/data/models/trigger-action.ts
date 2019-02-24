@@ -4,6 +4,7 @@ import { ActionItem } from './action-item';
 import { Trigger } from './trigger';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
+import { AssetTriggerAction } from './asset-trigger-action';
 
 export interface ITriggerActionItemShell {
     id?: number;
@@ -23,6 +24,7 @@ export class TriggerAction extends ebase.SpEntityBase {
     triggerId: number;
     actionItem: ActionItem;
     trigger: Trigger;
+    assetTriggerActions: AssetTriggerAction[];
 }
 
 @Injectable({
@@ -53,6 +55,11 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
                 entityTypeName: aagtCfg.AagtListName.ActionItem,
                 associationName: 'Action_Trigger',
                 foreignKeyNames: ['actionItemId']
+            },
+            assetTriggerActions: {
+                entityTypeName: aagtCfg.AagtListName.AssetTrigAct,
+                associationName: 'TrigAsset_AssetTrigAction',
+                isScalar: false
             }
         };
 

@@ -30,13 +30,13 @@ export class Step2Component implements OnInit, OnDestroy {
     constructor(private formBuilder: FormBuilder,
         private trigdialog: MatDialog,
         private deleteDialog: MatDialog,
-        private planUow: PlannerUowService) {
+        private uow: PlannerUowService) {
         this.unsubscribeAll = new Subject();
         this.selectedTriggersAction = [];
     }
 
     ngOnInit() {
-        this.allActionItems = this.planUow.allActionItems.filter((ai: ActionItem) => ai.availableForUse);
+        this.allActionItems = this.uow.allActionItemOptions.filter((ai: ActionItem) => ai.availableForUse);
         this.triggerFormGroup = this.formBuilder.group({
             trigger: new FormControl()
         });
@@ -47,12 +47,13 @@ export class Step2Component implements OnInit, OnDestroy {
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe((selectedTrigger: Trigger) => {
                 if (!selectedTrigger) { return; }
-
-                this.allActionItems = this.allActionItems.concat(this.selectedTriggersAction.splice(0));
+                this.uow.currentTrigger = selectedTrigger;
+                this.allActionItems = this.allActionItems
+                    .concat(this.selectedTriggersAction.splice(0));
 
                 this.allActionItems.forEach(item => item['sequence'] = null);
 
-                selectedTrigger.triggerActions.forEach((item, i, a) => {
+                selectedTrigger.triggerActions.forEach(item => {
                     const actionItemIndex = this.allActionItems
                         .findIndex(ai => ai.id === item.actionItemId);
                     const actionItem = this.allActionItems.splice(actionItemIndex, 1)[0];
@@ -71,11 +72,16 @@ export class Step2Component implements OnInit, OnDestroy {
     }
 
     addShell($event: { items: ITriggerActionItemShell[] }): void {
-        $event.items.forEach(item  => {
-            const trigActEntity = this.planUow
-                .getOrCreateTriggerAction({ triggerId: this.currentTrigger.id, actionItemId: item.id });
-            trigActEntity.sequence = item.sequence = this.selectedTriggersAction
+        $event.items.forEach(item => {
+            item.sequence = this.selectedTriggersAction
                 .findIndex(ai => ai.id === item.id) + 1;
+            
+            this.uow
+                .getTriggerAction({
+                    triggerId: this.currentTrigger.id,
+                    actionItemId: item.id,
+                    sequence: item.sequence
+                });
         });
     }
 
@@ -91,7 +97,10 @@ export class Step2Component implements OnInit, OnDestroy {
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(confirmDelete => {
                 if (!confirmDelete) { return; }
-                this.currentTrigger.triggerActions.forEach(tra => { tra.entityAspect.setDeleted(); });
+                this.currentTrigger.triggerActions.forEach(tra => {
+                    tra.assetTriggerActions.forEach(ata => ata.entityAspect.setDeleted());
+                    tra.entityAspect.setDeleted();
+                });
                 this.currentTrigger.entityAspect.setDeleted();
                 const index = this.triggers.findIndex(trig => this.currentTrigger.id === trig.id);
                 this.triggers.splice(index, 1);
@@ -105,8 +114,8 @@ export class Step2Component implements OnInit, OnDestroy {
         this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
             .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(data => {
-                if (!data) {
+            .subscribe(confirmedChange => {
+                if (!confirmedChange) {
                     this.currentTrigger.entityAspect.rejectChanges();
                 }
             });
@@ -114,7 +123,7 @@ export class Step2Component implements OnInit, OnDestroy {
 
     newTrigger(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.planUow.newTrigger(this.planUow.currentGen.id);
+        dialogCfg.data = this.uow.newTrigger(this.uow.currentGen.id);
         this.trigdialog.open(NewTriggerDialogComponent, dialogCfg)
             .afterClosed()
             .pipe(takeUntil(this.unsubscribeAll))
@@ -132,6 +141,7 @@ export class Step2Component implements OnInit, OnDestroy {
         $event.items.forEach(shell => {
             const trigAct = this.currentTrigger.triggerActions
                 .filter(item => item.actionItemId === shell.id)[0];
+            trigAct.assetTriggerActions.forEach(ata => ata.entityAspect.setDeleted());
             trigAct.entityAspect.setDeleted();
             shell.sequence = null;
         });
@@ -160,6 +170,6 @@ export class Step2Component implements OnInit, OnDestroy {
     }
 
     private updateStep2Status(): void {
-        this.step2Status.emit(!!this.triggers.length);
+        this.uow.onStep2ValidityChange.next(!!this.triggers.length);
     }
 }

@@ -2,6 +2,10 @@ import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angu
 import { Generation, Asset } from 'app/aagt/data';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
 import { PlannerUowService } from '../planner-uow.service';
+import { formControlBinding } from '@angular/forms/src/directives/ng_model';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 
 @Component({
     selector: 'genie-plan-step1',
@@ -11,20 +15,32 @@ import { PlannerUowService } from '../planner-uow.service';
 export class Step1Component implements OnInit, OnDestroy {
 
     allAssets: Asset[] = [];
-    @Output() step1Status = new EventEmitter<boolean>();
     isoOperations: string[];
     genAssetsSelected = [];
     step1FormGroup: FormGroup;
+    step1AssetFormGroup: FormGroup;
+    private unsubscribeAll: Subject<any>;
 
     constructor(private uow: PlannerUowService,
-    private formBuilder: FormBuilder) { }
+        private formBuilder: FormBuilder) {
+        this.unsubscribeAll = new Subject();
+     }
 
     ngOnInit() {
         this.step1FormGroup = this.createStep1Form();
-        this.step1FormGroup.statusChanges.subscribe(() => {
-            this.step1Status.emit(this.step1FormGroup.valid);
+        this.step1AssetFormGroup = this.formBuilder.group({
+            assetSelection: new FormControl()
         });
-        this.allAssets = this.uow.allAssets;
+        this.step1AssetFormGroup.get('assetSelection')
+            .valueChanges
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(selectedAssets => this.assetSelectionChanged(selectedAssets));
+        this.step1FormGroup.statusChanges
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(() => {
+                this.uow.onStep1ValidityChange.next(this.step1AssetFormGroup.valid);
+            });
+        this.allAssets = this.uow.allAssetsOptions;
         this.isoOperations = this.uow.isoLookups;
         this.genAssetsSelected = this.uow.currentGen.generationAssets.map(genAsset => {
             return genAsset.asset.id;
@@ -32,7 +48,8 @@ export class Step1Component implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
     }
 
     createStep1Form(): FormGroup {
@@ -47,22 +64,25 @@ export class Step1Component implements OnInit, OnDestroy {
         });
     }
 
-    assignedAssetModelChange(selectedAssets: number[]): void {
+    assetSelectionChanged(selectedAssets: Asset[]): void {
         this.step1FormGroup
             .get('numberAssetsRequired')
             .setValue(selectedAssets.length);
 
         this.uow.currentGen.generationAssets.forEach(genAsset => {
-            if (!selectedAssets.some(id => genAsset.assetId === id)) {
+            if (!selectedAssets.some(assets => genAsset.assetId === assets.id)) {
+                genAsset.assetTriggerActions.forEach(ata => {
+                    ata.entityAspect.setDeleted();
+                });
                 genAsset.entityAspect.setDeleted();
             }
         });
 
-        selectedAssets.forEach(id => {
-            if (!this.uow.currentGen.generationAssets.some(genAsset => genAsset.assetId === id)) {
+        selectedAssets.forEach(asset => {
+            if (!this.uow.currentGen.generationAssets.some(genAsset => genAsset.assetId === asset.id)) {
                 const data = {
                     generationId: this.uow.currentGen.id,
-                    assetId: id
+                    assetId: asset.id
                 };
                 this.uow.createGenerationAsset(data);
             }

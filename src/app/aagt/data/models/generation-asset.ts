@@ -4,6 +4,7 @@ import { Asset } from './asset';
 import { Generation } from './generation';
 import * as aagtCfg from './sp-aagt-config';
 import { AagtDataModule } from '../aagt-data.module';
+import { AssetTriggerAction } from './asset-trigger-action';
 
 export type AssetStatus = 'FMC' | 'PMC' | 'NMC';
 
@@ -15,6 +16,7 @@ export class GenerationAsset extends ebase.SpEntityBase {
     generation: Generation;
     generationId: number;
     assetId: number;
+    assetTriggerActions: AssetTriggerAction[];
 }
 
 @Injectable({
@@ -42,6 +44,11 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<GenerationAsset>
                 entityTypeName: 'Generation',
                 associationName: 'Generation_Assets',
                 foreignKeyNames: ['generationId']
+            },
+            assetTriggerActions: {
+                entityTypeName: 'AssetTriggerAction',
+                associationName: 'GenAsset_AssetTrigAction',
+                isScalar: false
             }
         };
 

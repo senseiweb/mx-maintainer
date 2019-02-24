@@ -13,9 +13,6 @@
             </button>
 
             <div class="logo" fxLayout="row" fxLayoutAlign="start center">
-                <mat-icon class="logo-icon mr-16"
-                          [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">account_box
-                </mat-icon>
                 <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
                     Generation Asset Tasks
                 </span>
@@ -54,7 +51,7 @@
 
             <!-- SIDEBAR CONTENT -->
             <div class="content" fusePerfectScrollbar>
-                <gen-trig-sidebar [@animate]="{value:'*'}"></gen-trig-sidebar>
+                <asset-trigger-sidebar [@animate]="{value:'*'}"></asset-trigger-sidebar>
             </div>
             <!-- / SIDEBAR CONTENT -->
 
@@ -66,7 +63,7 @@
 
             <!-- CONTENT -->
             <div class="content">
-                <!-- <contacts-contact-list></contacts-contact-list> -->
+                <asset-trigger-action-list></asset-trigger-action-list>
             </div>
             <!-- / CONTENT -->
 

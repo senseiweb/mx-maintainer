@@ -1,0 +1,39 @@
+<mat-table #table [dataSource]="dataSource"
+           [@animateStagger]="{value:'50'}">
+
+    <!-- Checkbox Column -->
+    <ng-container matColumnDef="checkbox">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell *matCellDef="let ata">
+            <mat-checkbox [(ngModel)]="checkboxes[ata.id]" (ngModelChange)="onSelectedChange(assetTrigAct.id)"
+                          (click)="$event.stopPropagation()">
+            </mat-checkbox>
+        </mat-cell>
+    </ng-container>
+
+    <!-- Sequence Column -->
+    <ng-container matColumnDef="sequence">
+        <mat-header-cell *matHeaderCellDef>Sequence</mat-header-cell>
+        <mat-cell *matCellDef="let ata">
+            <p class="font-weight-600">{{ata.sequence}}</p>
+        </mat-cell>
+    </ng-container>
+
+    <!-- Alias Column -->
+    <ng-container matColumnDef="alias">
+        <mat-header-cell *matHeaderCellDef>Alias</mat-header-cell>
+        <mat-cell *matCellDef="let assetTrigAct">
+            <p class="text-truncate font-weight-600">{{assetTrigAct.generationAsset.asset.alias}}</p>
+        </mat-cell>
+    </ng-container>
+
+   
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let ata; columns: displayedColumns;"
+             class="contact"
+             matRipple
+             [@animate]="{value:'*',params:{y:'100%'}}">
+    </mat-row>
+</mat-table>
+
+

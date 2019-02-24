@@ -8,7 +8,7 @@ import { AagtDataModule } from '../aagt-data.module';
 
 export class AssetTriggerAction extends ebase.SpEntityBase {
     sequence: number;
-    actionStatus: 'In-progress' | 'Scheduled' | 'Rescheduled' | 'Delayed';
+    actionStatus: 'Unscheduled' | 'In-progress' | 'Scheduled' | 'Rescheduled' | 'Delayed';
     outcome: 'PCW' | 'On-time' | 'Under-time' | 'Over-time' | 'Blamed';
     plannedStart: Date;
     plannedStop: Date;
@@ -16,9 +16,9 @@ export class AssetTriggerAction extends ebase.SpEntityBase {
     scheduledStop: Date;
     actualStart: Date;
     actualStop: Date;
-    generationAssetId: number;
+    genAssetId: number;
     triggerActionId: number;
-    generationAsset: GenerationAsset;
+    genAsset: GenerationAsset;
     triggerAction: TriggerAction;
 }
 
@@ -59,13 +59,26 @@ AssetTriggerAction
             dataType: this.dt.DateTime,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.generationAssetId = {
+        this.entityDefinition.dataProperties.genAssetId = {
             dataType: this.dt.Int32,
             isNullable: false
         };
         this.entityDefinition.dataProperties.triggerActionId = {
             dataType: this.dt.Int32,
             isNullable: false
+        };
+
+        this.entityDefinition.navigationProperties = {
+            genAsset: {
+                entityTypeName: aagtCfg.AagtListName.GenAsset,
+                foreignKeyNames: ['genAssetId'],
+                associationName: 'GenAsset_AssetTrigAction'
+            },
+            triggerAction: {
+                entityTypeName: aagtCfg.AagtListName.TriggerAct,
+                foreignKeyNames: ['triggerActionId'],
+                associationName: 'TrigAsset_AssetTrigAction'
+            }
         };
 
         Object.assign(

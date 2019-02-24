@@ -1,7 +1,12 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Generation, GenerationAsset, genStatusEnum } from 'app/aagt/data';
+import { MatDialog, MatDialogConfig, MatDatepickerModule, MatDialogRef } from '@angular/material';
 import { PlannerUowService } from './planner-uow.service';
+import { Subject, Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
+import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
 
 @Component({
     selector: 'app-planner',
@@ -9,7 +14,7 @@ import { PlannerUowService } from './planner-uow.service';
     styleUrls: ['./planner.component.scss'],
     encapsulation: ViewEncapsulation.None
 })
-export class PlannerComponent implements OnInit {
+export class PlannerComponent implements OnInit, CanDeactivateGuard {
 
     genId: number;
     isLinear: boolean;
@@ -19,35 +24,74 @@ export class PlannerComponent implements OnInit {
     step4Completed: boolean;
     genAssetsSelected: GenerationAsset[] = [];
     assignedAssets: GenerationAsset[];
+    private unsubscribeAll: Subject<any>;
 
     constructor(
         private route: ActivatedRoute,
-        private uow: PlannerUowService) { }
+        private deactivateDialog: MatDialog,
+        private uow: PlannerUowService) {
+        this.unsubscribeAll = new Subject();
+    }
+    
+    canDeactivate(): Observable<boolean> {
+        const currentGen = this.uow.currentGen;
+        const isNewGen = this.uow.currentGen.entityAspect.entityState.isAdded();
+
+        if (isNewGen) {
+            const hasValidGen = currentGen.entityAspect.validateEntity();
+            const hasKids = currentGen.triggers || currentGen.generationAssets;
+
+            if (hasValidGen && hasKids) {
+                this.confirmDeleteUnsavedData();
+            } else {
+                this.uow.canDeactivatePlaaner.next(true);
+            }
+        }
+
+        const newValidGeneration = this.uow.currentGen.entityAspect.entityState.isAdded() &&
+            this.uow.currentGen.entityAspect.validateEntity();
+        
+        const newGenWithKids = this.uow.currentGen.id < 0 
+
+        if (this.uow.currentGen.id < 0 &&
+            this.uow.currentGen.entityAspect.validateEntity()) {
+            
+            }
+    }
 
     ngOnInit() {
         this.genId = this.route.snapshot.params.id;
         this.uow.planGen(this.genId);
         this.isLinear = this.uow.currentGen.status === genStatusEnum.draft;
-        this.getAlreadyAssignedAssets();
+
+        this.uow.onStep1ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => this.step1Completed = isValid);
+        this.uow.onStep1ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => this.step2Completed = isValid);
+        this.uow.onStep1ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => this.step3Completed = isValid);
+        this.uow.onStep1ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => this.step4Completed = isValid);
+        // this.getAlreadyAssignedAssets();
     }
 
-    private getAlreadyAssignedAssets(): void {
-        if (this.uow.currentGen.entityAspect.entityState.isAdded()) { return; }
-        this.uow.getGenerationAssets();
+    private confirmDeleteUnsavedData(): void {
+        const dialogCfg = new MatDialogConfig();
+        this.deactivateDialog.open(ConfirmUnsavedDataComponent, dialogCfg)
+            .afterClosed()
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(confirmation => {
+                this.uow.canDeactivatePlaaner.next(confirmation)
+            });
     }
+    
 
-    onCompleted(id: number, $event: boolean): void {
-        switch (id) {
-            case 1:
-                this.step1Completed = $event;
-                break;
-            case 2:
-                this.step2Completed = $event;
-                break;
-            case 3:
-                this.step3Completed = $event;
-                break;
-        }
-
-    }
+    // private getAlreadyAssignedAssets(): void {
+    //     if (this.uow.currentGen.entityAspect.entityState.isAdded()) { return; }
+    //     this.uow.getGenerationAssets();
+    // }
 }

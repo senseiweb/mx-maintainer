@@ -16,10 +16,10 @@
                                 </a>
                             </div>
         
-                            <div *ngFor="let trigger of triggerActions">
+                            <div *ngFor="let trigger of triggerNames">
                                 <div class="nav-item" aria-label="generation triggers" (click)="filterActionsByTrigger(trigger)">
-                                    <a class="nav-link" matRipple [ngClass]="{'active accent':triggerFilterBy === trigger.id}">
-                                        <div class="title">trigger.milestone</div>
+                                    <a class="nav-link" matRipple [ngClass]="{'active accent':triggerFilterBy === trigger}">
+                                        <div class="title">{{trigger}}</div>
                                     </a>
                                 </div>
                             </div>
@@ -37,10 +37,10 @@
                     </a>
                 </div>
 
-                <div *ngFor="let genAsset of genAssets">
-                    <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(genAsset)">
-                        <a class="nav-link" matRipple [ngClass]="{'active accent':assetFilterBy === genAsset.id}">
-                            <div class="title">{{genAsset.asset.alias}}</div>
+                <div *ngFor="let alias of assetNames">
+                    <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(alias)">
+                        <a class="nav-link" matRipple [ngClass]="{'active accent':assetFilterBy === alias}">
+                            <div class="title">{{alias}}</div>
                         </a>
                     </div>
                 </div>

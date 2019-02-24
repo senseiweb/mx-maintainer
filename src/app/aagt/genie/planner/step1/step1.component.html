@@ -38,13 +38,24 @@
         <div>
             <h3 fxLayout="row" fxLayoutAlign="center center">Select Asset Available for Generation</h3>
         </div>
-        <div class="step1content inner-scroll" fusePerfectScrollbar>
-            <mat-selection-list #assets [(ngModel)]="genAssetsSelected" (ngModelChange)="assignedAssetModelChange($event)">
+        <form [formGroup]="step1AssetFormGroup">
+            <p-listbox [options]="allAssets"
+            filterMode="startsWith"
+            [listStyle]="{'min-height':'310px', 'max-height':'310px'}"
+            [style]="{'min-width':'80%', 'margin-left':'10%'}"
+            formControlName="assetSelection"
+            multiple="multiple"
+            checkbox="checkbox"
+            filter="assetFilter"
+            optionLabel="alias"></p-listbox>
+        </form>
+        <!-- <div class="step1content inner-scroll" fusePerfectScrollbar>
+            <mat-selection-list #assets [(ngMoldel)]="genAssetsSelected" (ngModelChange)="assignedAssetModelChange($event)">
                 <mat-list-option *ngFor="let asset of allAssets" [value]="asset.id">
                     {{asset.alias}}
                 </mat-list-option>
             </mat-selection-list>
-        </div>
+        </div> -->
     </div>
 
 </div>
