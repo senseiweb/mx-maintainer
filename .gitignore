@@ -4,6 +4,7 @@ node_modules/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.config/private.json
 # misc
 /.sass-cache
 /connect.lock

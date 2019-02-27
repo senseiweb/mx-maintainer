@@ -1,11 +1,11 @@
 import { Observable, Observer } from 'rxjs';
 import { ScriptKey, ScriptModel, ScriptStore } from '../../app-script-model';
-import { AagtListName } from 'app/aagt/data';
 
 // At times it is easier to retrieve things using the
 // the sharepoint JSOM libraries and cached them for later use
 export class BaseSpJsom {
-    private mxMaintainerContextSite = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer/';
+    // private mxMaintainerContextSite = 'https://cs2.eis.af.mil/sites/10918/mx-maintainer';
+    private mxMaintainerContextSite = 'http://localhost:8080';
     appSite: string;
     protected actorInfo: SP.Social.SocialActorInfo;
     protected appCtx: SP.ClientContext;
@@ -19,7 +19,7 @@ export class BaseSpJsom {
     }
 
     async getSpContext(): Promise<any> {
-        console.log(AagtListName.ActionItem);
+        //console.log(AagtListName.ActionItem);
         this.appCtx = new SP.ClientContext(this.appSite);
         this.followingManager = new SP.Social.SocialFollowingManager(this.appCtx);
         this.appCtx.load(this.followingManager);

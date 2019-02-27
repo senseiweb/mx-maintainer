@@ -32,31 +32,32 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
         private uow: PlannerUowService) {
         this.unsubscribeAll = new Subject();
     }
-    
+
     canDeactivate(): Observable<boolean> {
-        const currentGen = this.uow.currentGen;
-        const isNewGen = this.uow.currentGen.entityAspect.entityState.isAdded();
+        return this.uow.canDeactivatePlaaner;
+        // const currentGen = this.uow.currentGen;
+        // const isNewGen = this.uow.currentGen.entityAspect.entityState.isAdded();
 
-        if (isNewGen) {
-            const hasValidGen = currentGen.entityAspect.validateEntity();
-            const hasKids = currentGen.triggers || currentGen.generationAssets;
+        // if (isNewGen) {
+        //     const hasValidGen = currentGen.entityAspect.validateEntity();
+        //     const hasKids = currentGen.triggers || currentGen.generationAssets;
 
-            if (hasValidGen && hasKids) {
-                this.confirmDeleteUnsavedData();
-            } else {
-                this.uow.canDeactivatePlaaner.next(true);
-            }
-        }
+        //     if (hasValidGen && hasKids) {
+        //         this.confirmDeleteUnsavedData();
+        //     } else {
+        //         this.uow.canDeactivatePlaaner.next(true);
+        //     }
+        // }
 
-        const newValidGeneration = this.uow.currentGen.entityAspect.entityState.isAdded() &&
-            this.uow.currentGen.entityAspect.validateEntity();
+        // const newValidGeneration = this.uow.currentGen.entityAspect.entityState.isAdded() &&
+        //     this.uow.currentGen.entityAspect.validateEntity();
         
-        const newGenWithKids = this.uow.currentGen.id < 0 
+        // const newGenWithKids = this.uow.currentGen.id < 0 
 
-        if (this.uow.currentGen.id < 0 &&
-            this.uow.currentGen.entityAspect.validateEntity()) {
+        // if (this.uow.currentGen.id < 0 &&
+        //     this.uow.currentGen.entityAspect.validateEntity()) {
             
-            }
+        //     }
     }
 
     ngOnInit() {

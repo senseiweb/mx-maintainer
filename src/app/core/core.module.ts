@@ -56,11 +56,6 @@ const defaultFuseConfig: FuseConfig = {
     BrowserAnimationsModule,
     BreezeBridgeHttpClientModule,
     HttpClientModule,
-    environment.production || environment.sharepoint ?
-    [] :
-      InMemoryWebApiModule.forRoot(FakeDbService, {
-        apiBase: 'https://cs2.eis.af.mil/sites/10918/mx-maintainer/'
-    }),
     TranslateModule.forRoot(),
 
     // Material moment date module
