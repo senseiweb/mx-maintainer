@@ -49,7 +49,7 @@ interface ISaveChngePackage extends SaveResult {
 export class SpDataserviceAdapter {
     ajaxImpl: any;
     name: string;
-    getRequestDigest: Function;
+    getRequestDigest: string;
     dataServiceVersion: string;
     ignoreDeleteNotFound = true; // true if should ignore a 404 error from a delete
     jsonResultsAdapter: JsonResultsAdapter;
@@ -207,7 +207,7 @@ export class SpDataserviceAdapter {
         const query = mappingContext.query;
         const entityType = this._getEntityTypeFromMappingContext(mappingContext);
         // @ts-ignore
-        const custom = entityType.custom || {} as any;
+        const custom = (entityType && entityType.custom) || {} as any;
 
         // @ts-ignore
         if (!query.selectClause && entityType && custom.defaultSelect) {
@@ -280,7 +280,7 @@ export class SpDataserviceAdapter {
             'Content-Type': 'application/json;odata=verbose'
         };
         if (this.getRequestDigest) {
-            basicHeaders['X-RequestDigest'] = this.getRequestDigest();
+            basicHeaders['X-RequestDigest'] = this.getRequestDigest;
         }
         return basicHeaders;
     }

@@ -18,7 +18,7 @@
 
             <!-- CONTENT -->
             <div class="content p-24" fusePerfectScrollbar>
-                <mat-horizontal-stepper [linear]="isLinear" #stepper>
+                <mat-horizontal-stepper [linear]="isLinear" (selectionChange)="onStepChange($event)" #stepper>
                     <mat-step [completed]="step1Completed">
                         <ng-template matStepLabel>
                             <span *ngIf="isLinear">Provide General Generation Information</span>

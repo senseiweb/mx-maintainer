@@ -1,15 +1,22 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AppUserService } from './data';
 
 const appRoutes: Routes = [
     {
         path: '',
         redirectTo: '/user/dashboard',
         pathMatch: 'full',
+        resolve: {
+            appUser: AppUserService
+        }
     },
     {
         path: 'aagt',
-        loadChildren: './aagt/aagt.module#AagtModule'
+        loadChildren: './aagt/aagt.module#AagtModule',
+        resolve: {
+            appUser: AppUserService
+        }
     }
     // {
     //   path: 'program-manager',

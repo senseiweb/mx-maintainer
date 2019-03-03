@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
+import { Resolve } from '@angular/router';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from 'app/data';
 import { environment } from 'environments/environment';
-import { SpRepoService } from './sp-repo.service';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IUserGrpInitData {
     id: number;
@@ -13,13 +14,19 @@ export interface IUserGrpInitData {
 }
 
 @Injectable({ providedIn: 'root' })
-export class UserService implements Resolve<any> {
+export class AppUserService implements Resolve<any> {
+
+    appConfigDate = {
+        siteUrl: 'http://localhost:8080/sites/mxmaintainer'
+    };
+
+    headers: HttpHeaders;
 
     myGroups: Array<{ id: number, title: string }> = [];
     preferredTheme = '';
-    profileProps: SPUserProfileProperties = {};
-    requestDigestExpiration = 0;
-    requestDigestToken = '';
+    onProfilePropsChange: BehaviorSubject<SPUserProfileProperties>;
+    onRequestDigestChange: BehaviorSubject<string>;
+    onUserGroupsChange: BehaviorSubject<{id: number, title: string}[]>
     navStructure = {
         name: '',
         navItems: [] as FuseNavigation[]
@@ -27,8 +34,8 @@ export class UserService implements Resolve<any> {
 
     id: number;
     saluation = {
-        lastName: this.profileProps.LastName,
-        firstName: this.profileProps.FirstName,
+        lastName: '',
+        firstName: '',
         title: '',
         rankName: () => `${this.saluation.firstName} ${this.saluation.lastName}`
     };
@@ -36,31 +43,104 @@ export class UserService implements Resolve<any> {
     spAccountName;
 
     constructor(
-        private spRootData: SpRepoService,
+        private http: HttpClient,
         private fuseNavigation: FuseNavigationService
     ) {
         if (!environment.production) {
             this.myGroups.push({ id: 0, title: 'Genie' });
         }
+        this.onRequestDigestChange = new BehaviorSubject('');
+        this.onProfilePropsChange = new BehaviorSubject({});
+        this.onUserGroupsChange = new BehaviorSubject([]);
+        this.headers = new HttpHeaders({
+            'Content-Type': 'application/json;odata=verbose',
+            'Accept': 'application/json;odata=verbose'
+        });
     }
 
     async resolve(): Promise<any> {
-        this.profileProps = this.spRootData.peopleManager
-            .getMyProperties()
-            .get_userProfileProperties();
+        const preLoad = [
+            this.fetchRequestDigest(),
+            this.fetchUserProfileProperties(),
+            this.fetchUserGroups()
+        ]
+        return new Promise(async (resolve, reject) => {
+            try {
+                await Promise.all(preLoad);
+                resolve();
+            } catch (e) {
+                console.log(e);
+                reject();
+            }
+        });
+    }
 
-        this.id = this.spRootData.spUser.get_id();
-        this.spAccountName = this.spRootData.spUser.get_userId();
-        const groups = this.spRootData.spUser.get_groups();
-        const iterator = groups.getEnumerator();
-        while (iterator.moveNext()) {
-            const currRec = iterator.get_current();
-            this.myGroups.push({
-                title: currRec.get_title(),
-                id: currRec.get_id()
+    private fetchRequestDigest(): void {
+        const httpOptions = { headers: this.headers };
+        this.http.post(`${this.appConfigDate.siteUrl}/_api/contextinfo`, {}, httpOptions)
+            .subscribe(response => {
+                console.log(response);
+                const digest = response['d']['GetContextWebInformation']['FormDigestValue'];
+                let timeout = response['d']['GetContextWebInformation']['FormDigestTimeoutSeconds'];
+                if (timeout) {
+                    timeout *= 1000;
+                    setTimeout(() => {
+                        this.fetchRequestDigest();
+                    }, timeout);
+                }
+                this.onRequestDigestChange.next(digest);
             });
+    }
+
+    private fetchUserProfileProperties(): void {
+        const httpOptions = { headers: this.headers };
+        this.http.post(`${this.appConfigDate.siteUrl}/_api/SP.UserProfiles.PeopleManager/GetMyProperties`,
+            {}, httpOptions)
+            .subscribe(response => {
+                if (!response) {
+                    console.log('bad response');
+                    return;
+                }
+                const props = response['d']['UserProfileProperties']['results'] as any[];
+                const profileProps: SPUserProfileProperties = {};
+                props.forEach(p => {
+                    profileProps[p.Key] = p.Value;
+                })
+                console.log(profileProps);
+                this.saluation.firstName = profileProps.FirstName;
+                this.saluation.lastName = profileProps.LastName;
+                this.onProfilePropsChange.next(profileProps);
+            });
+    }
+
+    private async fetchUserGroups(): Promise<void> {
+        const ctx = SP.ClientContext.get_current();
+        const ctxWeb = ctx.get_web();
+        const spUser = ctxWeb.get_currentUser();
+        spUser.retrieve();
+        const userGroups = spUser.get_groups();
+        ctx.load(ctxWeb);
+        ctx.load(spUser);
+        ctx.load(userGroups);
+        const groups = [];
+        try {
+            await ctx.executeQueryAsync(() => {
+                const i = userGroups.getEnumerator();
+                while (i.moveNext()) {
+                    const currGrp = i.get_current();
+                    groups.push({
+                        title: currGrp.get_title(),
+                        id: currGrp.get_id()
+                    });
+                }
+            });
+            console.log(groups);
+            console.log(spUser);
+            this.onUserGroupsChange.next(groups as any);
+            Promise.resolve(groups);
+        } catch (error) {
+            return Promise.reject();
         }
-        this.setNavStructure();
     }
 
     logout(): void {

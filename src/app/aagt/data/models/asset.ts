@@ -22,13 +22,6 @@ export class AssetMetadata extends ebase.MetadataBase<Asset> {
         this.entityDefinition.dataProperties.location = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
 
-        // this.entityDefinition.navigationProperties = {
-        //     assetGenerations: {
-        //         entityTypeName: 'GenerationAsset',
-        //         isScalar: false,
-        //         associationName: 'Asset_Generations'
-        //     }
-        // };
         Object.assign(
             this.entityDefinition.dataProperties,
             this.baseDataProperties

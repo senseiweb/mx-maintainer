@@ -16,6 +16,8 @@ import {
     SpEntityBase
 } from '../models/_entity-base';
 import { EmProviderService } from './em-provider.service';
+import { Entity } from 'breeze';
+import { setTimeout } from 'core-js';
 
 
 export class BaseRepoService<T extends SpEntityBase> {
@@ -24,6 +26,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     protected resourceName: string;
     private cachedDate: moment.Moment;
     private cachedAll: boolean;
+    spChoiceFieldCache: { key: string, values: string[]; }[];
     private queryCache: {
         [index: string]: moment.Moment
     } = {};
@@ -38,6 +41,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.entityManager = _entityService.entityManager;
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = FetchStrategy.FromServer;
+        this.spChoiceFieldCache = []
         console.log(`base created from ${entityTypeName}`);
     }
 
@@ -111,6 +115,27 @@ export class BaseRepoService<T extends SpEntityBase> {
         return Predicate.create(property as any, filter, condition);
     }
 
+    async spChoiceValues(fieldName: string): Promise<string[]> {
+        const retrievedChoiceFields = this.spChoiceFieldCache.filter(sp => sp.key === fieldName)[0];
+        if (retrievedChoiceFields) {
+            return Promise.resolve(retrievedChoiceFields.values);
+        }
+        const defaultResourceName = this.entityType.defaultResourceName;
+        const fieldsResourceName = defaultResourceName.replace('/items', '/fields');
+        const predicate = Predicate.create('EntityPropertyName', FilterQueryOp.Equals, fieldName);
+        const query = EntityQuery.from(fieldsResourceName)
+            .where(predicate);
+        try {
+            const response = await this.entityManager.executeQuery(query);
+            const choices = response.results[0]['choices']['results'] as string[];
+            this.spChoiceFieldCache.push({ key: fieldName, values: choices });
+            console.log(choices);
+            return choices as any;
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
     async withId(key: number): Promise<T> {
         try {
             const data = await this.entityManager.fetchEntityByKey(this.entityType.shortName, key, true);
@@ -152,12 +177,23 @@ export class BaseRepoService<T extends SpEntityBase> {
         return Promise.reject(err);
     }
 
+    async saveEntityChanges(entities: T[]): Promise<void> {
+        try {
+            const results = await this.entityManager.saveChanges(entities);
+            console.log(results);
+        } catch (error) {
+            console.log(error);
+            Promise.reject();
+        }
+    }
+
     async saveChanges(): Promise<void> {
         try {
             const results = await this.entityManager.saveChanges();
             console.log(results.entities.length);
         } catch (e) {
             console.error(`Saving changes failed ==> ${e}`);
+            Promise.reject();
         }
     }
 }

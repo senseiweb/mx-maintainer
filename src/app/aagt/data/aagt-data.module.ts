@@ -52,7 +52,7 @@ const appEntities = [
   imports: [
     DataModule.forFeature({
       entities: appEntities,
-      serviceEndpoint: '/aagt',
+      serviceEndpoint: '/aagt/',
       nameSpace: 'SP.Data.Aagt'
     })
   ],

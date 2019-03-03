@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { fuseAnimations } from '@fuse/animations';
-import { ActionItem, SpAagtRepoService } from 'app/aagt/data';
+import { ActionItem } from 'app/aagt/data';
 import { AimUowService } from '../aim-uow.service';
 import { MinutesExpand } from 'app/common';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -25,7 +25,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     pageType: string;
     actionItemForm: FormGroup;
     formattedDuration: string;
-    teamTypes: Promise<string[]>;
+    teamTypes: string[];
     private unsubscribeAll: Subject<any>;
 
 
@@ -37,10 +37,9 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
         private _matSnackBar: MatSnackBar,
         private minExpand: MinutesExpand,
         private aimUow: AimUowService,
-        private spAagtRepo: SpAagtRepoService
     ) {
         this.unsubscribeAll = new Subject();
-        this.teamTypes = this.spAagtRepo.getTeamTypeLookup();
+        this.teamTypes = this.aimUow.teamTypes;
     }
 
     ngOnInit() {
@@ -67,15 +66,16 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     createActionItemForm(): FormGroup {
         const ai = this.actionItem;
         this.formattedDuration = this.minExpand.transform(ai.duration as any);
-        return this.formBuilder.group({
-            id: new FormControl(ai.id),
-            action: new FormControl(ai.action),
-            shortCode: new FormControl(ai.shortCode),
-            duration: new FormControl(ai.duration),
-            teamType: new FormControl(ai.teamType),
-            available: new FormControl(ai.availableForUse),
-            notes: new FormControl(ai.notes)
-        });
+        return this.formBuilder.group(ai);
+        // return this.formBuilder.group({
+        //     id: new FormControl(ai.id),
+        //     action: new FormControl(ai.action),
+        //     shortCode: new FormControl(ai.shortCode),
+        //     duration: new FormControl(ai.duration),
+        //     teamType: new FormControl(ai.teamType),
+        //     available: new FormControl(ai.availableForUse),
+        //     notes: new FormControl(ai.notes)
+        // });
     }
 
     formatMinutes(): void {
@@ -98,8 +98,11 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
 
 
     saveActionItem(): void {
-        this.router.navigate(['../../action-items'], {relativeTo: this.route});
-        return;
+        this.aimUow.saveActionItems(this.actionItem)
+            .then((ai) => {
+                console.log(ai);
+                this.router.navigate(['../../action-items'], { relativeTo: this.route });
+            });
     }
 
 }

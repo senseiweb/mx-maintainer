@@ -10,7 +10,8 @@ import {
 import 'breeze-client-labs/breeze.namingConventionWithDictionary';
 import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
-import { SpRepoService } from './sp-repo.service';
+import { BehaviorSubject } from 'rxjs';
+import { AppUserService } from './app-user.service';
 import { SpDataserviceAdapter } from './sp-dataservice-adapter';
 
 @Injectable({ providedIn: 'root' })
@@ -18,10 +19,11 @@ export class EmProviderService {
     activate = false;
     entityManager: EntityManager ;
     servicePoint: string;
+    onRequestDigestChange: BehaviorSubject<string>;
 
-    constructor(private spRooData: SpRepoService,
-        private emCfg: EmProviderConfig,
-        private spDataserviceAdapter: SpDataserviceAdapter) {
+    constructor(private emCfg: EmProviderConfig,
+        private spDataProvider: SpDataserviceAdapter,
+        private appUserSvc: AppUserService) {
         this.init();
     }
 
@@ -29,10 +31,15 @@ export class EmProviderService {
 
         const dataAdapter = config.initializeAdapterInstance('dataService', 'SpCustomOData', true) as any;
 
-        dataAdapter.getRequestDigest = () => this.spRooData.getRequestDigest();
+        this.appUserSvc.onRequestDigestChange
+            .subscribe(digest => {
+                dataAdapter.getRequestDigest = digest;
+            });
 
         const clientToServerNameDictionary = {
-            'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' }
+            'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' },
+            'ActionItem:#SP.Data.Aagt': { action: 'Title' },
+            'Asset:#SP.Data.Aagt': { alias: 'Title' }
         };
 
         // @ts-ignore
@@ -42,7 +49,7 @@ export class EmProviderService {
         convention.setAsDefault();
 
         const dataService = new DataService({
-            serviceName: `${this.spRooData.appSite}${this.emCfg.serviceEndpoint}_api/web`,
+            serviceName: `${this.appUserSvc.appConfigDate.siteUrl}/${this.emCfg.serviceEndpoint}_api/web`,
             hasServerMetadata: false
         });
         this.servicePoint = dataService.serviceName;
@@ -61,4 +68,5 @@ export class EmProviderService {
             e.addDefaultSelect(type);
         });
     }
+
 }

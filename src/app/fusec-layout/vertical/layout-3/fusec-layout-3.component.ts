@@ -4,7 +4,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import { UserService } from 'app/data';
+import { AppUserService } from 'app/data';
 
 @Component({
     selector     : 'fusec-vertical-layout-3',
@@ -22,7 +22,7 @@ export class FusecVerticalLayout3Component implements OnInit, OnDestroy {
     constructor(
         private _navService: FuseNavigationService,
         private _fuseConfigService: FuseConfigService,
-        private userService: UserService
+        private userService: AppUserService
     ) {
 
 

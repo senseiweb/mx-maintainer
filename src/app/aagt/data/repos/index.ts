@@ -1,4 +1,3 @@
-export * from './sp-aagt-repo.service';
 export * from './asset-repo.service';
 export * from './gen-asset-repo.service';
 export * from './generation-repo.service';

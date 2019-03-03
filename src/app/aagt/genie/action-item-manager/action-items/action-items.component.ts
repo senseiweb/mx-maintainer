@@ -31,11 +31,10 @@ export class ActionItemsComponent implements OnInit, OnDestroy {
 
     constructor (private aimUow: AimUowService, private route: ActivatedRoute) {
         this.unsubscribeAll = new Subject();
-
     }
 
     ngOnInit() {
-        this.dataSource = new FilesDataSource(this.route.snapshot.data.actionItems,
+        this.dataSource = new FilesDataSource(this.aimUow.onActionItemsChanged.value,
             this.paginator,
             this.sort,
             this.aimUow.onActionItemsChanged);
@@ -50,7 +49,6 @@ export class ActionItemsComponent implements OnInit, OnDestroy {
                 if (!this.dataSource) { return; }
                 this.dataSource.filter = this.filter.nativeElement.value;
             });
-
     }
 
     ngOnDestroy() {

@@ -89,7 +89,7 @@
                                                     <mat-label>Assigned Team Type</mat-label>
                                                     <mat-select formControlName="teamType"
                                                     required>
-                                            <mat-option *ngFor="let teamType of teamTypes | async"
+                                            <mat-option *ngFor="let teamType of teamTypes"
                                                         [value]="teamType">
                                                 {{teamType}}
                                             </mat-option>
@@ -97,10 +97,10 @@
                                             </mat-form-field>
                                             <mat-form-field appearance="outline" floatLabel="always" fxFlex="25">
                                                 <mat-label>Make Available For Use</mat-label>
-                                                <mat-select formControlName="available"
+                                                <mat-select formControlName="availableForUse"
                                                 required>
-                                        <mat-option [value]='true'>Yes </mat-option>
-                                        <mat-option [value]='false'>No </mat-option>
+                                        <mat-option [value]="'Yes'">Yes</mat-option>
+                                        <mat-option [value]="'No'">No</mat-option>
                                     </mat-select>
                                         </mat-form-field>
                                 </div>

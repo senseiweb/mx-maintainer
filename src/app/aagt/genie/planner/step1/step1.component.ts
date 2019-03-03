@@ -68,24 +68,6 @@ export class Step1Component implements OnInit, OnDestroy {
         this.step1FormGroup
             .get('numberAssetsRequired')
             .setValue(selectedAssets.length);
-
-        this.uow.currentGen.generationAssets.forEach(genAsset => {
-            if (!selectedAssets.some(assets => genAsset.assetId === assets.id)) {
-                genAsset.assetTriggerActions.forEach(ata => {
-                    ata.entityAspect.setDeleted();
-                });
-                genAsset.entityAspect.setDeleted();
-            }
-        });
-
-        selectedAssets.forEach(asset => {
-            if (!this.uow.currentGen.generationAssets.some(genAsset => genAsset.assetId === asset.id)) {
-                const data = {
-                    generationId: this.uow.currentGen.id,
-                    assetId: asset.id
-                };
-                this.uow.createGenerationAsset(data);
-            }
-        });
+        this.uow.selectedAssets = selectedAssets;
     }
 }

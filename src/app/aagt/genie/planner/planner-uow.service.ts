@@ -6,7 +6,6 @@ import {
 } from 'breeze-client';
 import {
     TriggerRepoService,
-    SpAagtRepoService,
     ActionItem,
     ActionItemRepo,
     Trigger,
@@ -36,6 +35,7 @@ import { AssetTriggerActionRepoService } from 'app/aagt/data/repos/asset-trigger
 
 @Injectable({ providedIn: AagtDataModule })
 export class PlannerUowService implements Resolve<any> {
+    assetFilterBy: string;
     isoLookups: string[];
     allAssetsOptions: Asset[];
     allIsoOptions: string[];
@@ -51,10 +51,10 @@ export class PlannerUowService implements Resolve<any> {
     onTriggerActionsChange: BehaviorSubject<TriggerAction[]>;
     onGenerationAssetsChange: BehaviorSubject<GenerationAsset[]>;
     onAssetTriggerActionChange: BehaviorSubject<AssetTriggerAction[]>;
-    assetFilterBy: string;
-    triggerFilterBy: string;
     onAssetFilterChange: Subject<string>;
     onTriggerFilterChange: Subject<string>;
+    selectedAssets: Asset[];
+    triggerFilterBy: string;
     private generationPredicate: Predicate;
 
     constructor(
@@ -63,7 +63,6 @@ export class PlannerUowService implements Resolve<any> {
         private triggerActionRepo: TriggerActionRepoService,
         private assetRepo: AssetRepoService,
         private genAssetRepo: GenAssetRepoService,
-        private spRepo: SpAagtRepoService,
         private actionItemRepo: ActionItemRepo,
         private assetTrigActionRepo: AssetTriggerActionRepoService
     ) {
@@ -88,15 +87,15 @@ export class PlannerUowService implements Resolve<any> {
         this.planGen(id);
         return new Promise(async (resolve, reject) => {
             const dataNeeded = [
-                this.fetchAllActionItems,
-                this.fetchISOoptions,
-                this.fetchAllAssets
+                this.fetchAllActionItems(),
+                this.fetchISOoptions(),
+                this.fetchAllAssets()
             ];
 
             if (id !== 'new') {
                 dataNeeded.concat([
-                    this.fetchGenerationAssets,
-                    this.fetchGenerationTriggers
+                    this.fetchGenerationAssets(),
+                    this.fetchGenerationTriggers()
                 ]);
             }
 
@@ -123,7 +122,7 @@ export class PlannerUowService implements Resolve<any> {
         try {
             this.allActionItemOptions = await this.actionItemRepo.all();
         } catch (e) {
-
+            console.log(e);
         }
     }
 
@@ -131,7 +130,7 @@ export class PlannerUowService implements Resolve<any> {
         try {
             this.allAssetsOptions = await this.assetRepo.all();
         } catch (e) {
-
+            console.log(e);
         }
     }
 
@@ -141,7 +140,7 @@ export class PlannerUowService implements Resolve<any> {
 
     async fetchISOoptions(): Promise<void> {
         try {
-            this.allIsoOptions = await this.spRepo.getIsoLookup()
+            this.allIsoOptions = await this.genRepo.spChoiceValues('IsoTypes');
         } catch (e) {
 
         }
@@ -185,7 +184,7 @@ export class PlannerUowService implements Resolve<any> {
             this.onGenerationAssetsChange.next(this.currentGen.generationAssets);
         } else {
             this.genAssetRepo.createGenerationAsset(data);
-            this.updateAssetTriggerActions();
+            // this.updateAssetTriggerActions();
             // this.onTriggerActionsChange
             // this.getGenerationAssets();
         }
@@ -207,6 +206,28 @@ export class PlannerUowService implements Resolve<any> {
     //             this.onAssetTriggerActionChange.next(assetTrigActions);
     //         });
     // }
+
+    assetSelectionCheck(): void {
+        this.currentGen.generationAssets.forEach(genAsset => {
+            if (!this.selectedAssets.some(assets => genAsset.assetId === assets.id)) {
+                genAsset.assetTriggerActions.forEach(ata => {
+                    ata.entityAspect.setDeleted();
+                });
+                genAsset.entityAspect.setDeleted();
+            }
+        });
+
+        this.selectedAssets.forEach(asset => {
+            if (!this.currentGen.generationAssets.some(genAsset => genAsset.assetId === asset.id)) {
+                const data = {
+                    generationId: this.currentGen.id,
+                    assetId: asset.id
+                };
+                this.createGenerationAsset(data);
+            }
+        });
+        this.updateAssetTriggerActions();
+    }
 
     getTriggerAction(data: { triggerId: number, actionItemId: number, sequence: number }): TriggerAction {
         const recoverableTrigAction = this.triggerActionRepo.recoverDeletedTrigAction(data);

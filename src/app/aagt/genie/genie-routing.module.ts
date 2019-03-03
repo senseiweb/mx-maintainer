@@ -68,12 +68,16 @@ const featureRoutes: Routes = [
             {
                 path: 'action-items',
                 component: ActionItemsComponent,
-                resolve: { actionItems: AimUowService }
+                resolve: {
+                    actionItems: AimUowService
+                }
             },
             {
                 path: 'action-items/:id',
                 component: ActionItemDetailComponent,
-                resolve: { actionItems: AimUowService }
+                resolve: {
+                    actionItems: AimUowService
+                }
             }
         ]
     }

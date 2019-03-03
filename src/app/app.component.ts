@@ -8,7 +8,6 @@ import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseTranslationLoaderService } from '@fuse/services/translation-loader.service';
 import { TranslateService } from '@ngx-translate/core';
 import { FuseSplashScreenService } from '@fuse/services/splash-screen.service';
-
 import { takeUntil } from 'rxjs/operators';
 import { navLocale as navigationEnglish } from './core';
 

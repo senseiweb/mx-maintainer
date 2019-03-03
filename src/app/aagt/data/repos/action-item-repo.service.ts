@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/data';
-import { BaseSpJsom } from 'app/data/repos/base-spjsom-repo.service';
 import { ActionItem, AagtListName } from '../models';
 import { AagtDataModule } from '../aagt-data.module';
 
@@ -11,6 +10,6 @@ export class ActionItemRepo extends BaseRepoService<ActionItem> {
     }
 
     create(): ActionItem {
-        return this.createBase({ action: 'this is a test' , availableForUse: false });
+        return this.createBase({ action: 'this is a test' , availableForUse: 'No' });
     }
 }

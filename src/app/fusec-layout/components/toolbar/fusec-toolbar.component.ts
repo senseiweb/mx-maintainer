@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
-import { UserService } from 'app/data';
+import { AppUserService } from 'app/data';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 @Component({
@@ -34,7 +34,7 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
         private _navService: FuseNavigationService,
-        private userService: UserService
+        private userService: AppUserService
     ) {
         // Set the defaults
         this.userStatusOptions = [

@@ -7,6 +7,7 @@ import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
 import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 
 @Component({
     selector: 'app-planner',
@@ -78,6 +79,13 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(isValid => this.step4Completed = isValid);
         // this.getAlreadyAssignedAssets();
+    }
+
+    onStepChange($event: StepperSelectionEvent): void {
+        console.log($event.selectedIndex)
+        if ($event.selectedIndex === 1) {
+            this.uow.assetSelectionCheck();
+        }
     }
 
     private confirmDeleteUnsavedData(): void {

@@ -11,7 +11,7 @@ export class ActionItemFakeDb {
             const itemGuid = faker.random.uuid();
             entity.id = index + 1;
             entity.iD = index + 1 as any;
-            entity.availableForUse = faker.random.boolean();
+            entity.availableForUse = 'Yes';
             entity.action = faker.random.arrayElement(['Load Wing', 'Load Center', 'Cock On', 'Tow', 'ReCock', 'Fuel', 'Nutrion']) as any;
             entity.shortCode = faker.lorem.words(1);
 

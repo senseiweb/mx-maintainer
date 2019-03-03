@@ -6,8 +6,6 @@ import {
 } from './models';
 import {
   EmProviderService,
-  SpRepoService,
-  UserService,
 } from './repos/';
 
 import { ModuleWithProviders } from '@angular/compiler/src/core';

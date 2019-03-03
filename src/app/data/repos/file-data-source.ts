@@ -16,7 +16,7 @@ export class FilesDataSource<T> extends DataSource<T> {
     ) {
         super();
         this.filterDataChange = new BehaviorSubject('') as any;
-        this.filteredData = tableData;
+        this.filteredData = tableData || [];
         console.log(tableData);
     }
 

@@ -9,7 +9,7 @@ export class ActionItem extends ebase.SpEntityBase {
     shortCode: string;
     duration: number;
     teamType: string;
-    availableForUse: boolean;
+    availableForUse: 'Yes' | 'No';
     notes: string;
     actionTriggers: TriggerAction[];
     // get important(): boolean {
@@ -52,7 +52,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
+        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.String };
 
         this.entityDefinition.navigationProperties = {
             actionTriggers: {
