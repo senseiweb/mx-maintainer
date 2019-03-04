@@ -72,7 +72,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
         this.actionItemTemplate['shortCode'] = ai.shortCode;
         this.actionItemTemplate['duration'] = ai.duration;
         this.actionItemTemplate['teamType'] = ai.teamType;
-        this.actionItemTemplate['availableForUse'] = ai.availableForUse;
+        this.actionItemTemplate['availability'] = ai.availability;
         this.actionItemTemplate['notes'] = ai.notes;
 
         this.formattedDuration = this.minExpand.transform(ai.duration as any);

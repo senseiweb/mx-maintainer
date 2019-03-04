@@ -12,7 +12,7 @@ export class ActionItemRepo extends BaseRepoService<ActionItem> {
     create(): ActionItem {
         return this.createBase(
             {
-                availableForUse: 'No',
+                availability: false,
                 duration: 0
         });
     }

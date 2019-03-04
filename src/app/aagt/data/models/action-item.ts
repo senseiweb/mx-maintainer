@@ -9,7 +9,17 @@ export class ActionItem extends ebase.SpEntityBase {
     shortCode: string;
     duration: number;
     teamType: string;
-    availableForUse: 'Yes' | 'No';
+    availableForUse: number;
+    get availability(): boolean {
+        return !!this.availableForUse;
+    }
+    set availability(isAvailable: boolean) {
+        if (isAvailable) {
+            this.availableForUse = 1;
+        } else {
+            this.availableForUse = 0;
+        }
+    }
     notes: string;
     actionTriggers: TriggerAction[];
     // get important(): boolean {
