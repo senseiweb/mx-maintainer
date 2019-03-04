@@ -24,6 +24,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     makeAvail: string;
     pageType: string;
     actionItemForm: FormGroup;
+    actionItemTemplate: any;
     formattedDuration: string;
     teamTypes: string[];
     private unsubscribeAll: Subject<any>;
@@ -40,6 +41,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     ) {
         this.unsubscribeAll = new Subject();
         this.teamTypes = this.aimUow.teamTypes;
+        this.actionItemTemplate = {};
     }
 
     ngOnInit() {
@@ -65,17 +67,16 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
 
     createActionItemForm(): FormGroup {
         const ai = this.actionItem;
+        this.actionItemTemplate['id'] = ai.id;
+        this.actionItemTemplate['action'] = ai.action;
+        this.actionItemTemplate['shortCode'] = ai.shortCode;
+        this.actionItemTemplate['duration'] = ai.duration;
+        this.actionItemTemplate['teamType'] = ai.teamType;
+        this.actionItemTemplate['availableForUse'] = ai.availableForUse;
+        this.actionItemTemplate['notes'] = ai.notes;
+
         this.formattedDuration = this.minExpand.transform(ai.duration as any);
-        return this.formBuilder.group(ai);
-        // return this.formBuilder.group({
-        //     id: new FormControl(ai.id),
-        //     action: new FormControl(ai.action),
-        //     shortCode: new FormControl(ai.shortCode),
-        //     duration: new FormControl(ai.duration),
-        //     teamType: new FormControl(ai.teamType),
-        //     available: new FormControl(ai.availableForUse),
-        //     notes: new FormControl(ai.notes)
-        // });
+        return this.formBuilder.group(this.actionItemTemplate);
     }
 
     formatMinutes(): void {
@@ -98,6 +99,10 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
 
 
     saveActionItem(): void {
+        const aiKeys = Object.keys(this.actionItemTemplate);
+        aiKeys.forEach(key => {
+            this.actionItem[key] = this.actionItemForm.get(key).value;
+        });
         this.aimUow.saveActionItems(this.actionItem)
             .then((ai) => {
                 console.log(ai);

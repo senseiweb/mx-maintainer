@@ -10,6 +10,10 @@ export class ActionItemRepo extends BaseRepoService<ActionItem> {
     }
 
     create(): ActionItem {
-        return this.createBase({ action: 'this is a test' , availableForUse: 'No' });
+        return this.createBase(
+            {
+                availableForUse: 'No',
+                duration: 0
+        });
     }
 }

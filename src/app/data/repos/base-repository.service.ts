@@ -7,6 +7,7 @@ import {
     FetchStrategySymbol,
     FetchStrategy,
     FilterQueryOp,
+    SaveResult,
 } from 'breeze-client';
 import * as moment from 'moment';
 import {
@@ -177,10 +178,11 @@ export class BaseRepoService<T extends SpEntityBase> {
         return Promise.reject(err);
     }
 
-    async saveEntityChanges(entities: T[]): Promise<void> {
+    async saveEntityChanges(entities: T[]): Promise<SaveResult> {
         try {
             const results = await this.entityManager.saveChanges(entities);
             console.log(results);
+            return results;
         } catch (error) {
             console.log(error);
             Promise.reject();

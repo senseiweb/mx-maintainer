@@ -14,7 +14,6 @@ import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 import { environment } from 'environments/environment';
 
 import { FuseConfig } from '@fuse/types';
-import { FakeDbService } from 'app/@fake-db/_fake-db.service';
 
 const defaultFuseConfig: FuseConfig = {
   colorTheme: 'theme-default',

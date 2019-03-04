@@ -318,14 +318,17 @@ export class SpDataserviceAdapter {
             return this.createChangeRequest(saveContext, entity, savePackage);
         });
         const savePromises = this.sendChangeRequests(savePackage);
-        return new Promise(async (resolve) => {
+        return new Promise(async (resolve, reject) => {
             try {
                 await Promise.all(savePromises);
-                this.reviewSaveResult(saveContext, savePackage, savePackage.requests);
-                resolve();
             } catch (e) {
-                Promise.reject(e);
+               return reject(e);
             }
+            const saveResult = this.reviewSaveResult(saveContext, savePackage, savePackage.requests);
+            if (saveResult.meessage) {
+                return reject(saveResult);
+            }
+            return resolve(saveResult);
         });
     }
 
