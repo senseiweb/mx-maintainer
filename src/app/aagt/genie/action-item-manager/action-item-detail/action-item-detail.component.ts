@@ -1,5 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import {
+    FormBuilder,
+    FormControl} from '@angular/forms';
 import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material';
 import { Subject } from 'rxjs';
@@ -10,6 +12,8 @@ import { ActionItem } from 'app/aagt/data';
 import { AimUowService } from '../aim-uow.service';
 import { MinutesExpand } from 'app/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { EntityFormGroup, EntityFormBuilder } from 'app/data/models/entitiy-form-builder';
+import { bareEntity } from 'app/data';
 
 @Component({
     selector: 'app-action-item-detail',
@@ -23,15 +27,15 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     actionItem: ActionItem;
     makeAvail: string;
     pageType: string;
-    actionItemForm: FormGroup;
-    actionItemTemplate: any;
+    actionItemForm: EntityFormGroup<ActionItem>;
+    formBuilder: EntityFormBuilder<ActionItem>;
     formattedDuration: string;
     teamTypes: string[];
     private unsubscribeAll: Subject<any>;
 
 
     constructor(
-        private formBuilder: FormBuilder,
+        formBuilder: FormBuilder,
         private router: Router,
         private route: ActivatedRoute,
         private _location: Location,
@@ -40,8 +44,8 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
         private aimUow: AimUowService,
     ) {
         this.unsubscribeAll = new Subject();
+        this.formBuilder = formBuilder as any;
         this.teamTypes = this.aimUow.teamTypes;
-        this.actionItemTemplate = {};
     }
 
     ngOnInit() {
@@ -55,7 +59,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
                 }
                 console.log(this.pageType);
                 this.actionItem = actionItem;
-                this.actionItemForm = this.createActionItemForm();
+                this.actionItemForm = this.createActionItemForm() as any;
             });
         this.formatMinutes();
     }
@@ -65,18 +69,17 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    createActionItemForm(): FormGroup {
+    createActionItemForm(): FormBuilder {
         const ai = this.actionItem;
-        this.actionItemTemplate['id'] = ai.id;
-        this.actionItemTemplate['action'] = ai.action;
-        this.actionItemTemplate['shortCode'] = ai.shortCode;
-        this.actionItemTemplate['duration'] = ai.duration;
-        this.actionItemTemplate['teamType'] = ai.teamType;
-        this.actionItemTemplate['availability'] = ai.availability;
-        this.actionItemTemplate['notes'] = ai.notes;
-
         this.formattedDuration = this.minExpand.transform(ai.duration as any);
-        return this.formBuilder.group(this.actionItemTemplate);
+        return this.formBuilder.group({
+            action: new FormControl(ai.action),
+            shortCode: new FormControl(ai.shortCode),
+            duration: new FormControl(ai.duration),
+            teamType: new FormControl(ai.teamType),
+            availableForUse: new FormControl(ai.availableForUse),
+            notes: new FormControl(ai.notes)
+        }) as any;
     }
 
     formatMinutes(): void {
@@ -99,10 +102,10 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
 
 
     saveActionItem(): void {
-        const aiKeys = Object.keys(this.actionItemTemplate);
-        aiKeys.forEach(key => {
-            this.actionItem[key] = this.actionItemForm.get(key).value;
-        });
+        Object.keys(this.actionItemForm.controls)
+            .forEach((key: keyof bareEntity<ActionItem>) => {
+                this.actionItem[key] = this.actionItemForm.get(key).value;
+            });
         this.aimUow.saveActionItems(this.actionItem)
             .then((ai) => {
                 console.log(ai);

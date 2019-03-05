@@ -9,17 +9,8 @@ export class ActionItem extends ebase.SpEntityBase {
     shortCode: string;
     duration: number;
     teamType: string;
-    availableForUse: number;
-    get availability(): boolean {
-        return !!this.availableForUse;
-    }
-    set availability(isAvailable: boolean) {
-        if (isAvailable) {
-            this.availableForUse = 1;
-        } else {
-            this.availableForUse = 0;
-        }
-    }
+    // Sharepoint handle yes/no boxes as 0:1 values to represet boolean;
+    availableForUse: boolean;
     notes: string;
     actionTriggers: TriggerAction[];
     // get important(): boolean {
@@ -62,7 +53,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.String };
+        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
 
         this.entityDefinition.navigationProperties = {
             actionTriggers: {

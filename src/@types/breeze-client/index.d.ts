@@ -1,71 +1,71 @@
-import {
-    EntityQuery,
-    EntityManager,
-    SaveResult,
-    Entity,
-    DataServiceAdapter,
-    DataService
-} from 'breeze-client';
+// import {
+//     EntityQuery,
+//     EntityManager,
+//     SaveResult,
+//     Entity,
+//     DataServiceAdapter,
+//     DataService
+// } from 'breeze-client';
 
-declare module 'breeze-client' {
-    export interface SaveContext {
-        entityManager: EntityManager;
-        dataService: DataService;
-        processSavedEntities: (saveResult: SaveResult) => Entity[];
-        resourceName: string;
-        adapter?: DataServiceAdapter;
-        routePrefix?: string;
-    }
+// declare module 'breeze-client' {
+//     export interface SaveContext {
+//         entityManager: EntityManager;
+//         dataService: DataService;
+//         processSavedEntities: (saveResult: SaveResult) => Entity[];
+//         resourceName: string;
+//         adapter?: DataServiceAdapter;
+//         routePrefix?: string;
+//     }
 
-    export interface MappingContext extends QueryContext {
-        mergeOptions?: MergeOptions;
-        refMap?: {};
-        deferredFns?: any[];
-        rawValueFn?: (rawEntity: any, dp: any) => any;
-        jsonResultsAdapter?: JsonResultsAdapter;
-        metadataStore?: MetadataStore;
-        query: EntityQuery;
-        dataService: DataService
-        getUrl: () => string;
-        processDeferred?(): void;
-        visitAndMerge?(nodes: any[], nodeContext: NodeContext): any[];
-    }
+//     export interface MappingContext extends QueryContext {
+//         mergeOptions?: MergeOptions;
+//         refMap?: {};
+//         deferredFns?: any[];
+//         rawValueFn?: (rawEntity: any, dp: any) => any;
+//         jsonResultsAdapter?: JsonResultsAdapter;
+//         metadataStore?: MetadataStore;
+//         query: EntityQuery;
+//         dataService: DataService
+//         getUrl: () => string;
+//         processDeferred?(): void;
+//         visitAndMerge?(nodes: any[], nodeContext: NodeContext): any[];
+//     }
         
-    export interface MergeOptions {
-        mergeStrategy: MergeStrategySymbol;
-        noTracking: boolean;
-        includeDeleted: boolean;
-    }
+//     export interface MergeOptions {
+//         mergeStrategy: MergeStrategySymbol;
+//         noTracking: boolean;
+//         includeDeleted: boolean;
+//     }
         
-    export interface NodeContext {
-        nodeType: string;
-        propertyName: string;
-        navigationProperty?: { entityTypeName: string; }
-    }
+//     export interface NodeContext {
+//         nodeType: string;
+//         propertyName: string;
+//         navigationProperty?: { entityTypeName: string; }
+//     }
         
-    export interface DataServiceOptions {
-        serviceName?: string;
-        adapterName?: string;
-        uriBuilderName?: string;
-        hasServerMetadata?: boolean;
-        jsonResultsAdapter?: JsonResultsAdapter;
-        useJsonp?: boolean;
-    }
+//     export interface DataServiceOptions {
+//         serviceName?: string;
+//         adapterName?: string;
+//         uriBuilderName?: string;
+//         hasServerMetadata?: boolean;
+//         jsonResultsAdapter?: JsonResultsAdapter;
+//         useJsonp?: boolean;
+//     }
         
-    export interface SaveBundle {
-        entities: Entity[];
-        saveOptions: SaveOptions;
-    }
+//     export interface SaveBundle {
+//         entities: Entity[];
+//         saveOptions: SaveOptions;
+//     }
         
-    export interface VisitNodeResult {
-        entityType?: EntityType;
-        nodeId?: any;
-        nodeRefId?: any;
-        ignore?: boolean;
-        extraMetadata?: { [key: string]: any; }
-    }
+//     export interface VisitNodeResult {
+//         entityType?: EntityType;
+//         nodeId?: any;
+//         nodeRefId?: any;
+//         ignore?: boolean;
+//         extraMetadata?: { [key: string]: any; }
+//     }
         
-}
+// }
 
 
 // export namespace breeze.core {

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+
 import {
     SaveResult,
     JsonResultsAdapter,
@@ -17,12 +18,13 @@ import {
     SaveBundle,
     NodeContext
 } from 'breeze-client';
+import { HttpHeaders } from '@angular/common/http';
 
 interface ISaveRequest {
     requestUri?: string;
     method?: 'POST' | 'GET' | 'DELETE';
     data?: string;
-    headers?: string;
+    headers?: {[key: string]: string};
 }
 
 interface ISaveChngePackage extends SaveResult {
@@ -49,7 +51,8 @@ interface ISaveChngePackage extends SaveResult {
 export class SpDataserviceAdapter {
     ajaxImpl: any;
     name: string;
-    getRequestDigest: string;
+    requestDigest: string;
+    defaultHeaders: { [index: string]: string }
     dataServiceVersion: string;
     ignoreDeleteNotFound = true; // true if should ignore a 404 error from a delete
     jsonResultsAdapter: JsonResultsAdapter;
@@ -62,10 +65,23 @@ export class SpDataserviceAdapter {
             name: `${this.name}_default`,
             visitNode: this.visitNode
         });
+        this.defaultHeaders = {
+            Accept: 'application/json;odata=verbose',
+            DataServiceVersion: this.dataServiceVersion,
+            'Content-Type': 'application/json;odata=verbose'
+        }
         this.jsonResultsAdapter['serverTypeNameToClient'] = this.serverTypeNameToClient;
         this.jsonResultsAdapter['clientTypeNameToServer'] = this.clientTypeNameToServer;
         this.jsonResultsAdapter['typeMap'] = { '': { _mappedPropertiesCount: NaN } };
         SpDataserviceAdapter.prototype.jsonResultsAdapter = this.jsonResultsAdapter;
+    }
+
+    private addDigestToHeader(): void {
+        if (this.requestDigest && !this.defaultHeaders['X-RequestDigest']) {
+            this.defaultHeaders['X-RequestDigest'] = this.requestDigest;
+        } else if (!this.requestDigest) {
+            delete this.defaultHeaders['X-RequestDigest'];
+        }
     }
 
     private addKeyMapping(savePackage: ISaveChngePackage, index: number, saved: any): void {
@@ -84,16 +100,6 @@ export class SpDataserviceAdapter {
         }
     }
 
-    private adjectUpdateDeleteRequest(aspect: EntityAspect): string {
-        const metadata = aspect.extraMetadata as any;
-        if (!metadata) {
-            throw new Error('Missing the extra metadata for an update/delete entity');
-        }
-        if (metadata.etag) {
-            this.getHttpHeaders()['If-Match'] = metadata.etag;
-        }
-        return metadata.uri || metadata.id;
-    }
 
     private catchNoConnectionError(error): void {
         if (error.status === 0 && error.message == null) {
@@ -119,7 +125,7 @@ export class SpDataserviceAdapter {
     }
 
     clientTypeNameToServer(clientTypeName): string {
-        return `SP.Data.${clientTypeName}.Item`;
+        return `SP.Data.${clientTypeName}ListItem`;
     }
 
     private createChangeRequest(saveContext: SaveContext, entity: Entity, savePackage: ISaveChngePackage): ISaveRequest {
@@ -128,6 +134,7 @@ export class SpDataserviceAdapter {
         let rawEntity: any;
         const entityManager = saveContext.entityManager as any;
         const helper = entityManager.helper;
+        this.addDigestToHeader();
 
         const aspect = entity.entityAspect;
         const metadata = aspect.extraMetadata as any;
@@ -155,6 +162,7 @@ export class SpDataserviceAdapter {
                     requestUri: entityManager.dataService.serviceName + type.defaultResourceName,
                     method: 'POST',
                     data: data,
+                    headers: this.defaultHeaders
                 };
                 break;
 
@@ -164,15 +172,29 @@ export class SpDataserviceAdapter {
                     data: null
                 };
 
-                request.requestUri = this.adjectUpdateDeleteRequest(aspect);
+                if (!metadata) {
+                    throw new Error('Missing the extra metadata for an update/delete entity');
+                }
+
+                if (metadata.etag) {
+                    Object.assign(request.headers, this.defaultHeaders);
+                    request.headers['If-Match'] = metadata.etag;
+                }
+
+                request.requestUri = metadata.uri || metadata.id;
                 break;
 
             case EntityState.Modified:
                 request = {
                     method: 'POST'
                 };
-                this.adjectUpdateDeleteRequest(aspect);
-                request.headers = this.getHttpHeaders()['X-HTTP-Method'] = 'MERGE';
+
+                if (metadata.etag) {
+                    Object.assign(request.headers, this.defaultHeaders);
+                    request.headers['If-Match'] = metadata.etag;
+                 }
+ 
+                request.headers['X-HTTP-Method'] = 'MERGE';
                 rawEntity = helper.unwrapChangedValues(entity, entityManager.metadataStore, this.transformSaveValue);
                 rawEntity.__metadata = { type: metadata.type };
                 request.data = JSON.parse(rawEntity);
@@ -214,10 +236,12 @@ export class SpDataserviceAdapter {
             mappingContext.query = query.select(custom.defaultSelect);
         }
 
+        this.addDigestToHeader();
+
         const httpOptions = {
             type: 'GET',
             url: mappingContext.getUrl(),
-            headers: this.getHttpHeaders(),
+            headers: this.defaultHeaders,
             params: query.parameters,
             dataType: 'json',
             success: null,
@@ -271,18 +295,6 @@ export class SpDataserviceAdapter {
     _getResponseData(response): any {
         const data = response.data && response.data.d;
         return data.results === undefined ? data : data.results;
-    }
-
-    private getHttpHeaders = () => {
-        const basicHeaders = {
-            Accept: 'application/json;odata=verbose',
-            DataServiceVersion: this.dataServiceVersion,
-            'Content-Type': 'application/json;odata=verbose'
-        };
-        if (this.getRequestDigest) {
-            basicHeaders['X-RequestDigest'] = this.getRequestDigest;
-        }
-        return basicHeaders;
     }
 
     initialize(): void {

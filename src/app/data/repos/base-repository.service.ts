@@ -3,8 +3,6 @@ import {
     EntityType,
     EntityQuery,
     Predicate,
-    FilterQueryOpSymbol,
-    FetchStrategySymbol,
     FetchStrategy,
     FilterQueryOp,
     SaveResult,
@@ -35,7 +33,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         [index: string]: Promise<T[]> | Promise<T> | null
     } = {};
 
-    protected defaultFetchStrategy: FetchStrategySymbol;
+    protected defaultFetchStrategy: FetchStrategy;
 
     constructor(entityTypeName: string, _entityService: EmProviderService) {
         this.entityType = _entityService.entityManager.metadataStore.getEntityType(entityTypeName) as EntityType;
@@ -95,7 +93,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         return true;
     }
 
-    protected async executeQuery(query: EntityQuery, fetchStrat?: FetchStrategySymbol): Promise<T[]> {
+    protected async executeQuery(query: EntityQuery, fetchStrat?: FetchStrategy): Promise<T[]> {
         try {
             const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
             const dataQueryResult = await this.entityManager.executeQuery(queryType);

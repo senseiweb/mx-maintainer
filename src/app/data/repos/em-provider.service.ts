@@ -12,7 +12,7 @@ import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
 import { BehaviorSubject } from 'rxjs';
 import { AppUserService } from './app-user.service';
-import { SpDataserviceAdapter } from './sp-dataservice-adapter';
+import { SpDataserviceAdapter } from './custom-sp-data-adapter';
 
 @Injectable({ providedIn: 'root' })
 export class EmProviderService {

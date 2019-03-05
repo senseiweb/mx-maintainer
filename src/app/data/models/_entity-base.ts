@@ -34,6 +34,7 @@ declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefin
 
 export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof Entity | ExtreBareEntityProps>>>;
 
+
 declare type etDef = Omit<EntityTypeOptions, 'dataProperties'|'navigationProperties'>;
 
 declare type dtDef = Omit<DataProperty, 'dataType'>;
