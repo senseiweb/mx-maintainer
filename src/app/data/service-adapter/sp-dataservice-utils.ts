@@ -1,10 +1,9 @@
-import {  Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AjaxAdapter, HttpResponse, ServerError, MetadataStore, AbstractDataServiceAdapter } from 'breeze-client';
 import { SaveErrorFromServer } from 'breeze-client/src/entity-manager';
 
 @Injectable()
 export class CustomDataServiceUtils {
-
     ajaxAdapter: AjaxAdapter;
 
     clientTypeNameToServer(clientTypeName: string): string {
@@ -36,11 +35,7 @@ export class CustomDataServiceUtils {
 
         const saveContext = response.saveContext;
 
-        let tmp =
-            errObj.Message ||
-            errObj.ExceptionMessage ||
-            errObj.EntityErrors ||
-            errObj.Errors;
+        let tmp = errObj.Message || errObj.ExceptionMessage || errObj.EntityErrors || errObj.Errors;
         const isDotNet = !!tmp;
         let message: string, entityErrors: any[];
         if (!isDotNet) {
@@ -61,9 +56,7 @@ export class CustomDataServiceUtils {
                 entityErrors.map(function(e) {
                     return {
                         errorName: e.ErrorName,
-                        entityTypeName: MetadataStore.normalizeTypeName(
-                            e.EntityTypeName
-                        ),
+                        entityTypeName: MetadataStore.normalizeTypeName(e.EntityTypeName),
                         keyValues: e.KeyValues,
                         propertyName: e.PropertyName,
                         errorMessage: e.ErrorMessage
@@ -72,9 +65,7 @@ export class CustomDataServiceUtils {
         }
 
         if (saveContext && entityErrors) {
-            const propNameFn =
-                saveContext.entityManager.metadataStore.namingConvention
-                    .serverPropertyNameToClient;
+            const propNameFn = saveContext.entityManager.metadataStore.namingConvention.serverPropertyNameToClient;
             entityErrors.forEach(function(e) {
                 e.propertyName = e.propertyName && propNameFn(e.propertyName);
             });
@@ -96,6 +87,11 @@ export class CustomDataServiceUtils {
             err.message = `${messagePrefix}; ${err.message}`;
         }
         reject(err);
+    }
+
+    serverTypeNameToClient(servertTypeName: string): string {
+        const re = /^(SP\.Data.)(.*)(ListItem)$/;
+        const typeName = serverTypeName.replace(re, '$2');
     }
 
     unwrapResponseData(response: any): any {
