@@ -12,8 +12,6 @@ import {
 
 } from 'breeze-client';
 import { TypeDefintion } from './custom-type-def';
-import { ComplexTypeConfig } from 'breeze-client/src/entity-metadata';
-
 
 @Injectable()
 export class CustomMetadataHelperService {
@@ -41,11 +39,11 @@ export class CustomMetadataHelperService {
             .hasAKeyType(this.defaultAutoGenKeyType)
             .replaceDataPropAliases()
             .replaceNavPropAliases();
-        
+
         const type = typeDef.isComplexType ?
             new ComplexType(typeDef as any) :
             new EntityType(typeDef as any);
-        
+
         store.addEntityType(type);
         this.inferValidators(type);
         this.addTypeNameAsResource(store, type as EntityType);
@@ -63,9 +61,27 @@ export class CustomMetadataHelperService {
             store.setEntityTypeForResourceName(type.shortName, type);
         }
     }
-    
 
-    private addValidator(prop: DataProperty, validator: Validator): void {
+
+    private inferValidators(entityType: EntityType | ComplexType): void {
+
+        entityType.dataProperties.forEach(function (prop) {
+            if (!prop.isNullable) { // is required.
+                this.addValidator(prop, Validator.required());
+            }
+
+            const dataTypeValidator = this.getDataTypeValidator(prop)
+
+            this.addValidator(prop, dataTypeValidator);
+
+            if (prop.maxLength != null && prop.dataType === DataType.String) {
+                this.addValidator(prop, Validator.maxLength({ maxLength: prop.maxLength }));
+            }
+
+        });
+    }
+
+    addValidator(prop: DataProperty, validator: Validator): void {
         if (!validator) { return; } // no validator arg
         const valName = validator.name;
         const validators = prop.validators;
@@ -75,25 +91,10 @@ export class CustomMetadataHelperService {
         }
     }
 
-    private getDataTypeValidator(prop: DataProperty): Function {
+    getDataTypeValidator(prop: DataProperty): Function {
         const dataType = prop.dataType as any;
         const validatorCtor = !dataType || dataType === DataType.String ? null : dataType.validatorCtor;
         return validatorCtor ? validatorCtor() : null;
     }
 
-    private inferValidators(entityType: EntityType | ComplexType): void {
-
-        entityType.dataProperties.forEach(function (prop) {
-            if (!prop.isNullable) { // is required.
-                this.addValidator(prop, Validator.required());
-            }
-
-            this.addValidator(prop, this.getDataTypeValidator(prop));
-
-            if (prop.maxLength != null && prop.dataType === DataType.String) {
-                this.addValidator(prop, Validator.maxLength({ maxLength: prop.maxLength }));
-            }
-
-        });
-    }
 }

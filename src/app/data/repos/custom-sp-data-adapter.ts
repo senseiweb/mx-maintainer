@@ -13,12 +13,10 @@ import {
     SaveContext,
     MappingContext,
     MetadataStore,
-    QueryResult,
     EntityState,
     SaveBundle,
     NodeContext
 } from 'breeze-client';
-import { HttpHeaders } from '@angular/common/http';
 
 interface ISaveRequest {
     requestUri?: string;

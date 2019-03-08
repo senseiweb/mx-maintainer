@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
     FilterQueryOp,
-    Predicate,
-    FilterQueryOpSymbol
+    Predicate
 } from 'breeze-client';
 import {
     TriggerRepoService,

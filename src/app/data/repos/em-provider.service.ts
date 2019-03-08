@@ -7,7 +7,7 @@ import {
     EntityType,
     NamingConvention
 } from 'breeze-client';
-import 'breeze-client-labs/breeze.namingConventionWithDictionary';
+import { CustomNameConventionService } from './custom-namingConventionDict';
 import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
 import { BehaviorSubject } from 'rxjs';
@@ -23,6 +23,7 @@ export class EmProviderService {
 
     constructor(private emCfg: EmProviderConfig,
         private spDataProvider: SpDataserviceAdapter,
+        private namingDict: CustomNameConventionService,
         private appUserSvc: AppUserService) {
         this.init();
     }
@@ -43,7 +44,7 @@ export class EmProviderService {
         };
 
         // @ts-ignore
-        const convention = new NamingConvention.NamingConventionWithDictionary(
+        const convention = this.namingDict.createNameDictionary(
             'spNameConv', NamingConvention.camelCase, clientToServerNameDictionary);
 
         convention.setAsDefault();

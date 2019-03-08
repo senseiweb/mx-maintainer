@@ -1,19 +1,15 @@
 import { SpMetadata } from './sp-metadata';
 import {
     DataType,
-    DataTypeSymbol,
     DataProperty,
-    NavigationPropertyOptions,
     Entity,
     EntityAspect,
     EntityType,
-    EntityTypeOptions
+    NavigationProperty,
 } from 'breeze-client';
 import 'breeze-client-labs/breeze.metadata-helper';
 
-export interface Instantiable<T> {
-    new(...args: any[]): T;
-}
+export type Instantiable<T> = new(...args: any[]) => T;
 
 // export declare type Children<T> <keyof T, T extends any[] ? T : never;
 
@@ -34,15 +30,14 @@ declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefin
 
 export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof Entity | ExtreBareEntityProps>>>;
 
-
-declare type etDef = Omit<EntityTypeOptions, 'dataProperties'|'navigationProperties'>;
+declare type etDef = Omit<EntityType, 'dataProperties'|'navigationProperties'>;
 
 declare type dtDef = Omit<DataProperty, 'dataType'>;
 
-declare type navDef = Omit<NavigationPropertyOptions, 'foreignKeyNames'>;
+declare type navDef = Omit<NavigationProperty, 'foreignKeyNames'>;
 
 export interface SpDataDef extends dtDef {
-    dataType: DataTypeSymbol;
+    dataType: DataType;
     hasMany?: boolean;
 }
 export interface SpNavDef<T> extends navDef {
@@ -52,9 +47,9 @@ export type DataMembers<T> = {
     [key in keyof bareEntity<T>]: Partial<SpDataDef>;
 };
 
-export interface Type<T> extends Function {
-    new (...args: any[]): T;
-}
+// export interface Type<T> extends Function {
+//     new (...args: any[]): T;
+// }
 export type ClientNameDict<T> = {
     [bkey in keyof bareEntity<T>]: string
 };
@@ -128,17 +123,17 @@ export class MetadataBase<T> {
 
     addDefaultSelect(type: EntityType): EntityType {
         // @ts-ignore
-        const customPropExist = type.custom;
+        const customProp = type.custom;
         const excludeProps = ['__metadata'];
 
-        if (!customPropExist || !customPropExist.defaultSelect) {
+        if (!customProp || !customProp['defaultSelect']) {
             const selectItems = [];
             type.dataProperties.forEach((prop) => {
                 const isExcluded = excludeProps.some(exProp => exProp === prop.name);
                 if (!prop.isUnmapped && !isExcluded) { selectItems.push(prop.name); }
             });
             if (selectItems.length) {
-                if (!customPropExist) {
+                if (!customProp) {
                     // @ts-ignore
                     type.custom = {};
                 }
