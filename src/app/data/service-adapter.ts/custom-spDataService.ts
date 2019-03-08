@@ -24,7 +24,9 @@ import {
     ServerError,
     SaveErrorFromServer
 } from 'breeze-client/src/entity-manager';
-import { JsonPipe } from '@angular/common';
+
+import { CustomSaveContext } from './sp-dataservice-save';
+import { CustomDataServiceUtils } from './sp-dataservice-utils';
 
 /**
  * Built from example at https://github.com/Breeze/breeze-client/blob/master/src/abstract-data-service-adapter.ts
@@ -35,7 +37,7 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
     defaultHeaders: { [index: string]: string };
     requestDigest: string;
 
-    constructor() {
+    constructor(private utils: CustomDataServiceUtils) {
         super();
         this.name = 'SpCustomDataService';
         this.defaultHeaders = {
@@ -296,8 +298,8 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
     }
 
     initialize(): void {
-        this.ajaxImpl = config.getAdapterInstance('ajax');
-        if (this.ajaxImpl && this.ajaxImpl.ajax) {
+        this.utils.ajaxAdapter = config.getAdapterInstance('ajax');
+        if ( this.utils.ajaxAdapter && this.utils.ajaxAdapter.ajax) {
             return;
         }
         throw new Error(
@@ -306,19 +308,7 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         );
     }
 
-    normalizeSaveValue(prop: DataProperty, val: any): any {
-        if (prop.isUnmapped) {
-            return undefined;
-        }
-        if (prop.dataType === DataType.DateTimeOffset) {
-            val =
-                val &&
-                new Date(val.getTime() - val.getTimezoneOffset() * 60000);
-        } else if (prop.dataType.quoteJsonOData) {
-            val = val != null ? val.toString() : val;
-        }
-        return val;
-    }
+
 
     prepareSaveBundles(
         saveContext: SaveContext,
@@ -412,12 +402,9 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         }
     }
 
-    saveChanges(
-        saveContext: SaveContext,
-        saveBundle: SaveBundle
-    ): Promise<SaveResult> {
-        const adapter = (saveContext.adapter = this);
-        const saveBundler = adapter.prepareSaveBundles(saveContext, saveBundle);
+    saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
+        const saveCtx = new CustomSaveContext(saveContext, saveBundle, utils);
+        return saveCtx.save();
     }
 
     requestAttemptFailed(): void {}

@@ -7,12 +7,12 @@ import {
     EntityType,
     NamingConvention
 } from 'breeze-client';
-import { CustomNameConventionService } from './custom-namingConventionDict';
+import { CustomNameConventionService } from '../service-adapter.ts/custom-namingConventionDict';
 import * as eb from '../models/_entity-base';
 import { EmProviderConfig } from './em-provider-config';
 import { BehaviorSubject } from 'rxjs';
 import { AppUserService } from './app-user.service';
-import { SpDataserviceAdapter } from './custom-sp-data-adapter';
+import { SpDataserviceAdapter } from '../service-adapter.ts/custom-sp-data-adapter';
 
 @Injectable({ providedIn: 'root' })
 export class EmProviderService {
