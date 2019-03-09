@@ -91,10 +91,11 @@ export class CustomDataServiceUtils {
 
     serverTypeNameToClient(servertTypeName: string): string {
         const re = /^(SP\.Data.)(.*)(ListItem)$/;
-        const typeName = serverTypeName.replace(re, '$2');
+        const typeName = servertTypeName.replace(re, '$2');
+        return MetadataStore.normalizeTypeName(typeName);
     }
 
-    unwrapResponseData(response: any): any {
+    unwrapResponseData(response: HttpResponse): any {
         const data = response.data && response.data.d;
         return data.results === undefined ? data : data.results;
     }
