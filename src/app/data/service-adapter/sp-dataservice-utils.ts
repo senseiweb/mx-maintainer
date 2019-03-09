@@ -89,6 +89,39 @@ export class CustomDataServiceUtils {
         reject(err);
     }
 
+    // private setSPODataErrorMessage(err: any) {
+    //     // OData errors can have the message buried very deeply - and nonobviously
+    //     // Normal MS OData responses have a response.body
+    //     // SharePoint OData responses have a response.data instead
+    //     // this code is tricky so be careful changing the response.data parsing.
+    //     let data = (err.data = err.response.data);
+    //     let m: any;
+    //     const msg = [];
+    //     let nextErr: any;
+
+    //     if (data) {
+    //         try {
+    //             if (typeof data === 'string') {
+    //                 data = err.data = JSON.parse(data);
+    //             }
+    //             do {
+    //                 nextErr = data.error || data.innererror;
+    //                 if (!nextErr) {
+    //                     m = data.message || '';
+    //                     msg.push(typeof m === 'string' ? m : m.value);
+    //                 }
+    //                 nextErr = nextErr || data.internalexception;
+    //                 data = nextErr;
+    //             } while (nextErr);
+    //             if (msg.length > 0) {
+    //                 err.message = msg.join('; ') + '.';
+    //             }
+    //         } catch (e) {
+    //             /* carry on */
+    //         }
+    //     }
+    // }
+
     serverTypeNameToClient(servertTypeName: string): string {
         const re = /^(SP\.Data.)(.*)(ListItem)$/;
         const typeName = servertTypeName.replace(re, '$2');

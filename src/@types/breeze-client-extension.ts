@@ -1,14 +1,6 @@
-import {
-    BreezeConfig,
-    AdapterType,
-    BaseAdapter
-} from 'breeze-client/src/config';
+import { BreezeConfig, AdapterType, BaseAdapter } from 'breeze-client/src/config';
 
-import {
-    SaveResult,
-    SaveContext,
-    HttpResponse
-} from 'breeze-client/src/entity-manager';
+import { SaveResult, SaveContext, HttpResponse } from 'breeze-client/src/entity-manager';
 
 import { AjaxAdapter } from 'breeze-client/src/interface-registry';
 
@@ -16,10 +8,7 @@ import { EntityKey, Entity, EntityType } from 'breeze-client';
 
 declare module 'breeze-client/src/config' {
     interface BreezeConfig {
-        getAdapterInstance<T extends BaseAdapter>(
-            interfaceName: AdapterType,
-            adapterName?: string
-        ): AjaxAdapter;
+        getAdapterInstance<T extends BaseAdapter>(interfaceName: AdapterType, adapterName?: string): AjaxAdapter;
     }
 }
 
@@ -37,7 +26,6 @@ declare module 'breeze-client/src/entity-manager' {
     }
 
     export interface SaveResult {
-        $entityType: EntityType;
         entitiesWithErrors: Entity[];
     }
 
@@ -45,10 +33,10 @@ declare module 'breeze-client/src/entity-manager' {
     //     saveContext: SaveContext | any;
     // }
     // not subclasses of Error
-    /** 
-    For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation. 
-    @adapter (see [[IDataServiceAdapter]])    
-    @hidden @internal 
+    /**
+    For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
+    @adapter (see [[IDataServiceAdapter]])
+    @hidden @internal
     */
     export interface EntityErrorFromServer {
         entityTypeName: string;
@@ -59,9 +47,9 @@ declare module 'breeze-client/src/entity-manager' {
         propertyName: string;
     }
 
-    /** Shape of a save error returned from the server. 
-For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation. 
-@adapter (see [[IDataServiceAdapter]])    
+    /** Shape of a save error returned from the server.
+For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
+@adapter (see [[IDataServiceAdapter]])
 @hidden @internal
 */
     export interface SaveErrorFromServer extends ServerError {

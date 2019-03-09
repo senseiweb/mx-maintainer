@@ -4,6 +4,7 @@ import {
     MetadataStore,
     DataService,
     config,
+    core,
     MappingContext,
     EntityType,
     EntityQuery,
@@ -16,14 +17,12 @@ import {
     EntityProperty,
     DataProperty,
     DataType,
-    Entity
+    Entity,
+    JsonResultsAdapter,
+    NodeContext
 } from 'breeze-client';
 
-import {
-    QueryResult,
-    ServerError,
-    SaveErrorFromServer
-} from 'breeze-client/src/entity-manager';
+import { QueryResult, ServerError, SaveErrorFromServer } from 'breeze-client/src/entity-manager';
 
 import { CustomSaveContext } from './sp-dataservice-save';
 import { CustomDataServiceUtils } from './sp-dataservice-utils';
@@ -47,128 +46,12 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         };
     }
 
-    private addKeyMapping(
-        response: HttpResponse,
-        index: number,
-        unwrappedResponse: any
-    ): any {
-        const tempKey = response.saveContext.tempKeys[index];
-        if (tempKey) {
-            // entity had a temporary key; add a temp-to-perm key mapping
-            const entityType = tempKey.entityType;
-            const tempValue = tempKey.values[0];
-            const realKey = entityType.getEntityKeyFromRawEntity(
-                entityType,
-                unwrappedResponse
-            );
-            const keyMapping = {
-                entityTypeName: entityType.name,
-                tempValue: tempValue,
-                realValue: realKey.values[0]
-            };
-            response.saveContext.saveResult.keyMappings.push(keyMapping);
-        }
+    jsonResultsAdapter(): JsonResultsAdapter {
+        return new JsonResultsAdapter({
+            visitNode: 
+        })
     }
 
-    private clientTypeNameToServer(clientTypeName: string): string {
-        return `SP.Data.${clientTypeName}ListItem`;
-    }
-
-    private createError(httpResponse: HttpResponse): ServerError {
-        const err = new Error() as ServerError;
-        err.httpResponse = httpResponse;
-        err.status = httpResponse.status;
-
-        let errObj = httpResponse.data;
-
-        if (!errObj) {
-            err.message = httpResponse.error && httpResponse.error.toString();
-            return err;
-        }
-
-        // some ajax providers will convert errant result into an object (angularjs), others will not (jQuery)
-        // if not do it here.
-        if (typeof errObj === 'string') {
-            try {
-                errObj = JSON.parse(errObj);
-            } catch (e) {
-                // sometimes httpResponse.data is just the error message itself
-                err.message = errObj;
-                return err;
-            }
-        }
-
-        const saveContext = httpResponse.saveContext;
-
-        let tmp =
-            errObj.Message ||
-            errObj.ExceptionMessage ||
-            errObj.EntityErrors ||
-            errObj.Errors;
-        const isDotNet = !!tmp;
-        let message: string, entityErrors: any[];
-        if (!isDotNet) {
-            message = errObj.message;
-            entityErrors = errObj.errors || errObj.entityErrors;
-        } else {
-            tmp = errObj;
-            do {
-                // .NET exceptions can provide both ExceptionMessage and Message but ExceptionMethod if it
-                // exists has a more detailed message.
-                message = tmp.ExceptionMessage || tmp.Message;
-                tmp = tmp.InnerException;
-            } while (tmp);
-            // .EntityErrors will only occur as a result of an EntityErrorsException being deliberately thrown on the server
-            entityErrors = errObj.Errors || errObj.EntityErrors;
-            entityErrors =
-                entityErrors &&
-                entityErrors.map(function(e) {
-                    return {
-                        errorName: e.ErrorName,
-                        entityTypeName: MetadataStore.normalizeTypeName(
-                            e.EntityTypeName
-                        ),
-                        keyValues: e.KeyValues,
-                        propertyName: e.PropertyName,
-                        errorMessage: e.ErrorMessage
-                    };
-                });
-        }
-
-        if (saveContext && entityErrors) {
-            const propNameFn =
-                saveContext.entityManager.metadataStore.namingConvention
-                    .serverPropertyNameToClient;
-            entityErrors.forEach(function(e) {
-                e.propertyName = e.propertyName && propNameFn(e.propertyName);
-            });
-            (err as SaveErrorFromServer).entityErrors = entityErrors;
-        }
-
-        err.message =
-            message ||
-            `Server side errors encountered -
-          see the entityErrors collection on this object for more detail`;
-        return err;
-    }
-
-    private changeRequestSuccess(
-        saveContext: SaveContext,
-        response: HttpResponse,
-        index: number
-    ): Entity {
-        let data = this.unwrapResponseData(response);
-        if (data && typeof data === 'object') {
-            // Have "saved entity" data; add its type (for JsonResultsAdapter) & KeyMapping
-            data.entityType = saveContext.originalEntities[index].entityType;
-            this.addKeyMapping(saveContext, index, data);
-        } else {
-            // No "saved entity" data; return the original entity
-            data = saveContext.originalEntities[index];
-        }
-        saveContext.saveResult.entities.push(saved);
-        return saved;
-    }
 
     executeQuery(mappingContext: MappingContext): Promise<QueryResult> {
         mappingContext.adapter = this;
@@ -179,59 +62,49 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
             mappingContext.query = query.select(custom.defaultSelect);
         }
 
-        const executeQueryPromise = new Promise<QueryResult>(
-            (resolver, reject) => {
-                const httpOptions = {
-                    type: 'GET',
-                    url: mappingContext.getUrl(),
-                    headers: this.getRequestDigestHeaders(),
-                    params: query.parameters,
-                    dataType: 'json',
-                    crossDomain: false,
-                    success: (response: HttpResponse) => {
-                        try {
-                            const data = this.executeQuerySuccess(
-                                response,
-                                mappingContext
-                            );
-                            resolver(data);
-                        } catch (e) {
-                            if (e instanceof Error) {
-                                reject(e);
-                            } else {
-                                this.handleHttpErrors(reject, response);
-                            }
+        const executeQueryPromise = new Promise<QueryResult>((resolver, reject) => {
+            const httpOptions = {
+                type: 'GET',
+                url: mappingContext.getUrl(),
+                headers: this.getRequestDigestHeaders(),
+                params: query.parameters,
+                dataType: 'json',
+                crossDomain: false,
+                success: (response: HttpResponse) => {
+                    try {
+                        const data = this.executeQuerySuccess(response, mappingContext);
+                        resolver(data);
+                    } catch (e) {
+                        if (e instanceof Error) {
+                            reject(e);
+                        } else {
+                            this.handleHttpErrors(reject, response);
                         }
-                    },
-                    error: (response: HttpResponse) => {
-                        this.handleHttpErrors(reject, response);
                     }
-                };
-
-                if (mappingContext.dataService.useJsonp) {
-                    httpOptions.dataType = 'jsonp';
-                    httpOptions.crossDomain = true;
+                },
+                error: (response: HttpResponse) => {
+                    this.handleHttpErrors(reject, response);
                 }
+            };
 
-                this.ajaxImpl.ajax(httpOptions);
+            if (mappingContext.dataService.useJsonp) {
+                httpOptions.dataType = 'jsonp';
+                httpOptions.crossDomain = true;
             }
-        );
+
+            this.ajaxImpl.ajax(httpOptions);
+        });
         return executeQueryPromise;
     }
 
-    private executeQuerySuccess(
-        response: HttpResponse,
-        mc: MappingContext
-    ): QueryResult {
+    private executeQuerySuccess(response: HttpResponse, mc: MappingContext): QueryResult {
         const unwrappedData = this.unwrapResponseData(response);
         let rData: QueryResult;
 
         if (unwrappedData) {
             rData = {
                 results: unwrappedData,
-                inlineCount: unwrappedData.__count
-                    ? parseInt(unwrappedData.__count, 10)
-                    : undefined,
+                inlineCount: unwrappedData.__count ? parseInt(unwrappedData.__count, 10) : undefined,
                 httpResponse: response,
                 query: mc.query
             };
@@ -245,13 +118,8 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         return rData;
     }
 
-    fetchMetadata(
-        metadataStore: MetadataStore,
-        dataService: DataService
-    ): Promise<any> {
-        const error = new Error(
-            'This dataservice does not support metadata retriveal from sharepoint'
-        );
+    fetchMetadata(metadataStore: MetadataStore, dataService: DataService): Promise<any> {
+        const error = new Error('This dataservice does not support metadata retriveal from sharepoint');
         return Promise.reject(error);
     }
 
@@ -264,18 +132,14 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         return defaultHeader;
     }
 
-    private getEntityTypeFromMappingContext(
-        mc: MappingContext
-    ): EntityType | undefined {
+    private getEntityTypeFromMappingContext(mc: MappingContext): EntityType | undefined {
         const query = mc.query;
         if (!query || typeof query === 'string') {
             return undefined;
         }
         let et = query.resultEntityType as EntityType;
         if (!et) {
-            const etName = mc.metadataStore.getEntityTypeNameForResourceName(
-                query.resourceName
-            );
+            const etName = mc.metadataStore.getEntityTypeNameForResourceName(query.resourceName);
             if (etName) {
                 et = mc.metadataStore.getEntityType(etName) as EntityType;
             }
@@ -283,147 +147,52 @@ export class CustomSpDsataService extends AbstractDataServiceAdapter {
         return et;
     }
 
-    private handleHttpErrors(
-        reject: (reason?: any) => void,
-        httResponse: HttpResponse,
-        messagePrefix?: string
-    ): ServerError {
-        const err = this.createError(httResponse);
-        AbstractDataServiceAdapter._catchNoConnectionError(err);
-
-        if (messagePrefix) {
-            err.message = `${messagePrefix}; ${err.message}`;
-        }
-        reject(err);
-    }
-
     initialize(): void {
         this.utils.ajaxAdapter = config.getAdapterInstance('ajax');
-        if ( this.utils.ajaxAdapter && this.utils.ajaxAdapter.ajax) {
+        if (this.utils.ajaxAdapter && this.utils.ajaxAdapter.ajax) {
             return;
         }
-        throw new Error(
-            `Unable to find ajax adapter for dataservice adapter ${this.name ||
-                ''}`
-        );
-    }
-
-
-
-    prepareSaveBundles(
-        saveContext: SaveContext,
-        saveBundle: SaveBundle
-    ): Promise<SaveResult>[] {
-        saveContext.tempKeys = [];
-        saveContext.originalEntities = saveBundle.entities;
-
-        const requestList = saveBundle.entities.map((entity, index) => {
-            if (entity.entityAspect.entityState.isAdded()) {
-                return this.prepareAddChangeSet(
-                    saveContext,
-                    saveBundle,
-                    entity,
-                    index
-                );
-            }
-        });
-        return requestList;
-    }
-
-    private prepareAddChangeSet(
-        saveCtx: SaveContext,
-        bundle: SaveBundle,
-        entity: Entity,
-        index: number
-    ): Promise<SaveResult> {
-        const defaultHeaders = {};
-
-        Object.assign(defaultHeaders, this.defaultHeaders);
-
-        let rawEntity: any;
-        const url = saveCtx.dataService.qualifyUrl(saveCtx.resourceName);
-        const em = saveCtx.entityManager;
-        const et = entity.entityType;
-        const ap = entity.entityAspect;
-        const helper = em.helper;
-
-        if (!entity.entityType.defaultResourceName) {
-            throw new Error(`Missing resource name for type: ${et.name}`);
-        }
-
-        if (et.autoGeneratedKeyType !== AutoGeneratedKeyType.None) {
-            saveCtx.tempKeys[index] = ap.getKey();
-        }
-
-        rawEntity = helper.unwrapInstance(entity, this.normalizeSaveValue);
-        rawEntity.__metadata = {
-            type: this.clientTypeNameToServer(et.shortName)
-        };
-        const payload = JSON.stringify(rawEntity);
-
-        return new Promise<SaveResult>((resolve, reject) => {
-            const requestConfig = {
-                url: url + et.defaultResourceName,
-                type: 'POST',
-                data: payload,
-                headers: defaultHeaders,
-                success: (response: HttpResponse) => {
-                    response.saveContext = saveCtx;
-                    const data = this.unwrapResponseData(response.data);
-                    if (data && (data.Error || data.error)) {
-                        this.handleHttpErrors(reject, response);
-                    } else {
-                        const saveResult = this.prepareSaveResult(
-                            response,
-                            index
-                        );
-                        resolve(saveResult);
-                    }
-                },
-                error: (response: HttpResponse) => {
-                    response.saveContext = saveCtx;
-                    this.handleHttpErrors(reject, response);
-                }
-            };
-            this.ajaxImpl.ajax(requestConfig);
-        });
-    }
-
-    prepareSaveResult(response: HttpResponse, index: number): SaveResult {
-        let data = this.unwrapResponseData(response);
-        if (data && typeof data === 'object') {
-            // Have "saved entity" data; add its type (for JsonResultsAdapter) & KeyMapping
-            data.$entityType =
-                response.saveContext.originalEntities[index].entityType;
-            this.addKeyMapping(response, index, data);
-        } else {
-            // No "saved entity" data; return the original entity
-            data = saveContext.originalEntities[index];
-        }
+        throw new Error(`Unable to find ajax adapter for dataservice adapter ${this.name || ''}`);
     }
 
     saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
-        const saveCtx = new CustomSaveContext(saveContext, saveBundle, utils);
-        return saveCtx.save();
+        const saveCtx = new CustomSaveContext(saveContext, saveBundle, this.utils);
+        return saveCtx.save(this.getRequestDigestHeaders());
     }
 
-    requestAttemptFailed(): void {}
+    // Determine if this is an Entity node and update the node appropriately if so
+    updateEntityNode(node: any, mappingContext: MappingContext): void {
+        const metadata = node.__metadata; // every SharePoint entity node has __metadata
 
-    // requestAttemptSucceed(response: HttpResponse,
-    //     index: number, resolve: any, reject: any): void {
-    //     try {
-    //         const responseCode = +response.status;
+        if (!metadata) { return; }
 
-    //         if ((!responseCode) || responseCode >= 400) {
-    //             this.requestAttemptFailed(response, )
-    //         } else {
+        const entityType = node.$entityType;
 
-    //         }
-    //     }
-    // }
+        if (entityType) {
+            // save result node
 
-    unwrapResponseData(response: any): any {
-        const data = response.data && response.data.d;
-        return data.results === undefined ? data : data.results;
+        }
     }
+
+    visitNode(node: any, mappingContext: MappingContext, nodeContext: NodeContext): any {
+        if (!node) { return {}; }
+
+        const propertyName = nodeContext.propertyName;
+
+        const ignore = node.__deferred !== null || propertyName === '__metadata' ||
+            // EntityKey properties can be produced by EDMX models
+            (propertyName === 'EntityKey' && node.$type && core.stringStartsWith(node.$type, 'System.Data'));
+        
+        if (!ignore) {
+            
+            return {
+                entityType: entityType,
+                nodeId: node.$id,
+                nodeRefId: node.$ref,
+                ignore: ignore
+              } as any;
+        }
+
+    }
+
 }
