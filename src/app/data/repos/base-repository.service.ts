@@ -15,8 +15,7 @@ import {
     SpEntityBase
 } from '../models/_entity-base';
 import { EmProviderService } from './em-provider.service';
-import { Entity } from 'breeze';
-import { setTimeout } from 'core-js';
+
 
 
 export class BaseRepoService<T extends SpEntityBase> {
@@ -40,7 +39,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.entityManager = _entityService.entityManager;
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = FetchStrategy.FromServer;
-        this.spChoiceFieldCache = []
+        this.spChoiceFieldCache = [];
         console.log(`base created from ${entityTypeName}`);
     }
 
@@ -69,8 +68,13 @@ export class BaseRepoService<T extends SpEntityBase> {
         return this.entityManager.createEntity(this.entityType.shortName, options) as any;
     }
 
-    protected baseQuery(): EntityQuery {
-        return EntityQuery.from(this.resourceName);
+    protected baseQuery(toBaseType = true): EntityQuery {
+        const query = EntityQuery
+            .from(this.resourceName);
+        if (!toBaseType) {
+            return query;
+        }
+        return query.toType(this.entityType);
     }
 
     protected isCachedBundle(refreshedData?: true): boolean {
@@ -96,7 +100,8 @@ export class BaseRepoService<T extends SpEntityBase> {
     protected async executeQuery(query: EntityQuery, fetchStrat?: FetchStrategy): Promise<T[]> {
         try {
             const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
-            const dataQueryResult = await this.entityManager.executeQuery(queryType);
+            const dataQueryResult = await this.entityManager
+                .executeQuery(queryType);
             console.log(dataQueryResult);
             return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
         } catch (error) {
@@ -124,6 +129,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         const predicate = Predicate.create('EntityPropertyName', FilterQueryOp.Equals, fieldName);
         const query = EntityQuery.from(fieldsResourceName)
             .where(predicate);
+
         try {
             const response = await this.entityManager.executeQuery(query);
             const choices = response.results[0]['choices']['results'] as string[];

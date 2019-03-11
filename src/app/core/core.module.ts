@@ -5,12 +5,10 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import 'hammerjs';
 
 import { HttpClientModule } from '@angular/common/http';
-import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { TranslateModule } from '@ngx-translate/core';
 import { FuseModule } from '@fuse/fuse.module';
 import { FusecLayoutModule } from 'app/fusec-layout/fusec-layout.module';
 import { FuseProgressBarModule, FuseSidebarModule } from '@fuse/components';
-import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
 import { environment } from 'environments/environment';
 
 import { FuseConfig } from '@fuse/types';
@@ -53,7 +51,6 @@ const defaultFuseConfig: FuseConfig = {
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    BreezeBridgeHttpClientModule,
     HttpClientModule,
     TranslateModule.forRoot(),
 
@@ -71,7 +68,6 @@ const defaultFuseConfig: FuseConfig = {
   exports: [
     BrowserModule,
     BrowserAnimationsModule,
-    BreezeBridgeHttpClientModule,
     HttpClientModule,
 
     // Material moment date module

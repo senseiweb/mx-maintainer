@@ -7,7 +7,7 @@ import {
     EntityType,
     NavigationProperty,
 } from 'breeze-client';
-import 'breeze-client-labs/breeze.metadata-helper';
+import { TypeDefintion } from '../service-adapter/custom-type-def';
 
 export type Instantiable<T> = new(...args: any[]) => T;
 
@@ -30,7 +30,7 @@ declare type ExtreBareEntityProps = 'entityType' | 'entityAspect' | 'entityDefin
 
 export declare type bareEntity<T> = Partial<Pick<T, Exclude<keyof T, keyof Entity | ExtreBareEntityProps>>>;
 
-declare type etDef = Omit<EntityType, 'dataProperties'|'navigationProperties'>;
+export declare type CustomEtDef = Omit<EntityType, 'dataProperties'|'navigationProperties'>;
 
 declare type dtDef = Omit<DataProperty, 'dataType'>;
 
@@ -56,9 +56,9 @@ export type ClientNameDict<T> = {
 export type NavMembers<T> = {
     [key in keyof bareEntity<T>]: Partial<SpNavDef<T>>;
 };
-export interface SpEntityDef<T> extends etDef {
-    dataProperties: DataMembers<T>;
-    isComplexType: boolean;
+export interface SpEntityDef<T> extends Partial<CustomEtDef> {
+    dataProperties?: DataMembers<T>;
+    isComplexType?: boolean;
     navigationProperties?: NavMembers<T>;
 }
 
@@ -99,13 +99,8 @@ export class MetadataBase<T> {
         editorId: { dataType: this.dt.Int32 }
     };
 
-    entityDefinition = {
-        dataProperties: {},
-        navigationProperties: {},
-        shortName: '',
-        defaultResourceName: '',
-    } as SpEntityDef<T>;
-
+    entityDefinition = new TypeDefintion<T>();
+    
     metadataFor: Instantiable<T>;
 
     translateDictionary = {} as {
@@ -122,9 +117,12 @@ export class MetadataBase<T> {
     }
 
     addDefaultSelect(type: EntityType): EntityType {
-        // @ts-ignore
         const customProp = type.custom;
         const excludeProps = ['__metadata'];
+
+        if (type.isComplexType) {
+            return;
+        }
 
         if (!customProp || !customProp['defaultSelect']) {
             const selectItems = [];
@@ -134,11 +132,9 @@ export class MetadataBase<T> {
             });
             if (selectItems.length) {
                 if (!customProp) {
-                    // @ts-ignore
                     type.custom = {};
                 }
-                // @ts-ignore
-                type.custom.defaultSelect = selectItems.join(',');
+                type.custom = { defaultSelect: selectItems.join(',') };
             }
         }
         return type;
@@ -146,17 +142,7 @@ export class MetadataBase<T> {
 
     initializer(_entity: T) { }
 
-    // registerMe(store: breeze.MetadataStore,
-    //     metadataHelper: breeze.config.MetadataHelper,
-    //     spEntity: any,
-    //     initializer?: (entity: Entity) => void): void {
-
-    //     const addedType = metadataHelper.addTypeToStore(store, this.entityDefinition as any) as EntityType;
-    //     store.registerEntityTypeCtor(this.entityDefinition.shortName, spEntity , initializer);
-    //     if (this.entityDefinition.defaultResourceName) {
-    //         store.setEntityTypeForResourceName(this.entityDefinition.defaultResourceName, addedType);
-    //     }
-    //     this.addDefaultSelect(addedType);
-
-    // }
+    
+  
 }
+

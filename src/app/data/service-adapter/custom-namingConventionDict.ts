@@ -34,15 +34,13 @@ export interface CustomClientDict {
  *
  */
 //#endregion
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class CustomNameConventionService {
     private clientToServerDictionary: CustomClientDict;
     private serverToClientDictionary: { [index: string]: EntityType }
     private sourceConvention: NamingConvention;
-
-    constructor() {
-        this.serverToClientDictionary = this.makeServerToClientDictionary();
-    }
+    
+    constructor() {}
 
     createNameDictionary(name: string, sourceConv: NamingConvention, clientToServerDict: CustomClientDict): NamingConvention {
         if (!(sourceConv instanceof NamingConvention)) {
@@ -53,26 +51,23 @@ export class CustomNameConventionService {
         }
         this.clientToServerDictionary = clientToServerDict;
         this.sourceConvention = sourceConv;
-
+        this.serverToClientDictionary = this.makeServerToClientDictionary();
+        const that = this;
         return new NamingConvention({
             name: name,
-            clientPropertyNameToServer: this.clientPropertyNameToServer,
-            serverPropertyNameToClient: this.serverProperyNameToClient
+            clientPropertyNameToServer: (namer: string, propDef: DataProperty): string => {
+                const typeName = propDef && propDef.parentType && propDef.parentType.name;
+                const props = that.clientToServerDictionary[typeName || undefined];
+                const newName = props && props[namer];
+                return newName || that.sourceConvention.clientPropertyNameToServer(namer, propDef);
+            },
+            serverPropertyNameToClient: (namer: string, propDef: DataProperty): string => {
+                const typeName = propDef && propDef.parentType && propDef.parentType.name;
+                const props = that.serverToClientDictionary[typeName || undefined];
+                const newName = props && props[namer];
+                return newName || that.sourceConvention.serverPropertyNameToClient(namer, propDef);
+            }
         });
-    }
-
-    clientPropertyNameToServer(name: string, propDef: DataProperty): string {
-        const typeName = propDef && propDef.parentType && propDef.parentType.name;
-        const props = this.clientToServerDictionary[typeName || undefined];
-        const newName = props && props[name];
-        return newName || this.sourceConvention.clientPropertyNameToServer(name, propDef);
-    }
-
-    serverProperyNameToClient(name: string, propDef: DataProperty): string {
-        const typeName = propDef && propDef.parentType && propDef.parentType.name;
-        const props = this.serverToClientDictionary[typeName || undefined];
-        const newName = props && props[name];
-        return newName || this.sourceConvention.serverPropertyNameToClient(name, propDef);
     }
 
      // makes new dictionary based on clientToServerDifctionary

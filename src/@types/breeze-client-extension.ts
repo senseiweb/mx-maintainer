@@ -4,15 +4,21 @@ import { SaveResult, SaveContext, HttpResponse } from 'breeze-client/src/entity-
 
 import { AjaxAdapter } from 'breeze-client/src/interface-registry';
 
-import { EntityKey, Entity, EntityType } from 'breeze-client';
+import { EntityKey, Entity } from 'breeze-client';
+import { EntityType } from 'breeze-client/src/entity-metadata';
+import { any } from 'bluebird';
 
 declare module 'breeze-client/src/config' {
     interface BreezeConfig {
         getAdapterInstance<T extends BaseAdapter>(interfaceName: AdapterType, adapterName?: string): AjaxAdapter;
     }
+
 }
 
-declare module 'breeze-client' {
+declare module 'breeze-client/src/entity-metadata' {
+    interface EntityType {
+        custom?: Object;
+    }
     // export interface HttpResponse {
     //     saveContext: SaveContext;
     // }

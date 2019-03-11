@@ -13,7 +13,7 @@ import {
 } from 'breeze-client';
 import { TypeDefintion } from './custom-type-def';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class CustomMetadataHelperService {
 
     defaultNamespace: string;
@@ -30,9 +30,8 @@ export class CustomMetadataHelperService {
      * fixes some defaults, infers certain validators,
      * add adds the type's "shortname" as a resource name
      */
-    addTypeToStore(store: MetadataStore, typeDef: TypeDefintion): EntityType | ComplexType {
-        typeDef
-            .checkForName()
+    addTypeToStore(store: MetadataStore, typeDef: TypeDefintion<any>): EntityType | ComplexType {
+        typeDef.checkForName()
             .setNamespace(this.defaultNamespace)
             .inferDefaultResourceName()
             .findEntityKey()
@@ -65,14 +64,12 @@ export class CustomMetadataHelperService {
 
     private inferValidators(entityType: EntityType | ComplexType): void {
 
-        entityType.dataProperties.forEach(function (prop) {
+        entityType.dataProperties.forEach(prop => {
             if (!prop.isNullable) { // is required.
                 this.addValidator(prop, Validator.required());
             }
 
-            const dataTypeValidator = this.getDataTypeValidator(prop)
-
-            this.addValidator(prop, dataTypeValidator);
+            this.addValidator(prop, this.getDataTypeValidator(prop));
 
             if (prop.maxLength != null && prop.dataType === DataType.String) {
                 this.addValidator(prop, Validator.maxLength({ maxLength: prop.maxLength }));
@@ -91,7 +88,7 @@ export class CustomMetadataHelperService {
         }
     }
 
-    getDataTypeValidator(prop: DataProperty): Function {
+    getDataTypeValidator(prop: DataProperty): Validator {
         const dataType = prop.dataType as any;
         const validatorCtor = !dataType || dataType === DataType.String ? null : dataType.validatorCtor;
         return validatorCtor ? validatorCtor() : null;

@@ -8,14 +8,19 @@ import {
   EmProviderService,
 } from './repos/';
 
+import { BreezeBridgeHttpClientModule } from 'breeze-bridge2-angular';
+
 import { ModuleWithProviders } from '@angular/compiler/src/core';
 import { EmProviderConfig } from './repos/em-provider-config';
 
 const appEntities = [SpMetadataMetadata, SpMultiLookupMeta, MxmTagMetadata] as any;
 
 @NgModule({
-  imports: [],
-  exports: [
+    imports: [
+        BreezeBridgeHttpClientModule
+  ],
+    exports: [
+        BreezeBridgeHttpClientModule
   ],
   providers: [EmProviderService],
   declarations: []

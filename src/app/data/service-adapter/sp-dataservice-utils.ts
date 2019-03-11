@@ -1,10 +1,23 @@
 import { Injectable } from '@angular/core';
-import { AjaxAdapter, HttpResponse, ServerError, MetadataStore, AbstractDataServiceAdapter } from 'breeze-client';
+import {
+    AjaxAdapter,
+    HttpResponse,
+    ServerError,
+    MetadataStore,
+    AbstractDataServiceAdapter,
+    MappingContext,
+    EntityType,
+    core,
+    JsonResultsAdapter,
+    DataService,
+    NodeContext
+} from 'breeze-client';
 import { SaveErrorFromServer } from 'breeze-client/src/entity-manager';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class CustomDataServiceUtils {
     ajaxAdapter: AjaxAdapter;
+    requestDigest: string;
 
     clientTypeNameToServer(clientTypeName: string): string {
         return `SP.Data.${clientTypeName}ListItem`;
@@ -79,7 +92,46 @@ export class CustomDataServiceUtils {
         return err;
     }
 
-    handleHttpErrors(reject: (reason: any) => void, response: HttpResponse, messagePrefix?: string): ServerError {
+
+    getAbsoluteUrl(dataService: DataService, url: string) {
+        const serviceName = dataService.qualifyUrl('');
+        // only prefix with serviceName if not already on the url
+        let base = (core.stringStartsWith(url, serviceName)) ? '' : serviceName;
+        // If no protocol, turn base into an absolute URI
+        if (window && serviceName.indexOf('//') < 0) {
+          // no protocol; make it absolute
+          base = window.location.protocol + '//' + window.location.host +
+            (core.stringStartsWith(serviceName, '/') ? '' : '/') +
+            base;
+        }
+        return base + url;
+    }
+
+
+    getDefaultSelect(mappingContext: MappingContext): MappingContext {
+        const query = mappingContext.query;
+        if (typeof query === 'string') {
+            return mappingContext;
+        }
+        const entityType = query.resultEntityType as EntityType;
+        if (!entityType) {
+            return mappingContext;
+        }
+        const defaultSelect = entityType.custom && entityType.custom['defaultSelect'];
+        mappingContext.query = query.select(defaultSelect);
+        return mappingContext;
+    }
+
+    getRequestDigestHeaders(defaultHeaders: any): Object {
+        const defaultHeader = {};
+        Object.assign(defaultHeader, defaultHeaders);
+        if (this.requestDigest) {
+            defaultHeader['X-RequestDigest'] = this.requestDigest;
+        }
+        return defaultHeader;
+    }
+
+    handleHttpErrors(reject: (reason: any) => void, response: HttpResponse, messagePrefix?: string): void {
         const err = this.createError(response);
         AbstractDataServiceAdapter._catchNoConnectionError(err);
 
@@ -87,6 +139,18 @@ export class CustomDataServiceUtils {
             err.message = `${messagePrefix}; ${err.message}`;
         }
         reject(err);
+    }
+
+    jsonResultsAdapter(): JsonResultsAdapter {
+        const that = this;
+        const config = {
+            name: 'SpCustomRestJson',
+            extractResults: that.unwrapResponseData,
+            extractSaveResults: () => null,
+            visitNode: that.visitNode
+        };
+
+        return new JsonResultsAdapter(config);
     }
 
     // private setSPODataErrorMessage(err: any) {
@@ -131,5 +195,11 @@ export class CustomDataServiceUtils {
     unwrapResponseData(response: HttpResponse): any {
         const data = response.data && response.data.d;
         return data.results === undefined ? data : data.results;
+    }
+
+    visitNode(node: any, mpCtx: MappingContext, ndCtx: NodeContext): Object {
+        let result: any = {}
+        if (!node) { return result; }
+
     }
 }
