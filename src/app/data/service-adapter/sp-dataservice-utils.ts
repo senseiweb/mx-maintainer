@@ -141,18 +141,6 @@ export class CustomDataServiceUtils {
         reject(err);
     }
 
-    jsonResultsAdapter(): JsonResultsAdapter {
-        const that = this;
-        const config = {
-            name: 'SpCustomRestJson',
-            extractResults: that.unwrapResponseData,
-            extractSaveResults: () => null,
-            visitNode: that.visitNode
-        };
-
-        return new JsonResultsAdapter(config);
-    }
-
     // private setSPODataErrorMessage(err: any) {
     //     // OData errors can have the message buried very deeply - and nonobviously
     //     // Normal MS OData responses have a response.body
@@ -197,9 +185,5 @@ export class CustomDataServiceUtils {
         return data.results === undefined ? data : data.results;
     }
 
-    visitNode(node: any, mpCtx: MappingContext, ndCtx: NodeContext): Object {
-        let result: any = {}
-        if (!node) { return result; }
 
-    }
 }

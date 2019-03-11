@@ -16,7 +16,9 @@ import {
     SaveBundle,
     SaveResult,
     JsonResultsAdapter,
-    ChangeRequestInterceptor
+    ChangeRequestInterceptor,
+    NodeContext,
+    HttpResponse
 } from 'breeze-client';
 
 
@@ -38,9 +40,13 @@ export class SpODataDataService implements DataServiceAdapter {
     }
 
     executeQuery(mappingContext: MappingContext): any {
-        this.utils.ajaxAdapter = this.ajaxImpl;
         const queryer = new CustomQueryContext(mappingContext, this.utils);
-        return queryer.query(this.defaultHeaders);
+        return queryer.query(this.defaultHeaders, this.ajaxImpl);
+    }
+
+    extractResults(response: HttpResponse): any {
+        const data = response.data && response.data.d;
+        return data.results === undefined ? data : data.results;
     }
 
     fetchMetadata(metadataStore: MetadataStore, dataService: any): Promise<any> {
@@ -51,11 +57,11 @@ export class SpODataDataService implements DataServiceAdapter {
 
     initialize(): void {
         this.ajaxImpl = config.getAdapterInstance('ajax');
+        this.jsonResultsAdapter = this.getJsonResultsAdapter();
         // Force a wait until the next tick then attached the utils class
         Promise.resolve()
             .then(() => {
                 this.utils.ajaxAdapter = this.ajaxImpl;
-                this.jsonResultsAdapter = this.utils.jsonResultsAdapter();
             });
 
         this.defaultHeaders = {
@@ -65,9 +71,26 @@ export class SpODataDataService implements DataServiceAdapter {
         };
     }
 
+    getJsonResultsAdapter(): JsonResultsAdapter {
+        const jraConfig = {
+            name: 'SpCustomRestJson',
+            extractResults: this.extractResults.bind(this),
+            extractSaveResults: undefined,
+            visitNode: this.visitNode.bind(this)
+        };
+
+        return new JsonResultsAdapter(jraConfig);
+    }
+
     saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
         const saver = new CustomSaveContext(saveContext, saveBundle, this.utils);
         return saver.save(this.defaultHeaders);
+    }
+
+    visitNode(node: any, mpCtx: MappingContext, ndCtx: NodeContext): Object {
+        let result: any = {}
+        if (!node) { return result; }
+
     }
 }
 

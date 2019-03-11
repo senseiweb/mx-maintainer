@@ -14,7 +14,7 @@ export class CustomQueryContext {
         
     }
 
-    query(headers: Object): Promise<any> {
+    query(headers: Object, ajaxCaller: any): Promise<any> {
         this.mappingContext = this.utils.getDefaultSelect(this.mappingContext);
         let url = this.utils.getAbsoluteUrl(this.mappingContext.dataService, this.mappingContext.getUrl());
 
@@ -31,7 +31,7 @@ export class CustomQueryContext {
 
         const promise = new Promise<QueryResult>((resolve, reject) => {
 
-            this.utils.ajaxAdapter.ajax({
+            ajaxCaller.ajax({
                 type: 'GET',
                 url: url,
                 dataType: 'json',
