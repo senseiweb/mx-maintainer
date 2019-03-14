@@ -1,22 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AppUserService } from './data';
 
 const appRoutes: Routes = [
     {
         path: '',
         redirectTo: '/user/dashboard',
-        pathMatch: 'full',
-        resolve: {
-            appUser: AppUserService
-        }
+        pathMatch: 'full'
     },
     {
         path: 'aagt',
-        loadChildren: './aagt/aagt.module#AagtModule',
-        resolve: {
-            appUser: AppUserService
-        }
+        loadChildren: './features/aagt/aagt.module#AagtModule'
     }
     // {
     //   path: 'program-manager',
@@ -30,18 +23,13 @@ const appRoutes: Routes = [
 
 @NgModule({
     imports: [
-        RouterModule.forRoot(
-            appRoutes,
-            {
-                useHash: true
-                // enableTracing: true
-            }
-        )
+        RouterModule.forRoot(appRoutes, {
+            useHash: true
+            // enableTracing: true
+        })
     ],
-    exports: [
-        RouterModule
-    ]
+    exports: [RouterModule]
 })
 export class AppRoutingModule {
-    constructor () { }
+    constructor() {}
 }

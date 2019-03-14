@@ -7,16 +7,15 @@ import * as _ from 'lodash';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 
-import { AppUserService } from 'app/data';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { AppConfig } from 'app/app-config.service';
 
 @Component({
-    selector     : 'fusec-toolbar',
-    templateUrl  : './fusec-toolbar.component.html',
-    styleUrls    : ['./fusec-toolbar.component.scss'],
+    selector: 'fusec-toolbar',
+    templateUrl: './fusec-toolbar.component.html',
+    styleUrls: ['./fusec-toolbar.component.scss'],
     encapsulation: ViewEncapsulation.None
 })
-
 export class FusecToolbarComponent implements OnInit, OnDestroy {
     horizontalNavbar: boolean;
     rightNavbar: boolean;
@@ -34,47 +33,47 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
         private _navService: FuseNavigationService,
-        private userService: AppUserService
+        private appConfig: AppConfig
     ) {
         // Set the defaults
         this.userStatusOptions = [
             {
-                'title': 'Online',
-                'icon' : 'icon-checkbox-marked-circle',
-                'color': '#4CAF50'
+                title: 'Online',
+                icon: 'icon-checkbox-marked-circle',
+                color: '#4CAF50'
             },
             {
-                'title': 'Away',
-                'icon' : 'icon-clock',
-                'color': '#FFC107'
+                title: 'Away',
+                icon: 'icon-clock',
+                color: '#FFC107'
             },
             {
-                'title': 'Do not Disturb',
-                'icon' : 'icon-minus-circle',
-                'color': '#F44336'
+                title: 'Do not Disturb',
+                icon: 'icon-minus-circle',
+                color: '#F44336'
             },
             {
-                'title': 'Invisible',
-                'icon' : 'icon-checkbox-blank-circle-outline',
-                'color': '#BDBDBD'
+                title: 'Invisible',
+                icon: 'icon-checkbox-blank-circle-outline',
+                color: '#BDBDBD'
             },
             {
-                'title': 'Offline',
-                'icon' : 'icon-checkbox-blank-circle-outline',
-                'color': '#616161'
+                title: 'Offline',
+                icon: 'icon-checkbox-blank-circle-outline',
+                color: '#616161'
             }
         ];
 
         this.languages = [
             {
-                id   : 'en',
+                id: 'en',
                 title: 'English',
-                flag : 'us'
+                flag: 'us'
             },
             {
-                id   : 'tr',
+                id: 'tr',
                 title: 'Turkish',
-                flag : 'tr'
+                flag: 'tr'
             }
         ];
 
@@ -83,22 +82,18 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         // Subscribe to the config changes
-        this._fuseConfigService.config
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((settings) => {
-                this.horizontalNavbar = settings.layout.navbar.position === 'top';
-                this.rightNavbar = settings.layout.navbar.position === 'right';
-                this.hiddenNavbar = settings.layout.navbar.hidden === true;
-            });
+        this._fuseConfigService.config.pipe(takeUntil(this._unsubscribeAll)).subscribe(settings => {
+            this.horizontalNavbar = settings.layout.navbar.position === 'top';
+            this.rightNavbar = settings.layout.navbar.position === 'right';
+            this.hiddenNavbar = settings.layout.navbar.hidden === true;
+        });
 
         // Set the selected language from default languages
-        this.selectedLanguage = _.find(this.languages, { 'id': this._translateService.currentLang });
-        this.userService.setNavStructure();
-        this.userName = this.userService.saluation.rankName();
+        this.selectedLanguage = _.find(this.languages, { id: this._translateService.currentLang });
+        this.appConfig.setNavStructure();
+        this.userName = this.appConfig.my.lastName;
         this.navigation = this._navService.getCurrentNavigation();
-
     }
-
 
     ngOnDestroy(): void {
         // Unsubscribe from all subscriptions

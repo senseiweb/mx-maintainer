@@ -10,22 +10,22 @@ import { fuseAnimations } from '@fuse/animations';
     animations: fuseAnimations
 })
 export class UserDashComponent implements OnInit {
-    generations = [{
-        name: 'Test Generation 1'
-    }, {
-        name: 'Test Generation 2'
-    }];
+    generations = [
+        {
+            name: 'Test Generation 1'
+        },
+        {
+            name: 'Test Generation 2'
+        }
+    ];
 
     dateNow = Date.now();
 
     widgets: any;
 
-    constructor(private _fuseSidebarService: FuseSidebarService) { }
+    constructor(private _fuseSidebarService: FuseSidebarService) {}
 
     ngOnInit() {
-
-        console.log('base loaded');
-
         this.widgets = {
             weatherWidget: {
                 locations: {
@@ -52,5 +52,4 @@ export class UserDashComponent implements OnInit {
     toggleSidebar(name: string): void {
         this._fuseSidebarService.getSidebar(name).toggleOpen();
     }
-
 }

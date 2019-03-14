@@ -10,24 +10,14 @@
         "experimentalDecorators": true,
         "downlevelIteration": true,
         "paths": {
-            "breeze": [
-                "node_modules/breeze-client/breeze-debug"
-            ],
-            "@fuse": [
-                "@fuse/"
-            ],
-            "sp-jsom": [
-                "node_modules/@microsoft/sp-jsom"
-            ]
+            "breeze": ["node_modules/breeze-client/breeze-debug"],
+            "@fuse": ["@fuse/"],
+            "@ctypes": ["@ctypes/"],
+            "@odata": ["@odata/"],
+            "sp-jsom": ["node_modules/@microsoft/sp-jsom"]
         },
         "target": "es5",
-        "typeRoots": [
-            "src/@types",
-            "node_modules/@types"
-        ],
-        "lib": [
-            "es2017",
-            "dom"
-        ]
+        "typeRoots": ["node_modules/@types"],
+        "lib": ["es2017", "dom"]
     }
 }

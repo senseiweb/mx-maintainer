@@ -1,36 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <script type="text/javascript" src="//localhost:8080/_layouts/15/MicrosoftAjax.js"></script>
-  <script type="text/javascript" src="//localhost:8080/_layouts/15/sp.runtime.js"></script>
-  <script type="text/javascript" src="//localhost:8080/_layouts/15/init.js"></script>
-  <script type="text/javascript" src="//localhost:8080/_layouts/15/sp.userprofiles.js"></script>
-  <script type="text/javascript" src="//localhost:8080/_layouts/15/sp.js"></script>
+    <head>
+        <meta charset="utf-8" />
+        <script type="text/javascript" src="//localhost:8080/sites/mxmaintainer/_layouts/15/MicrosoftAjax.js"></script>
+        <script type="text/javascript" src="//localhost:8080/sites/mxmaintainer/_layouts/15/sp.runtime.js"></script>
+        <script type="text/javascript" src="//localhost:8080/sites/mxmaintainer/_layouts/15/init.js"></script>
+        <script type="text/javascript" src="//localhost:8080/sites/mxmaintainer/_layouts/15/sp.userprofiles.js"></script>
+        <script type="text/javascript" src="//localhost:8080/sites/mxmaintainer/_layouts/15/sp.js"></script>
 
-  <!-- <script type="text/javascript" src="/_layouts/15/1033/initstrings.js"></script>
+        <!-- <script type="text/javascript" src="/_layouts/15/1033/initstrings.js"></script>
   <script type="text/javascript" src="/_layouts/15/1033/strings.js"></script>
   <script type="text/javascript" src="/_layouts/15/sp.init.js"></script> -->
-  <!-- <script type="text/javascript" src="/_layouts/15/ScriptResx.ashx?culture=en%2Dus&amp;name=SP%2ERes&amp;"></script> -->
-  <!-- <script type="text/javascript" src="/_layouts/15/core.js"></script>
+        <!-- <script type="text/javascript" src="/_layouts/15/ScriptResx.ashx?culture=en%2Dus&amp;name=SP%2ERes&amp;"></script> -->
+        <!-- <script type="text/javascript" src="/_layouts/15/core.js"></script>
   <script type="text/javascript" src="/_layouts/15/sp.core.js"></script> -->
-  <!-- <script type="text/javascript" src="/_layouts/15/sp.userprofiles.js"></script>
+        <!-- <script type="text/javascript" src="/_layouts/15/sp.userprofiles.js"></script>
   <script type="text/javascript" src="/_layouts/15/sp.js"></script> -->
-  <title>Mx Maintainer Tool</title>
-  <base href="/">
-  <meta charset="utf-8">
+        <title>Mx Maintainer Tool</title>
+        <base href="/" />
+        <meta charset="utf-8" />
 
-  <meta name="description" content="Mx Maintainer app">
-  <meta name="keywords" content="HTML,CSS,,Angular 7,Material">
-  <meta name="author" content="Withinpixels">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="description" content="Mx Maintainer app" />
+        <meta name="keywords" content="HTML,CSS,,Angular 7,Material" />
+        <meta name="author" content="Withinpixels" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link href="assets/icons/meteocons/style.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+        <link href="assets/icons/meteocons/style.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" />
 
-          <!-- Splash Screen CSS -->
-          <style type="text/css">
+        <!-- Splash Screen CSS -->
+        <style type="text/css">
             #fuse-splash-screen {
                 display: block;
                 position: absolute;
@@ -38,7 +38,7 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: #2D323D;
+                background-color: #2d323d;
                 z-index: 99999;
                 pointer-events: none;
             }
@@ -57,7 +57,7 @@
             }
 
             #fuse-splash-screen .logo img {
-                filter: drop-shadow(0px 10px 6px rgba(0, 0, 0, 0.2))
+                filter: drop-shadow(0px 10px 6px rgba(0, 0, 0, 0.2));
             }
 
             #fuse-splash-screen .spinner-wrapper {
@@ -109,7 +109,7 @@
                 width: 100px;
                 height: 100px;
                 box-sizing: border-box;
-                border: 10px solid #4285F4;
+                border: 10px solid #4285f4;
                 border-bottom-color: transparent;
                 border-radius: 50%;
             }
@@ -146,7 +146,8 @@
             }
 
             @keyframes left-wobble {
-                0%, 100% {
+                0%,
+                100% {
                     transform: rotate(130deg);
                 }
                 50% {
@@ -155,7 +156,8 @@
             }
 
             @keyframes right-wobble {
-                0%, 100% {
+                0%,
+                100% {
                     transform: rotate(-130deg);
                 }
                 50% {
@@ -191,38 +193,34 @@
             }
         </style>
         <!-- / Splash Screen CSS -->
-</head>
-<body>
-          <!--  Splash Screen -->
-          <fuse-splash-screen id="fuse-splash-screen">
+    </head>
+    <body>
+        <!--  Splash Screen -->
+        <fuse-splash-screen id="fuse-splash-screen">
+            <div class="center">
+                <div class="logo">
+                    <img width="128" src="assets/images/logos/aagt-logo.png" />
+                </div>
 
-              <div class="center">
+                <!-- Material Design Spinner -->
+                <div class="spinner-wrapper">
+                    <div class="spinner">
+                        <div class="inner">
+                            <div class="gap"></div>
+                            <div class="left">
+                                <div class="half-circle"></div>
+                            </div>
+                            <div class="right">
+                                <div class="half-circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- / Material Design Spinner -->
+            </div>
+        </fuse-splash-screen>
+        <!-- /Splash Screen -->
 
-                  <div class="logo">
-                      <img width="128" src="assets/images/logos/aagt-logo.png">
-                  </div>
-
-                  <!-- Material Design Spinner -->
-                  <div class="spinner-wrapper">
-                      <div class="spinner">
-                          <div class="inner">
-                              <div class="gap"></div>
-                              <div class="left">
-                                  <div class="half-circle"></div>
-                              </div>
-                              <div class="right">
-                                  <div class="half-circle"></div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                  <!-- / Material Design Spinner -->
-
-              </div>
-
-          </fuse-splash-screen>
-          <!-- /Splash Screen -->
-
-  <app-root></app-root>
-</body>
+        <app-root></app-root>
+    </body>
 </html>
