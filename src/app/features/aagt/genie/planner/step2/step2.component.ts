@@ -33,7 +33,7 @@ export class Step2Component implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.allActionItems = this.uow.allActionItemOptions.filter((ai: ActionItem) => ai.availableForUse);
+        this.allActionItems = this.uow.allActionItemOptions.filter((ai: ActionItem) => ai.assignable);
         this.triggerFormGroup = this.formBuilder.group({
             trigger: new FormControl()
         });

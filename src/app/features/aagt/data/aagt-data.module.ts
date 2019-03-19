@@ -10,10 +10,11 @@ import {
     TeamAvailabilityMetadata,
     TeamMetadata,
     TriggerActionMetadata,
-    TriggerMetadata
+    TriggerMetadata,
+    AagtSpMetadataMetadata
 } from './models';
 
-import { SpMetadataMetadata, DataModule, EmProviderConfig } from 'app/global-data';
+import { GlobalDataModule, EmProviderConfig } from 'app/global-data';
 
 const appEntities = [
     ActionItemMetadata,
@@ -23,7 +24,7 @@ const appEntities = [
     GenerationMetadata,
     GenerationAssetMetadata,
     TeamMetadata,
-    SpMetadataMetadata as any,
+    AagtSpMetadataMetadata as any,
     TeamAvailabilityMetadata,
     TriggerActionMetadata,
     TriggerMetadata
@@ -34,7 +35,7 @@ emCfg.featureSpAppName = 'aagt';
 emCfg.nameSpace = 'SP.Data.Aagt';
 
 @NgModule({
-    imports: [DataModule.forFeature(emCfg)],
+    imports: [GlobalDataModule.forFeature(emCfg)],
     exports: [],
     providers: [],
     declarations: []

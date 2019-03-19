@@ -1,8 +1,9 @@
 import { EntityManager, EntityType, EntityQuery, Predicate, FetchStrategy, FilterQueryOp, SaveResult } from 'breeze-client';
 import * as moment from 'moment';
-import { SpEntityBase } from '../global-models/_entity-base';
+import { SpEntityBase } from '../models/_entity-base';
 import { EmProviderService } from './em-provider.service';
 import { bareEntity, EntityChildren } from '@ctypes/breeze-type-customization';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 export class BaseRepoService<T extends SpEntityBase> {
     protected entityManager: EntityManager;
@@ -10,6 +11,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     protected resourceName: string;
     private cachedDate: moment.Moment;
     private cachedAll: boolean;
+    onSaveInProgressChange: BehaviorSubject<boolean>;
     spChoiceFieldCache: { key: string; values: string[] }[];
     private queryCache: {
         [index: string]: moment.Moment;
@@ -26,6 +28,7 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = FetchStrategy.FromServer;
         this.spChoiceFieldCache = [];
+        this.onSaveInProgressChange = new BehaviorSubject(false);
         console.log(`base created from ${entityTypeName}`);
     }
 
@@ -174,22 +177,28 @@ export class BaseRepoService<T extends SpEntityBase> {
 
     async saveEntityChanges(entities: T[]): Promise<SaveResult> {
         try {
+            this.onSaveInProgressChange.next(true);
             const results = await this.entityManager.saveChanges(entities);
             console.log(results);
             return results;
         } catch (error) {
             console.log(error);
             Promise.reject();
+        } finally {
+            this.onSaveInProgressChange.next(false);
         }
     }
 
     async saveChanges(): Promise<void> {
         try {
+            this.onSaveInProgressChange.next(true);
             const results = await this.entityManager.saveChanges();
             console.log(results.entities.length);
         } catch (e) {
             console.error(`Saving changes failed ==> ${e}`);
             Promise.reject();
+        } finally {
+            this.onSaveInProgressChange.next(false);
         }
     }
 }

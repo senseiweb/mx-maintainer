@@ -6,14 +6,8 @@ import { AagtRoutingModule, routedComponents } from './aagt-routing.module';
 import { GenieModule } from './genie';
 
 @NgModule({
-    imports: [
-        GenieModule,
-        NgxChartsModule,
-        AagtRoutingModule,
-        AagtDataModule,
-        AppSharedModule
-    ],
+    imports: [GenieModule, NgxChartsModule, AagtDataModule, AppSharedModule, AagtRoutingModule],
     declarations: routedComponents,
-    providers: [],
+    providers: []
 })
-export class AagtModule { }
+export class AagtModule {}

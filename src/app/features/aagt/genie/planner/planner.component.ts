@@ -60,7 +60,7 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
     ngOnInit() {
         this.genId = this.route.snapshot.params.id;
         this.uow.planGen(this.genId);
-        this.isLinear = this.uow.currentGen.status === genStatusEnum.draft;
+        this.isLinear = this.uow.currentGen.genStatus === genStatusEnum.draft;
 
         this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step1Completed = isValid));
         this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step2Completed = isValid));

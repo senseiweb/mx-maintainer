@@ -1,42 +1,43 @@
-import { CustomDataServiceUtils } from './sp-dataservice-utils';
 import 'breeze-client/adapters/adapter-model-library-backing-store.umd';
 import 'breeze-client/adapters/adapter-uri-builder-odata.umd';
+import { CustomDataServiceUtils } from './sp-dataservice-utils';
 
 import {
-    AbstractDataServiceAdapter,
-    MappingContext,
-    DataService,
-    core,
     config,
-    EntityQuery,
-    DataServiceAdapter,
-    MetadataStore,
-    SaveContext,
-    SaveBundle,
-    SaveResult,
-    JsonResultsAdapter,
+    core,
+    AbstractDataServiceAdapter,
     ChangeRequestInterceptor,
-    NodeContext,
+    DataService,
+    DataServiceAdapter,
+    EntityQuery,
+    EntityType,
     HttpResponse,
-    EntityType
+    JsonResultsAdapter,
+    MappingContext,
+    MetadataStore,
+    NodeContext,
+    SaveBundle,
+    SaveContext,
+    SaveResult
 } from 'breeze-client';
 
-import { Injectable } from '@angular/core';
-import { ChangeRequestInterceptorCtor } from 'breeze-client/src/interface-registry';
-import { CustomQueryContext } from './sp-dataservice-query';
-import { SpDataServiceOdataSave } from './sp-dataservice-odata-save';
-import { OData3BatchService } from '@odata';
 import { HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { OData3BatchService, OData3Response } from '@odata';
+import { ChangeRequestInterceptorCtor } from 'breeze-client/src/interface-registry';
+import { SpDataServiceOdataSave } from './sp-dataservice-odata-save';
+import { CustomQueryContext } from './sp-dataservice-query';
 
 @Injectable({ providedIn: 'root' })
 export class SpODataDataService implements DataServiceAdapter {
     ajaxImpl: any;
-    defaultHeaders: HttpHeaders;
+    defaultHeaders: { [index: string]: string };
     name: string;
+    odataService: OData3BatchService;
     jsonResultsAdapter: JsonResultsAdapter;
     changeRequestInterceptor: ChangeRequestInterceptorCtor;
     utils: CustomDataServiceUtils;
-    private odataService: OData3BatchService;
+    odataServiceEndpoint: string;
 
     constructor() {
         this.name = 'SpODataService';
@@ -52,6 +53,12 @@ export class SpODataDataService implements DataServiceAdapter {
         return data.results === undefined ? data : data.results;
     }
 
+    extractSaveResults(serializeData: string): any {
+        const jsonData = JSON.parse(serializeData);
+        const data = jsonData.d;
+        return data.results === undefined ? data : data.results;
+    }
+
     fetchMetadata(metadataStore: MetadataStore, dataService: any): Promise<any> {
         return Promise.reject(new Error('Fetch Metadata is not available on this adapter;'));
     }
@@ -64,11 +71,11 @@ export class SpODataDataService implements DataServiceAdapter {
             this.utils.ajaxAdapter = this.ajaxImpl;
         });
 
-        this.defaultHeaders = new HttpHeaders({
+        this.defaultHeaders = {
             Accept: 'application/json;odata=verbose',
             DataServiceVersion: '3.0',
             'Content-Type': 'application/json;odata=verbose'
-        });
+        };
     }
 
     getJsonResultsAdapter(): JsonResultsAdapter {
@@ -84,8 +91,7 @@ export class SpODataDataService implements DataServiceAdapter {
 
     saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
         const saver = new SpDataServiceOdataSave(saveContext, this.odataService, saveBundle, this.utils, this.defaultHeaders);
-        saver.save();
-        return null;
+        return saver.save();
     }
 
     visitNode(node: any, mappingContext: MappingContext, nodeContext: NodeContext): Object {
@@ -122,7 +128,7 @@ export class SpODataDataService implements DataServiceAdapter {
                     uriKey = uriKey.replace(re, '');
                 }
                 result.extraMetadata = {
-                    uriKey: uriKey,
+                    uriKey,
                     etag: metadata.etag
                 };
             }

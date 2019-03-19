@@ -52,14 +52,14 @@ export class Step1Component implements OnInit, OnDestroy {
             title: new FormControl(stp.title),
             active: new FormControl(stp.active),
             iso: new FormControl(stp.iso),
-            numberAssetsRequired: new FormControl(stp.numberAssetsRequired),
-            startDt: new FormControl(stp.startDateTime),
-            stopDt: new FormControl(stp.stopDateTime)
+            assignedAssetCount: new FormControl(stp.assignedAssetCount),
+            startDt: new FormControl(stp.genStartDate),
+            stopDt: new FormControl(stp.genEndDate)
         });
     }
 
     assetSelectionChanged(selectedAssets: Asset[]): void {
-        this.step1FormGroup.get('numberAssetsRequired').setValue(selectedAssets.length);
+        this.step1FormGroup.get('assignedAssetCount').setValue(selectedAssets.length);
         this.uow.selectedAssets = selectedAssets;
     }
 }

@@ -1,3 +1,3 @@
-export * from './global-models';
-export * from './global-repos';
+export * from './models';
+export * from './repos';
 export * from './data.module';

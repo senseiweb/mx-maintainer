@@ -8,7 +8,7 @@ export class CustomQueryContext {
 
     constructor(private mappingContext: MappingContext, private utils: CustomDataServiceUtils) {}
 
-    query(headers: HttpHeaders, ajaxCaller: any): Promise<any> {
+    query(headers: { [index: string]: string }, ajaxCaller: any): Promise<any> {
         this.mappingContext = this.utils.getDefaultSelect(this.mappingContext);
         let url = this.utils.getAbsoluteUrl(this.mappingContext.dataService, this.mappingContext.getUrl());
 
@@ -23,8 +23,10 @@ export class CustomQueryContext {
         const defaultHeaders = {};
         const requestHeaders = this.utils.getRequestDigestHeaders(headers);
 
-        requestHeaders.keys().forEach(k => {
-            defaultHeaders[k] = requestHeaders.get(k);
+        const newHeaderkeys = Object.keys(requestHeaders);
+
+        newHeaderkeys.forEach(hKey => {
+            defaultHeaders[hKey] = requestHeaders[hKey];
         });
 
         const promise = new Promise<QueryResult>((resolve, reject) => {

@@ -1,7 +1,7 @@
-import { DataType, Entity, EntityAspect, EntityType } from 'breeze-client';
-import { SpMetadata } from './sp-metadata';
 import { DataMembers, Instantiable } from '@ctypes/breeze-type-customization';
-import { TypeDefintion } from './custom-type-def';
+import { DataType, Entity, EntityAspect, EntityType } from 'breeze-client';
+import { EntityDefinition } from './custom-entity-def';
+import { SpMetadata } from './sp-metadata';
 
 export class SpEntityBase implements Entity {
     private iD: number; // sharepoint includes this property but we dont use it;
@@ -38,13 +38,13 @@ export class MetadataBase<T> {
         editorId: { dataType: this.dt.Int32 }
     };
 
-    entityDefinition = new TypeDefintion<T>();
+    entityDefinition = new EntityDefinition<T>();
 
     metadataFor: Instantiable<T>;
 
     constructor(shortName: string) {
         this.entityDefinition.shortName = shortName;
-        this.entityDefinition.defaultResourceName = `lists/getByTitle('${shortName}')/items`;
+        this.entityDefinition.defaultResourceName = `web/lists/getByTitle('${shortName}')/items`;
     }
 
     addDefaultSelect(type: EntityType): EntityType {

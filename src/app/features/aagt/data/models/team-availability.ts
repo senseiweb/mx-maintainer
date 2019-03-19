@@ -1,7 +1,6 @@
 import * as ebase from 'app/global-data';
 import { Injectable } from '@angular/core';
 import { Team } from './team';
-import { AagtModule } from 'app/features/aagt/aagt.module';
 import * as aagtCfg from './_aagt-feature-cfg';
 import { AagtDataModule } from '../aagt-data.module';
 

@@ -1,10 +1,12 @@
+// tslint:disable-next-line: no-submodule-imports
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { UUID } from 'angular2-uuid';
+import { HttpResponse } from 'breeze-client';
 import { OData3Batch } from './odata3-batch';
 import { OData3Changeset } from './odata3-changeset';
 import { OData3Request } from './odata3-request';
 import { OData3Response } from './odata3-response';
-import { Injectable } from '@angular/core';
-import { UUID } from 'angular2-uuid';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class OData3BatchService {
@@ -12,7 +14,7 @@ export class OData3BatchService {
     private uuid: UUID;
 
     /** Allows injection of uuid module for mocking */
-    constructor(private hhtp: HttpClient) {
+    constructor(private http: HttpClient) {
         this.contentTypeRegExp = RegExp('^content-type', 'i');
     }
     createBatch(url: string): OData3Batch {
@@ -25,38 +27,39 @@ export class OData3BatchService {
         return new OData3Changeset(uuid);
     }
 
-    createRequest(method: string, url: string, data: {}, contentId: string, requestHeaders: HttpHeaders): OData3Request {
+    createRequest(method: string, url: string, data: {}, contentId: string, requestHeaders: { [index: string]: string }): OData3Request {
         return new OData3Request(method, url, data, contentId, requestHeaders);
     }
 
-    submitBatch(batch: OData3Batch): Promise<OData3Response[]> {
+    async submitBatch(batch: OData3Batch): Promise<{ responses: OData3Response[]; rawResponse: HttpResponse }> {
         const batchRequest = batch.getBatchRequest();
-
-        return new Promise(async (resolve, reject) => {
-            try {
-                console.log(batch);
-                const response = (await this.hhtp.post(batchRequest.url, batchRequest.body, { headers: batchRequest.headers }).toPromise()) as any;
-                console.log(response);
-                const batchResponses = this.parseBatchResponse(response, response.body);
-                resolve(batchResponses);
-            } catch (error) {
-                reject(error);
-            }
-        });
+        try {
+            const rawResponse = (await this.http
+                .post(batchRequest.url, batchRequest.body, { headers: batchRequest.headers, responseType: 'text', observe: 'response' })
+                .toPromise()) as any;
+            console.log(rawResponse);
+            const responses = this.parseBatchResponse(rawResponse);
+            return { responses, rawResponse };
+        } catch (error) {
+            throw new Error(error);
+        }
     }
-    private parseBatchResponse(response: Response, body): any[] {
-        const header = response.headers.get('context-type');
+
+    private parseBatchResponse(response: Response): any[] {
+        const header = response.headers.get('content-type');
         const m = header.match(/boundary=([^;]+)/);
         if (!m) {
             throw new Error('Bad content-type header, no multipart boundary');
         }
         const boundary = m[1];
-        const responses = this.parseBatch(boundary, body);
+        const responses = this.parseBatch(boundary, response);
+        responses.forEach((r, i) => (r.TempKeyIndex = i));
         return responses;
     }
 
-    private parseBatch(boundary, body): OData3Batch[] {
+    private parseBatch(boundary: string, response: Response): OData3Response[] {
         let batchResponses = [];
+        const body = response.body as any;
         // Split the batch result into its associated parts
         const batchPartRegex = RegExp('--' + boundary + '(?:\r\n)?(?:--\r\n)?');
         const batchParts = body.split(batchPartRegex);
@@ -92,9 +95,9 @@ export class OData3BatchService {
                     // console.log("----Boundary Not Found for batch part " + i)
                     // console.log("----PArsing batch part " + i);
                     if (this.contentTypeRegExp.test(batchPart)) {
-                        const response = this.parseResponse(batchPart);
+                        const parsedResponse = this.parseResponse(batchPart);
                         // console.log(response);
-                        batchResponses.push(response);
+                        batchResponses.push(parsedResponse);
                     }
                 }
             }
@@ -104,7 +107,7 @@ export class OData3BatchService {
         return batchResponses;
     }
 
-    private parseResponse(part): any {
+    private parseResponse(part): OData3Response {
         const response = part.split('\r\n\r\n');
         // console.log(response);
         // response[1] are headers for the part
@@ -144,7 +147,7 @@ export class OData3BatchService {
         return responseOut;
     }
 
-    private parseResponses(parts): any {
+    private parseResponses(parts): OData3Response[] {
         const responses = [];
         for (let j = 0; j < parts.length; j++) {
             const part = parts[j];

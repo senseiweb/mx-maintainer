@@ -9,7 +9,7 @@ export class ActionItem extends ebase.SpEntityBase {
     duration: number;
     teamType: string;
     // Sharepoint handle yes/no boxes as 0:1 values to represet boolean;
-    availableForUse: boolean;
+    assignable: boolean;
     notes: string;
     actionTriggers: TriggerAction[];
 }
@@ -20,7 +20,10 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
 
     constructor() {
         super(aagtCfg.AagtListName.ActionItem);
-        this.entityDefinition.dataProperties.action = { dataType: this.dt.String };
+        this.entityDefinition.dataProperties.action = {
+            dataType: this.dt.String,
+            spInternalName: 'Title'
+        };
         this.entityDefinition.dataProperties.shortCode = {
             dataType: this.dt.String
         };
@@ -28,7 +31,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.availableForUse = { dataType: this.dt.Boolean };
+        this.entityDefinition.dataProperties.assignable = { dataType: this.dt.Boolean };
 
         this.entityDefinition.navigationProperties = {
             actionTriggers: {

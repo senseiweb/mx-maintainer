@@ -15,6 +15,6 @@ export class GenerationRepoService extends BaseRepoService<Generation> {
         if (existingDraft) {
             return existingDraft;
         }
-        return this.createBase({ status: genStatusEnum.draft });
+        return this.createBase({ genStatus: genStatusEnum.draft });
     }
 }

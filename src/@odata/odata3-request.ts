@@ -1,41 +1,46 @@
 import { HttpHeaders } from '@angular/common/http';
 
 export class OData3Request {
-    private headers: HttpHeaders;
+    private headers: { [index: string]: string };
+    dataElementType = 'request';
 
-    constructor(private method: string, private url: string, private data: {}, private contentId: string, headers: HttpHeaders) {
-        this.headers = new HttpHeaders({
-            DataServiceVersion: '3.0;NetFx',
-            MaxDataServiceVersion: '3.0;NetFx',
-            'Content-Type': 'application/json;odata=minimalmetadata',
-            Accept: 'application/json;odata=minimalmetadata'
-        });
-        this.addHeaders(headers);
+    constructor(private method: string, private url: string, private data: {}, private contentId: string, headers: { [index: string]: string }) {
+        this.headers = {
+            'Content-Type': 'application/json;odata=verbose',
+            'Accept-Charset': 'UTF-8',
+            Accept: 'application/json;odata=verbose'
+        };
+        if (headers) {
+            this.addHeaders(headers);
+        }
     }
 
     get Body(): string {
-        let body = `Content-Type: application/http
-        Content-Transfer-Encoding:binary\n
-        ${this.method} ${this.url} HTTP/1.1\n`;
-        const keys = this.Headers.keys();
+        let body = 'Content-Type: application/http\r\n';
+        body += 'Content-Transfer-Encoding:binary\r\n\r\n';
+        body += '\r\n';
+        body += `${this.method} ${this.url} HTTP/1.1\r\n`;
+        const keys = Object.keys(this.Headers);
         for (const key of keys) {
-            body += `${key}: ${this.Headers.get(key)}\n`;
+            body += `${key}: ${this.Headers[key]}\r\n`;
         }
-        body += this.contentId ? `Content-ID:${this.contentId}\n` : `\n`;
-        body += this.data ? `\n${JSON.stringify(this.data)}\n` : `\n`;
+        body += this.contentId ? `Content-ID:${this.contentId}\r\n` : `\r\n`;
+        body += this.data ? `\r\n${this.data}\r\n` : `\r\n`;
+        console.log(body);
         return body;
     }
-    ID;
-    get Headers(): HttpHeaders {
+
+    get Headers(): { [index: string]: string } {
         return this.headers;
     }
 
-    addHeaders(headers: HttpHeaders): void {
-        if (!headers) {
-            return;
-        }
-        headers.keys().forEach(key => {
-            this.headers.append(key, headers.get(key));
+    addHeaders(headers: { [index: string]: string }): void {
+        const newHeaderkeys = Object.keys(headers);
+        newHeaderkeys.forEach(hKey => {
+            if (this.Headers[hKey]) {
+                return;
+            }
+            this.Headers[hKey] = headers[hKey];
         });
     }
 }

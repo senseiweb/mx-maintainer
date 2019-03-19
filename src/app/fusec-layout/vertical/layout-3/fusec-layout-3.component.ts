@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { AppConfig } from 'app/app-config.service';
+import { GlobalUserRepo } from 'app/global-data/repos/user-repo.serivce';
 
 @Component({
     selector: 'fusec-vertical-layout-3',
@@ -19,13 +20,13 @@ export class FusecVerticalLayout3Component implements OnInit, OnDestroy {
     // Private
     private _unsubscribeAll: Subject<any>;
 
-    constructor(private _navService: FuseNavigationService, private _fuseConfigService: FuseConfigService, private appConfig: AppConfig) {
+    constructor(private _navService: FuseNavigationService, private _fuseConfigService: FuseConfigService, private userRepo: GlobalUserRepo) {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
-        this.appConfig.setNavStructure();
+        this.userRepo.setNavStruct();
         // Set the defaults
         this.navigation = this._navService.getCurrentNavigation();
         // Subscribe to config changes

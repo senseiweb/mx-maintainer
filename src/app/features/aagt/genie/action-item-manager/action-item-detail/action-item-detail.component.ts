@@ -11,7 +11,7 @@ import { MinutesExpand } from 'app/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ActionItem } from 'app/features/aagt/data';
 import { bareEntity } from '@ctypes/breeze-type-customization';
-import { EntityFormBuilder, EntityFormGroup } from 'app/global-data/global-models';
+import { EntityFormBuilder, EntityFormGroup } from 'app/global-data/';
 
 @Component({
     selector: 'app-action-item-detail',
@@ -72,7 +72,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
             shortCode: new FormControl(ai.shortCode),
             duration: new FormControl(ai.duration),
             teamType: new FormControl(ai.teamType),
-            availableForUse: new FormControl(ai.availableForUse),
+            assignable: new FormControl(ai.assignable),
             notes: new FormControl(ai.notes)
         }) as any;
     }

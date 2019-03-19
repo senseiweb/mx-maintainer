@@ -17,10 +17,10 @@ export class Generation extends ebase.SpEntityBase {
     title: string;
     active: boolean;
     iso: string;
-    status: genStatusEnum;
-    numberAssetsRequired: number;
-    startDateTime: Date;
-    stopDateTime: Date;
+    genStatus: genStatusEnum;
+    assignedAssetCount: number;
+    genStartDate: Date;
+    genEndDate: Date;
     draftAssets: number[];
     assumptions: Assumption[];
     triggers: Trigger[];
@@ -48,19 +48,19 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
             dataType: this.dt.String,
             isNullable: true
         };
-        this.entityDefinition.dataProperties.status = {
+        this.entityDefinition.dataProperties.genStatus = {
             dataType: this.dt.String,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.numberAssetsRequired = {
+        this.entityDefinition.dataProperties.assignedAssetCount = {
             dataType: this.dt.Int16,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.startDateTime = {
+        this.entityDefinition.dataProperties.genStartDate = {
             dataType: this.dt.DateTime,
             isNullable: true
         };
-        this.entityDefinition.dataProperties.stopDateTime = {
+        this.entityDefinition.dataProperties.genEndDate = {
             dataType: this.dt.DateTime
         };
 

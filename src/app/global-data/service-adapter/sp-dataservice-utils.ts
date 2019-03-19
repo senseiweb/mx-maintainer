@@ -1,21 +1,6 @@
-import { Injectable } from '@angular/core';
-import {
-    AjaxAdapter,
-    HttpResponse,
-    ServerError,
-    MetadataStore,
-    AbstractDataServiceAdapter,
-    MappingContext,
-    EntityType,
-    core,
-    JsonResultsAdapter,
-    DataService,
-    NodeContext
-} from 'breeze-client';
+import { core, AbstractDataServiceAdapter, AjaxAdapter, DataService, EntityType, HttpResponse, MappingContext, MetadataStore, ServerError } from 'breeze-client';
 import { SaveErrorFromServer } from 'breeze-client/src/entity-manager';
-import { HttpHeaderResponse, HttpHeaders } from '@angular/common/http';
 
-@Injectable({ providedIn: 'root' })
 export class CustomDataServiceUtils {
     ajaxAdapter: AjaxAdapter;
     requestDigest: string;
@@ -69,7 +54,7 @@ export class CustomDataServiceUtils {
             entityErrors = errObj.Errors || errObj.EntityErrors;
             entityErrors =
                 entityErrors &&
-                entityErrors.map(function(e) {
+                entityErrors.map(e => {
                     return {
                         errorName: e.ErrorName,
                         entityTypeName: MetadataStore.normalizeTypeName(e.EntityTypeName),
@@ -82,7 +67,7 @@ export class CustomDataServiceUtils {
 
         if (saveContext && entityErrors) {
             const propNameFn = saveContext.entityManager.metadataStore.namingConvention.serverPropertyNameToClient;
-            entityErrors.forEach(function(e) {
+            entityErrors.forEach(e => {
                 e.propertyName = e.propertyName && propNameFn(e.propertyName);
             });
             (err as SaveErrorFromServer).entityErrors = entityErrors;
@@ -121,11 +106,11 @@ export class CustomDataServiceUtils {
         return mappingContext;
     }
 
-    getRequestDigestHeaders(defaultHeaders: HttpHeaders): HttpHeaders {
+    getRequestDigestHeaders(defaultHeaders: { [index: string]: string }): { [index: string]: string } {
         if (!this.requestDigest) {
             return defaultHeaders;
         }
-        return defaultHeaders.append('X-RequestDigest', this.requestDigest);
+        return { 'X-RequestDigest': this.requestDigest };
     }
 
     handleHttpErrors(reject: (reason: any) => void, response: HttpResponse, messagePrefix?: string): void {

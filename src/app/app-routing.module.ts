@@ -3,13 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 
 const appRoutes: Routes = [
     {
+        path: 'aagt',
+        loadChildren: './features/aagt/aagt.module#AagtModule'
+    },
+    {
         path: '',
         redirectTo: '/user/dashboard',
         pathMatch: 'full'
-    },
-    {
-        path: 'aagt',
-        loadChildren: './features/aagt/aagt.module#AagtModule'
     }
     // {
     //   path: 'program-manager',

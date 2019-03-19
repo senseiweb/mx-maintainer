@@ -2,7 +2,7 @@ import { NgModule, ErrorHandler, APP_INITIALIZER, InjectionToken } from '@angula
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core';
-import { DataModule } from './global-data';
+import { GlobalDataModule } from './global-data';
 import { UserModule } from './user/user.module';
 import { RollbarService, AppErrorHandler, rollbarFactory } from './app-error-handler.service';
 import { IAppConfig } from '@ctypes/app-config';
@@ -34,9 +34,11 @@ function loadCtx(appConfig: AppConfig, fuseNav: FuseNavigationService): () => Pr
         });
     };
 }
+console.log('appModule called');
+
 @NgModule({
     declarations: [AppComponent],
-    imports: [DataModule.forRoot(), CoreModule, AppRoutingModule, UserModule],
+    imports: [GlobalDataModule.forRoot(), CoreModule, UserModule, AppRoutingModule],
     providers: [
         // { provide: ErrorHandler, useClass: AppErrorHandler},
         // { provide: RollbarService, useFactory: rollbarFactory }
