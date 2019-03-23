@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/global-data';
-import { Asset, AagtListName } from '../models';
 import { AagtDataModule } from '../aagt-data.module';
+import { AagtEmProviderService } from '../aagt-emprovider.service';
+import { AagtListName, Asset } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class AssetRepoService extends BaseRepoService<Asset> {
-    constructor(entityService: EmProviderService) {
+    constructor(entityService: AagtEmProviderService) {
         super(AagtListName.Asset, entityService);
     }
 }

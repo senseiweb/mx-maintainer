@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/global-data';
-import { Trigger, AagtListName, TriggerAction } from '../models';
-import { AagtDataModule } from '../aagt-data.module';
 import { EntityState } from 'breeze-client';
+import { AagtDataModule } from '../aagt-data.module';
+import { AagtEmProviderService } from '../aagt-emprovider.service';
+import { AagtListName, Trigger, TriggerAction } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class TriggerActionRepoService extends BaseRepoService<TriggerAction> {
-    constructor(emService: EmProviderService) {
+    constructor(emService: AagtEmProviderService) {
         super(AagtListName.TriggerAct, emService);
     }
 

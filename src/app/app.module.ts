@@ -1,13 +1,13 @@
-import { NgModule, ErrorHandler, APP_INITIALIZER, InjectionToken } from '@angular/core';
-import { AppComponent } from './app.component';
+import { APP_INITIALIZER, ErrorHandler, InjectionToken, NgModule } from '@angular/core';
+import { IAppConfig } from '@ctypes/app-config';
+import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { AppConfig } from './app-config.service';
+import { rollbarFactory, AppErrorHandler, RollbarService } from './app-error-handler.service';
 import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
 import { CoreModule } from './core';
 import { GlobalDataModule } from './global-data';
 import { UserModule } from './user/user.module';
-import { RollbarService, AppErrorHandler, rollbarFactory } from './app-error-handler.service';
-import { IAppConfig } from '@ctypes/app-config';
-import { AppConfig } from './app-config.service';
-import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 
 export const tokens: Map<string, InjectionToken<IAppConfig>> = new Map();
 tokens.set('tokenName', new InjectionToken<IAppConfig>('tokenName'));
@@ -34,11 +34,10 @@ function loadCtx(appConfig: AppConfig, fuseNav: FuseNavigationService): () => Pr
         });
     };
 }
-console.log('appModule called');
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [GlobalDataModule.forRoot(), CoreModule, UserModule, AppRoutingModule],
+    imports: [GlobalDataModule, CoreModule, UserModule, AppRoutingModule],
     providers: [
         // { provide: ErrorHandler, useClass: AppErrorHandler},
         // { provide: RollbarService, useFactory: rollbarFactory }

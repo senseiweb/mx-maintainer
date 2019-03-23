@@ -1,4 +1,16 @@
-import { core, AbstractDataServiceAdapter, AjaxAdapter, DataService, EntityType, HttpResponse, MappingContext, MetadataStore, ServerError } from 'breeze-client';
+import {
+    core,
+    AbstractDataServiceAdapter,
+    AjaxAdapter,
+    DataProperty,
+    DataService,
+    DataType,
+    EntityType,
+    HttpResponse,
+    MappingContext,
+    MetadataStore,
+    ServerError
+} from 'breeze-client';
 import { SaveErrorFromServer } from 'breeze-client/src/entity-manager';
 
 export class CustomDataServiceUtils {
@@ -123,6 +135,19 @@ export class CustomDataServiceUtils {
         reject(err);
     }
 
+    normalizeSaveValue(prop: DataProperty, val: any): any {
+        if (prop.isUnmapped) {
+            return undefined;
+        }
+        const propDataType = prop.dataType as DataType;
+        if (propDataType === DataType.DateTimeOffset) {
+            val = val && new Date(val.getTime() - val.getTimezoneOffset() * 60000);
+        } else if (prop.dataType) {
+            // quoteJsonOData
+            val = val != null ? val.toString() : val;
+        }
+        return val;
+    }
     // private setSPODataErrorMessage(err: any) {
     //     // OData errors can have the message buried very deeply - and nonobviously
     //     // Normal MS OData responses have a response.body

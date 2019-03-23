@@ -1,13 +1,13 @@
-import { BreezeConfig, AdapterType, BaseAdapter } from 'breeze-client/src/config';
+import { AdapterType, BaseAdapter, BreezeConfig } from 'breeze-client/src/config';
 
-import { SaveResult, SaveContext, HttpResponse } from 'breeze-client/src/entity-manager';
+import { HttpResponse, SaveContext, SaveResult } from 'breeze-client/src/entity-manager';
 
 import { AjaxAdapter } from 'breeze-client/src/interface-registry';
 
-import { EntityKey, Entity } from 'breeze-client';
-import { EntityType } from 'breeze-client/src/entity-metadata';
-import { CustomDataServiceUtils } from 'app/global-data/service-adapter/sp-dataservice-utils';
 import { OData3BatchService } from '@odata';
+import { CustomDataServiceUtils } from 'app/global-data/service-adapter/sp-dataservice-utils';
+import { Entity, EntityKey } from 'breeze-client';
+import { EntityType } from 'breeze-client/src/entity-metadata';
 
 declare module 'breeze-client/src/config' {
     interface BreezeConfig {
@@ -36,6 +36,7 @@ declare module 'breeze-client/src/data-service' {
 
     interface DataService {
         odataServiceEndpoint?: string;
+        requestDigest?: string;
     }
 }
 

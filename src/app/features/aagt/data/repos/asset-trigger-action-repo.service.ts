@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/global-data';
-import { AagtListName, AssetTriggerAction } from '../models';
-import { AagtDataModule } from '../aagt-data.module';
 import { EntityState } from 'breeze-client';
+import { AagtDataModule } from '../aagt-data.module';
+import { AagtEmProviderService } from '../aagt-emprovider.service';
+import { AagtListName, AssetTriggerAction } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class AssetTriggerActionRepoService extends BaseRepoService<AssetTriggerAction> {
-    constructor(entityService: EmProviderService) {
+    constructor(entityService: AagtEmProviderService) {
         super(AagtListName.AssetTrigAct, entityService);
     }
 

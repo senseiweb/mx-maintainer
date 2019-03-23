@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BaseRepoService, EmProviderService } from 'app/global-data';
 import * as breeze from 'breeze-client';
-import { Generation, genStatusEnum, AagtListName } from '../models';
 import { AagtDataModule } from '../aagt-data.module';
+import { AagtEmProviderService } from '../aagt-emprovider.service';
+import { genStatusEnum, AagtListName, Generation } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class GenerationRepoService extends BaseRepoService<Generation> {
-    constructor(entityService: EmProviderService) {
+    constructor(entityService: AagtEmProviderService) {
         super(AagtListName.Gen, entityService);
     }
 

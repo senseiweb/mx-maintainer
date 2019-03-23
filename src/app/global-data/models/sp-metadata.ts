@@ -1,5 +1,6 @@
-import * as ebase from './_entity-base';
 import { Injectable } from '@angular/core';
+import { GlobalDataModule } from '../data.module';
+import * as ebase from './_entity-base';
 
 export class SpMetadata {
     id: string;
@@ -9,13 +10,14 @@ export class SpMetadata {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: GlobalDataModule
 })
 export class SpMetadataMetadata extends ebase.MetadataBase<SpMetadata> {
     metadataFor = SpMetadata as any;
 
     constructor() {
         super('__metadata');
+        this.entityDefinition.namespace = 'SP.Data';
         this.entityDefinition.defaultResourceName = undefined;
         this.entityDefinition.isComplexType = true;
         this.entityDefinition.navigationProperties = undefined;

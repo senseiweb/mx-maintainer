@@ -1,7 +1,7 @@
-import { MappingContext, EntityQuery, core } from 'breeze-client';
-import { CustomDataServiceUtils } from './sp-dataservice-utils';
 import { HttpHeaders } from '@angular/common/http';
+import { core, EntityQuery, MappingContext } from 'breeze-client';
 import { QueryResult } from 'breeze-client/src/entity-manager';
+import { CustomDataServiceUtils } from './sp-dataservice-utils';
 
 export class CustomQueryContext {
     private headers: Object;
@@ -32,7 +32,7 @@ export class CustomQueryContext {
         const promise = new Promise<QueryResult>((resolve, reject) => {
             ajaxCaller.ajax({
                 type: 'GET',
-                url: url,
+                url,
                 dataType: 'json',
                 headers: defaultHeaders,
                 params: query.parameters,

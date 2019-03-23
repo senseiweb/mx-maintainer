@@ -28,8 +28,7 @@ export class MetadataBase<T> {
             isPartOfKey: true
         },
         __metadata: {
-            complexTypeName: '__metadata',
-            dataType: null,
+            complexTypeName: '__metadata:#SP.Data',
             isNullable: false
         },
         modified: { dataType: this.dt.DateTime },

@@ -15,77 +15,47 @@ export class SpDataServiceOdataSave {
         this.uuid = UUID.UUID();
         const batchUrl = this.saveContext.dataService.serviceName + '$batch';
         this.batch = this.odataService.createBatch(batchUrl);
-        this.defaultHeaders = defaultBatchHeaders;
         const batchHeaders = this.utils.getRequestDigestHeaders(defaultBatchHeaders);
         this.batch.addHeaders(batchHeaders);
     }
     private batch: OData3Batch;
-    private defaultHeaders: { [index: string]: string };
     private uuid: UUID;
-
-    private prepare;
-
-    private normalizeSaveValue(prop: DataProperty, val: any): any {
-        if (prop.isUnmapped) {
-            return undefined;
-        }
-        const propDataType = prop.dataType as DataType;
-        if (propDataType === DataType.DateTimeOffset) {
-            val = val && new Date(val.getTime() - val.getTimezoneOffset() * 60000);
-        } else if (prop.dataType) {
-            // quoteJsonOData
-            val = val != null ? val.toString() : val;
-        }
-        return val;
-    }
 
     private prepareSaveBundles(): void {
         this.saveContext.tempKeys = [];
+        this.saveContext.originalEntities = [];
         const saveResult: SaveResult = {
             entities: [],
             entitiesWithErrors: [],
-            keyMappings: []
+            keyMappings: [],
+            deletedKeys: []
         };
         this.saveContext.saveResult = saveResult;
 
         this.saveBundle.entities.forEach((entity, index) => {
             const state = entity.entityAspect.entityState;
-            this.saveContext.originalEntities[index] = entity;
             const contentId = index + 1;
-            const contentId2 = index + 2;
-            const contentId3 = index + 3;
+            this.saveContext.originalEntities[contentId] = entity;
             let request: OData3Request;
-            let request2: OData3Request;
-            let request3: OData3Request;
 
             const changeSet = this.odataService.createChangeset(this.uuid);
-            const changeSet2 = this.odataService.createChangeset(this.uuid);
-            const changeSet3 = this.odataService.createChangeset(this.uuid);
 
             switch (state) {
                 case EntityState.Added:
                     request = this.processAddChangeSet(entity, contentId);
-                    request2 = this.processAddChangeSet(entity, contentId2);
-                    request3 = this.processAddChangeSet(entity, contentId3);
-
                     break;
                 case EntityState.Modified:
-                    request = this.processUpdateChangeSet(entity, index + 1);
+                    request = this.processUpdateChangeSet(entity, contentId);
                     break;
                 case EntityState.Deleted:
-                    request = this.processDeleteChangeSet(entity as SpEntityBase, index + 1);
+                    request = this.processDeleteChangeSet(entity as SpEntityBase, contentId);
                     break;
                 default:
                     throw new Error(`Cannot save an entity whose EntityState is ${state.name}`);
             }
 
             changeSet.request = request;
-            changeSet2.request = request2;
-            changeSet3.request = request3;
-
             this.batch.addChangeset(changeSet);
-            this.batch.addChangeset(changeSet2);
-            this.batch.addChangeset(changeSet3);
         });
     }
 
@@ -93,10 +63,6 @@ export class SpDataServiceOdataSave {
         const em = this.saveContext.entityManager;
         const aspect = entity.entityAspect;
         const et = entity.entityType;
-        // const addHeaders = new HttpHeaders({
-        //     'Content-Type': 'application/http',
-        //     'Content-Transfer-Encoding': 'binary'
-        // });
 
         if (!et.defaultResourceName) {
             throw new Error(`Missing resource name for type: ${et.name}`);
@@ -109,7 +75,7 @@ export class SpDataServiceOdataSave {
         const url = this.saveContext.entityManager.dataService.odataServiceEndpoint + et.defaultResourceName;
 
         const helper = em.helper;
-        const rawEntity = helper.unwrapInstance(entity, this.normalizeSaveValue);
+        const rawEntity = helper.unwrapInstance(entity, this.utils.normalizeSaveValue);
         rawEntity.__metadata = {
             type: this.utils.clientTypeNameToServer(et.shortName)
         };
@@ -127,21 +93,18 @@ export class SpDataServiceOdataSave {
 
     private processUpdateChangeSet(entity: Entity, contentId: number): OData3Request {
         const em = this.saveContext.entityManager;
-        const rawEntity = em.helper.unwrapInstance(entity, this.normalizeSaveValue) as SpEntityBase;
+        const rawEntity = em.helper.unwrapInstance(entity, this.utils.normalizeSaveValue) as SpEntityBase;
 
         const reqHeaders = { 'IF-MATCH': rawEntity.__metadata.etag };
-        // const defaultHeaderKeys = Object.keys(this.defaultHeaders);
-        // for (const key of defaultHeaderKeys) {
-        //     reqHeaders[key] = this.defaultHeaders[key];
-        // }
+
         const url = rawEntity.__metadata.uri;
         // check to see if __metadata type is added from this
-        const changedData = em.helper.unwrapChangedValues(entity, em.metadataStore, this.normalizeSaveValue);
+        const changedData = em.helper.unwrapChangedValues(entity, em.metadataStore, this.utils.normalizeSaveValue);
         const payload = JSON.stringify(changedData);
         return this.odataService.createRequest('PATCH', url, payload, contentId.toString(), reqHeaders);
     }
 
-    private preparSaveResult(responses: OData3Response[]): SaveResult {
+    private prepareSaveResult(responses: OData3Response[]): SaveResult {
         const jra = this.saveContext.dataService.jsonResultsAdapter;
         const saveResult = this.saveContext.saveResult;
 
@@ -151,17 +114,25 @@ export class SpDataServiceOdataSave {
                 saveResult.entitiesWithErrors.push(original);
             }
             // assume one entity per save, but may need to revisit if multiple result entities are exctracted
-            const rawEntity = jra.extractSaveResults(response);
+            const rawEntity = jra.extractSaveResults(response.Data);
             const tempKey = this.saveContext.tempKeys[response.TempKeyIndex];
             if (tempKey) {
-                const et = tempKey.entityType;
+                const tmpEt = tempKey.entityType;
                 this.saveContext.saveResult.entities.push(rawEntity);
-                if (et.autoGeneratedKeyType !== AutoGeneratedKeyType.None) {
+                if (tmpEt.autoGeneratedKeyType !== AutoGeneratedKeyType.None) {
                     const tempValue = tempKey.values[0];
-                    const realKey = et.getEntityKeyFromRawEntity(rawEntity, DataProperty.getRawValueFromServer);
-                    const keyMapping = { entityTypeName: et.name, tempValue, realValue: realKey.values[0] };
+                    const realKey = tmpEt.getEntityKeyFromRawEntity(rawEntity, DataProperty.getRawValueFromServer);
+                    const keyMapping = { entityTypeName: tmpEt.name, tempValue, realValue: realKey.values[0] };
                     this.saveContext.saveResult.keyMappings.push(keyMapping);
                 }
+            }
+
+            const et = this.saveContext.originalEntities[response.TempKeyIndex];
+            if (et.entityAspect.entityState.isDeleted()) {
+                saveResult.deletedKeys.push({
+                    entityTypeName: et.entityType.name,
+                    keyValues: [et.entityAspect.getKey()]
+                });
             }
             saveResult.entities.push(rawEntity);
         });
@@ -170,8 +141,12 @@ export class SpDataServiceOdataSave {
 
     async save(): Promise<SaveResult> {
         this.prepareSaveBundles();
-        const serverReply = await this.odataService.submitBatch(this.batch);
-        this.saveContext.saveResult.httpResponse = serverReply.rawResponse;
-        return this.preparSaveResult(serverReply.responses);
+        try {
+            const serverReply = await this.odataService.submitBatch(this.batch);
+            this.saveContext.saveResult.httpResponse = serverReply.rawResponse;
+            return this.prepareSaveResult(serverReply.responses);
+        } catch (error) {
+            throw new Error(error);
+        }
     }
 }

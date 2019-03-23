@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
-import {
-    NamingConvention,
-    EntityType,
-    DataProperty
-} from 'breeze-client';
+import { DataProperty, EntityType, NamingConvention } from 'breeze-client';
+import { GlobalDataModule } from '../data.module';
 
-export interface CustomClientDict {
-    [index: string]: { [index: string]: string }
+export interface ICustomClientDict {
+    [index: string]: { [index: string]: string };
 }
 
 //#region Copyright, Version, and Description
@@ -34,15 +31,15 @@ export interface CustomClientDict {
  *
  */
 //#endregion
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: GlobalDataModule })
 export class CustomNameConventionService {
-    private clientToServerDictionary: CustomClientDict;
-    private serverToClientDictionary: { [index: string]: EntityType }
+    private clientToServerDictionary: ICustomClientDict;
+    private serverToClientDictionary: { [index: string]: EntityType };
     private sourceConvention: NamingConvention;
-    
+
     constructor() {}
 
-    createNameDictionary(name: string, sourceConv: NamingConvention, clientToServerDict: CustomClientDict): NamingConvention {
+    createNameDictionary(name: string, sourceConv: NamingConvention, clientToServerDict: ICustomClientDict): NamingConvention {
         if (!(sourceConv instanceof NamingConvention)) {
             throw new Error('must be a instance of a Naming Convention');
         }
@@ -52,9 +49,11 @@ export class CustomNameConventionService {
         this.clientToServerDictionary = clientToServerDict;
         this.sourceConvention = sourceConv;
         this.serverToClientDictionary = this.makeServerToClientDictionary();
+
+        // tslint:disable-next-line: no-this-assignment
         const that = this;
         return new NamingConvention({
-            name: name,
+            name,
             clientPropertyNameToServer: (namer: string, propDef: DataProperty): string => {
                 const typeName = propDef && propDef.parentType && propDef.parentType.name;
                 const props = that.clientToServerDictionary[typeName || undefined];
@@ -70,7 +69,15 @@ export class CustomNameConventionService {
         });
     }
 
-     // makes new dictionary based on clientToServerDifctionary
+    updateDictionary(dict: ICustomClientDict): void {
+        const newDictKeys = Object.keys(dict);
+        for (const key of newDictKeys) {
+            this.clientToServerDictionary[key] = dict[key];
+        }
+        this.serverToClientDictionary = this.makeServerToClientDictionary();
+    }
+
+    // makes new dictionary based on clientToServerDifctionary
     // that reverses each EntityType's {clientPropName: serverPropName} KV pairs
     makeServerToClientDictionary(): { [index: string]: EntityType } {
         const dict = {};

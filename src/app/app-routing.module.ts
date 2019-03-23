@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 const appRoutes: Routes = [
     {
         path: 'aagt',
-        loadChildren: './features/aagt/aagt.module#AagtModule'
+        loadChildren: '../app/features/aagt/aagt.module#AagtModule'
     },
     {
         path: '',

@@ -10,4 +10,3 @@ export * from './generation-asset';
 export * from './trigger-action';
 export * from './action-item';
 export * from './_aagt-feature-cfg';
-export * from './sp-metadata-complex.model';

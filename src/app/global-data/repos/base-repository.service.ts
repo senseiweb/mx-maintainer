@@ -1,9 +1,9 @@
 import { EntityManager, EntityType, EntityQuery, Predicate, FetchStrategy, FilterQueryOp, SaveResult } from 'breeze-client';
 import * as moment from 'moment';
 import { SpEntityBase } from '../models/_entity-base';
-import { EmProviderService } from './em-provider.service';
 import { bareEntity, EntityChildren } from '@ctypes/breeze-type-customization';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { BaseEmProviderService } from './base-emprovider.service';
 
 export class BaseRepoService<T extends SpEntityBase> {
     protected entityManager: EntityManager;
@@ -22,9 +22,9 @@ export class BaseRepoService<T extends SpEntityBase> {
 
     protected defaultFetchStrategy: FetchStrategy;
 
-    constructor(entityTypeName: string, _entityService: EmProviderService) {
-        this.entityType = _entityService.entityManager.metadataStore.getEntityType(entityTypeName) as EntityType;
-        this.entityManager = _entityService.entityManager;
+    constructor(entityTypeName: string, emProviderService: BaseEmProviderService) {
+        this.entityType = emProviderService.entityManager.metadataStore.getEntityType(entityTypeName) as EntityType;
+        this.entityManager = emProviderService.entityManager;
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = FetchStrategy.FromServer;
         this.spChoiceFieldCache = [];

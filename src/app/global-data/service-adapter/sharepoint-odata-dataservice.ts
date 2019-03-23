@@ -21,14 +21,15 @@ import {
     SaveResult
 } from 'breeze-client';
 
-import { HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { OData3BatchService, OData3Response } from '@odata';
+import { OData3BatchService } from '@odata';
 import { ChangeRequestInterceptorCtor } from 'breeze-client/src/interface-registry';
+import { GlobalDataModule } from '../data.module';
 import { SpDataServiceOdataSave } from './sp-dataservice-odata-save';
 import { CustomQueryContext } from './sp-dataservice-query';
+import { SpDataServiceSave } from './sp-dataservice-save';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: GlobalDataModule })
 export class SpODataDataService implements DataServiceAdapter {
     ajaxImpl: any;
     defaultHeaders: { [index: string]: string };
@@ -82,7 +83,7 @@ export class SpODataDataService implements DataServiceAdapter {
         const jraConfig = {
             name: 'SpCustomRestJson',
             extractResults: this.extractResults.bind(this),
-            extractSaveResults: undefined,
+            extractSaveResults: this.extractSaveResults.bind(this),
             visitNode: this.visitNode.bind(this)
         };
 
@@ -90,11 +91,14 @@ export class SpODataDataService implements DataServiceAdapter {
     }
 
     saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
-        const saver = new SpDataServiceOdataSave(saveContext, this.odataService, saveBundle, this.utils, this.defaultHeaders);
+        const saver =
+            saveBundle.entities.length === 1
+                ? new SpDataServiceSave(saveContext, saveBundle, this.utils)
+                : new SpDataServiceOdataSave(saveContext, this.odataService, saveBundle, this.utils, this.defaultHeaders);
         return saver.save();
     }
 
-    visitNode(node: any, mappingContext: MappingContext, nodeContext: NodeContext): Object {
+    visitNode(node: any, mappingContext: MappingContext, nodeContext: NodeContext): object {
         // TODO: maybe a problem when using expand relative objects...see sharepoint bz example
         const result: any = {};
         if (node == null) {
