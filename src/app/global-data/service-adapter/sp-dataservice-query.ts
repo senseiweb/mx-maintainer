@@ -4,7 +4,7 @@ import { QueryResult } from 'breeze-client/src/entity-manager';
 import { CustomDataServiceUtils } from './sp-dataservice-utils';
 
 export class CustomQueryContext {
-    private headers: Object;
+    private headers:  { [index: string]: string };
 
     constructor(private mappingContext: MappingContext, private utils: CustomDataServiceUtils) {}
 
@@ -20,28 +20,23 @@ export class CustomQueryContext {
             const sep = url.indexOf('?') < 0 ? '?' : '&';
             url = url + sep + paramString;
         }
-        const defaultHeaders = {};
-        const requestHeaders = this.utils.getRequestDigestHeaders(headers);
+        const reqDigest = this.mappingContext.entityManager.dataService.requestDigest;
+        
+        if (reqDigest) {
+            headers['X-RequestDigest'] = reqDigest;
+        }
 
-        const newHeaderkeys = Object.keys(requestHeaders);
-
-        newHeaderkeys.forEach(hKey => {
-            defaultHeaders[hKey] = requestHeaders[hKey];
-        });
-
-        const promise = new Promise<QueryResult>((resolve, reject) => {
+        return new Promise<QueryResult>((resolve, reject) => {
             ajaxCaller.ajax({
                 type: 'GET',
                 url,
                 dataType: 'json',
-                headers: defaultHeaders,
+                headers,
                 params: query.parameters,
                 success: resolve,
                 error: reject
             });
         });
-
-        return promise;
     }
 
     private toQueryString(obj: Object) {

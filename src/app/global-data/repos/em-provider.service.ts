@@ -88,7 +88,7 @@ export class EmProviderService {
                     this.fetchRequestDigest();
                 }, timeout);
             }
-            this.dataService.requestDigest = digest;
+            this.entityManager.dataService.requestDigest = digest;
         });
     }
 }

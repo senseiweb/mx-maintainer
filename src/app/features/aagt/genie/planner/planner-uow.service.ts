@@ -102,7 +102,7 @@ export class PlannerUowService implements Resolve<any> {
 
     async fetchISOoptions(): Promise<void> {
         try {
-            this.allIsoOptions = await this.genRepo.spChoiceValues('IsoTypes');
+            this.allIsoOptions = await this.genRepo.spChoiceValues('Iso');
         } catch (e) {}
     }
 

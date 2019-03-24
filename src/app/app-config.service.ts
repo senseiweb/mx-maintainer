@@ -7,7 +7,7 @@ import { SPUserProfileProperties } from './global-data';
 
 @Injectable({ providedIn: 'root' })
 export class AppConfig implements IAppConfig {
-    webApplicationSite = 'http://localhost:8080/';
+    webApplicationSite = 'http://localhost:4202';
     sharepointMainAppSite = '';
     spClientCtx: SP.ClientContext;
     fuseNavigation: FuseNavigationService;
@@ -32,11 +32,14 @@ export class AppConfig implements IAppConfig {
     }
 
     featureSpAppSite(appName: string): string {
-        return `${this.sharepointMainAppSite}/mx-maintainer/${appName}/_api/`;
+        const site = `${this.sharepointMainAppSite}/mx-maintainer${appName}/_api/`;
+        return site.replace('mx-maintainer//', 'mx-maintainer/');
     }
 
     apiAddress(appName: string): string {
-        return `${this.webApplicationSite}mx-maintainer/${appName}/_api/`;
+        const site = `${this.webApplicationSite}/mx-maintainer/${appName}/_api/`;
+        return site.replace('mx-maintainer//', 'mx-maintainer/')
+        ;
     }
 
     async fetchUserData(): Promise<void> {

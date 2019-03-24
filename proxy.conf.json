@@ -3,27 +3,27 @@
         "target": "http://localhost:8080",  
         "secure": false,  
         "changeOrigin": true,  
-        "logLevel": "debug",  
-        "pathRewrite": {  
-            "^/sites": "http://localhost:8080/sites"  
-        }  
+        "logLevel": "debug"
+    },
+    "/mx-maintainer/*": {  
+        "target": "http://localhost:8080",  
+        "secure": false,  
+        "changeOrigin": true,  
+        "logLevel": "debug"
     },
     "/_api/*": {  
         "target": "http://localhost:8080",  
         "secure": false,  
         "changeOrigin": true,  
-        "logLevel": "debug",  
-        "pathRewrite": {  
-            "^/_api": "http://localhost:8080/_api"  
+        "logLevel": "debug",
+        "pathRewrite": {
+
         }  
     },
     "/_vti_bin/*": {  
         "target": "http://localhost:8080",  
         "secure": false,  
         "changeOrigin": true,  
-        "logLevel": "debug",  
-        "pathRewrite": {  
-            "^/_vti_bin": "http://localhost:8080/_vti_bin"  
-        }  
+        "logLevel": "debug"
     }    
 }

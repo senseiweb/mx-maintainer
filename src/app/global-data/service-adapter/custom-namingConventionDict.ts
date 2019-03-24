@@ -55,12 +55,18 @@ export class CustomNameConventionService {
         return new NamingConvention({
             name,
             clientPropertyNameToServer: (namer: string, propDef: DataProperty): string => {
+                if (propDef && propDef.parentType && propDef.parentType.name === '__metadata:#SP.Data') {
+                    return namer;
+                }
                 const typeName = propDef && propDef.parentType && propDef.parentType.name;
                 const props = that.clientToServerDictionary[typeName || undefined];
                 const newName = props && props[namer];
                 return newName || that.sourceConvention.clientPropertyNameToServer(namer, propDef);
             },
             serverPropertyNameToClient: (namer: string, propDef: DataProperty): string => {
+                if (propDef && propDef.parentType && propDef.name === '__metada__metadata:#SP.Datata') {
+                    return namer;
+                }
                 const typeName = propDef && propDef.parentType && propDef.parentType.name;
                 const props = that.serverToClientDictionary[typeName || undefined];
                 const newName = props && props[namer];

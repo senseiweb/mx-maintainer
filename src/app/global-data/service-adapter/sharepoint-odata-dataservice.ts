@@ -55,8 +55,11 @@ export class SpODataDataService implements DataServiceAdapter {
     }
 
     extractSaveResults(serializeData: string): any {
-        const jsonData = JSON.parse(serializeData);
-        const data = jsonData.d;
+        let jsonData = serializeData;
+        if (typeof serializeData === 'string') {
+            jsonData = JSON.parse(serializeData);
+        }
+        const data = jsonData['d'];
         return data.results === undefined ? data : data.results;
     }
 
@@ -104,17 +107,18 @@ export class SpODataDataService implements DataServiceAdapter {
         if (node == null) {
             return result;
         }
-
-        // if (mappingContext.mergeOptions.noTracking) {
-        //     return (result.ignore = true);
-        // }
+        console.log(node)
+   
+        let isStringCollection = false;
 
         const metadata = node.__metadata;
-
         if (metadata != null) {
             // TODO: may be able to make this more efficient by caching of the previous value.
             // const entityTypeName = MetadataStore.normalizeTypeName(metadata.type);
             const entityTypeName = this.utils.serverTypeNameToClient(metadata.type);
+
+            // breeze expects metadata names to be Pascal Case, but sharepoint sends all lowercase;
+            
             const et = entityTypeName && (mappingContext.entityManager.metadataStore.getEntityType(entityTypeName, true) as EntityType);
             // OData response doesn't distinguish a projection from a whole entity.
             // We'll assume that whole-entity data would have at least as many properties  (<=)
@@ -136,6 +140,11 @@ export class SpODataDataService implements DataServiceAdapter {
                     etag: metadata.etag
                 };
             }
+            isStringCollection = metadata.type === 'SP.FieldChoice';
+        }
+
+        if (isStringCollection) {
+            result.passThru = true;
         }
         // OData v3 - projection arrays will be enclosed in a results array
         if (node.results) {

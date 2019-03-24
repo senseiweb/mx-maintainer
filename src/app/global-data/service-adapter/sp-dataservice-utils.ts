@@ -23,6 +23,10 @@ export class CustomDataServiceUtils {
         return `SP.Data.${clientTypeName}ListItem`;
     }
 
+    makeUpdateDeleteItemsUri(id: number, queryUrl: string): string {
+        return queryUrl.replace('/items', `/items(${id})`);
+    }
+
     createError(response: HttpResponse): ServerError {
         const err = new Error() as ServerError;
         err.httpResponse = response;
