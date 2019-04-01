@@ -1,15 +1,15 @@
-import * as ebase from 'app/global-data';
 import { Injectable } from '@angular/core';
-import { TeamAvailability } from './team-availability';
-import * as aagtCfg from './_aagt-feature-cfg';
+import * as ebase from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { TeamAvailability } from './team-availability';
 
 export class Team extends ebase.SpEntityBase {
     teamName: string;
     teamType: string;
     numberOfTeamMembers: number;
     notes: string;
-    teamAvailabilites: Array<TeamAvailability>;
+    teamAvailabilites: TeamAvailability[];
 }
 
 @Injectable({

@@ -1,10 +1,10 @@
-import * as ebase from 'app/global-data';
 import { Injectable } from '@angular/core';
-import { Assumption } from './assumption';
-import { Trigger } from './trigger';
-import { GenerationAsset } from './generation-asset';
-import * as aagtCfg from './_aagt-feature-cfg';
+import * as ebase from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { Assumption } from './assumption';
+import { GenerationAsset } from './generation-asset';
+import { Trigger } from './trigger';
 
 export enum genStatusEnum {
     draft = 'Draft',
@@ -77,6 +77,9 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
             }
         };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

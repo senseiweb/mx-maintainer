@@ -1,55 +1,61 @@
 <div class="page-layout carded fullwidth inner-scroll">
-
     <!-- TOP BACKGROUND -->
     <div class="top-bg accent"></div>
     <!-- / TOP BACKGROUND -->
 
     <!-- CENTER -->
     <div class="center">
-
         <!-- CONTENT HEADER -->
-        <div class="header accent p-24" fxLayout="row" fxLayoutAlign="start center">
+        <div
+            class="header accent p-24"
+            fxLayout="row"
+            fxLayoutAlign="start center"
+        >
             <h2 class="m-0">Generation Planner</h2>
         </div>
         <!-- / CONTENT HEADER -->
 
         <!-- CONTENT CARD -->
         <div class="content-card">
-
             <!-- CONTENT -->
             <div class="content p-24" fusePerfectScrollbar>
-                <mat-horizontal-stepper [linear]="isLinear" (selectionChange)="onStepChange($event)" #stepper>
+                <mat-horizontal-stepper
+                    [linear]="isLinear"
+                    (selectionChange)="onStepChange($event)"
+                    #stepper
+                >
                     <mat-step [completed]="step1Completed">
                         <ng-template matStepLabel>
-                            <span *ngIf="isLinear">Provide General Generation Information</span>
-                            <span *ngIf="!isLinear">Update Generation Information</span>
+                            <span *ngIf="isLinear"
+                                >Provide General Generation Information</span
+                            >
+                            <span *ngIf="!isLinear"
+                                >Update Generation Information</span
+                            >
                         </ng-template>
                         <genie-plan-step1></genie-plan-step1>
                     </mat-step>
                     <mat-step [completed]="step2Completed">
-                        <ng-template matStepLabel>Specify Triggers & Tasks</ng-template>
+                        <ng-template matStepLabel
+                            >Specify Triggers & Tasks</ng-template
+                        >
                         <genie-plan-step2></genie-plan-step2>
                     </mat-step>
                     <mat-step [completed]="step3Completed">
-                        <ng-template matStepLabel>Generation Assets & Tasks</ng-template>
+                        <ng-template matStepLabel
+                            >Generation Assets & Tasks</ng-template
+                        >
                         <genie-plan-step3></genie-plan-step3>
                     </mat-step>
-                    <mat-step>
-                        <ng-template matStepLabel>Done</ng-template>
-                        You are now done.
-                        <div>
-                            <button mat-button matStepperPrevious>Back</button>
-                            <button mat-button (click)="stepper.reset()">Reset</button>
-                        </div>
+                    <mat-step [completed]="step4Completed">
+                        <ng-template matStepLabel>Review Changes</ng-template>
+                        <genie-plan-step4></genie-plan-step4>
                     </mat-step>
                 </mat-horizontal-stepper>
             </div>
             <!-- / CONTENT -->
-
         </div>
         <!-- / CONTENT CARD -->
-
     </div>
     <!-- / CENTER -->
-
 </div>

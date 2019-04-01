@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Asset, Generation } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
-import { Trigger, Asset, GenerationAsset, TriggerAction, Generation } from 'app/features/aagt/data';
+import { take, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
@@ -10,7 +10,6 @@ import { PlannerUowService } from '../../planner-uow.service';
     styleUrls: ['./asset-trigger-sidebar.component.scss']
 })
 export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
-
     triggerNames: string[];
     triggerFilterBy: string;
     assetFilterBy: string;
@@ -18,25 +17,27 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
     // Private
     private unsubscribeAll: Subject<any>;
 
-    constructor(
-        private planUow: PlannerUowService
-    ) {
+    constructor(private planUow: PlannerUowService) {
         // Set the private defaults
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
-        this.assetFilterBy = this.planUow.assetFilterBy || 'all';
-        this.triggerFilterBy = this.planUow.triggerFilterBy || 'all';
+        this.assetFilterBy = this.planUow.onAssetFilterChange.value;
+        this.triggerFilterBy = this.planUow.onTriggerFilterChange.value;
         this.planUow.onTriggerActionsChange
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(trigActions => {
-                this.triggerNames = [...new Set(trigActions.map(ta => ta.trigger.milestone))];
+                this.triggerNames = [
+                    ...new Set(trigActions.map(ta => ta.trigger.milestone))
+                ];
             });
         this.planUow.onGenerationAssetsChange
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(genAssets => {
-                this.assetNames = [...new Set(genAssets.map(ga => ga.asset.alias))];
+                this.assetNames = [
+                    ...new Set(genAssets.map(ga => ga.asset.alias))
+                ];
             });
     }
 
@@ -66,4 +67,3 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
         }
     }
 }
-

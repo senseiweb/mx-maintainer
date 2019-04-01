@@ -1,13 +1,13 @@
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
-import { Generation, GenerationAsset, genStatusEnum } from 'app/features/aagt/data';
-import { MatDialog, MatDialogConfig, MatDatepickerModule, MatDialogRef } from '@angular/material';
-import { PlannerUowService } from './planner-uow.service';
-import { Subject, Observable } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
 import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
-import { StepperSelectionEvent } from '@angular/cdk/stepper';
+import { genStatusEnum, GenerationAsset } from 'app/features/aagt/data';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { PlannerUowService } from './planner-uow.service';
 
 @Component({
     selector: 'app-planner',
@@ -26,7 +26,11 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
     assignedAssets: GenerationAsset[];
     private unsubscribeAll: Subject<any>;
 
-    constructor(private route: ActivatedRoute, private deactivateDialog: MatDialog, private uow: PlannerUowService) {
+    constructor(
+        private route: ActivatedRoute,
+        private deactivateDialog: MatDialog,
+        private uow: PlannerUowService
+    ) {
         this.unsubscribeAll = new Subject();
     }
 
@@ -62,18 +66,23 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
         this.uow.planGen(this.genId);
         this.isLinear = this.uow.currentGen.genStatus === genStatusEnum.draft;
 
-        this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step1Completed = isValid));
-        this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step2Completed = isValid));
-        this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step3Completed = isValid));
-        this.uow.onStep1ValidityChange.pipe(takeUntil(this.unsubscribeAll)).subscribe(isValid => (this.step4Completed = isValid));
+        this.uow.onStep1ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => (this.step1Completed = isValid));
+        this.uow.onStep2ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => (this.step2Completed = isValid));
+        this.uow.onStep3ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => (this.step3Completed = isValid));
+        this.uow.onStep4ValidityChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(isValid => (this.step4Completed = isValid));
         // this.getAlreadyAssignedAssets();
     }
 
     onStepChange($event: StepperSelectionEvent): void {
-        console.log($event.selectedIndex);
-        if ($event.selectedIndex === 1) {
-            this.uow.assetSelectionCheck();
-        }
+        this.uow.onStepperChange.next($event);
     }
 
     private confirmDeleteUnsavedData(): void {

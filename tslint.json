@@ -19,7 +19,7 @@
         "indent": [true, "spaces", 4],
         "interface-over-type-literal": true,
         "label-position": true,
-        "max-line-length": [true, 140],
+        "max-line-length": [true, 180],
         "max-classes-per-file": false,
         "member-access": false,
         "member-ordering": [

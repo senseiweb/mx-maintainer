@@ -1,13 +1,20 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
-import { GenerationAsset } from './generation-asset';
-import { TriggerAction } from './trigger-action';
-import * as aagtCfg from './_aagt-feature-cfg';
+import { EntityAction, EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { GenerationAsset } from './generation-asset';
+import { Team } from './team';
+import { TriggerAction } from './trigger-action';
 
 export class AssetTriggerAction extends ebase.SpEntityBase {
     sequence: number;
-    actionStatus: 'Unscheduled' | 'In-progress' | 'Scheduled' | 'Rescheduled' | 'Delayed';
+    actionStatus:
+        | 'Unscheduled'
+        | 'In-progress'
+        | 'Scheduled'
+        | 'Rescheduled'
+        | 'Delayed';
     outcome: 'PCW' | 'On-time' | 'Under-time' | 'Over-time' | 'Blamed';
     plannedStart: Date;
     plannedStop: Date;
@@ -15,46 +22,50 @@ export class AssetTriggerAction extends ebase.SpEntityBase {
     scheduledStop: Date;
     actualStart: Date;
     actualStop: Date;
+    completedByTeamId?: number;
+    completedByTeam?: Team;
     genAssetId: number;
     triggerActionId: number;
     genAsset: GenerationAsset;
     triggerAction: TriggerAction;
+    preDeleteState: EntityState;
 }
 
 @Injectable({ providedIn: AagtDataModule })
-export class AssetTriggerActionMetadata extends ebase.MetadataBase<AssetTriggerAction> {
+export class AssetTriggerActionMetadata extends ebase.MetadataBase<
+    AssetTriggerAction
+> {
     metadataFor = AssetTriggerAction;
 
     constructor() {
         super(aagtCfg.AagtListName.AssetTrigAct);
         this.entityDefinition.dataProperties.actionStatus = {
+            dataType: this.dt.String,
+            spInternalName: 'Title'
+        };
+        this.entityDefinition.dataProperties.sequence = {
+            dataType: this.dt.Int16
+        };
+        this.entityDefinition.dataProperties.outcome = {
             dataType: this.dt.String
         };
-        this.entityDefinition.dataProperties.sequence = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.outcome = { dataType: this.dt.String };
         this.entityDefinition.dataProperties.plannedStart = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.plannedStop = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.scheduledStart = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.scheduledStop = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.actualStart = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.actualStop = {
-            dataType: this.dt.DateTime,
-            isNullable: false
+            dataType: this.dt.DateTime
         };
         this.entityDefinition.dataProperties.genAssetId = {
             dataType: this.dt.Int32,
@@ -78,6 +89,9 @@ export class AssetTriggerActionMetadata extends ebase.MetadataBase<AssetTriggerA
             }
         };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

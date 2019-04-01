@@ -1,8 +1,17 @@
-import { APP_INITIALIZER, ErrorHandler, InjectionToken, NgModule } from '@angular/core';
+import {
+    APP_INITIALIZER,
+    ErrorHandler,
+    InjectionToken,
+    NgModule
+} from '@angular/core';
 import { IAppConfig } from '@ctypes/app-config';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { AppConfig } from './app-config.service';
-import { rollbarFactory, AppErrorHandler, RollbarService } from './app-error-handler.service';
+import {
+    rollbarFactory,
+    AppErrorHandler,
+    RollbarService
+} from './app-error-handler.service';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core';
@@ -12,7 +21,10 @@ import { UserModule } from './user/user.module';
 export const tokens: Map<string, InjectionToken<IAppConfig>> = new Map();
 tokens.set('tokenName', new InjectionToken<IAppConfig>('tokenName'));
 
-function loadCtx(appConfig: AppConfig, fuseNav: FuseNavigationService): () => Promise<boolean> {
+function loadCtx(
+    appConfig: AppConfig,
+    fuseNav: FuseNavigationService
+): () => Promise<boolean> {
     return (): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             const spCtx = SP.ClientContext.get_current();

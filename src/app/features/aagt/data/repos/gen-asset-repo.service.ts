@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { bareEntity } from '@ctypes/breeze-type-customization';
 import { BaseRepoService, EmProviderService } from 'app/global-data';
 import { EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
@@ -11,21 +12,32 @@ export class GenAssetRepoService extends BaseRepoService<GenerationAsset> {
         super(AagtListName.GenAsset, entityService);
     }
 
-    createGenerationAsset(data: { generationId: number; assetId: number }): GenerationAsset {
+    createGenerationAsset(data: bareEntity<GenerationAsset>): GenerationAsset {
+        data.health = 'UNKNOWN';
         return this.createBase(data);
     }
 
-    recoverDeletedGenAssets(data: { generationId: number; assetId: number }): GenerationAsset | null {
-        const deletedGenAssets = this.entityManager.getEntities(this.entityType, EntityState.Deleted) as GenerationAsset[];
+    // recoverDeletedGenAssets(data: {
+    //     generationId: number;
+    //     assetId: number;
+    // }): GenerationAsset | undefined {
+    //     const deletedGenAssets = this.entityManager.getEntities(
+    //         this.entityType,
+    //         EntityState.Deleted
+    //     ) as GenerationAsset[];
 
-        const recoveredGenAsset = deletedGenAssets.filter(ga => ga.generationId === data.generationId && ga.assetId === data.assetId)[0];
+    //     const recoveredGenAsset = deletedGenAssets.filter(
+    //         ga =>
+    //             ga.generationId === data.generationId &&
+    //             ga.assetId === data.assetId
+    //     )[0];
 
-        if (recoveredGenAsset) {
-            recoveredGenAsset.entityAspect.setUnchanged();
-            return recoveredGenAsset;
-        }
-        return null;
-    }
+    //     if (recoveredGenAsset) {
+    //         recoveredGenAsset.entityAspect.setModified();
+    //         return recoveredGenAsset;
+    //     }
+    //     return undefined;
+    // }
 
     // getAllGenerationAssets(data: { gernationId: number, triggerId: number }): GenerationAsset[] {
     //     return this.entityManager

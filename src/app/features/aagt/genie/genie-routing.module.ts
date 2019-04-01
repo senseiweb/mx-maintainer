@@ -1,19 +1,20 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { GenieBaseComponent } from './genie-base/genie-base.component';
 import {
     ActionItemsComponent,
     ActionItemDetailComponent
 } from './action-item-manager';
-import { ListGenyComponent } from './list-geny/list-geny.component';
 import { AimUowService } from './action-item-manager/aim-uow.service';
+import { GenieBaseComponent } from './genie-base/genie-base.component';
+import { ListGenyComponent } from './list-geny/list-geny.component';
 import {
+    AssetTriggerSidebarComponent,
     PlannerComponent,
+    PlannerUowService,
     Step1Component,
     Step2Component,
     Step3Component,
-    PlannerUowService,
-    AssetTriggerSidebarComponent
+    Step4Component
 } from './planner';
 
 import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
@@ -28,6 +29,7 @@ export const routedComponents = [
     Step1Component,
     Step2Component,
     Step3Component,
+    Step4Component,
     AssetTriggerSidebarComponent,
     AssetTriggerActionListComponent,
     NewTriggerDialogComponent
@@ -49,7 +51,7 @@ const featureRoutes: Routes = [
             {
                 path: 'planner/:id',
                 component: PlannerComponent,
-                resolve: {init: PlannerUowService},
+                resolve: { init: PlannerUowService },
                 children: [
                     {
                         path: 'step1',
@@ -62,6 +64,10 @@ const featureRoutes: Routes = [
                     {
                         path: 'step3',
                         component: Step3Component
+                    },
+                    {
+                        path: 'step4',
+                        component: Step4Component
                     }
                 ]
             },

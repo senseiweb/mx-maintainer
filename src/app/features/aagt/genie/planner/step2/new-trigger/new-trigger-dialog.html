@@ -1,29 +1,59 @@
 <div>
-        <h1 mat-dialog-title>
-                <ng-container *ngIf="isNew; else elseTemplate">
-                    Create New Trigger
-                </ng-container>
-                <ng-template #elseTemplate>
-                    Editing Trigger: {{currentTrigger.milestone}}
-                </ng-template>
-            </h1>
+    <h1 mat-dialog-title>
+        <ng-container *ngIf="isNew; else elseTemplate">
+            Create New Trigger
+        </ng-container>
+        <ng-template #elseTemplate>
+            Editing Trigger: {{ currentTrigger.milestone }}
+        </ng-template>
+    </h1>
 </div>
 <div mat-dialog-content>
     <form fxLayout="column" [formGroup]="triggerFormGroup" fxFlex>
         <mat-form-field>
-            <input matInput name="milestone" formControlName="milestone" placeholder="Milestone for Trigger">
+            <input
+                matInput
+                name="milestone"
+                formControlName="milestone"
+                placeholder="Milestone for Trigger"
+            />
         </mat-form-field>
         <mat-form-field>
-            <input matInput name="offset" formControlName="offset" placeholder="Offset from Generation Start" type="number">
+            <input
+                matInput
+                name="offset"
+                formControlName="offset"
+                placeholder="Offset from Generation Start"
+                type="number"
+            />
             <span matSuffix>hours</span>
         </mat-form-field>
         <div fxLayout="row" *ngIf="!!currentTrigger.triggerStart">
-            <input name="start" formControlName="start" placeholder="Calculated Start" name="start" readonly>
-            <input name="stop" formControlName="stop" placeholder="Calculated End" name="end" readonly>
+            <input
+                name="start"
+                formControlName="start"
+                placeholder="Calculated Start"
+                name="start"
+                readonly
+            />
+            <input
+                name="stop"
+                formControlName="stop"
+                placeholder="Calculated End"
+                name="end"
+                readonly
+            />
         </div>
     </form>
 </div>
 <div mat-dialog-actions fxLayoutAlign="start end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-button (click)="saveChanges()" cdkFocusInitial>Save</button>
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button
+        mat-button
+        (click)="saveChanges()"
+        cdkFocusInitial
+        disable="!isValid"
+    >
+        Save
+    </button>
 </div>

@@ -49,12 +49,12 @@ export class SpODataDataService implements DataServiceAdapter {
         return queryer.query(this.defaultHeaders, this.ajaxImpl);
     }
 
-    extractResults(response: HttpResponse): any {
+    extractResults = (response: HttpResponse) => {
         const data = response.data && response.data.d;
         return data.results === undefined ? data : data.results;
     }
 
-    extractSaveResults(serializeData: string): any {
+    extractSaveResults = (serializeData: string) => {
         let jsonData = serializeData;
         if (typeof serializeData === 'string') {
             jsonData = JSON.parse(serializeData);
@@ -63,8 +63,13 @@ export class SpODataDataService implements DataServiceAdapter {
         return data.results === undefined ? data : data.results;
     }
 
-    fetchMetadata(metadataStore: MetadataStore, dataService: any): Promise<any> {
-        return Promise.reject(new Error('Fetch Metadata is not available on this adapter;'));
+    fetchMetadata(
+        metadataStore: MetadataStore,
+        dataService: any
+    ): Promise<any> {
+        return Promise.reject(
+            new Error('Fetch Metadata is not available on this adapter;')
+        );
     }
 
     initialize(): void {
@@ -85,54 +90,79 @@ export class SpODataDataService implements DataServiceAdapter {
     getJsonResultsAdapter(): JsonResultsAdapter {
         const jraConfig = {
             name: 'SpCustomRestJson',
-            extractResults: this.extractResults.bind(this),
-            extractSaveResults: this.extractSaveResults.bind(this),
-            visitNode: this.visitNode.bind(this)
+            extractResults: this.extractResults,
+            extractSaveResults: this.extractSaveResults,
+            visitNode: this.visitNode
         };
 
         return new JsonResultsAdapter(jraConfig);
     }
 
-    saveChanges(saveContext: SaveContext, saveBundle: SaveBundle): Promise<SaveResult> {
+    saveChanges(
+        saveContext: SaveContext,
+        saveBundle: SaveBundle
+    ): Promise<SaveResult> {
         const saver =
             saveBundle.entities.length === 1
                 ? new SpDataServiceSave(saveContext, saveBundle, this.utils)
-                : new SpDataServiceOdataSave(saveContext, this.odataService, saveBundle, this.utils, this.defaultHeaders);
+                : new SpDataServiceOdataSave(
+                      saveContext,
+                      this.odataService,
+                      saveBundle,
+                      this.utils,
+                      this.defaultHeaders
+                  );
         return saver.save();
     }
 
-    visitNode(node: any, mappingContext: MappingContext, nodeContext: NodeContext): object {
+    visitNode = (
+        node: any,
+        mappingContext: MappingContext,
+        nodeContext: NodeContext
+    ) => {
         // TODO: maybe a problem when using expand relative objects...see sharepoint bz example
         const result: any = {};
         if (node == null) {
             return result;
         }
-        console.log(node)
-   
+
         let isStringCollection = false;
 
         const metadata = node.__metadata;
         if (metadata != null) {
             // TODO: may be able to make this more efficient by caching of the previous value.
             // const entityTypeName = MetadataStore.normalizeTypeName(metadata.type);
-            const entityTypeName = this.utils.serverTypeNameToClient(metadata.type);
+            const entityTypeName = this.utils.serverTypeNameToClient(
+                metadata.type
+            );
 
             // breeze expects metadata names to be Pascal Case, but sharepoint sends all lowercase;
-            
-            const et = entityTypeName && (mappingContext.entityManager.metadataStore.getEntityType(entityTypeName, true) as EntityType);
+
+            const et =
+                entityTypeName &&
+                (mappingContext.entityManager.metadataStore.getEntityType(
+                    entityTypeName,
+                    true
+                ) as EntityType);
             // OData response doesn't distinguish a projection from a whole entity.
             // We'll assume that whole-entity data would have at least as many properties  (<=)
             // as the EntityType has mapped properties on the basis that
             // most projections remove properties rather than add them.
             // If not, assume it's a projection and do NOT treat as an entity
-            if (et && et.dataProperties.length <= Object.keys(node).length - 1) {
+            if (
+                et &&
+                et.dataProperties.length <= Object.keys(node).length - 1
+            ) {
                 // if (et && et._mappedPropertiesCount === Object.keys(node).length - 1) { // OLD
                 result.entityType = et;
                 let uriKey = metadata.uri || metadata.id;
                 if (uriKey) {
                     // Strip baseUri to make uriKey a relative uri
                     // Todo: why is this necessary when absolute works for every OData source tested?
-                    const re = new RegExp('^' + mappingContext.dataService.serviceName, 'i');
+                    const re = new RegExp(
+                        '^' + mappingContext.dataService.serviceName,
+                        'i'
+                    );
                     uriKey = uriKey.replace(re, '');
                 }
                 result.extraMetadata = {
@@ -156,7 +186,9 @@ export class SpODataDataService implements DataServiceAdapter {
             node.__deferred != null ||
             propertyName === '__metadata' ||
             // EntityKey properties can be produced by EDMX models
-            (propertyName === 'EntityKey' && node.$type && core.stringStartsWith(node.$type, 'System.Data'));
+            (propertyName === 'EntityKey' &&
+                node.$type &&
+                core.stringStartsWith(node.$type, 'System.Data'));
         return result;
     }
 }

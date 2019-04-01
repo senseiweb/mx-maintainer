@@ -1,16 +1,16 @@
-import * as ebase from 'app/global-data';
 import { Injectable } from '@angular/core';
-import { Asset } from './asset';
-import { Generation } from './generation';
-import * as aagtCfg from './_aagt-feature-cfg';
+import * as ebase from 'app/global-data';
+import { EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
+import { Generation } from './generation';
 
-export type AssetStatus = 'FMC' | 'PMC' | 'NMC';
+export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNKNOWN';
 
 export class GenerationAsset extends ebase.SpEntityBase {
     health: AssetStatus;
-    title: string;
     mxPosition: number;
     asset: Asset;
     generation: Generation;
@@ -22,16 +22,28 @@ export class GenerationAsset extends ebase.SpEntityBase {
 @Injectable({
     providedIn: AagtDataModule
 })
-export class GenerationAssetMetadata extends ebase.MetadataBase<GenerationAsset> {
+export class GenerationAssetMetadata extends ebase.MetadataBase<
+    GenerationAsset
+> {
     metadataFor = GenerationAsset;
 
     constructor() {
         super(aagtCfg.AagtListName.GenAsset);
-        this.entityDefinition.dataProperties.title = { dataType: this.dt.String, isNullable: false };
-        this.entityDefinition.dataProperties.health = { dataType: this.dt.String };
-        this.entityDefinition.dataProperties.mxPosition = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.generationId = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.assetId = { dataType: this.dt.Int16, isNullable: false };
+        this.entityDefinition.dataProperties.health = {
+            spInternalName: 'Title',
+            dataType: this.dt.String,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.mxPosition = {
+            dataType: this.dt.Int16
+        };
+        this.entityDefinition.dataProperties.generationId = {
+            dataType: this.dt.Int16
+        };
+        this.entityDefinition.dataProperties.assetId = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
 
         this.entityDefinition.navigationProperties = {
             asset: {
@@ -51,6 +63,9 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<GenerationAsset>
             }
         };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

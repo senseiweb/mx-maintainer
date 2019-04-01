@@ -1,25 +1,35 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
+import { DataSource } from '@angular/cdk/collections';
+import {
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    ViewEncapsulation
+} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { DataSource } from '@angular/cdk/collections';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
+import {
+    AssetTriggerAction,
+    GenerationAsset,
+    TriggerAction
+} from 'app/features/aagt/data';
 import { PlannerUowService } from '../../planner-uow.service';
 import { AssetTriggerActionDataSource } from './asset-trigger-action-datasource';
-import { GenerationAsset, TriggerAction, AssetTriggerAction } from 'app/features/aagt/data';
 
 @Component({
-    selector     : 'asset-trigger-action-list',
-    templateUrl  : './asset-trigger-action-list.component.html',
-    styleUrls    : ['./asset-trigger-action-list.component.scss'],
+    selector: 'asset-trigger-action-list',
+    templateUrl: './asset-trigger-action-list.component.html',
+    styleUrls: ['./asset-trigger-action-list.component.scss'],
     encapsulation: ViewEncapsulation.None,
-    animations   : fuseAnimations
+    animations: fuseAnimations
 })
-export class AssetTriggerActionListComponent implements OnInit, OnDestroy
-{
+export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
     @ViewChild('dialogContent')
     dialogContent: TemplateRef<any>;
 
@@ -27,7 +37,15 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
     user: any;
     dataSource: AssetTriggerActionDataSource | null;
     // displayedColumns = ['checkbox', 'sequence', 'alias', 'action', 'trigger', 'status', 'outcome'];
-    displayedColumns = ['checkbox', 'sequence', 'alias'];
+    displayedColumns = [
+        'checkbox',
+        'sequence',
+        'alias',
+        'action',
+        'trigger',
+        'status',
+        'outcome'
+    ];
 
     selectedContacts: any[];
     checkboxes: {};
@@ -38,10 +56,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
     private genAssets: GenerationAsset[];
     private triggerActions: TriggerAction[];
 
-    constructor(
-        private uow: PlannerUowService,
-        public _matDialog: MatDialog
-    ) {
+    constructor(private uow: PlannerUowService, public _matDialog: MatDialog) {
         // Set the private defaults
         this.unsubscribeAll = new Subject();
     }
@@ -56,7 +71,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
                 this.checkboxes = {};
                 atas.map(ata => {
                     this.checkboxes[ata.id] = false;
-                })
+                });
             });
 
         // this._contactsService.onSelectedContactsChanged
@@ -99,7 +114,6 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
         //         action: 'edit'
         //     }
         // });
-
         // this.dialogRef.afterClosed()
         //     .subscribe(response => {
         //         if (!response) {
@@ -112,28 +126,28 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
         //              * Save
         //              */
         //             case 'save':
-
         //                 this._contactsService.updateContact(formData.getRawValue());
-
         //                 break;
         //             /**
         //              * Delete
         //              */
         //             case 'delete':
-
         //                 this.deleteContact(contact);
-
         //                 break;
         //         }
         //     });
     }
 
     deleteContact(contact): void {
-        this.confirmDialogRef = this._matDialog.open(FuseConfirmDialogComponent, {
-            disableClose: false
-        });
+        this.confirmDialogRef = this._matDialog.open(
+            FuseConfirmDialogComponent,
+            {
+                disableClose: false
+            }
+        );
 
-        this.confirmDialogRef.componentInstance.confirmMessage = 'Are you sure you want to delete?';
+        this.confirmDialogRef.componentInstance.confirmMessage =
+            'Are you sure you want to delete?';
 
         // this.confirmDialogRef.afterClosed().subscribe(result => {
         //     if (result) {
@@ -141,7 +155,6 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
         //     }
         //     this.confirmDialogRef = null;
         // });
-
     }
 
     onSelectedChange(contactId): void {
@@ -155,9 +168,6 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy
         // else {
         //     this.user.starred.push(contactId);
         // }
-
         // this._contactsService.updateUserData(this.user);
     }
 }
-
-

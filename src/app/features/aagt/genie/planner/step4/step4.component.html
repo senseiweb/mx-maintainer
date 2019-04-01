@@ -1,0 +1,61 @@
+<div class="pt-12 pb-24">
+    <button mat-raised-button matStepperPrevious>
+        Back: Generation Actions
+    </button>
+    <button mat-raised-button (click)="reset()">Reset All</button>
+    <button mat-raised-button (click)="saveChanges()">Save Changes</button>
+</div>
+<mat-accordion class="example-headers-align">
+    <mat-expansion-panel
+        *ngFor="let change of changeSet; let i = index"
+        [expanded]="panelIndex === i"
+        hideToggle
+        (opened)="setPanel(i)"
+    >
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                {{ change.shortName }}
+            </mat-panel-title>
+            <mat-panel-description>
+                <div>
+                    {{ change.entityState }}
+                </div>
+                <div>
+                    {{ change.status }}
+                </div>
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <table
+            mat-table
+            [dataSource]="change.dataProps"
+            class="mat-elevation-z8"
+        >
+            <!--- Note that these columns can be defined in any order.
+                      The actual rendered columns are set as a property on the row definition" -->
+
+            <!-- dataProperty Column -->
+            <ng-container matColumnDef="dataProperty">
+                <th mat-header-cell *matHeaderCellDef>Data Property</th>
+                <td mat-cell *matCellDef="let entity">
+                    {{ entity.propertyName }}
+                </td>
+            </ng-container>
+
+            <!-- New Value Column -->
+            <ng-container matColumnDef="newValue">
+                <th mat-header-cell *matHeaderCellDef>New Value</th>
+                <td mat-cell *matCellDef="let entity">{{ entity.newValue }}</td>
+            </ng-container>
+
+            <!-- Old Value Column -->
+            <ng-container matColumnDef="oldValue">
+                <th mat-header-cell *matHeaderCellDef>Old Value</th>
+                <td mat-cell *matCellDef="let entity">{{ entity.oldValue }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+    </mat-expansion-panel>
+</mat-accordion>

@@ -1,8 +1,8 @@
-import { IAppConfig } from '@ctypes/app-config';
 import { Injectable } from '@angular/core';
-import * as availNav from 'app/core/app-nav-structure';
+import { IAppConfig } from '@ctypes/app-config';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
+import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from './global-data';
 
 @Injectable({ providedIn: 'root' })
@@ -32,14 +32,17 @@ export class AppConfig implements IAppConfig {
     }
 
     featureSpAppSite(appName: string): string {
-        const site = `${this.sharepointMainAppSite}/mx-maintainer${appName}/_api/`;
+        const site = `${
+            this.sharepointMainAppSite
+        }/mx-maintainer/${appName}/_api/`;
         return site.replace('mx-maintainer//', 'mx-maintainer/');
     }
 
     apiAddress(appName: string): string {
-        const site = `${this.webApplicationSite}/mx-maintainer/${appName}/_api/`;
-        return site.replace('mx-maintainer//', 'mx-maintainer/')
-        ;
+        const site = `${
+            this.webApplicationSite
+        }/mx-maintainer/${appName}/_api/`;
+        return site.replace('mx-maintainer//', 'mx-maintainer/');
     }
 
     async fetchUserData(): Promise<void> {

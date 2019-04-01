@@ -6,29 +6,66 @@
         <div class="step1content">
             <form fxLayout="column" [formGroup]="step1FormGroup" fxFlex>
                 <mat-form-field>
-                    <input matInput name="title" formControlName="title" placeholder="Generation Title" required>
+                    <input
+                        matInput
+                        name="title"
+                        formControlName="title"
+                        placeholder="Generation Title"
+                        required
+                    />
                 </mat-form-field>
                 <mat-form-field>
-                    <mat-select placeholder="In Support Of" name="iso" required formControlName="iso">
-                        <mat-option *ngFor="let op of isoOperations" [value]="op">
-                            {{op}}
+                    <mat-select
+                        placeholder="In Support Of"
+                        name="iso"
+                        required
+                        formControlName="iso"
+                    >
+                        <mat-option
+                            *ngFor="let op of isoOperations"
+                            [value]="op"
+                        >
+                            {{ op }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field>
-                    <input matInput name="numRequired" readonly placeholder="Number of Required Assets" type="number"
-                        formControlName="assignedAssetCount" required>
+                    <input
+                        matInput
+                        name="numRequired"
+                        readonly
+                        placeholder="Number of Required Assets"
+                        type="number"
+                        formControlName="assignedAssetCount"
+                        required
+                    />
                 </mat-form-field>
                 <mat-form-field>
-                    <input matInput name="startDate" [matDatepicker]="planStartPicker" formControlName="startDt"
-                        placeholder="Planned Start date">
-                    <mat-datepicker-toggle matSuffix [for]="planStartPicker"></mat-datepicker-toggle>
+                    <input
+                        matInput
+                        name="startDate"
+                        [matDatepicker]="planStartPicker"
+                        formControlName="genStartDate"
+                        placeholder="Planned Start date"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="planStartPicker"
+                    ></mat-datepicker-toggle>
                     <mat-datepicker #planStartPicker></mat-datepicker>
                 </mat-form-field>
                 <mat-form-field>
-                    <input matInput name="stopDate" [matDatepicker]="planStopPicker" formControlName="stopDt"
-                        placeholder="Planned Stop date">
-                    <mat-datepicker-toggle matSuffix [for]="planStopPicker"></mat-datepicker-toggle>
+                    <input
+                        matInput
+                        name="stopDate"
+                        [matDatepicker]="planStopPicker"
+                        formControlName="genEndDate"
+                        placeholder="Planned Stop date"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="planStopPicker"
+                    ></mat-datepicker-toggle>
                     <mat-datepicker #planStopPicker></mat-datepicker>
                 </mat-form-field>
             </form>
@@ -36,18 +73,22 @@
     </div>
     <div fxFlex="40">
         <div>
-            <h3 fxLayout="row" fxLayoutAlign="center center">Select Asset Available for Generation</h3>
+            <h3 fxLayout="row" fxLayoutAlign="center center">
+                Select Asset Available for Generation
+            </h3>
         </div>
         <form [formGroup]="step1AssetFormGroup">
-            <p-listbox [options]="allAssets"
-            filterMode="startsWith"
-            [listStyle]="{'min-height':'310px', 'max-height':'310px'}"
-            [style]="{'min-width':'80%', 'margin-left':'10%'}"
-            formControlName="assetSelection"
-            multiple="multiple"
-            checkbox="checkbox"
-            filter="assetFilter"
-            optionLabel="alias"></p-listbox>
+            <p-listbox
+                [options]="allAssets"
+                filterMode="startsWith"
+                [listStyle]="{ 'min-height': '310px', 'max-height': '310px' }"
+                [style]="{ 'min-width': '80%', 'margin-left': '10%' }"
+                formControlName="assetSelection"
+                multiple="multiple"
+                checkbox="checkbox"
+                filter="assetFilter"
+                optionLabel="alias"
+            ></p-listbox>
         </form>
         <!-- <div class="step1content inner-scroll" fusePerfectScrollbar>
             <mat-selection-list #assets [(ngMoldel)]="genAssetsSelected" (ngModelChange)="assignedAssetModelChange($event)">
@@ -57,7 +98,6 @@
             </mat-selection-list>
         </div> -->
     </div>
-
 </div>
 <mat-divider></mat-divider>
 <div class="pt-12">

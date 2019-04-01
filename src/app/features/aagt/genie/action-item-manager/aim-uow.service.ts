@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { AagtDataModule, ActionItem, ActionItemRepo } from '../../data';
 
@@ -17,56 +17,90 @@ export class AimUowService implements Resolve<ActionItem[]> {
     }
 
     resolve(route: ActivatedRouteSnapshot): Promise<any> {
-        const preload = [this.fetchAllActionItems(), this.fetchAllTeamTypes()];
-
-        if (route.params.id) {
-            preload.push(this.getActionItem(route.params.id));
-        }
-        return new Promise(async (resolve, reject) => {
-            try {
-                await Promise.all(preload);
-                return resolve();
-            } catch (e) {
-                reject(e);
+        return new Promise((resolve, reject) => {
+            if (route.params.id) {
+                return Promise.all([
+                    this.fetchAllActionItems(),
+                    this.fetchAllTeamTypes(),
+                    this.getActionItem(route.params.id)
+                ])
+                    .then(resolve)
+                    .catch(e => {
+                        reject(e);
+                        throw new Error(e);
+                    });
             }
+            return Promise.all([
+                this.fetchAllActionItems(),
+                this.fetchAllTeamTypes()
+            ])
+                .then(resolve)
+                .catch(e => {
+                    reject(e);
+                    throw new Error(e);
+                });
         });
     }
 
-    async fetchAllActionItems(): Promise<void> {
-        try {
-            const actionItems = await this.actionItemRepo.all();
-            this.onActionItemsChanged.next(actionItems);
-        } catch (e) {
-            console.log(e);
-        }
+    fetchAllActionItems(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.actionItemRepo
+                .all()
+                .then(allAI => {
+                    this.onActionItemsChanged.next(allAI);
+                    resolve();
+                })
+                .catch(e => {
+                    reject(e);
+                    throw new Error(e);
+                });
+        });
     }
 
-    async fetchAllTeamTypes(): Promise<void> {
-        try {
-            this.teamTypes = await this.actionItemRepo.spChoiceValues('TeamType');
-        } catch (error) {
-            console.log(error);
-        }
+    fetchAllTeamTypes(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.actionItemRepo
+                .spChoiceValues('TeamType')
+                .then(choices => {
+                    this.teamTypes = choices;
+                    resolve();
+                })
+                .catch(e => {
+                    reject(e);
+                    throw new Error(e);
+                });
+        });
     }
 
-    async getActionItem(id: string): Promise<void> {
+    getActionItem(id: string): Promise<void> {
         let newActionItem: ActionItem;
-
-        if (id === 'new') {
-            newActionItem = this.actionItemRepo.create();
-            Promise.resolve();
-        } else {
-            try {
-                newActionItem = await this.actionItemRepo.withId(+id);
-                Promise.resolve();
-            } catch (e) {
-                console.log(e);
+        return new Promise((resolve, reject) => {
+            if (id === 'new') {
+                newActionItem = this.actionItemRepo.create();
+                this.onActionItemChanged.next(newActionItem);
+                return resolve();
             }
-        }
-        this.onActionItemChanged.next(newActionItem);
+            this.actionItemRepo
+                .withId(+id)
+                .then(newAction => {
+                    this.onActionItemChanged.next(newAction);
+                    return resolve();
+                })
+                .catch(e => {
+                    reject(e);
+                    throw new Error(e);
+                });
+        });
     }
 
-    async saveActionItems(actionItem: ActionItem): Promise<void> {
-        this.actionItemRepo.saveEntityChanges([actionItem]);
+    saveActionItems(actionItem: ActionItem): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.actionItemRepo
+                .saveEntityChanges()
+                .then(() => {
+                    return resolve();
+                })
+                .catch(reject);
+        });
     }
 }

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
-import { ActionItem } from './action-item';
-import { Trigger } from './trigger';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
+import { Trigger } from './trigger';
 
 export interface ITriggerActionItemShell {
     id?: number;
@@ -16,12 +16,33 @@ export interface ITriggerActionItemShell {
     teamType?: string;
 }
 export class TriggerAction extends ebase.SpEntityBase {
+    private _actionItemId: number;
+    private _triggerId: number;
+    private _sequence: number;
     title: string;
-    sequence: number;
     totalExecutionTime: number;
     averageExecutionTime: number;
-    actionItemId: number;
-    triggerId: number;
+    get sequence(): number {
+        return this._sequence;
+    }
+    set sequence(id: number) {
+        this._sequence = id;
+        this.title = `${this._actionItemId}/${this._triggerId}/${this._sequence}`;
+    }
+    get actionItemId(): number {
+        return this._actionItemId;
+    }
+    set actionItemId(id: number) {
+        this._actionItemId = id;
+        this.title = `${this.actionItemId}/${this._triggerId}/${this._sequence}`;
+    }
+    get triggerId(): number {
+        return this._triggerId;
+    }
+    set triggerId(id: number) {
+        this._triggerId = id;
+        this.title = `${this._actionItemId}/${this._triggerId}/${this._sequence}`;
+    }
     actionItem: ActionItem;
     trigger: Trigger;
     assetTriggerActions: AssetTriggerAction[];
@@ -35,11 +56,26 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
 
     constructor() {
         super(aagtCfg.AagtListName.TriggerAct);
-        this.entityDefinition.dataProperties.title = { dataType: this.dt.String, isNullable: false };
-        this.entityDefinition.dataProperties.sequence = { dataType: this.dt.Int16, isNullable: false };
-        this.entityDefinition.dataProperties.totalExecutionTime = { dataType: this.dt.Int16, isNullable: false };
-        this.entityDefinition.dataProperties.averageExecutionTime = { dataType: this.dt.Int16, isNullable: false };
-        this.entityDefinition.dataProperties.actionItemId = { dataType: this.dt.Int16, isNullable: false };
+        this.entityDefinition.dataProperties.title = {
+            dataType: this.dt.String,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.sequence = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.totalExecutionTime = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.averageExecutionTime = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.actionItemId = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
         this.entityDefinition.dataProperties.triggerId = {
             dataType: this.dt.Int16,
             isNullable: false
@@ -63,6 +99,9 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
             }
         };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

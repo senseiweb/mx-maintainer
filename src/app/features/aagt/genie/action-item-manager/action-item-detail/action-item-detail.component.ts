@@ -1,17 +1,17 @@
+import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { Location } from '@angular/common';
 import { MatSnackBar } from '@angular/material';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { fuseAnimations } from '@fuse/animations';
-import { AimUowService } from '../aim-uow.service';
-import { MinutesExpand } from 'app/common';
-import { Router, ActivatedRoute } from '@angular/router';
-import { ActionItem } from 'app/features/aagt/data';
+import { ActivatedRoute, Router } from '@angular/router';
 import { bareEntity } from '@ctypes/breeze-type-customization';
+import { fuseAnimations } from '@fuse/animations';
+import { MinutesExpand } from 'app/common';
+import { ActionItem } from 'app/features/aagt/data';
 import { EntityFormBuilder, EntityFormGroup } from 'app/global-data/';
+import { AimUowService } from '../aim-uow.service';
 
 @Component({
     selector: 'app-action-item-detail',
@@ -46,17 +46,17 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.actionItem = this.aimUow.onActionItemChanged.value;
+        this.pageType = this.actionItem.entityAspect.entityState.isAdded() ? 'new' : 'edit';
+        this.actionItemForm = this.createActionItemForm() as any;
+        this.formatMinutes();
+
         this.aimUow.onActionItemChanged.pipe(takeUntil(this.unsubscribeAll)).subscribe(actionItem => {
-            if (actionItem.entityAspect.entityState.isAdded()) {
-                this.pageType = 'new';
-            } else {
-                this.pageType = 'edit';
-            }
-            console.log(this.pageType);
+            this.pageType = actionItem.entityAspect.entityState.isAdded() ? 'new' : 'edit';
             this.actionItem = actionItem;
             this.actionItemForm = this.createActionItemForm() as any;
+            this.formatMinutes();
         });
-        this.formatMinutes();
     }
 
     ngOnDestroy() {
@@ -102,8 +102,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
         Object.keys(this.actionItemForm.controls).forEach((key: keyof bareEntity<ActionItem>) => {
             this.actionItem[key] = this.actionItemForm.get(key).value;
         });
-        this.aimUow.saveActionItems(this.actionItem).then(ai => {
-            console.log(ai);
+        this.aimUow.saveActionItems(this.actionItem).then(() => {
             this.router.navigate(['../../action-items'], { relativeTo: this.route });
         });
     }

@@ -1,12 +1,24 @@
-import { Component, OnInit, Input, ViewEncapsulation, OnDestroy } from '@angular/core';
-import { Generation, ActionItem, Trigger, TriggerAction, ITriggerActionItemShell } from 'app/features/aagt/data';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
-import { PlannerUowService } from '../planner-uow.service';
+import {
+    Component,
+    Input,
+    OnDestroy,
+    OnInit,
+    ViewEncapsulation
+} from '@angular/core';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
-import { MatDialog, MatDialogConfig } from '@angular/material';
-import { takeUntil } from 'rxjs/operators';
+import {
+    ActionItem,
+    Generation,
+    ITriggerActionItemShell,
+    Trigger,
+    TriggerAction
+} from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { PlannerUowService } from '../planner-uow.service';
 
 @Component({
     selector: 'genie-plan-step3',
@@ -18,20 +30,37 @@ import { Subject } from 'rxjs';
 })
 export class Step3Component implements OnInit, OnDestroy {
     currentTrigger: Trigger;
-    @Input() plannedGen: Generation;
 
     triggers: Trigger[] = [];
+    searchInput: FormControl;
     private unsubscribeAll: Subject<any>;
 
-    constructor(private formBuilder: FormBuilder,
+    constructor(
+        private uow: PlannerUowService,
+        private formBuilder: FormBuilder,
         private trigdialog: MatDialog,
         private deleteDialog: MatDialog,
-        private planUow: PlannerUowService) {
+        private planUow: PlannerUowService
+    ) {
         this.unsubscribeAll = new Subject();
+        this.searchInput = new FormControl('');
     }
 
     ngOnInit() {
-        
+        this.searchInput.valueChanges
+            .pipe(
+                takeUntil(this.unsubscribeAll),
+                debounceTime(300),
+                distinctUntilChanged()
+            )
+            .subscribe(searchText => {
+                // this._contactsService.onSearchTextChanged.next(searchText);
+            });
+        this.uow.onStepperChange.subscribe(stepEvent => {
+            if (stepEvent.selectedIndex === 3) {
+                this.uow.reviewChanges();
+            }
+        });
     }
 
     ngOnDestroy(): void {
@@ -47,7 +76,7 @@ export class Step3Component implements OnInit, OnDestroy {
             const valueA = isNaN(+propA) ? propA : +propA;
             const valueB = isNaN(+propB) ? propB : +propB;
 
-            return (valueA < valueB ? -1 : 1);
+            return valueA < valueB ? -1 : 1;
         });
     }
 }

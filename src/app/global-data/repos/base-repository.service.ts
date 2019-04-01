@@ -1,8 +1,16 @@
-import { EntityManager, EntityType, EntityQuery, Predicate, FetchStrategy, FilterQueryOp, SaveResult } from 'breeze-client';
-import * as moment from 'moment';
-import { SpEntityBase } from '../models/_entity-base';
 import { bareEntity, EntityChildren } from '@ctypes/breeze-type-customization';
-import { Observable, BehaviorSubject } from 'rxjs';
+import {
+    EntityManager,
+    EntityQuery,
+    EntityType,
+    FetchStrategy,
+    FilterQueryOp,
+    Predicate,
+    SaveResult
+} from 'breeze-client';
+import * as moment from 'moment';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { SpEntityBase } from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
 
 export class BaseRepoService<T extends SpEntityBase> {
@@ -12,7 +20,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     private cachedDate: moment.Moment;
     private cachedAll: boolean;
     onSaveInProgressChange: BehaviorSubject<boolean>;
-    spChoiceFieldCache: { key: string; values: string[] }[];
+    spChoiceFieldCache: Array<{ key: string; values: string[] }>;
     private queryCache: {
         [index: string]: moment.Moment;
     } = {};
@@ -22,13 +30,18 @@ export class BaseRepoService<T extends SpEntityBase> {
 
     protected defaultFetchStrategy: FetchStrategy;
 
-    constructor(entityTypeName: string, emProviderService: BaseEmProviderService) {
-        this.entityType = emProviderService.entityManager.metadataStore.getEntityType(entityTypeName) as EntityType;
+    constructor(
+        entityTypeName: string,
+        emProviderService: BaseEmProviderService
+    ) {
+        this.entityType = emProviderService.entityManager.metadataStore.getEntityType(
+            entityTypeName
+        ) as EntityType;
         this.entityManager = emProviderService.entityManager;
+        this.onSaveInProgressChange = emProviderService.onSaveInProgressChange;
         this.resourceName = this.entityType.defaultResourceName;
         this.defaultFetchStrategy = FetchStrategy.FromServer;
         this.spChoiceFieldCache = [];
-        this.onSaveInProgressChange = new BehaviorSubject(false);
         console.log(`base created from ${entityTypeName}`);
     }
 
@@ -56,7 +69,10 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
 
     protected createBase(options?: bareEntity<T>): T {
-        return this.entityManager.createEntity(this.entityType.shortName, options) as any;
+        return this.entityManager.createEntity(
+            this.entityType.shortName,
+            options
+        ) as any;
     }
 
     protected baseQuery(toBaseType = true): EntityQuery {
@@ -89,10 +105,17 @@ export class BaseRepoService<T extends SpEntityBase> {
         return true;
     }
 
-    protected async executeQuery(query: EntityQuery, fetchStrat?: FetchStrategy): Promise<T[]> {
+    protected async executeQuery(
+        query: EntityQuery,
+        fetchStrat?: FetchStrategy
+    ): Promise<T[]> {
         try {
-            const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
-            const dataQueryResult = await this.entityManager.executeQuery(queryType);
+            const queryType = query.using(
+                fetchStrat || this.defaultFetchStrategy
+            );
+            const dataQueryResult = await this.entityManager.executeQuery(
+                queryType
+            );
             console.log(dataQueryResult);
             return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
         } catch (error) {
@@ -106,44 +129,70 @@ export class BaseRepoService<T extends SpEntityBase> {
         return localCache;
     }
 
-    makePredicate(property: keyof T, condition: string | number, filter = FilterQueryOp.Equals): Predicate {
+    makePredicate(
+        property: keyof T,
+        condition: string | number,
+        filter = FilterQueryOp.Equals
+    ): Predicate {
         return Predicate.create(property as any, filter, condition);
     }
 
-    async spChoiceValues(fieldName: string): Promise<string[]> {
-        const retrievedChoiceFields = this.spChoiceFieldCache.filter(sp => sp.key === fieldName)[0];
-        if (retrievedChoiceFields) {
-            return Promise.resolve(retrievedChoiceFields.values);
-        }
-        const defaultResourceName = this.entityType.defaultResourceName;
-        const fieldsResourceName = defaultResourceName.replace('/items', '/fields');
-        const predicate = Predicate.create('EntityPropertyName', FilterQueryOp.Equals, fieldName);
-        const query = EntityQuery.from(fieldsResourceName)
-            .where(predicate)
-            .noTracking();
+    spChoiceValues(fieldName: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            const retrievedChoiceFields = this.spChoiceFieldCache.filter(
+                sp => sp.key === fieldName
+            )[0];
+            if (retrievedChoiceFields) {
+                return resolve(retrievedChoiceFields.values);
+            }
 
-        try {
-            const response = await this.entityManager.executeQuery(query);
-            const choices = response.results[0]['choices'] as string[];
-            this.spChoiceFieldCache.push({ key: fieldName, values: choices });
-            console.log(choices);
-            return choices as any;
-        } catch (e) {
-            console.log(e);
-            Promise.reject(this.queryFailed(e));
-        }
+            const defaultResourceName = this.entityType.defaultResourceName;
+            const fieldsResourceName = defaultResourceName.replace(
+                '/items',
+                '/fields'
+            );
+            const predicate = Predicate.create(
+                'EntityPropertyName',
+                FilterQueryOp.Equals,
+                fieldName
+            );
+            const query = EntityQuery.from(fieldsResourceName)
+                .where(predicate)
+                .noTracking();
+            return this.entityManager
+                .executeQuery(query)
+                .then(response => {
+                    const choices = response.results[0]['Choices']
+                        .results as string[];
+                    this.spChoiceFieldCache.push({
+                        key: fieldName,
+                        values: choices
+                    });
+                    resolve(choices);
+                })
+                .catch(this.queryFailed);
+        });
     }
 
     async withId(key: number): Promise<T> {
         try {
-            const data = await this.entityManager.fetchEntityByKey(this.entityType.shortName, key, true);
+            const data = await this.entityManager.fetchEntityByKey(
+                this.entityType.shortName,
+                key,
+                true
+            );
             return Promise.resolve(data.entity) as Promise<T>;
         } catch (error) {
             return Promise.reject(this.queryFailed(error));
         }
     }
 
-    async where(queryName: string, predicate: Predicate, includeChildren?: EntityChildren<T>, refreshFromServer = false): Promise<T[]> {
+    async where(
+        queryName: string,
+        predicate: Predicate,
+        includeChildren?: EntityChildren<T>,
+        refreshFromServer = false
+    ): Promise<T[]> {
         const query = this.baseQuery();
 
         if (includeChildren) {
@@ -154,8 +203,14 @@ export class BaseRepoService<T extends SpEntityBase> {
         const lastQueryed = this.queryCache[queryName];
         const now = moment();
         try {
-            if (refreshFromServer || (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)) {
-                const data = await this.executeQuery(query, FetchStrategy.FromServer);
+            if (
+                refreshFromServer ||
+                (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)
+            ) {
+                const data = await this.executeQuery(
+                    query,
+                    FetchStrategy.FromServer
+                );
                 this.queryCache[queryName] = moment();
                 return Promise.resolve(data);
             }
@@ -170,33 +225,22 @@ export class BaseRepoService<T extends SpEntityBase> {
         return this.executeCacheQuery(query) as any[];
     }
 
-    queryFailed(error): Error {
+    queryFailed(error): Promise<Error> {
         const err = new Error(error);
-        return err;
+        return Promise.reject(err);
     }
 
-    async saveEntityChanges(entities: T[]): Promise<SaveResult> {
+    async saveEntityChanges(): Promise<SaveResult | undefined> {
+        const entities = this.entityManager.getChanges(this.entityType);
+        if (!entities.length) {
+            return undefined;
+        }
         try {
             this.onSaveInProgressChange.next(true);
             const results = await this.entityManager.saveChanges(entities);
-            console.log(results);
             return results;
         } catch (error) {
-            console.log(error);
-            Promise.reject();
-        } finally {
-            this.onSaveInProgressChange.next(false);
-        }
-    }
-
-    async saveChanges(): Promise<void> {
-        try {
-            this.onSaveInProgressChange.next(true);
-            const results = await this.entityManager.saveChanges();
-            console.log(results.entities.length);
-        } catch (e) {
-            console.error(`Saving changes failed ==> ${e}`);
-            Promise.reject();
+            return error;
         } finally {
             this.onSaveInProgressChange.next(false);
         }
