@@ -28,9 +28,11 @@
                             "src/assets/icons/material/material-icons.css",
                             "node_modules/primeicons/primeicons.css",
                             "node_modules/primeng/resources/themes/nova-light/theme.css",
-                            "node_modules/primeng/resources/primeng.min.css"
+                            "node_modules/primeng/resources/primeng.min.css",
+                            "node_modules/quill/dist/quill.core.css",
+                            "node_modules/quill/dist/quill.snow.css"
                         ],
-                        "scripts": [],
+                        "scripts": ["node_modules/quill/dist/quill.js"],
                         "showCircularDependencies": false
                     },
                     "configurations": {
@@ -144,7 +146,10 @@
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
-                        "tsConfig": ["src/tsconfig.app.json", "src/tsconfig.spec.json"],
+                        "tsConfig": [
+                            "src/tsconfig.app.json",
+                            "src/tsconfig.spec.json"
+                        ],
                         "tslintConfig": "src/tslint.json",
                         "exclude": ["**/node_modules/**", "**/@fuse/**"]
                     }

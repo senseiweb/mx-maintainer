@@ -1,14 +1,13 @@
 import { DataSource } from '@angular/cdk/table';
 import { MatPaginator, MatSort } from '@angular/material';
 import { FuseUtils } from '@fuse/utils';
-import { BehaviorSubject, merge, Observable } from 'rxjs';
+import { merge, BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export class FilesDataSource<T> extends DataSource<T> {
-
     private filterChange = new BehaviorSubject('');
     private filterDataChange: BehaviorSubject<T[]>;
-    constructor (
+    constructor(
         private tableData: T[],
         private matPaginator: MatPaginator,
         private matSort: MatSort,
@@ -17,7 +16,6 @@ export class FilesDataSource<T> extends DataSource<T> {
         super();
         this.filterDataChange = new BehaviorSubject('') as any;
         this.filteredData = tableData || [];
-        console.log(tableData);
     }
 
     connect(): Observable<T[]> {
@@ -28,20 +26,21 @@ export class FilesDataSource<T> extends DataSource<T> {
             this.matSort.sortChange
         ];
 
-        return merge(...displayDataChanges)
-            .pipe(
-                map(() => {
-                    let data = this.tableData.slice();
-                    data = this.filterData(data);
-                    this.filteredData = [...data];
-                    data = this.sortData(data);
+        return merge(...displayDataChanges).pipe(
+            map(dataSource => {
+                let data = dataSource
+                    ? dataSource.slice()
+                    : this.tableData.slice();
+                data = this.filterData(data as any);
+                this.filteredData = [...data];
+                data = this.sortData(data);
 
-                    // Grab the page's slice of data.
-                    const startIndex = this.matPaginator.pageIndex * this.matPaginator.pageSize;
-                    return data.splice(startIndex, this.matPaginator.pageSize);
-
-                })
-            );
+                // Grab the page's slice of data.
+                const startIndex =
+                    this.matPaginator.pageIndex * this.matPaginator.pageSize;
+                return data.splice(startIndex, this.matPaginator.pageSize);
+            })
+        );
     }
 
     get filter(): string {
@@ -78,11 +77,12 @@ export class FilesDataSource<T> extends DataSource<T> {
             const valueA = isNaN(+propA) ? propA : +propA;
             const valueB = isNaN(+propB) ? propB : +propB;
 
-            return (valueA < valueB ? -1 : 1) * (this.matSort.direction === 'asc' ? 1 : -1);
+            return (
+                (valueA < valueB ? -1 : 1) *
+                (this.matSort.direction === 'asc' ? 1 : -1)
+            );
         });
     }
 
-    disconnect(): void {
-
-    }
+    disconnect(): void {}
 }

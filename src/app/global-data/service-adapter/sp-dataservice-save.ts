@@ -16,6 +16,8 @@ import { CustomDataServiceUtils } from './sp-dataservice-utils';
 interface ISaveRequest {
     url: string;
     payload?: string;
+    // tells breeze adapater whether or not to parse the data
+    dataType: 'json' | 'raw';
     method: 'POST' | 'PATCH' | 'DELETE' | 'MERGE';
     headers: any;
 }
@@ -72,7 +74,7 @@ export class SpDataServiceSave {
             this.utils.ajaxAdapter.ajax({
                 type: request.method,
                 url: request.url,
-                dataType: 'json',
+                dataType: request.dataType,
                 data: request.payload,
                 headers: request.headers,
                 success: resolve,
@@ -109,6 +111,7 @@ export class SpDataServiceSave {
         const request: ISaveRequest = {
             method: 'POST',
             url,
+            dataType: 'json',
             payload,
             headers: this.headers
         };
@@ -128,6 +131,7 @@ export class SpDataServiceSave {
         const request: ISaveRequest = {
             method: 'POST',
             url,
+            dataType: 'raw',
             headers: deleteHeaders
         };
         return request;
@@ -160,6 +164,7 @@ export class SpDataServiceSave {
             method: 'POST',
             url,
             payload,
+            dataType: 'json',
             headers: updateHeaders
         };
         return request;

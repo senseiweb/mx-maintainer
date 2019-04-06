@@ -4,7 +4,7 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
 import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from './global-data';
-
+import { TestSchedulerService } from './test-taskService';
 @Injectable({ providedIn: 'root' })
 export class AppConfig implements IAppConfig {
     webApplicationSite = 'http://localhost:4202';
@@ -25,7 +25,7 @@ export class AppConfig implements IAppConfig {
         spGroups: Array<{ id: number; title: string }>;
     };
 
-    constructor() {
+    constructor(private test: TestSchedulerService) {
         this.my = {} as any;
         this.my.spGroups = [];
         console.log('appConfig initialized');

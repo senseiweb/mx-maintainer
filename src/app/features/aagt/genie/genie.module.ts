@@ -1,22 +1,25 @@
 import { NgModule } from '@angular/core';
 import { AppSharedModule } from 'app/app-shared.module';
-import { GenieRoutingModule, routedComponents } from './genie-routing.module';
-import { AagtDataModule } from '../data/aagt-data.module';
-import { PickListModule } from 'primeng/picklist';
+import { EditorModule } from 'primeng/editor';
 import { ListboxModule } from 'primeng/listbox';
+import { PickListModule } from 'primeng/picklist';
+
+import { AagtDataModule } from '../data/aagt-data.module';
+import { routedComponents, GenieRoutingModule } from './genie-routing.module';
 import { NewTriggerDialogComponent } from './planner';
+import { TeamDetailDialogComponent } from './team-manager';
 
 @NgModule({
     imports: [
         AppSharedModule,
         PickListModule,
         ListboxModule,
+        EditorModule,
         GenieRoutingModule,
         AagtDataModule
     ],
     providers: [],
     declarations: routedComponents,
-    entryComponents: [NewTriggerDialogComponent]
+    entryComponents: [NewTriggerDialogComponent, TeamDetailDialogComponent]
 })
-export class GenieModule {
-}
+export class GenieModule {}

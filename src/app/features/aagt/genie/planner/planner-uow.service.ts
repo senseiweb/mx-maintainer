@@ -56,10 +56,8 @@ export class PlannerUowService implements Resolve<any> {
     onGenerationAssetsChange: BehaviorSubject<GenerationAsset[]>;
     onAssetTriggerActionChange: BehaviorSubject<AssetTriggerAction[]>;
     onAssetFilterChange: BehaviorSubject<string>;
-    onEntityMngrChange: Subject<any>;
     onTriggerFilterChange: BehaviorSubject<string>;
     selectedAssets: Asset[];
-    entityManagerSubscriptionId: number;
     private entityChangeSet: Entity[];
 
     constructor(
@@ -84,32 +82,7 @@ export class PlannerUowService implements Resolve<any> {
         this.onTriggerActionsChange = new BehaviorSubject([]);
         this.onGenerationAssetsChange = new BehaviorSubject([]);
         this.onAssetTriggerActionChange = new BehaviorSubject([]);
-        this.onEntityMngrChange = new Subject();
         this.onStepperChange = new Subject();
-        this.onStepperChange.subscribe(stepEvent => {
-            if (stepEvent.selectedIndex !== 3) {
-                if (!this.entityManagerSubscriptionId) {
-                    return;
-                }
-                emProvider.entityManager.entityChanged.unsubscribe(
-                    this.entityManagerSubscriptionId
-                );
-                return (this.entityManagerSubscriptionId = undefined);
-            }
-            this.entityManagerSubscriptionId = emProvider.entityManager.entityChanged.subscribe(
-                data => {
-                    const entityAction: EntityAction = data.entityAction;
-                    if (
-                        entityAction !== EntityAction.EntityStateChange &&
-                        entityAction !== EntityAction.PropertyChange
-                    ) {
-                        return;
-                    }
-                    console.log(data);
-                    this.onEntityMngrChange.next(data);
-                }
-            );
-        });
     }
 
     resolve(
@@ -393,7 +366,7 @@ export class PlannerUowService implements Resolve<any> {
         return this.entityChangeSet;
     }
 
-     async saveAssetTrigActions(): Promise<SaveResult> {
+    async saveAssetTrigActions(): Promise<SaveResult> {
         try {
             const success = await this.assetTrigActionRepo.saveEntityChanges();
             return success;
@@ -402,7 +375,7 @@ export class PlannerUowService implements Resolve<any> {
         }
     }
 
-   async saveGeneration(): Promise<SaveResult> {
+    async saveGeneration(): Promise<SaveResult> {
         try {
             const success = await this.genRepo.saveEntityChanges();
             return success;

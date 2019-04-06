@@ -47,17 +47,17 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<
 
         this.entityDefinition.navigationProperties = {
             asset: {
-                entityTypeName: 'Asset',
+                entityTypeName: aagtCfg.AagtListName.Asset,
                 foreignKeyNames: ['assetId'],
                 associationName: 'Asset_Generations'
             },
             generation: {
-                entityTypeName: 'Generation',
+                entityTypeName: aagtCfg.AagtListName.Gen,
                 associationName: 'Generation_Assets',
                 foreignKeyNames: ['generationId']
             },
             assetTriggerActions: {
-                entityTypeName: 'AssetTriggerAction',
+                entityTypeName: aagtCfg.AagtListName.AssetTrigAct,
                 associationName: 'GenAsset_AssetTrigAction',
                 isScalar: false
             }

@@ -56,6 +56,10 @@ export class SpODataDataService implements DataServiceAdapter {
 
     extractSaveResults = (serializeData: string) => {
         let jsonData = serializeData;
+        // Sharepoint deletes sends back an empty string
+        if (serializeData === '') {
+            return serializeData;
+        }
         if (typeof serializeData === 'string') {
             jsonData = JSON.parse(serializeData);
         }

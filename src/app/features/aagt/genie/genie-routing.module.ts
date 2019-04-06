@@ -19,12 +19,16 @@ import {
 
 import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
 import { AssetTriggerActionListComponent } from './planner/step3/asset-trigger-action-list/asset-trigger-action-list.component';
+import { TeamDetailDialogComponent } from './team-manager';
+import { TeamListComponent } from './team-manager/team-list/team-list.component';
+import { TeamUowService } from './team-manager/team-uow.service';
 
 export const routedComponents = [
     GenieBaseComponent,
     ActionItemsComponent,
     ActionItemDetailComponent,
     ListGenyComponent,
+    TeamListComponent,
     PlannerComponent,
     Step1Component,
     Step2Component,
@@ -32,7 +36,8 @@ export const routedComponents = [
     Step4Component,
     AssetTriggerSidebarComponent,
     AssetTriggerActionListComponent,
-    NewTriggerDialogComponent
+    NewTriggerDialogComponent,
+    TeamDetailDialogComponent
 ];
 
 const featureRoutes: Routes = [
@@ -84,17 +89,16 @@ const featureRoutes: Routes = [
                 resolve: {
                     actionItems: AimUowService
                 }
+            },
+            {
+                path: 'teams',
+                component: TeamListComponent,
+                resolve: {
+                    teams: TeamUowService
+                }
             }
         ]
     }
-    // {
-    //   path: 'program-manager',
-    //   loadChildren: './program-manager/prog-mgr.module#ProgMgrModule'
-    // }, {
-    //   path: 'mocc',
-    //   loadChildren: './mocc/mocc.module#MoccModule'
-    // }
-    // { path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({

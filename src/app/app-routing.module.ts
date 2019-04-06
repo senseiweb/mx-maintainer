@@ -4,21 +4,13 @@ import { RouterModule, Routes } from '@angular/router';
 const appRoutes: Routes = [
     {
         path: 'aagt',
-        loadChildren: '../app/features/aagt/aagt.module#AagtModule'
+        loadChildren: 'app/features/aagt/aagt.module#AagtModule'
     },
     {
         path: '',
         redirectTo: '/user/dashboard',
         pathMatch: 'full'
     }
-    // {
-    //   path: 'program-manager',
-    //   loadChildren: './program-manager/prog-mgr.module#ProgMgrModule'
-    // }, {
-    //   path: 'mocc',
-    //   loadChildren: './mocc/mocc.module#MoccModule'
-    // }
-    // { path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({

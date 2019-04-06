@@ -20,11 +20,34 @@ export class TeamMetadata extends ebase.MetadataBase<Team> {
 
     constructor() {
         super(aagtCfg.AagtListName.Team);
-        this.entityDefinition.dataProperties.teamType = { dataType: this.dt.String, isNullable: false };
-        this.entityDefinition.dataProperties.teamName = { dataType: this.dt.String, isNullable: false };
-        this.entityDefinition.dataProperties.numberOfTeamMembers = { dataType: this.dt.Int16, isNullable: false };
-        this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
+        this.entityDefinition.dataProperties.teamType = {
+            dataType: this.dt.String,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.teamName = {
+            dataType: this.dt.String,
+            isNullable: false,
+            spInternalName: 'Title'
+        };
+        this.entityDefinition.dataProperties.numberOfTeamMembers = {
+            dataType: this.dt.Int16,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.notes = {
+            dataType: this.dt.String
+        };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        this.entityDefinition.navigationProperties = {
+            teamAvailabilites: {
+                entityTypeName: aagtCfg.AagtListName.TeamAvail,
+                associationName: 'Team_TeamAvailabilities',
+                isScalar: false
+            }
+        };
+
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }
