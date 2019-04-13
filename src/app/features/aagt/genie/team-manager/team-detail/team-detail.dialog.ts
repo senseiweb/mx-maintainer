@@ -31,8 +31,9 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
     currentTeam: Team;
     action: 'edit' | 'add';
     teamFormGroup: FormGroup;
+    teamCategories: string[];
     dialogTitle: string;
-    teamTypes: string[];
+    teamCatgories: string[];
     isNew = false;
     isValid = false;
     private unsubscribeAll: Subject<any>;
@@ -49,7 +50,7 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const team = this.currentTeam;
-        this.teamTypes = this.uow.teamTypes;
+        this.teamCategories = this.uow.teamCategories.map(tc => tc.teamType);
         if (this.currentTeam.entityAspect.entityState.isAdded()) {
             this.action = 'add';
             this.dialogTitle = 'Add Team';
@@ -60,10 +61,14 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
 
         this.teamFormGroup = this.formBuilder.group({
             teamName: new FormControl(team.teamName, [Validators.required]),
-            teamType: new FormControl(team.teamType, Validators.required),
-            numberOfTeamMembers: new FormControl(team.numberOfTeamMembers),
+            teamCategory: new FormControl(
+                team.teamCategory,
+                Validators.required
+            ),
+            numberOfTeamMembers: new FormControl(team.numTeamMembers),
             notes: new FormControl(team.notes)
         });
+        this.teamCategories = this.uow.teamCategories.map(tc => tc.teamType);
         this.teamFormGroup.statusChanges
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(valid => {

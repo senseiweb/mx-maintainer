@@ -5,30 +5,24 @@ import {
     OnInit,
     ViewEncapsulation
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogConfig } from '@angular/material';
+import { FormBuilder, FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
-import {
-    ActionItem,
-    Generation,
-    ITriggerActionItemShell,
-    Trigger,
-    TriggerAction
-} from 'app/features/aagt/data';
+import { ActionItem, Trigger } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
 
 @Component({
-    selector: 'genie-plan-step3',
-    templateUrl: './step3.component.html',
-    styleUrls: ['./step3.component.scss'],
+    selector: 'genie-plan-step-ata-list',
+    templateUrl: './step-ata-list.component.html',
+    styleUrls: ['./step-ata-list.component.scss'],
     animations: fuseAnimations,
     encapsulation: ViewEncapsulation.None,
     providers: [MinutesExpand]
 })
-export class Step3Component implements OnInit, OnDestroy {
+export class StepAtaListComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
 
     triggers: Trigger[] = [];

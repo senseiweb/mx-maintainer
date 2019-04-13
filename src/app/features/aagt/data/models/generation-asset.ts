@@ -38,7 +38,8 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<
             dataType: this.dt.Int16
         };
         this.entityDefinition.dataProperties.generationId = {
-            dataType: this.dt.Int16
+            dataType: this.dt.Int16,
+            isNullable: false
         };
         this.entityDefinition.dataProperties.assetId = {
             dataType: this.dt.Int16,

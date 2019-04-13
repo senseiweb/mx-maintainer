@@ -8,6 +8,7 @@ import {
 } from 'breeze-client';
 import {
     AagtDataModule,
+    AagtListName,
     ActionItem,
     ActionItemRepo,
     Asset,
@@ -17,6 +18,12 @@ import {
     GenerationAsset,
     GenerationRepoService,
     GenAssetRepoService,
+    IJobReservateionRequest,
+    Team,
+    TeamAvailability,
+    TeamAvailRepoService,
+    TeamCategory,
+    TeamCategoryRepoService,
     Trigger,
     TriggerAction,
     TriggerActionRepoService,
@@ -30,39 +37,55 @@ import {
 } from '@angular/router';
 
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
+import { prepareSyntheticListenerFunctionName } from '@angular/compiler/src/render3/util';
+import { bareEntity } from '@ctypes/breeze-type-customization';
+import { trimLabel } from '@swimlane/ngx-charts';
 import { AssetTriggerActionRepoService } from 'app/features/aagt/data/repos/asset-trigger-action-repo.service';
 import {} from 'app/features/aagt/data/repos/trigger-action-repo.service';
+import { BaseRepoService, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { AagtEmProviderService } from '../../data/aagt-emprovider.service';
+import * as _m from 'moment';
+import { forkJoin, from, BehaviorSubject, Observable, Subject } from 'rxjs';
+import { concatMap, filter, map, mergeMap } from 'rxjs/operators';
+import {
+    AagtEmProviderService,
+    IEntityChange
+} from '../../data/aagt-emprovider.service';
+import { TeamRepoService } from '../../data/repos/team-repo.service';
+import { IStepperModel } from './planner.component';
+
+export type FilterType = 'asset' | 'trigger';
+export type FilterChange = {
+    [key in FilterType]: {
+        filterText: string;
+    }
+};
 
 @Injectable({ providedIn: AagtDataModule })
 export class PlannerUowService implements Resolve<any> {
-    isoLookups: string[];
     allAssetsOptions: Asset[];
     allIsoOptions: string[];
-    allActionItemOptions: ActionItem[];
+    allActionItems: Observable<ActionItem[]>;
     allAssetTriggerActions: AssetTriggerAction[];
+    allTeamCats: TeamCategory[];
     canDeactivatePlaaner: BehaviorSubject<boolean>;
     currentGen: Generation;
     genTriggers: Trigger[];
-    onStep1ValidityChange: BehaviorSubject<boolean>;
-    onStep2ValidityChange: BehaviorSubject<boolean>;
-    onStep3ValidityChange: BehaviorSubject<boolean>;
-    onStep4ValidityChange: BehaviorSubject<boolean>;
+    onStepValidityChange: BehaviorSubject<IStepperModel>;
     onStepperChange: Subject<StepperSelectionEvent>;
-    onTriggersChange: BehaviorSubject<Trigger[]>;
-    onTriggerActionsChange: BehaviorSubject<TriggerAction[]>;
-    onGenerationAssetsChange: BehaviorSubject<GenerationAsset[]>;
-    onAssetTriggerActionChange: BehaviorSubject<AssetTriggerAction[]>;
-    onAssetFilterChange: BehaviorSubject<string>;
-    onTriggerFilterChange: BehaviorSubject<string>;
+    onFilterChange: BehaviorSubject<FilterChange>;
+    onEntitiesChange: Observable<SpEntityBase[]>;
     selectedAssets: Asset[];
     private entityChangeSet: Entity[];
+    private emSubsId: number;
+    saveAll: any;
 
     constructor(
         private aagtEmService: AagtEmProviderService,
         private genRepo: GenerationRepoService,
+        private teamRepo: TeamRepoService,
+        private teamCatRepo: TeamCategoryRepoService,
+        private teamAvailRepo: TeamAvailRepoService,
         private triggerRepo: TriggerRepoService,
         private triggerActionRepo: TriggerActionRepoService,
         private assetRepo: AssetRepoService,
@@ -72,89 +95,79 @@ export class PlannerUowService implements Resolve<any> {
         private emProvider: AagtEmProviderService
     ) {
         this.canDeactivatePlaaner = new BehaviorSubject(true);
-        this.onStep1ValidityChange = new BehaviorSubject(false);
-        this.onStep2ValidityChange = new BehaviorSubject(false);
-        this.onStep3ValidityChange = new BehaviorSubject(true);
-        this.onStep4ValidityChange = new BehaviorSubject(true);
-        this.onAssetFilterChange = new BehaviorSubject('all');
-        this.onTriggerFilterChange = new BehaviorSubject('all');
-        this.onTriggersChange = new BehaviorSubject([]);
-        this.onTriggerActionsChange = new BehaviorSubject([]);
-        this.onGenerationAssetsChange = new BehaviorSubject([]);
-        this.onAssetTriggerActionChange = new BehaviorSubject([]);
+        this.onEntitiesChange = new Observable();
+        this.onStepValidityChange = new BehaviorSubject({} as any);
+        this.onFilterChange = new BehaviorSubject({} as any);
         this.onStepperChange = new Subject();
+        this.emProvider.onEntityChange.subscribe(this.entityChanges);
     }
 
     resolve(
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
-    ): Promise<any> {
+    ): Observable<any> {
         const id = route.params.id;
+
         this.planGen(id);
 
-        this.onAssetFilterChange.subscribe(assetFilter => {
-            let atas = this.updateAssetTriggerActions();
+        const neededObs = [
+            this.actionItemRepo.all,
+            this.teamCatRepo.all,
+            from(this.genRepo.spChoiceValues('iso')),
+            this.assetRepo.all
+        ];
 
-            const triggerFilter = this.onTriggerFilterChange.value;
+        if (id === 'new') {
+            return this.onEntitiesChange.pipe(x => forkJoin(neededObs));
+        }
 
-            if (triggerFilter !== 'all') {
-                atas = atas.filter(
-                    ata => ata.triggerAction.trigger.milestone === triggerFilter
-                );
-            }
-            if (assetFilter !== 'all') {
-                atas = atas.filter(
-                    ata => ata.genAsset.asset.alias === assetFilter
-                );
-            }
-            this.onAssetTriggerActionChange.next(atas);
-        });
+        neededObs.push(from(this.fetchGenerationAssets));
+        neededObs.push(from(this.fetchGenTrigAndActions));
 
-        this.onTriggerFilterChange.subscribe(triggerFilter => {
-            let atas = this.updateAssetTriggerActions();
+        return this.onEntitiesChange.pipe(x => forkJoin(neededObs));
 
-            const assetFilter = this.onAssetFilterChange.value;
+        // this.onFilterChange
+        //     .pipe(filter(fil => !!(fil.asset && fil.asset.filterText)))
+        //     .subscribe(fil => {
+        //         let atas = this.updateAssetTriggerActions();
 
-            if (assetFilter !== 'all') {
-                atas = atas.filter(
-                    ata => ata.genAsset.asset.alias === assetFilter
-                );
-            }
-            if (triggerFilter !== 'all') {
-                atas = atas.filter(
-                    ata => ata.triggerAction.trigger.milestone === triggerFilter
-                );
-            }
-            this.onAssetTriggerActionChange.next(atas);
-        });
+        //         if (fil.asset.filterText !== 'all') {
+        //             atas = atas.filter(
+        //                 ata =>
+        //                     ata.triggerAction.trigger.milestone ===
+        //                     fil.asset.filterText
+        //             );
+        //         }
+        //         if (fil.asset.filterText !== 'all') {
+        //             atas = atas.filter(
+        //                 ata => ata.genAsset.asset.alias === fil.asset.filterText
+        //             );
+        //         }
+        //         this.onEntitiesChange.next(atas);
+        //     });
 
-        return new Promise((resolve, reject) => {
-            let preloadData: Promise<any>;
+        // this.onFilterChange.subscribe(txtFilter => {
+        //     let atas = this.updateAssetTriggerActions();
 
-            if (id !== 'new') {
-                preloadData = Promise.all([
-                    this.fetchAllActionItems(),
-                    this.fetchISOoptions(),
-                    this.fetchAllAssets(),
-                    this.fetchGenerationAssets(),
-                    this.fetchGenerationTriggers()
-                ]);
-            } else {
-                preloadData = Promise.all([
-                    this.fetchAllActionItems(),
-                    this.fetchISOoptions(),
-                    this.fetchAllAssets()
-                ]);
-            }
+        //     const assetFilter =
+        //         (txtFilter.asset && txtFilter.asset.filterText) || 'all';
 
-            return preloadData
-                .then(() => {
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
+        //     const triggerFilter =
+        //         (txtFilter.trigger && txtFilter.trigger.filterText) || 'all';
+
+        //     if (assetFilter !== 'all') {
+        //         atas = atas.filter(
+        //             ata => ata.genAsset.asset.alias === assetFilter
+        //         );
+        //     }
+
+        //     if (triggerFilter !== 'all') {
+        //         atas = atas.filter(
+        //             ata => ata.triggerAction.trigger.milestone === triggerFilter
+        //         );
+        //     }
+        //     this.onEntitiesChange.next(atas);
+        // });
     }
 
     assetSelectionCheck(): void {
@@ -182,7 +195,6 @@ export class PlannerUowService implements Resolve<any> {
                 this.createGenerationAsset(data);
             }
         });
-        this.updateAssetTriggerActions();
     }
 
     createGenerationAsset(data: {
@@ -204,8 +216,6 @@ export class PlannerUowService implements Resolve<any> {
                 assetTrigActionData
             );
         });
-        this.onGenerationAssetsChange.next(this.currentGen.generationAssets);
-        this.updateAssetTriggerActions();
         return genAsset;
     }
 
@@ -225,9 +235,6 @@ export class PlannerUowService implements Resolve<any> {
                 assetTrigActionData
             );
         });
-
-        this.updateTriggerActions();
-        this.updateAssetTriggerActions();
         return newTrigAction;
     }
 
@@ -253,84 +260,159 @@ export class PlannerUowService implements Resolve<any> {
         triggerAction.entityAspect.setDeleted();
     }
 
-    fetchAllActionItems(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.actionItemRepo
-                .all()
-                .then(allActionItems => {
-                    this.allActionItemOptions = allActionItems;
-                    resolve();
+    private entityChanges(entityChanges: IEntityChange[]): void {
+        const propChanges = entityChanges.filter(
+            chng => chng.entityAction === EntityAction.PropertyChange
+        );
+        if (!propChanges.length) {
+            return;
+        }
+        const genChanges = propChanges.filter(
+            chng => chng.entity.entityType.shortName === AagtListName.Gen
+        );
+        if (genChanges) {
+            if (
+                genChanges.some(chng => {
+                    const propName: keyof bareEntity<Generation> =
+                        chng.args.propertyName;
+                    return (
+                        propName === 'genEndDate' || propName === 'genStartDate'
+                    );
                 })
-                .catch(error => {
-                    reject(error);
-                });
-        });
+            ) {
+                this.planAssetTaskActions();
+                return;
+            }
+        }
+        const triggerChanges = propChanges.filter(
+            chng => chng.entity.entityType.shortName === AagtListName.Trigger
+        );
+        if (triggerChanges) {
+            if (
+                triggerChanges.some(chng => {
+                    const propName: keyof bareEntity<Trigger> =
+                        chng.args.propertyName;
+                    return (
+                        propName === 'triggerStart' ||
+                        propName === 'triggerStop'
+                    );
+                })
+            ) {
+                this.planAssetTaskActions();
+                return;
+            }
+        }
+        const trigActions = propChanges.filter(
+            chng => chng.entity.entityType.shortName === AagtListName.TriggerAct
+        );
+        if (trigActions) {
+            if (
+                trigActions.some(chng => {
+                    const propName: keyof bareEntity<TriggerAction> =
+                        chng.args.propertyName;
+                    return propName === 'sequence';
+                })
+            ) {
+                this.planAssetTaskActions();
+                return;
+            }
+        }
+        const assetTrigActs = propChanges.filter(
+            chng =>
+                chng.entity.entityType.shortName === AagtListName.AssetTrigAct
+        );
+        if (assetTrigActs) {
+            if (
+                assetTrigActs.some(chng => {
+                    const propName: keyof bareEntity<AssetTriggerAction> =
+                        chng.args.propertyName;
+                    return propName === 'sequence';
+                })
+            ) {
+                this.planAssetTaskActions();
+                return;
+            }
+        }
     }
 
-    fetchAllAssets(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.assetRepo
-                .all()
-                .then(allAssects => {
-                    this.allAssetsOptions = allAssects;
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    }
-
-    fetchISOoptions(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.genRepo
-                .spChoiceValues('Iso')
-                .then(allIso => {
-                    this.allIsoOptions = allIso;
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    }
-
-    fetchGenerationAssets(): Promise<void> {
-        const predicate = this.genAssetRepo.makePredicate(
+    private fetchGenerationAssets(): Observable<any> {
+        const genAssetPredicate = this.genAssetRepo.makePredicate(
             'generationId',
             this.currentGen.id
         );
-        const queryName = `allGenAssets${this.currentGen.id}`;
-        return new Promise((resolve, reject) => {
-            this.genAssetRepo
-                .where(queryName, predicate, 'assetTriggerActions')
-                .then(() => resolve())
-                .catch(error => {
-                    reject(error);
-                });
-        });
+        const genAssetQueryName = `genAssetFor-${this.currentGen.id}`;
+
+        const query = this.genAssetRepo.whereWithChildren(
+            genAssetQueryName,
+            genAssetPredicate,
+            this.assetTrigActionRepo,
+            'genAssetId'
+        );
+
+        return from(query);
     }
 
-    fetchGenerationTriggers(): Promise<void> {
+    private fetchGenTrigAndActions(): Observable<any> {
         const predicate = this.triggerRepo.makePredicate(
             'generationId',
             this.currentGen.id
         );
-        const queryName1 = `allGenTrigger${this.currentGen.id}`;
-        const queryName2 = `allTriggerActions${this.currentGen.id}`;
+        const genTrigQueryName = `triggersFor-${this.currentGen.id}`;
 
-        return new Promise((resolve, reject) => {
-            this.triggerRepo
-                .where(queryName1, predicate, 'triggerActions')
-                .then(triggers => {
-                    this.genTriggers = triggers;
-                    this.onTriggersChange.next(triggers);
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
+        const query = this.genAssetRepo.whereWithChildren(
+            genTrigQueryName,
+            predicate,
+            this.triggerActionRepo,
+            'triggerId'
+        );
+        return from(query);
+    }
+
+    async fetchTeamsAndAvail(teamCats: number[]): Promise<TeamAvailability[]> {
+        let teamCatPredicate: Predicate;
+        teamCats.forEach(tc => {
+            const pred = this.teamRepo.makePredicate('teamCategoryId', tc);
+            teamCatPredicate = teamCatPredicate
+                ? teamCatPredicate.and(pred)
+                : pred;
         });
+        try {
+            const teams = await this.teamRepo.where(
+                teamCats.toString(),
+                teamCatPredicate
+            );
+
+            let teamAvailPredicate: Predicate;
+
+            teams
+                .map(t => t.id)
+                .forEach(teamId => {
+                    const predPart = this.teamAvailRepo.makePredicate(
+                        'teamId',
+                        teamId
+                    );
+                    teamAvailPredicate = teamAvailPredicate
+                        ? teamAvailPredicate.and(predPart)
+                        : predPart;
+                });
+
+            if (!teamAvailPredicate) {
+                return;
+            }
+            teamAvailPredicate.and(
+                this.teamAvailRepo.makePredicate(
+                    'availStart',
+                    this.currentGen.genStartDate.toString(),
+                    FilterQueryOp.GreaterThanOrEqual
+                )
+            );
+            return await this.teamAvailRepo.where(
+                teams.toString(),
+                teamAvailPredicate
+            );
+        } catch (e) {
+            throw e;
+        }
     }
 
     getAllMilestones(): string[] {
@@ -339,9 +421,6 @@ export class PlannerUowService implements Resolve<any> {
 
     newTrigger(generationId: number): Trigger {
         const newTrigger = this.triggerRepo.newTrigger(generationId);
-        this.triggerRepo.all().then(triggers => {
-            this.onTriggersChange.next(triggers);
-        });
         return newTrigger;
     }
 
@@ -361,59 +440,139 @@ export class PlannerUowService implements Resolve<any> {
                 : this.genRepo.whereInCache(genPredicate)[0];
     }
 
+    async planAssetTaskActions(): Promise<void> {
+        // Step 1: Get all asset trig actions
+        const allAssetTrigActions = _.flatMap(
+            this.currentGen.generationAssets,
+            x => x.assetTriggerActions
+        );
+
+        // if none exists; get out of here
+        if (!allAssetTrigActions.length) {
+            return;
+        }
+
+        // setup a container to hold planned tasks by taskid and
+        // then assetid
+        const taskForTrigger: {
+            [index: number]: {
+                triggerRunTime?: _m.Duration;
+                [index: number]: {
+                    requestedStart: _m.Moment;
+                    scheduledTasks: AssetTriggerAction[];
+                    failedTasks: AssetTriggerAction[];
+                    assetRunTime: _m.Duration;
+                };
+            };
+        } = {};
+
+        const assetIds = _.flatMap(
+            this.currentGen.generationAssets,
+            x => x.generationId
+        );
+
+        this.currentGen.triggers.forEach(trigger => {
+            taskForTrigger[trigger.id].triggerRunTime = _m.duration(0);
+
+            assetIds.forEach(aid => {
+                taskForTrigger[trigger.id][aid] = {
+                    assetRunTime: _m.duration(0),
+                    get requestedStart() {
+                        return _m(trigger.triggerStart).add(this.assetRunTime);
+                    },
+                    scheduledTasks: [],
+                    failedTasks: []
+                };
+            });
+        });
+
+        // Step 2: Get the team category IDs to fetch the
+        // associated teams
+        const teamCatIds = allAssetTrigActions.map(
+            ata => ata.triggerAction.actionItem.teamCategoryId
+        );
+
+        // Step 3: Get all teams and team availabilities
+        // within the range of this generation
+
+        await this.fetchTeamsAndAvail(teamCatIds);
+
+        const prioritizedATAs = _.orderBy(allAssetTrigActions, [
+            x => x.genAsset.mxPosition,
+            x => x.triggerAction.trigger.milestone,
+            x => x.triggerAction.sequence
+        ]);
+
+        prioritizedATAs.forEach(pata => {
+            const trigger = pata.triggerAction.trigger;
+            const asset = pata.genAsset.asset;
+
+            const start = taskForTrigger[trigger.id][asset.id].requestedStart;
+
+            const reservationRequest: IJobReservateionRequest = {
+                taskId: pata.id,
+                taskDuration: _m.duration(
+                    pata.triggerAction.actionItem.duration
+                ),
+                requestedStartDate: start
+            };
+            const receipt = pata.triggerAction.actionItem.teamCategory.addJobReservation(
+                reservationRequest
+            );
+
+            pata.plannedStart =
+                receipt.plannedStart && receipt.plannedStart.toDate();
+            pata.plannedStart =
+                receipt.plannedEnd && receipt.plannedEnd.toDate();
+
+            if (!receipt.plannedEnd || !receipt.plannedStart) {
+                // in case a start could be schedule but not an end;
+                return;
+            }
+
+            // if a task can be done concurrently, do not update runtime or start date;
+            if (pata.isConcurrentable) {
+                return;
+            }
+            taskForTrigger[trigger.id].triggerRunTime.add(
+                receipt.durationPlanned
+            );
+            taskForTrigger[trigger.id][asset.id].assetRunTime.add(
+                receipt.durationPlanned
+            );
+        });
+    }
+
     reviewChanges(): Entity[] {
         this.entityChangeSet = this.emProvider.entityManager.getChanges();
         return this.entityChangeSet;
     }
 
-    async saveAssetTrigActions(): Promise<SaveResult> {
-        try {
-            const success = await this.assetTrigActionRepo.saveEntityChanges();
-            return success;
-        } catch (e) {
-            return e;
+    async saveEntityChanges(entityName: AagtListName): Promise<SaveResult> {
+        let repo: BaseRepoService<any>;
+        switch (entityName) {
+            case AagtListName.Gen:
+                repo = this.genRepo;
+                break;
+            case AagtListName.GenAsset:
+                repo = this.genAssetRepo;
+                break;
+            case AagtListName.Trigger:
+                repo = this.triggerRepo;
+                break;
+            case AagtListName.TriggerAct:
+                repo = this.triggerActionRepo;
+                break;
+            case AagtListName.AssetTrigAct:
+                repo = this.assetTrigActionRepo;
+                break;
         }
-    }
-
-    async saveGeneration(): Promise<SaveResult> {
-        try {
-            const success = await this.genRepo.saveEntityChanges();
-            return success;
-        } catch (e) {
-            return e;
-        }
-    }
-
-    async saveGenAssets(): Promise<SaveResult> {
-        try {
-            const success = await this.genAssetRepo.saveEntityChanges();
-            return success;
-        } catch (e) {
-            return e;
-        }
-    }
-
-    async saveTriggers(): Promise<SaveResult> {
-        try {
-            const success = await this.triggerRepo.saveEntityChanges();
-            return success;
-        } catch (e) {
-            return e;
-        }
-    }
-
-    async saveTrigActions(): Promise<SaveResult> {
-        try {
-            const success = await this.triggerActionRepo.saveEntityChanges();
-            return success;
-        } catch (e) {
-            return e;
-        }
+        const success = await repo.saveEntityChanges();
+        return success;
     }
 
     triggerActionSelectionCheck(): void {
-        const triggers = this.onTriggersChange.value;
-        triggers.forEach(trig => {
+        this.currentGen.triggers.forEach(trig => {
             // ignore if nothing change on the trigger, i.e. just visited the step
 
             // delete triggerActions and AssetTrigActions graphs
@@ -461,16 +620,16 @@ export class PlannerUowService implements Resolve<any> {
         });
     }
 
-    updateTriggerActions(): void {
-        const tra = _.flatMap(this.currentGen.triggers, x => x.triggerActions);
-        this.onTriggerActionsChange.next(tra);
-    }
+    // updateTriggerActions(): void {
+    //     const tra = _.flatMap(this.currentGen.triggers, x => x.triggerActions);
+    //     this.next(tra);
+    // }
 
-    updateAssetTriggerActions(): AssetTriggerAction[] {
-        const atas = _.flatMap(this.currentGen.triggers, x =>
-            _.flatMap(x.triggerActions, m => m.assetTriggerActions)
-        );
-        this.onAssetTriggerActionChange.next(atas);
-        return atas;
-    }
+    // updateAssetTriggerActions(): AssetTriggerAction[] {
+    //     const atas = _.flatMap(this.currentGen.triggers, x =>
+    //         _.flatMap(x.triggerActions, m => m.assetTriggerActions)
+    //     );
+    //     this.onEntitiesChange.next(atas);
+    //     return atas;
+    // }
 }

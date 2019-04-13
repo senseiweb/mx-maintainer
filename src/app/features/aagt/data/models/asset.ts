@@ -1,8 +1,8 @@
-import * as ebase from 'app/global-data';
-import { GenerationAsset } from './generation-asset';
 import { Injectable } from '@angular/core';
-import * as aagtCfg from './_aagt-feature-cfg';
+import * as ebase from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { GenerationAsset } from './generation-asset';
 
 export class Asset extends ebase.SpEntityBase {
     alias: string;
@@ -19,11 +19,19 @@ export class AssetMetadata extends ebase.MetadataBase<Asset> {
         super(aagtCfg.AagtListName.Asset);
         this.entityDefinition.dataProperties.alias = {
             dataType: this.dt.String,
-            spInternalName: 'Title'
+            spInternalName: 'Title',
+            isNullable: false
         };
-        this.entityDefinition.dataProperties.location = { dataType: this.dt.String };
-        this.entityDefinition.dataProperties.notes = { dataType: this.dt.String };
+        this.entityDefinition.dataProperties.location = {
+            dataType: this.dt.String
+        };
+        this.entityDefinition.dataProperties.notes = {
+            dataType: this.dt.String
+        };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

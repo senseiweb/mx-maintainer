@@ -1,5 +1,5 @@
 <div
-    id="gp-step2"
+    id="gp-step-trig-action"
     [@animate]="{ value: '*', params: { y: '100%' } }"
     fxLayout="row"
     fxFlex="100"
@@ -85,7 +85,7 @@
                                 fxLayoutAlign="space-around center"
                             >
                                 <span class="w-35-p">{{
-                                    actionItem.teamType
+                                    actionItem.teamCategory
                                 }}</span>
                                 <span class="w-50-p"
                                     >{{ actionItem.action }} [{{
@@ -117,7 +117,7 @@
                 </ng-template>
             </p-pickList>
         </div>
-
+        <mat-divider></mat-divider>
         <div class="pt-12">
             <button mat-raised-button matStepperNext>
                 Next: Assets Action Items

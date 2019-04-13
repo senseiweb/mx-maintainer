@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { AagtDataModule, ActionItem, ActionItemRepo } from '../../data';
+import {
+    AagtDataModule,
+    ActionItem,
+    ActionItemRepo,
+    TeamCategoryRepoService
+} from '../../data';
+import { TeamCategory } from '../../data/models/team-category';
 
 @Injectable({ providedIn: AagtDataModule })
 export class AimUowService implements Resolve<ActionItem[]> {
@@ -9,9 +15,12 @@ export class AimUowService implements Resolve<ActionItem[]> {
     onActionItemsChanged: BehaviorSubject<ActionItem[]>;
     onActionItemChanged: BehaviorSubject<ActionItem>;
     routeParams: any;
-    teamTypes: string[];
+    teamCategories: TeamCategory[];
 
-    constructor(private actionItemRepo: ActionItemRepo) {
+    constructor(
+        private actionItemRepo: ActionItemRepo,
+        private teamCatRepo: TeamCategoryRepoService
+    ) {
         this.onActionItemsChanged = new BehaviorSubject([]);
         this.onActionItemChanged = new BehaviorSubject({} as any);
     }
@@ -21,7 +30,7 @@ export class AimUowService implements Resolve<ActionItem[]> {
             if (route.params.id) {
                 return Promise.all([
                     this.fetchAllActionItems(),
-                    this.fetchAllTeamTypes(),
+                    this.fetchAllTeamCategories(),
                     this.getActionItem(route.params.id)
                 ])
                     .then(resolve)
@@ -32,7 +41,7 @@ export class AimUowService implements Resolve<ActionItem[]> {
             }
             return Promise.all([
                 this.fetchAllActionItems(),
-                this.fetchAllTeamTypes()
+                this.fetchAllTeamCategories()
             ])
                 .then(resolve)
                 .catch(e => {
@@ -57,12 +66,12 @@ export class AimUowService implements Resolve<ActionItem[]> {
         });
     }
 
-    fetchAllTeamTypes(): Promise<void> {
+    fetchAllTeamCategories(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.actionItemRepo
-                .spChoiceValues('TeamType')
-                .then(choices => {
-                    this.teamTypes = choices;
+            this.teamCatRepo
+                .all()
+                .then(teamCats => {
+                    this.teamCategories = teamCats;
                     resolve();
                 })
                 .catch(e => {

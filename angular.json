@@ -30,7 +30,8 @@
                             "node_modules/primeng/resources/themes/nova-light/theme.css",
                             "node_modules/primeng/resources/primeng.min.css",
                             "node_modules/quill/dist/quill.core.css",
-                            "node_modules/quill/dist/quill.snow.css"
+                            "node_modules/quill/dist/quill.snow.css",
+                            "node_modules/ng-pick-datetime/assets/style/picker.min.css"
                         ],
                         "scripts": ["node_modules/quill/dist/quill.js"],
                         "showCircularDependencies": false

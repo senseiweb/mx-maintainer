@@ -1,5 +1,6 @@
 import { bareEntity, EntityChildren } from '@ctypes/breeze-type-customization';
 import {
+    EntityKey,
     EntityManager,
     EntityQuery,
     EntityType,
@@ -8,25 +9,33 @@ import {
     Predicate,
     SaveResult
 } from 'breeze-client';
-import * as moment from 'moment';
-import { BehaviorSubject, Observable } from 'rxjs';
+import * as _m from 'moment';
+import { from, timer, BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map, shareReplay, switchMap, take, takeUntil } from 'rxjs/operators';
 import { SpEntityBase } from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
+
+interface IRepoPredicateCache<T> {
+    [index: string]: _m.Moment;
+}
+
+type SpChoiceCache<T> = { [index in keyof T]: string[] };
 
 export class BaseRepoService<T extends SpEntityBase> {
     protected entityManager: EntityManager;
     protected entityType: EntityType;
     protected resourceName: string;
-    private cachedDate: moment.Moment;
-    private cachedAll: boolean;
+    private cached: Observable<T[]>;
+    private predicateCache: IRepoPredicateCache<T> = {};
+    private reload: Subject<any>;
     onSaveInProgressChange: BehaviorSubject<boolean>;
-    spChoiceFieldCache: Array<{ key: string; values: string[] }>;
-    private queryCache: {
-        [index: string]: moment.Moment;
-    } = {};
-    private inFlightCalls: {
-        [index: string]: Promise<T[]> | Promise<T> | null;
-    } = {};
+    private spChoiceFieldCache: SpChoiceCache<T> = {} as any;
+    // private queryCache: {
+    //     [index: string]: _m.Moment;
+    // } = {};
+    // private inFlightCalls: {
+    //     [index: string]: Promise<T[]> | Promise<T> | null;
+    // } = {};
 
     protected defaultFetchStrategy: FetchStrategy;
 
@@ -37,35 +46,35 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.entityType = emProviderService.entityManager.metadataStore.getEntityType(
             entityTypeName
         ) as EntityType;
+
         this.entityManager = emProviderService.entityManager;
         this.onSaveInProgressChange = emProviderService.onSaveInProgressChange;
         this.resourceName = this.entityType.defaultResourceName;
+        this.reload = new Subject();
         this.defaultFetchStrategy = FetchStrategy.FromServer;
-        this.spChoiceFieldCache = [];
         console.log(`base created from ${entityTypeName}`);
     }
 
-    all(): Promise<T[]> {
-        const query = this.baseQuery();
-        if (this.isCachedBundle()) {
-            return Promise.resolve(this.executeCacheQuery(query));
+    get all(): Observable<T[]> {
+        if (this.cached) {
+            return this.cached;
         }
-        if (this.inFlightCalls.all) {
-            return this.inFlightCalls.all as Promise<T[]>;
-        }
+        const refreshTimer = timer(0, 300000);
+        this.cached = refreshTimer.pipe(
+            switchMap(_ => this.allEntities()),
+            takeUntil(this.reload),
+            _ => this.cached.pipe(shareReplay(1))
+        );
+        return this.cached;
+    }
 
-        this.inFlightCalls.all = new Promise(async (resolve, reject) => {
-            try {
-                const data = await this.executeQuery(query);
-                this.isCachedBundle(true);
-                resolve(data);
-            } catch (error) {
-                return reject(this.queryFailed(error));
-            } finally {
-                this.inFlightCalls.all = null;
-            }
-        }) as any;
-        return this.inFlightCalls.all as Promise<T[]>;
+    forceReload(): void {
+        this.reload.next();
+        this.cached = null;
+    }
+
+    private allEntities(): Observable<T[]> {
+        return from(this.executeQuery(this.baseQuery()));
     }
 
     protected createBase(options?: bareEntity<T>): T {
@@ -83,44 +92,16 @@ export class BaseRepoService<T extends SpEntityBase> {
         return query.toType(this.entityType);
     }
 
-    protected isCachedBundle(refreshedData?: true): boolean {
-        if (refreshedData) {
-            this.cachedAll = true;
-            this.cachedDate = moment();
-            this.defaultFetchStrategy = FetchStrategy.FromLocalCache;
-            return false;
-        }
-
-        if (!this.cachedAll) {
-            return false;
-        }
-
-        const now = moment();
-
-        if (this.cachedAll && this.cachedDate.diff(now, 'm') > 5) {
-            this.defaultFetchStrategy = FetchStrategy.FromServer;
-            this.cachedAll = false;
-            return false;
-        }
-        return true;
-    }
-
     protected async executeQuery(
         query: EntityQuery,
         fetchStrat?: FetchStrategy
     ): Promise<T[]> {
-        try {
-            const queryType = query.using(
-                fetchStrat || this.defaultFetchStrategy
-            );
-            const dataQueryResult = await this.entityManager.executeQuery(
-                queryType
-            );
-            console.log(dataQueryResult);
-            return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
-        } catch (error) {
-            return Promise.reject(this.queryFailed(error));
-        }
+        const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
+        const dataQueryResult = await this.entityManager.executeQuery(
+            queryType
+        );
+        console.log(dataQueryResult);
+        return Promise.resolve(dataQueryResult.results) as Promise<T[]>;
     }
 
     protected executeCacheQuery(query: EntityQuery): T[] {
@@ -137,112 +118,136 @@ export class BaseRepoService<T extends SpEntityBase> {
         return Predicate.create(property as any, filter, condition);
     }
 
-    spChoiceValues(fieldName: string): Promise<string[]> {
-        return new Promise((resolve, reject) => {
-            const retrievedChoiceFields = this.spChoiceFieldCache.filter(
-                sp => sp.key === fieldName
-            )[0];
-            if (retrievedChoiceFields) {
-                return resolve(retrievedChoiceFields.values);
-            }
+    async spChoiceValues(fieldName: keyof T): Promise<string[]> {
+        const cached = this.spChoiceFieldCache[fieldName];
+        if (cached) {
+            return cached;
+        }
+        const defaultResourceName = this.entityType.defaultResourceName;
 
-            const defaultResourceName = this.entityType.defaultResourceName;
-            const fieldsResourceName = defaultResourceName.replace(
-                '/items',
-                '/fields'
-            );
-            const predicate = Predicate.create(
-                'EntityPropertyName',
-                FilterQueryOp.Equals,
-                fieldName
-            );
-            const query = EntityQuery.from(fieldsResourceName)
-                .where(predicate)
-                .noTracking();
-            return this.entityManager
-                .executeQuery(query)
-                .then(response => {
-                    const choices = response.results[0]['Choices']
-                        .results as string[];
-                    this.spChoiceFieldCache.push({
-                        key: fieldName,
-                        values: choices
-                    });
-                    resolve(choices);
-                })
-                .catch(this.queryFailed);
-        });
+        const fieldsResourceName = defaultResourceName.replace(
+            '/items',
+            '/fields'
+        );
+
+        const dp = this.entityType.dataProperties.find(
+            prop => prop.name === fieldName
+        );
+
+        const predicate = Predicate.create(
+            'EntityPropertyName',
+            FilterQueryOp.Equals,
+            dp.nameOnServer
+        );
+
+        const query = EntityQuery.from(fieldsResourceName)
+            .where(predicate)
+            .noTracking();
+
+        const response = await this.entityManager.executeQuery(query);
+        const choices = response.results[0]['Choices'].results as string[];
+
+        this.spChoiceFieldCache[fieldName] = choices;
+        return choices;
     }
 
     async withId(key: number): Promise<T> {
-        try {
-            const data = await this.entityManager.fetchEntityByKey(
-                this.entityType.shortName,
-                key,
-                true
-            );
-            return Promise.resolve(data.entity) as Promise<T>;
-        } catch (error) {
-            return Promise.reject(this.queryFailed(error));
-        }
+        const result = await this.entityManager.fetchEntityByKey(
+            this.entityType.shortName,
+            key,
+            true
+        );
+        return result.entity as T;
     }
 
-    async where(
+    where(queryName: string, predicate: Predicate): Promise<T[]> {
+        const freshTimeLimit = 6;
+        const cachedTime = this.predicateCache[queryName];
+        const timeSinceLastServerQuery = cachedTime
+            ? _m.duration(cachedTime.diff(_m(), 'minutes'))
+            : freshTimeLimit + 1;
+        const query = this.baseQuery().where(predicate);
+        if (timeSinceLastServerQuery < 5) {
+            return Promise.resolve(this.executeCacheQuery(query));
+        }
+        return this.executeQuery(query);
+    }
+
+    async whereWithChildren<U extends SpEntityBase>(
         queryName: string,
         predicate: Predicate,
-        includeChildren?: EntityChildren<T>,
-        refreshFromServer = false
-    ): Promise<T[]> {
-        const query = this.baseQuery();
+        childrenRepo: BaseRepoService<U>,
+        childLookupKey: keyof U
+    ): Promise<{ parent: T[]; children: U[] }> {
+        const parent = await this.where(queryName, predicate);
+        const pIds = parent.map(et => et.id).sort();
 
-        if (includeChildren) {
-            query.expand(includeChildren);
-        }
+        const childPreds: Predicate[] = [];
 
-        query.where(predicate);
-        const lastQueryed = this.queryCache[queryName];
-        const now = moment();
-        try {
-            if (
-                refreshFromServer ||
-                (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)
-            ) {
-                const data = await this.executeQuery(
-                    query,
-                    FetchStrategy.FromServer
-                );
-                this.queryCache[queryName] = moment();
-                return Promise.resolve(data);
-            }
-            return Promise.resolve(this.executeCacheQuery(query));
-        } catch (error) {
-            this.queryFailed(error);
-        }
+        pIds.forEach(id => {
+            childPreds.push(childrenRepo.makePredicate(childLookupKey, id));
+        });
+
+        const cPredicate = Predicate.create(childPreds);
+
+        const cQueryName = `${queryName}-${pIds.toString()}-${childLookupKey}`;
+
+        const children = await childrenRepo.where(cQueryName, cPredicate);
+
+        return { parent, children };
     }
+
+    // async where(
+    //     queryName: string,
+    //     predicate: Predicate,
+    //     includeChildren?: EntityChildren<T>,
+    // ): Promise<T[]> {
+    //     const query = this.baseQuery();
+
+    //     if (includeChildren) {
+    //         query.expand(includeChildren);
+    //     }
+
+    //     query.where(predicate);
+    //     const lastQueryed = this.queryCache[queryName];
+    //     const now = moment();
+    //     try {
+    //         if (
+    //             refreshFromServer ||
+    //             (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)
+    //         ) {
+    //             const data = await this.executeQuery(
+    //                 query,
+    //                 FetchStrategy.FromServer
+    //             );
+    //             this.queryCache[queryName] = moment();
+    //             return Promise.resolve(data);
+    //         }
+    //         return Promise.resolve(this.executeCacheQuery(query));
+    //     } catch (error) {
+    //         this.queryFailed(error);
+    //     }
+    // }
 
     whereInCache(predicate: Predicate): T[] {
         const query = this.baseQuery().where(predicate);
-        return this.executeCacheQuery(query) as any[];
+        return this.executeCacheQuery(query) as T[];
     }
 
-    queryFailed(error): Promise<Error> {
-        const err = new Error(error);
-        return Promise.reject(err);
-    }
+    // queryFailed(error): Promise<Error> {
+    //     const err = new Error(error);
+    //     return Promise.reject(err);
+    // }
 
     async saveEntityChanges(): Promise<SaveResult | undefined> {
         const entities = this.entityManager.getChanges(this.entityType);
         if (!entities.length) {
             return undefined;
         }
-        try {
-            this.onSaveInProgressChange.next(true);
-            const results = await this.entityManager.saveChanges(entities);
-            return results;
-        } catch (error) {
-            return error;
-        } finally {
-            this.onSaveInProgressChange.next(false);
-        }
+        this.onSaveInProgressChange.next(true);
+
+        const results = await this.entityManager.saveChanges(entities);
+        this.onSaveInProgressChange.next(false);
+        return results;
     }
 }

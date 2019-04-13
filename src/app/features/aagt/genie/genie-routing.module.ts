@@ -8,17 +8,18 @@ import { AimUowService } from './action-item-manager/aim-uow.service';
 import { GenieBaseComponent } from './genie-base/genie-base.component';
 import { ListGenyComponent } from './list-geny/list-geny.component';
 import {
+    AssetTriggerActionListComponent,
     AssetTriggerSidebarComponent,
+    NewGenerationDialogComponent,
     PlannerComponent,
     PlannerUowService,
-    Step1Component,
-    Step2Component,
-    Step3Component,
-    Step4Component
+    StepAtaListComponent,
+    StepGenAssetComponent,
+    StepSummaryComponent,
+    StepTrigActionComponent
 } from './planner';
 
-import { NewTriggerDialogComponent } from './planner/step2/new-trigger/new-trigger-dialog';
-import { AssetTriggerActionListComponent } from './planner/step3/asset-trigger-action-list/asset-trigger-action-list.component';
+import { NewTriggerDialogComponent } from './planner/step-trig-action/new-trigger/new-trigger-dialog';
 import { TeamDetailDialogComponent } from './team-manager';
 import { TeamListComponent } from './team-manager/team-list/team-list.component';
 import { TeamUowService } from './team-manager/team-uow.service';
@@ -30,14 +31,15 @@ export const routedComponents = [
     ListGenyComponent,
     TeamListComponent,
     PlannerComponent,
-    Step1Component,
-    Step2Component,
-    Step3Component,
-    Step4Component,
+    StepGenAssetComponent,
+    StepTrigActionComponent,
+    StepAtaListComponent,
+    StepSummaryComponent,
     AssetTriggerSidebarComponent,
     AssetTriggerActionListComponent,
     NewTriggerDialogComponent,
-    TeamDetailDialogComponent
+    TeamDetailDialogComponent,
+    NewGenerationDialogComponent
 ];
 
 const featureRoutes: Routes = [
@@ -60,19 +62,19 @@ const featureRoutes: Routes = [
                 children: [
                     {
                         path: 'step1',
-                        component: Step1Component
+                        component: StepGenAssetComponent
                     },
                     {
                         path: 'step2',
-                        component: Step2Component
+                        component: StepTrigActionComponent
                     },
                     {
                         path: 'step3',
-                        component: Step3Component
+                        component: StepAtaListComponent
                     },
                     {
                         path: 'step4',
-                        component: Step4Component
+                        component: StepSummaryComponent
                     }
                 ]
             },

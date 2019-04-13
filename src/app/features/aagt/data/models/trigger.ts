@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
+import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
 import * as aagtCfg from './_aagt-feature-cfg';
 import { Generation } from './generation';
@@ -16,7 +17,6 @@ export class Trigger extends ebase.SpEntityBase {
             .map(tra => tra.actionItem.duration)
             .reduce((duration1, duration2) => duration1 + duration2, 0);
     }
-    generationOffset?: number;
     triggerStart?: Date;
     triggerStop?: Date;
     generationId: number;
@@ -35,9 +35,6 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
         this.entityDefinition.dataProperties.milestone = {
             dataType: this.dt.String,
             spInternalName: 'Title'
-        };
-        this.entityDefinition.dataProperties.generationOffset = {
-            dataType: this.dt.Int16
         };
         this.entityDefinition.dataProperties.triggerStart = {
             dataType: this.dt.DateTime
@@ -67,6 +64,24 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
             this.entityDefinition.dataProperties,
             this.baseDataProperties
         );
+
+        this.createEntityValidator('duplicateTriggerMiles', (entity, ctx) => {
+            if (!entity || !entity.milestone) {
+                return true;
+            }
+            const existing = entity.generation.triggers.map(trig => {
+                if (trig.milestone && trig.milestone) {
+                    return trig.milestone;
+                }
+            });
+            if (!existing) {
+                return true;
+            }
+            if (existing.includes(entity.milestone)) {
+                return false;
+            }
+            return true;
+        });
 
         this.initializer = _entity => {
             _entity.triggerActions

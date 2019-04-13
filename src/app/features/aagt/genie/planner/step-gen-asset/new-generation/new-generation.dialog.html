@@ -1,0 +1,173 @@
+<div class="dialog-content-wrapper">
+    <mat-toolbar matDialogTitle class="mat-accent m-0">
+        <mat-toolbar-row fxLayout="row" fxLayoutAlign="space-between center">
+            <span class="title dialog-title">{{ dialogTitle }}</span>
+            <button
+                mat-icon-button
+                (click)="cancel()"
+                aria-label="Close dialog"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-toolbar-row>
+
+        <mat-toolbar-row
+            class="toolbar-bottom py-16"
+            fxLayout="column"
+            fxLayoutAlign="center center"
+        >
+            <div class="contact-name mt-8">
+                {{ currentGen.title }}
+            </div>
+        </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
+        <form [formGroup]="genFormGroup">
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>Generation Title</mat-label>
+                    <mat-icon matSuffix class="secondary-text"
+                        >account_circle</mat-icon
+                    >
+                    <input name="title" formControlName="title" matInput />
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>In Supprt Of</mat-label>
+                    <mat-icon matSuffix class="secondary-text"
+                        >account_circle</mat-icon
+                    >
+                    <mat-select formControlName="iso">
+                        <mat-option *ngFor="let iso of allIsos" [value]="iso">
+                            {{ iso }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>Generation Status</mat-label>
+                    <mat-icon matSuffix class="secondary-text"
+                        >account_circle</mat-icon
+                    >
+                    <mat-select formControlName="genStatus">
+                        <mat-option
+                            *ngFor="let status of statusEnum"
+                            [value]="status"
+                        >
+                            {{ status }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label># of Assets</mat-label>
+                    <input
+                        name="assignedAssetCount"
+                        formControlName="assignedAssetCount"
+                        type="number"
+                        matInput
+                        readonly
+                    />
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="!rangeSet">
+                <mat-form-field appearance="outline" fxFlex>
+                    <input
+                        matInput
+                        name="getRangeDate"
+                        formControlName="planDateRange"
+                        placeholder="Planned Range"
+                        [selectMode]="'range'"
+                        [owlDateTimeTrigger]="planRangePickert"
+                        [owlDateTime]="planRangePickert"
+                    />
+                    <owl-date-time
+                        [pickerMode]="'dialog'"
+                        #planRangePickert
+                    ></owl-date-time>
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
+                <mat-form-field appearance="outline" fxFlex>
+                    <input
+                        matInput
+                        name="getStartDate"
+                        formControlName="planDateRange"
+                        placeholder="Planned Start date"
+                        [selectMode]="'rangeFrom'"
+                        [owlDateTimeTrigger]="planStartPicker"
+                        [owlDateTime]="planStartPicker"
+                    />
+                    <owl-date-time
+                        [pickerMode]="'dialog'"
+                        #planStartPicker
+                    ></owl-date-time>
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
+                <mat-form-field appearance="outline" fxFlex>
+                    <input
+                        matInput
+                        name="genEndDate"
+                        [selectMode]="'rangeTo'"
+                        formControlName="planDateRange"
+                        placeholder="Planned Stop date"
+                        [owlDateTimeTrigger]="planStopPicker"
+                        [owlDateTime]="planStopPicker"
+                    />
+                    <owl-date-time #planStopPicker></owl-date-time>
+                </mat-form-field>
+            </div>
+        </form>
+    </div>
+
+    <div
+        mat-dialog-actions
+        class="m-0 p-16"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+    >
+        <button
+            *ngIf="action === 'edit'"
+            mat-button
+            class="mr-8"
+            (click)="deleteGeneration()"
+            aria-label="Delete"
+            matTooltip="Delete"
+        >
+            DELETE
+        </button>
+
+        <button
+            *ngIf="action !== 'edit'"
+            mat-button
+            class="save-button"
+            (click)="saveChanges()"
+            [disabled]="genFormGroup.invalid"
+            aria-label="SAVE"
+        >
+            ADD
+        </button>
+
+        <button
+            *ngIf="action === 'edit'"
+            mat-button
+            class="save-button"
+            (click)="saveChanges()"
+            [disabled]="genFormGroup.invalid"
+            aria-label="SAVE"
+        >
+            UPDATE
+        </button>
+    </div>
+</div>

@@ -30,7 +30,7 @@ import { TeamUowService } from '../team-uow.service';
 })
 export class TeamListComponent implements OnInit, OnDestroy {
     dataSource: FilesDataSource<Team>;
-    displayedColumns = ['id', 'teamName', 'teamType', 'teamMemberCount'];
+    displayedColumns = ['id', 'teamName', 'teamCategory', 'teamMemberCount'];
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
 

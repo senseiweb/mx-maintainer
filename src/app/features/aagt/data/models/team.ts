@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
+import * as _ from 'lodash';
+import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
 import * as aagtCfg from './_aagt-feature-cfg';
-import { TeamAvailability } from './team-availability';
+import { IJobReservation, TeamAvailability } from './team-availability';
+import { TeamCategory } from './team-category';
 
 export class Team extends ebase.SpEntityBase {
     teamName: string;
-    teamType: string;
-    numberOfTeamMembers: number;
+    teamCategoryId: number;
+    teamCategory: TeamCategory;
+    numTeamMembers: number;
     notes: string;
     teamAvailabilites: TeamAvailability[];
 }
@@ -20,7 +24,7 @@ export class TeamMetadata extends ebase.MetadataBase<Team> {
 
     constructor() {
         super(aagtCfg.AagtListName.Team);
-        this.entityDefinition.dataProperties.teamType = {
+        this.entityDefinition.dataProperties.teamCategoryId = {
             dataType: this.dt.String,
             isNullable: false
         };
@@ -29,7 +33,7 @@ export class TeamMetadata extends ebase.MetadataBase<Team> {
             isNullable: false,
             spInternalName: 'Title'
         };
-        this.entityDefinition.dataProperties.numberOfTeamMembers = {
+        this.entityDefinition.dataProperties.numTeamMembers = {
             dataType: this.dt.Int16,
             isNullable: false
         };
@@ -42,6 +46,12 @@ export class TeamMetadata extends ebase.MetadataBase<Team> {
                 entityTypeName: aagtCfg.AagtListName.TeamAvail,
                 associationName: 'Team_TeamAvailabilities',
                 isScalar: false
+            },
+
+            teamCategory: {
+                entityTypeName: aagtCfg.AagtListName.TeamCategory,
+                associationName: 'TeamCategory_Teams',
+                foreignKeyNames: ['teamCategoryId']
             }
         };
 

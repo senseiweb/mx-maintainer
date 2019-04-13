@@ -21,29 +21,23 @@
         <mat-form-field>
             <input
                 matInput
-                name="offset"
-                formControlName="offset"
-                placeholder="Offset from Generation Start"
+                name="start"
+                formControlName="start"
+                placeholder="Trigger Start"
                 type="number"
             />
             <span matSuffix>hours</span>
         </mat-form-field>
-        <div fxLayout="row" *ngIf="!!currentTrigger.triggerStart">
+        <mat-form-field>
             <input
-                name="start"
-                formControlName="start"
-                placeholder="Calculated Start"
-                name="start"
-                readonly
-            />
-            <input
+                matInput
                 name="stop"
                 formControlName="stop"
-                placeholder="Calculated End"
-                name="end"
-                readonly
+                placeholder="Trigger End"
+                type="number"
             />
-        </div>
+            <span matSuffix>hours</span>
+        </mat-form-field>
     </form>
 </div>
 <div mat-dialog-actions fxLayoutAlign="start end">

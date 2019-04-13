@@ -1,19 +1,17 @@
-@import "src/@fuse/scss/fuse";
+@import 'src/@fuse/scss/fuse';
 
-genie-plan-step2 {
-
-    #gp-step2{
-
+genie-plan-trig-actions {
+    #gp-step-trig-action {
         display: block;
         position: relative;
         perspective: 3000px;
-    
+
         > div {
             position: relative;
             transform-style: preserve-3d;
             transition: transform 1s;
         }
-    
+
         > .fuse-widget-front {
             display: flex;
             flex-direction: column;
@@ -25,15 +23,16 @@ genie-plan-step2 {
             opacity: 1;
             z-index: 10;
             border-radius: 8px;
-            transition: transform 0.5s ease-out 0s, visibility 0s ease-in 0.2s, opacity 0s ease-in 0.2s;
+            transition: transform 0.5s ease-out 0s, visibility 0s ease-in 0.2s,
+                opacity 0s ease-in 0.2s;
             transform: rotateY(0deg);
             backface-visibility: hidden;
         }
     }
 
     mat-select {
-        > .mat-select-trigger{ 
-            >.mat-select-value{
+        > .mat-select-trigger {
+            > .mat-select-value {
                 .mat-select-placeholder {
                     color: white;
                     white-space: nowrap;
@@ -42,7 +41,6 @@ genie-plan-step2 {
                 }
             }
         }
-        
     }
 
     .ui-picklist {
@@ -56,8 +54,5 @@ genie-plan-step2 {
                 padding-bottom: 0;
             }
         }
-       
     }
-    
-   
 }

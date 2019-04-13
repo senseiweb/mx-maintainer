@@ -47,7 +47,6 @@ export class NewTriggerDialogComponent implements OnInit, OnDestroy {
                 Validators.required,
                 existingMilestoneValidator(this.uow.getAllMilestones())
             ]),
-            offset: new FormControl(trig.generationOffset),
             start: new FormControl(trig.triggerStart),
             stop: new FormControl(trig.triggerStop)
         });
@@ -72,8 +71,11 @@ export class NewTriggerDialogComponent implements OnInit, OnDestroy {
         this.currentTrigger.milestone = this.triggerFormGroup.get(
             'milestone'
         ).value;
-        this.currentTrigger.generationOffset = this.triggerFormGroup.get(
-            'offset'
+        this.currentTrigger.triggerStart = this.triggerFormGroup.get(
+            'start'
+        ).value;
+        this.currentTrigger.triggerStop = this.triggerFormGroup.get(
+            'stop'
         ).value;
         this.dialogRef.close(this.currentTrigger);
     }

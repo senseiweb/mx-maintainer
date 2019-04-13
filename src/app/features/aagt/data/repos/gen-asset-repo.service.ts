@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { bareEntity } from '@ctypes/breeze-type-customization';
-import { BaseRepoService, EmProviderService } from 'app/global-data';
+import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
 import { EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';

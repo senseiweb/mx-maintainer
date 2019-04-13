@@ -42,6 +42,8 @@ import {
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { FuseSidebarModule, FuseWidgetModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
+
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { MxCommonModule } from './common/common.module';
 
@@ -90,7 +92,9 @@ import { MxCommonModule } from './common/common.module';
         FuseSharedModule,
         FuseWidgetModule,
         FuseSidebarModule,
-        NgxDnDModule
+        NgxDnDModule,
+        OwlNativeDateTimeModule,
+        OwlDateTimeModule
     ],
     exports: [
         CommonModule,
@@ -136,7 +140,9 @@ import { MxCommonModule } from './common/common.module';
         FuseWidgetModule,
         FuseSidebarModule,
         NgxDnDModule,
-        MxCommonModule
+        MxCommonModule,
+        OwlNativeDateTimeModule,
+        OwlDateTimeModule
     ]
 })
 export class AppSharedModule {}

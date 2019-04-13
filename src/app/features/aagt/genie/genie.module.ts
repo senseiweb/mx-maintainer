@@ -6,7 +6,10 @@ import { PickListModule } from 'primeng/picklist';
 
 import { AagtDataModule } from '../data/aagt-data.module';
 import { routedComponents, GenieRoutingModule } from './genie-routing.module';
-import { NewTriggerDialogComponent } from './planner';
+import {
+    NewGenerationDialogComponent,
+    NewTriggerDialogComponent
+} from './planner';
 import { TeamDetailDialogComponent } from './team-manager';
 
 @NgModule({
@@ -20,6 +23,10 @@ import { TeamDetailDialogComponent } from './team-manager';
     ],
     providers: [],
     declarations: routedComponents,
-    entryComponents: [NewTriggerDialogComponent, TeamDetailDialogComponent]
+    entryComponents: [
+        NewTriggerDialogComponent,
+        NewGenerationDialogComponent,
+        TeamDetailDialogComponent
+    ]
 })
 export class GenieModule {}

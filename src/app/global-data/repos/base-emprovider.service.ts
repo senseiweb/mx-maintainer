@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MetadataBase, SpEntityBase } from '../models';
 import { CustomMetadataHelperService } from '../service-adapter/custom-metadata-helper';
 import { CustomNameConventionService } from '../service-adapter/custom-namingConventionDict';
-import { EmProviderService } from './em-provider.service';
+import { CoreEmProviderService } from './core-em-provider.service';
 
 export class BaseEmProviderService {
     private featureAppSiteName: string;
@@ -25,7 +25,7 @@ export class BaseEmProviderService {
         private metaHelper: CustomMetadataHelperService,
         private appCfg: AppConfig,
         private nameConv: CustomNameConventionService,
-        private emProviderService: EmProviderService,
+        private emProviderService: CoreEmProviderService,
         appSiteName: string,
         private featureNameSpace: string,
         private appEntities: Array<
@@ -66,18 +66,19 @@ export class BaseEmProviderService {
             metadataStore: this.emProviderService.metadataStore
         });
 
-        this.appEntities.forEach(entity => {
-            const e = new entity();
+        this.appEntities.forEach(entityMetadata => {
+            const meta = new entityMetadata();
             const type = this.metaHelper.addTypeToStore(
                 this.emProviderService.metadataStore,
-                e.entityDefinition as any
+                meta.entityDefinition as any
             ) as EntityType;
             this.emProviderService.metadataStore.registerEntityTypeCtor(
                 type.shortName,
-                e.metadataFor,
-                e.initializer
+                meta.metadataFor,
+                meta.initializer
             );
-            e.addDefaultSelect(type);
+            meta.addDefaultSelect(type);
+            meta.transformValidators(type);
         });
 
         this.getRequestDigest();

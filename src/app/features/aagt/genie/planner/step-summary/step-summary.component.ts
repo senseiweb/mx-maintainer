@@ -43,14 +43,14 @@ interface IChangeSet {
 }
 
 @Component({
-    selector: 'genie-plan-step4',
-    templateUrl: './step4.component.html',
-    styleUrls: ['./step4.component.scss'],
+    selector: 'genie-plan-step-summary',
+    templateUrl: './step-summary.component.html',
+    styleUrls: ['./step-summary.component.scss'],
     animations: fuseAnimations,
     encapsulation: ViewEncapsulation.None,
     providers: [MinutesExpand]
 })
-export class Step4Component implements OnInit, OnDestroy {
+export class StepSummaryComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     ignoreProperties = [
         'id',

@@ -13,7 +13,7 @@ export interface ITriggerActionItemShell {
     action?: string;
     duration?: number;
     formattedDuration: string;
-    teamType?: string;
+    teamCategory?: string;
 }
 export class TriggerAction extends ebase.SpEntityBase {
     private _actionItemId: number;
@@ -27,21 +27,27 @@ export class TriggerAction extends ebase.SpEntityBase {
     }
     set sequence(id: number) {
         this._sequence = id;
-        this.title = `${this._actionItemId}/${this._triggerId}/${this._sequence}`;
+        this.title = `${this._actionItemId}/${this._triggerId}/${
+            this._sequence
+        }`;
     }
     get actionItemId(): number {
         return this._actionItemId;
     }
     set actionItemId(id: number) {
         this._actionItemId = id;
-        this.title = `${this.actionItemId}/${this._triggerId}/${this._sequence}`;
+        this.title = `${this.actionItemId}/${this._triggerId}/${
+            this._sequence
+        }`;
     }
     get triggerId(): number {
         return this._triggerId;
     }
     set triggerId(id: number) {
         this._triggerId = id;
-        this.title = `${this._actionItemId}/${this._triggerId}/${this._sequence}`;
+        this.title = `${this._actionItemId}/${this._triggerId}/${
+            this._sequence
+        }`;
     }
     actionItem: ActionItem;
     trigger: Trigger;

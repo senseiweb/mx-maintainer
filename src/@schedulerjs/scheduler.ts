@@ -10,8 +10,8 @@ export interface IWorkAvailableTime {
 
 export class Scheduler {
     private availabilityList: ShiftSchedule[] = [];
-    availStart: _m.Moment;
-    availEnd: _m.Moment;
+    // availStart: _m.Moment;
+    // availEnd: _m.Moment;
     exceptions: Error[] = [];
     constructor(private isNotReservable: boolean) {}
 
@@ -20,6 +20,8 @@ export class Scheduler {
         end?: _m.Moment | Date,
         labourHours?: number
     ): void {
+        console.log(start);
+        console.log(end);
         start = _m.isMoment(start) ? start : _m(start);
         if (!end) {
             end = start.add(1, 'year'); // if no end, set an atributary date one year out from start
@@ -31,12 +33,15 @@ export class Scheduler {
             labourHours,
             this.isNotReservable
         );
+        console.log(newShiftAvailablitiy);
         this.availabilityList.push(newShiftAvailablitiy);
+        console.log(this.availabilityList);
+        // debugger;
         this.availabilityList = this.sort(this.availabilityList);
-        this.availStart = this.availabilityList[0].start;
-        this.availEnd = this.availabilityList[
-            this.availabilityList.length - 1
-        ].end;
+        // this.availStart = this.availabilityList[0].start;
+        // this.availEnd = this.availabilityList[
+        //    this.availabilityList.length - 1
+        // ].end;
     }
 
     get currentAvailableShift(): ShiftSchedule {
@@ -68,9 +73,11 @@ export class Scheduler {
     }
 
     nextAvailableAfter(current: _m.Moment): IWorkAvailableTime {
-        const firstAvailableShift = this.availabilityList.find(
-            a => a.start.isSameOrAfter(current) && !a.isBookedUp
-        );
+        const firstAvailableShift = this.isNotReservable
+            ? this.availabilityList[0]
+            : this.availabilityList.find(
+                  a => a.start.isSameOrAfter(current) && !a.isBookedUp
+              );
         if (firstAvailableShift) {
             return this.nextJobFreeTime(firstAvailableShift);
         }

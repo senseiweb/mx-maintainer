@@ -15,14 +15,14 @@ import { PlannerUowService } from '../planner-uow.service';
 import { NewTriggerDialogComponent } from './new-trigger/new-trigger-dialog';
 
 @Component({
-    selector: 'genie-plan-step2',
-    templateUrl: './step2.component.html',
-    styleUrls: ['./step2.component.scss'],
+    selector: 'genie-plan-trig-actions',
+    templateUrl: './step-trig-action.component.html',
+    styleUrls: ['./step-trig-action.component.scss'],
     animations: fuseAnimations,
     encapsulation: ViewEncapsulation.None,
     providers: [MinutesExpand]
 })
-export class Step2Component implements OnInit, OnDestroy {
+export class StepTrigActionComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     triggers: Trigger[];
     allActionItems: ActionItem[];

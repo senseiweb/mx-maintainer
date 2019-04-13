@@ -24,7 +24,7 @@
                     (selectionChange)="onStepChange($event)"
                     #stepper
                 >
-                    <mat-step [completed]="step1Completed">
+                    <mat-step [completed]="stepperStatus.genAsset.isValid">
                         <ng-template matStepLabel>
                             <span *ngIf="isLinear"
                                 >Provide General Generation Information</span
@@ -33,23 +33,27 @@
                                 >Update Generation Information</span
                             >
                         </ng-template>
-                        <genie-plan-step1></genie-plan-step1>
+                        <genie-plan-gen-asset></genie-plan-gen-asset>
                     </mat-step>
-                    <mat-step [completed]="step2Completed">
+                    <mat-step [completed]="stepperStatus.trigAction.isValid">
                         <ng-template matStepLabel
                             >Specify Triggers & Tasks</ng-template
                         >
-                        <genie-plan-step2></genie-plan-step2>
+                        <genie-plan-trig-actions></genie-plan-trig-actions>
                     </mat-step>
-                    <mat-step [completed]="step3Completed">
+                    <mat-step [completed]="stepperStatus.tmMgr.isValid">
+                        <ng-template matStepLabel>Team Assignement</ng-template>
+                        <genie-plan-step-tm-manager></genie-plan-step-tm-manager>
+                    </mat-step>
+                    <mat-step [completed]="stepperStatus.ataList.isValid">
                         <ng-template matStepLabel
-                            >Generation Assets & Tasks</ng-template
+                            >Asset Trigger Action Items</ng-template
                         >
-                        <genie-plan-step3></genie-plan-step3>
+                        <genie-plan-step-ata-list></genie-plan-step-ata-list>
                     </mat-step>
-                    <mat-step [completed]="step4Completed">
+                    <mat-step [completed]="stepperStatus.summary.isValid">
                         <ng-template matStepLabel>Review Changes</ng-template>
-                        <genie-plan-step4></genie-plan-step4>
+                        <genie-plan-step-summary></genie-plan-step-summary>
                     </mat-step>
                 </mat-horizontal-stepper>
             </div>

@@ -4,11 +4,22 @@ import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
 import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
-import { genStatusEnum, GenerationAsset } from 'app/features/aagt/data';
+import { GenerationAsset, GenStatusEnum } from 'app/features/aagt/data';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from './planner-uow.service';
 
+export type PlannerSteps =
+    | 'genAsset'
+    | 'ataList'
+    | 'summary'
+    | 'tmMgr'
+    | 'trigAction';
+export type IStepperModel = {
+    [key in PlannerSteps]?: {
+        isValid: boolean;
+    }
+};
 @Component({
     selector: 'app-planner',
     templateUrl: './planner.component.html',
@@ -18,10 +29,7 @@ import { PlannerUowService } from './planner-uow.service';
 export class PlannerComponent implements OnInit, CanDeactivateGuard {
     genId: number;
     isLinear: boolean;
-    step1Completed: boolean;
-    step2Completed: boolean;
-    step3Completed: boolean;
-    step4Completed: boolean;
+    stepperStatus: IStepperModel = {} as any;
     genAssetsSelected: GenerationAsset[] = [];
     assignedAssets: GenerationAsset[];
     private unsubscribeAll: Subject<any>;
@@ -64,20 +72,14 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
     ngOnInit() {
         this.genId = this.route.snapshot.params.id;
         this.uow.planGen(this.genId);
-        this.isLinear = this.uow.currentGen.genStatus === genStatusEnum.draft;
+        this.isLinear = this.uow.currentGen.genStatus === GenStatusEnum.draft;
 
-        this.uow.onStep1ValidityChange
+        this.uow.onStepValidityChange
             .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(isValid => (this.step1Completed = isValid));
-        this.uow.onStep2ValidityChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(isValid => (this.step2Completed = isValid));
-        this.uow.onStep3ValidityChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(isValid => (this.step3Completed = isValid));
-        this.uow.onStep4ValidityChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(isValid => (this.step4Completed = isValid));
+            .subscribe(stepStatus => {
+                const key = Object.keys(stepStatus)[0];
+                this.stepperStatus[key].isValid = stepStatus[key];
+            });
         // this.getAlreadyAssignedAssets();
     }
 

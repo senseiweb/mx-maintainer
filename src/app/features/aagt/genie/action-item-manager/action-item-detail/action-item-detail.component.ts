@@ -10,6 +10,7 @@ import { bareEntity } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
 import { ActionItem } from 'app/features/aagt/data';
+import { TeamCategory } from 'app/features/aagt/data/models/team-category';
 import { EntityFormBuilder, EntityFormGroup } from 'app/global-data/';
 import { AimUowService } from '../aim-uow.service';
 
@@ -28,7 +29,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     actionItemForm: EntityFormGroup<ActionItem>;
     formBuilder: EntityFormBuilder<ActionItem>;
     formattedDuration: string;
-    teamTypes: string[];
+    teamCategories: TeamCategory[];
     private unsubscribeAll: Subject<any>;
 
     constructor(
@@ -42,21 +43,27 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     ) {
         this.unsubscribeAll = new Subject();
         this.formBuilder = formBuilder as any;
-        this.teamTypes = this.aimUow.teamTypes;
+        this.teamCategories = this.aimUow.teamCategories;
     }
 
     ngOnInit() {
         this.actionItem = this.aimUow.onActionItemChanged.value;
-        this.pageType = this.actionItem.entityAspect.entityState.isAdded() ? 'new' : 'edit';
+        this.pageType = this.actionItem.entityAspect.entityState.isAdded()
+            ? 'new'
+            : 'edit';
         this.actionItemForm = this.createActionItemForm() as any;
         this.formatMinutes();
 
-        this.aimUow.onActionItemChanged.pipe(takeUntil(this.unsubscribeAll)).subscribe(actionItem => {
-            this.pageType = actionItem.entityAspect.entityState.isAdded() ? 'new' : 'edit';
-            this.actionItem = actionItem;
-            this.actionItemForm = this.createActionItemForm() as any;
-            this.formatMinutes();
-        });
+        this.aimUow.onActionItemChanged
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(actionItem => {
+                this.pageType = actionItem.entityAspect.entityState.isAdded()
+                    ? 'new'
+                    : 'edit';
+                this.actionItem = actionItem;
+                this.actionItemForm = this.createActionItemForm() as any;
+                this.formatMinutes();
+            });
     }
 
     ngOnDestroy() {
@@ -71,7 +78,7 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
             action: new FormControl(ai.action),
             shortCode: new FormControl(ai.shortCode),
             duration: new FormControl(ai.duration),
-            teamType: new FormControl(ai.teamType),
+            teamCategory: new FormControl(ai.teamCategory),
             assignable: new FormControl(ai.assignable),
             notes: new FormControl(ai.notes)
         }) as any;
@@ -99,11 +106,15 @@ export class ActionItemDetailComponent implements OnInit, OnDestroy {
     }
 
     saveActionItem(): void {
-        Object.keys(this.actionItemForm.controls).forEach((key: keyof bareEntity<ActionItem>) => {
-            this.actionItem[key] = this.actionItemForm.get(key).value;
-        });
+        Object.keys(this.actionItemForm.controls).forEach(
+            (key: keyof bareEntity<ActionItem>) => {
+                this.actionItem[key] = this.actionItemForm.get(key).value;
+            }
+        );
         this.aimUow.saveActionItems(this.actionItem).then(() => {
-            this.router.navigate(['../../action-items'], { relativeTo: this.route });
+            this.router.navigate(['../../action-items'], {
+                relativeTo: this.route
+            });
         });
     }
 }

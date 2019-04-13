@@ -1,2 +1,2 @@
 export * from './base-repository.service';
-export * from './em-provider.service';
+export * from './core-em-provider.service';

@@ -9,7 +9,8 @@ import {
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { Observable, Subject } from 'rxjs';
+import * as _ from 'lodash';
+import { from, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 
 import { fuseAnimations } from '@fuse/animations';
@@ -20,7 +21,6 @@ import {
     TriggerAction
 } from 'app/features/aagt/data';
 import { PlannerUowService } from '../../planner-uow.service';
-import { AssetTriggerActionDataSource } from './asset-trigger-action-datasource';
 
 @Component({
     selector: 'asset-trigger-action-list',
@@ -35,7 +35,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
 
     assetTriggerActions: AssetTriggerAction[];
     user: any;
-    dataSource: AssetTriggerActionDataSource | null;
+    dataSource: BehaviorSubject<AssetTriggerAction[]>;
     // displayedColumns = ['checkbox', 'sequence', 'alias', 'action', 'trigger', 'status', 'outcome'];
     displayedColumns = [
         'checkbox',
@@ -62,7 +62,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.dataSource = new AssetTriggerActionDataSource(this.uow);
+        this.dataSource = from(this.uow.currentGen.assetTrigActions);
         this.uow.onAssetTriggerActionChange
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(atas => {

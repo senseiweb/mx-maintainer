@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
-import * as aagtCfg from './_aagt-feature-cfg';
+import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
+import * as aagtCfg from './_aagt-feature-cfg';
+import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 export class ActionItem extends ebase.SpEntityBase {
     action: string;
     shortCode: string;
     duration: number;
-    teamType: string;
+    teamCategoryId: number;
+    teamCategory: TeamCategory;
     // Sharepoint handle yes/no boxes as 0:1 values to represet boolean;
     assignable: boolean;
     notes: string;
@@ -27,20 +30,33 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
         this.entityDefinition.dataProperties.shortCode = {
             dataType: this.dt.String
         };
-        this.entityDefinition.dataProperties.teamType = {
-            dataType: this.dt.String
+        this.entityDefinition.dataProperties.teamCategoryId = {
+            dataType: this.dt.Int16,
+            isNullable: false
         };
-        this.entityDefinition.dataProperties.duration = { dataType: this.dt.Int16 };
-        this.entityDefinition.dataProperties.assignable = { dataType: this.dt.Boolean };
+        this.entityDefinition.dataProperties.duration = {
+            dataType: this.dt.Int16
+        };
+        this.entityDefinition.dataProperties.assignable = {
+            dataType: this.dt.Boolean
+        };
 
         this.entityDefinition.navigationProperties = {
             actionTriggers: {
                 entityTypeName: 'TriggerAction',
                 associationName: 'Action_Trigger',
                 isScalar: false
+            },
+            teamCategory: {
+                entityTypeName: aagtCfg.AagtListName.TeamCategory,
+                associationName: 'TeamCategory_Teams',
+                foreignKeyNames: ['teamCategoryId']
             }
         };
 
-        Object.assign(this.entityDefinition.dataProperties, this.baseDataProperties);
+        Object.assign(
+            this.entityDefinition.dataProperties,
+            this.baseDataProperties
+        );
     }
 }

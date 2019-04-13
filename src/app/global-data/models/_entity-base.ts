@@ -1,7 +1,25 @@
+import { AbstractControl, Validators, ValidatorFn } from '@angular/forms';
 import { DataMembers, Instantiable } from '@ctypes/breeze-type-customization';
-import { DataType, Entity, EntityAspect, EntityType } from 'breeze-client';
+import {
+    DataType,
+    Entity,
+    EntityAspect,
+    EntityType,
+    Validator
+} from 'breeze-client';
+import * as _ from 'lodash';
 import { EntityDefinition } from './custom-entity-def';
 import { SpMetadata } from './sp-metadata';
+
+export interface IValidatorCtx<T> {
+    value: T;
+    name: string;
+    displayName: string;
+    messageTemplate: string;
+    message?: string;
+}
+
+export type IBreezeNgValidator<T> = { [key in keyof T]: Validators[] };
 
 export class SpEntityBase implements Entity {
     private iD: number; // sharepoint includes this property but we dont use it;
@@ -13,6 +31,7 @@ export class SpEntityBase implements Entity {
     authorId: number;
     editorId: number;
     __metadata?: SpMetadata;
+
     // get $typeName(): string {
     //     if (!this.entityAspect) {return; }
     //     return this.entityType.shortName;
@@ -39,6 +58,8 @@ export class MetadataBase<T> {
 
     entityDefinition = new EntityDefinition<T>();
 
+    entityValidators: Validator[];
+
     metadataFor: Instantiable<T>;
 
     constructor(shortName: string) {
@@ -57,7 +78,9 @@ export class MetadataBase<T> {
         if (!customProp || !customProp['defaultSelect']) {
             const selectItems = [];
             type.dataProperties.forEach(prop => {
-                const isExcluded = excludeProps.some(exProp => exProp === prop.name);
+                const isExcluded = excludeProps.some(
+                    exProp => exProp === prop.name
+                );
                 if (!prop.isUnmapped && !isExcluded) {
                     selectItems.push(prop.name);
                 }
@@ -72,5 +95,78 @@ export class MetadataBase<T> {
         return type;
     }
 
-    initializer(_entity: T) {}
+    transformValidators(type: EntityType): void {
+        const customProp = type.custom ? type.custom : {};
+        const valMap = (customProp['validatorMap'] = {});
+        type.dataProperties.forEach(dp => {
+            dp.validators.forEach(validator => {
+                let currentVal: ValidatorFn;
+                switch (validator.name) {
+                    case 'required':
+                        currentVal = Validators.required;
+                        break;
+                    case 'emailAddress':
+                        currentVal = Validators.email;
+                        break;
+                    case 'maxLength':
+                        currentVal = Validators.maxLength(
+                            validator.context.value
+                        );
+                        break;
+                    default:
+                        currentVal = this.bzValidatorWrapper(validator);
+                }
+                if (!currentVal) {
+                    return;
+                }
+                valMap[dp.name] = valMap[dp.name] || [];
+                valMap[dp.name].push(currentVal);
+            });
+        });
+    }
+
+    private bzValidatorWrapper = (validator: Validator): ValidatorFn => {
+        return (c: AbstractControl): { [error: string]: any } => {
+            const result = validator.validate(c.value, validator.context);
+            return result
+                ? { [result.propertyName]: result.errorMessage }
+                : null;
+        };
+    }
+
+    private createValidatorBase(
+        vname: string,
+        validator: (
+            entityOrProp: T | keyof T,
+            ctx: {
+                value: T;
+                name: string;
+                displayName: string;
+                messageTemplate: string;
+                message?: string;
+            }
+        ) => boolean
+    ) {
+        const eValidator = new Validator(vname, validator);
+        this.entityValidators = this.entityValidators
+            ? this.entityValidators
+            : [];
+        this.entityValidators.push(eValidator);
+    }
+
+    protected createEntityValidator(
+        validatorName: string,
+        validator: (entity: T, ctx: IValidatorCtx<T>) => boolean
+    ) {
+        this.createValidatorBase(validatorName, validator);
+    }
+
+    protected createPropValidator(
+        validatorName: string,
+        validator: (entity: keyof T, ctx: IValidatorCtx<T>) => boolean
+    ) {
+        this.createValidatorBase(validatorName, validator);
+    }
+
+    initializer = (_entity: T) => {};
 }

@@ -147,15 +147,21 @@ export class SchedResourceManager {
         const delays: IDelay = {};
         this.initRanges(resources, start, schedules, delays);
         let success = false;
+        let maxtries = 0;
         do {
+            maxtries++;
             reservation = this.tryReservations(schedules, min, max);
             success = reservation.success;
-            this.updateRanges(
-                schedules,
-                this.nextValidStart(schedules),
-                delays
-            );
-        } while (success);
+            if (!success) {
+                this.updateRanges(
+                    schedules,
+                    this.nextValidStart(schedules),
+                    delays
+                );
+            }
+            console.log('after reservation');
+            console.log(reservation);
+        } while (!success && maxtries < 50);
         reservation.delays = delays;
         return reservation;
     }
@@ -173,10 +179,10 @@ export class SchedResourceManager {
     private nextValidStart(ranges: IRange[]): _m.Moment {
         const sortedRanges = _.orderBy(
             ranges,
-            x => x.range.freeTimeStart.format('x'),
+            x => x.range.freeTimeEnd.format('x'),
             ['asc']
         );
-        return sortedRanges[0].range.freeTimeStart;
+        return sortedRanges[0].range.freeTimeEnd;
     }
 
     private setEarliestSubRanges(subRanges: IRange[]): IRange {
@@ -209,7 +215,13 @@ export class SchedResourceManager {
         const resources = schedules
             .filter(r => !isInternal(r.id))
             .map(r => r.id);
+        console.log('try reservation');
+        console.log(start);
+        console.log(end);
+
         let duration = _m.duration(start.diff(end));
+        console.log(duration);
+
         if (
             duration.asMinutes() >= min.asMinutes() ||
             duration.asMinutes() >= max.asMinutes()
@@ -282,9 +294,9 @@ export class SchedResourceManager {
                 this.updateRanges(res.subRanges, start, {});
                 res = this.setEarliestSubRanges(res.subRanges);
             } else {
-                res.range = this.resourceDefs[res.id].available.firstAvailable(
-                    start
-                );
+                res.range = this.resourceMap[
+                    res.id
+                ].schedule.nextAvailableAfter(start);
                 if (res.id !== ResType.Project && !delays[res.id]) {
                     delays[res.id] = {
                         needed: start,

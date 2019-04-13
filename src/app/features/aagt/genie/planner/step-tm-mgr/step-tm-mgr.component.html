@@ -1,0 +1,128 @@
+<div id="gp-step-tm-mgr" class="page-layout simple">
+    <!-- CONTENT -->
+    <div class="content p-24">
+        <div fxLayout="column" fxLayoutAlign="center">
+            <div
+                class="filters"
+                fxLayout="column"
+                fxLayoutAlign="center center"
+                fxLayout.gt-xs="row"
+                fxLayoutAlign.gt-xs="space-between center"
+            >
+                <mat-form-field
+                    appearance="outline"
+                    floatLabel="always"
+                    class="course-search"
+                >
+                    <mat-label>Search for a team</mat-label>
+                    <input
+                        matInput
+                        placeholder="Enter a keyword..."
+                        [(ngModel)]="searchTerm"
+                        (input)="filterCoursesByTerm()"
+                    />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="category-selector">
+                    <mat-label>Team Category</mat-label>
+                    <mat-select
+                        [(ngModel)]="currentCategory"
+                        (selectionChange)="filterCoursesByCategory()"
+                    >
+                        <mat-option [value]="'all'">
+                            All
+                        </mat-option>
+                        <mat-option
+                            *ngFor="let category of teamCategories"
+                            [value]="category.id"
+                        >
+                            {{ category.teamType }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div
+                class="teams"
+                fxLayout="row wrap"
+                fxLayoutAlign="center"
+                [@animateStagger]="{ value: '50' }"
+            >
+                <div
+                    class="team"
+                    *ngFor="let team of filteredTeams"
+                    fxFlex="100"
+                    fxFlex.gt-xs="50"
+                    fxFlex.gt-sm="33"
+                    [ngClass]="team.teamCategory.teamType"
+                    [@animate]="{ value: '*', params: { y: '100%' } }"
+                >
+                    <div
+                        class="team-content"
+                        fxLayout="column"
+                        fxFlex="1 1 auto"
+                    >
+                        <div
+                            class="header"
+                            fxLayout="row"
+                            fxLayoutAlign="center center"
+                            [style.background]="team.teamCategory.teamCatColor"
+                            [ngClass]="team.teamCategory.teamType + '-bg'"
+                        >
+                            <div class="category" fxFlex>
+                                {{ team.teamCategory.teamType }}
+                            </div>
+
+                            <div
+                                class="length"
+                                fxLayout="row"
+                                fxLayoutAlign="center center"
+                            >
+                                <mat-icon class="length-icon s-20"
+                                    >access_time</mat-icon
+                                >
+                                <div class="min">{{ team }} | minExpand</div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="content"
+                            fxLayout="column"
+                            fxLayoutAlign="center center"
+                            fxFlex="1 1 auto"
+                        >
+                            <div class="h1">{{ team.teamName }}</div>
+                            <div class="updated">
+                                Team Size {{ team.numOfMembers }}
+                            </div>
+                        </div>
+
+                        <div
+                            class="footer"
+                            fxLayout="row"
+                            fxLayoutAlign="center center"
+                        >
+                            <button
+                                mat-button
+                                color="accent"
+                                [routerLink]="
+                                    '/apps/academy/courses/' +
+                                    course.id +
+                                    '/' +
+                                    course.slug
+                                "
+                            >
+                                Add Availability
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="no-team" *ngIf="filteredCourses.length === 0">
+                    No teams found!
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / CONTENT -->
+</div>

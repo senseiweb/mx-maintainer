@@ -176,7 +176,8 @@ export class SchedDependencyGraph {
                 return;
             }
             dependsOn.forEach(id => {
-                const parent = this.tasks[dependsOn[id]];
+                const parent = this.tasks[id];
+                parent.requiredBy = parent.requiredBy || [];
                 parent.requiredBy.push(child.id);
             });
         });

@@ -4,7 +4,7 @@
             <span class="title dialog-title">{{ dialogTitle }}</span>
             <button
                 mat-icon-button
-                (click)="dialogRef.close()"
+                (click)="cancel()"
                 aria-label="Close dialog"
             >
                 <mat-icon>close</mat-icon>
@@ -40,16 +40,16 @@
 
             <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
-                    <mat-label>Assigned Team Type</mat-label>
+                    <mat-label>Assigned Team Categories</mat-label>
                     <mat-icon matSuffix class="secondary-text"
                         >account_circle</mat-icon
                     >
-                    <mat-select formControlName="teamType">
+                    <mat-select formControlName="teamCategory">
                         <mat-option
-                            *ngFor="let teamType of teamTypes"
-                            [value]="teamType"
+                            *ngFor="let cats of teamCategories"
+                            [value]="cats"
                         >
-                            {{ teamType }}
+                            {{ cats }}
                         </mat-option>
                     </mat-select>
                 </mat-form-field>

@@ -16,22 +16,16 @@ export class ScheduleManager {
     resourceManager: SchedResourceManager;
     scheduledTasks: SchedDepTask[];
     failedTasks: ScheduleTask[];
-    private longestEnd: _m.Moment;
     constructor(
         private tasks: ScheduleTask[],
-        private resources: ScheduleResource[],
+        resources: ScheduleResource[],
         private sched: any,
-        private scheduleStart: _m.Moment
+        private scheduleStart: _m.Moment,
+        private scheduleEnd: _m.Moment
     ) {
         this.scheduledTasks = [];
         this.failedTasks = [];
         this.dependencyGraph = new SchedDependencyGraph(tasks, scheduleStart);
-        const sortedTask = _.orderBy(
-            this.dependencyGraph.tasks,
-            x => x.lateFinish,
-            ['desc']
-        );
-        this.longestEnd = sortedTask[0].lateFinish;
         this.resourceManager = new SchedResourceManager(
             resources,
             scheduleStart,
@@ -46,9 +40,8 @@ export class ScheduleManager {
      */
     backwardPass(leaves: string[], finishDate: _m.Moment): void {
         leaves.forEach((taskId, index) => {
-            const sTask = this.scheduledTasks[leaves[taskId]];
-            const dependsOn = this.dependencyGraph.tasks[leaves[taskId]]
-                .dependsOn;
+            const sTask = this.scheduledTasks[taskId];
+            const dependsOn = this.dependencyGraph.tasks[taskId].dependsOn;
 
             if (sTask) {
                 sTask.lateFinish = finishDate.clone();
@@ -65,9 +58,10 @@ export class ScheduleManager {
 
     create(): any {
         const ps = new Scheduler(true);
-        ps.availStart = this.scheduleStart.clone();
-        ps.availEnd = this.longestEnd.clone();
-        ps.addShiftAvailability(ps.availStart, ps.availEnd);
+        // ps.availStart = this.scheduleStart.clone();
+        // console.log(this.scheduleEnd);
+        // ps.availEnd = this.scheduleEnd;
+        ps.addShiftAvailability(this.scheduleStart, this.scheduleEnd);
         this.resourceManager.addResource(
             [
                 {
@@ -83,9 +77,11 @@ export class ScheduleManager {
             this.scheduleStart,
             ResType.Task
         );
-
+        debugger;
         this.forwardPass(this.dependencyGraph.roots);
+        debugger;
         const range = this.getSummary(this.tasks, this.failedTasks);
+        debugger;
         this.backwardPass(this.dependencyGraph.leaves, range[1]);
         return {
             scheduledTasks: this.scheduledTasks,
@@ -140,7 +136,7 @@ export class ScheduleManager {
                 return undefined;
             }
             scheduleTask.earlyStart =
-                scheduleTask.earlyStart.clone() || r.start.clone();
+                scheduleTask.earlyStart || r.start.clone();
             scheduleTask.schedule.push(r);
             duration.subtract(r.duration);
             next = r.end.clone();
@@ -159,7 +155,7 @@ export class ScheduleManager {
         let end: _m.Moment;
 
         tasks.forEach((task, index) => {
-            const t = this.scheduledTasks[task[index].id];
+            const t = this.scheduledTasks[task.id];
             if (t) {
                 start =
                     !start || t.earlyStart.isBefore(start)
@@ -167,7 +163,7 @@ export class ScheduleManager {
                         : start;
                 end = !end || t.earlyFinish.isAfter(end) ? t.earlyFinish : end;
             } else {
-                failedTask.push(task[index].id);
+                failedTask.push(task);
             }
         });
         return [start, end];

@@ -6,6 +6,7 @@ export enum AagtListName {
     GenAsset = 'GenerationAsset',
     TeamAvail = 'TeamAvailability',
     Team = 'Team',
+    TeamCategory = 'TeamCategory',
     TriggerAct = 'TriggerAction',
     Trigger = 'Trigger'
 }

@@ -1,30 +1,43 @@
 import { Injectable } from '@angular/core';
 import * as ebase from 'app/global-data';
+import * as _ from 'lodash';
 import { AagtDataModule } from '../aagt-data.module';
 import * as aagtCfg from './_aagt-feature-cfg';
+import { AssetTriggerAction } from './asset-trigger-action';
 import { Assumption } from './assumption';
 import { GenerationAsset } from './generation-asset';
 import { Trigger } from './trigger';
 
-export enum genStatusEnum {
+export enum GenStatusEnum {
     draft = 'Draft',
     planned = 'Planned',
     active = 'Active',
     historical = 'Historical'
 }
 
+export interface IDraftAsset {
+    priority: number;
+    id: number;
+}
+
 export class Generation extends ebase.SpEntityBase {
     title: string;
-    active: boolean;
+    isActive: boolean;
     iso: string;
-    genStatus: genStatusEnum;
+    genStatus: GenStatusEnum;
     assignedAssetCount: number;
     genStartDate: Date;
     genEndDate: Date;
-    draftAssets: number[];
+    draftAssets: IDraftAsset[];
     assumptions: Assumption[];
     triggers: Trigger[];
     generationAssets: GenerationAsset[];
+    get assetTrigActions(): AssetTriggerAction[] {
+        if (!this.generationAssets) {
+            return;
+        }
+        return _.flatMap(this.generationAssets, x => x.assetTriggerActions);
+    }
 }
 
 @Injectable({
@@ -40,7 +53,7 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
             dataType: this.dt.String,
             isNullable: false
         };
-        this.entityDefinition.dataProperties.active = {
+        this.entityDefinition.dataProperties.isActive = {
             dataType: this.dt.Boolean,
             isNullable: false
         };

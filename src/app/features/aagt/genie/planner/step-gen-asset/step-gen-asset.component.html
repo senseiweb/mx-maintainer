@@ -1,0 +1,79 @@
+<div
+    id="gp-step-gen-asset"
+    [@animate]="{ value: '*', params: { y: '100%' } }"
+    fxLayout="row"
+    fxFlex="100"
+    class="widget widget5"
+>
+    <div class="fuse-widget-front">
+        <div
+            class="px-16 border-bottom accent"
+            fxLayout="row"
+            fxLayoutAlign="space-between center"
+        >
+            <div class="h3">Generation Assets</div>
+
+            <div class="h3">
+                {{ currentGen.title }} | ISO:
+                {{ currentGen.iso }}
+            </div>
+            <div fxLayout="row">
+                <button class="mt-8" mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="addModifyGeneration()">
+                        <mat-icon>alarm_on</mat-icon>
+                        <span>Edit Generation Info</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+
+        <div class="ml-24 my-20">
+            <p-pickList
+                [source]="nonSelectedAssets"
+                [target]="selectedAssets"
+                [responsive]="true"
+                sourceHeader="Available Assets"
+                targetHeader="Selected Geneation Assets"
+                (onMoveToTarget)="addRemoveModifyAsset($event)"
+                (onTargetReorder)="addRemoveModifyAsset($event)"
+                (onMoveToSource)="addRemoveModifyAsset($event)"
+                [disabled]="
+                    !currentGen || !currentGen.entityAspect.validateEntity()
+                "
+                [showSourceControls]="false"
+            >
+                <ng-template let-asset pTemplate="item">
+                    <div class="ui-helper-clearfix">
+                        <div [hidden]="!!asset.priority">
+                            <div
+                                fxLayout="row"
+                                fxLayoutAlign="space-around center"
+                            >
+                                {{ asset.alias }}
+                            </div>
+                        </div>
+                        <div [hidden]="!asset.priority">
+                            <div
+                                fxLayout="row"
+                                fxLayoutAlign="space-between center"
+                            >
+                                <span class="w-20-p">{{ asset.priority }}</span>
+                                <span class="w-60-p">{{ asset.alias }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-pickList>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="pt-12">
+            <button mat-raised-button matStepperNext>
+                Next: Assets Action Items
+            </button>
+        </div>
+    </div>
+</div>

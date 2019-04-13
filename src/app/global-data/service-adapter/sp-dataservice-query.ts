@@ -4,13 +4,19 @@ import { QueryResult } from 'breeze-client/src/entity-manager';
 import { CustomDataServiceUtils } from './sp-dataservice-utils';
 
 export class CustomQueryContext {
-    private headers:  { [index: string]: string };
+    private headers: { [index: string]: string };
 
-    constructor(private mappingContext: MappingContext, private utils: CustomDataServiceUtils) {}
+    constructor(
+        private mappingContext: MappingContext,
+        private utils: CustomDataServiceUtils
+    ) {}
 
     query(headers: { [index: string]: string }, ajaxCaller: any): Promise<any> {
         this.mappingContext = this.utils.getDefaultSelect(this.mappingContext);
-        let url = this.utils.getAbsoluteUrl(this.mappingContext.dataService, this.mappingContext.getUrl());
+        let url = this.utils.getAbsoluteUrl(
+            this.mappingContext.dataService,
+            this.mappingContext.getUrl()
+        );
 
         // Add query params if .withParameters was used
         const query = this.mappingContext.query as EntityQuery;
@@ -20,8 +26,9 @@ export class CustomQueryContext {
             const sep = url.indexOf('?') < 0 ? '?' : '&';
             url = url + sep + paramString;
         }
-        const reqDigest = this.mappingContext.entityManager.dataService.requestDigest;
-        
+        const reqDigest = this.mappingContext.entityManager.dataService
+            .requestDigest;
+
         if (reqDigest) {
             headers['X-RequestDigest'] = reqDigest;
         }
@@ -44,7 +51,9 @@ export class CustomQueryContext {
 
         for (const i in obj) {
             if (obj.hasOwnProperty(i)) {
-                parts.push(`${encodeURIComponent(i)}=${encodeURIComponent(obj[i])}`);
+                parts.push(
+                    `${encodeURIComponent(i)}=${encodeURIComponent(obj[i])}`
+                );
             }
         }
         return parts.join('&');

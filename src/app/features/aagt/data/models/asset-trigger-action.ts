@@ -10,12 +10,19 @@ import { TriggerAction } from './trigger-action';
 export class AssetTriggerAction extends ebase.SpEntityBase {
     sequence: number;
     actionStatus:
+        | 'Planned'
         | 'Unscheduled'
         | 'In-progress'
         | 'Scheduled'
         | 'Rescheduled'
         | 'Delayed';
-    outcome: 'PCW' | 'On-time' | 'Under-time' | 'Over-time' | 'Blamed';
+    outcome:
+        | 'PCW'
+        | 'completed [on-time]'
+        | 'completed [early]'
+        | 'completed [late]'
+        | 'blamed'
+        | 'untouched';
     plannedStart: Date;
     plannedStop: Date;
     scheduledStart: Date;
@@ -26,6 +33,7 @@ export class AssetTriggerAction extends ebase.SpEntityBase {
     completedByTeam?: Team;
     genAssetId: number;
     triggerActionId: number;
+    isConcurrentable: boolean;
     genAsset: GenerationAsset;
     triggerAction: TriggerAction;
     preDeleteState: EntityState;
@@ -41,13 +49,21 @@ export class AssetTriggerActionMetadata extends ebase.MetadataBase<
         super(aagtCfg.AagtListName.AssetTrigAct);
         this.entityDefinition.dataProperties.actionStatus = {
             dataType: this.dt.String,
-            spInternalName: 'Title'
+            spInternalName: 'Title',
+            isNullable: false
         };
         this.entityDefinition.dataProperties.sequence = {
-            dataType: this.dt.Int16
+            dataType: this.dt.Int16,
+            isNullable: false
         };
+
         this.entityDefinition.dataProperties.outcome = {
-            dataType: this.dt.String
+            dataType: this.dt.String,
+            isNullable: false
+        };
+        this.entityDefinition.dataProperties.isConcurrentable = {
+            dataType: this.dt.Boolean,
+            isNullable: false
         };
         this.entityDefinition.dataProperties.plannedStart = {
             dataType: this.dt.DateTime
