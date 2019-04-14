@@ -82,11 +82,9 @@ export class NewGenerationDialogComponent implements OnInit, OnDestroy {
 
         const formModel: GenFormModel = {} as any;
         const genType = gen.entityType;
-        console.log(gen);
 
         this.modelProps.forEach(prop => {
             const dp = gen[prop] as DataProperty;
-            console.log(dp);
             formModel[prop] = new FormControl(
                 prop,
                 genType.custom['validatorMap'][prop]

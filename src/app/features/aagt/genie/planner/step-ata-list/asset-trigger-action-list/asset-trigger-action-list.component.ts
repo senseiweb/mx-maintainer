@@ -8,7 +8,7 @@ import {
     ViewEncapsulation
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog, MatDialogRef, MatTableDataSource } from '@angular/material';
 import * as _ from 'lodash';
 import { from, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
@@ -35,7 +35,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
 
     assetTriggerActions: AssetTriggerAction[];
     user: any;
-    dataSource: BehaviorSubject<AssetTriggerAction[]>;
+    dataSource: MatTableDataSource<AssetTriggerAction>;
     // displayedColumns = ['checkbox', 'sequence', 'alias', 'action', 'trigger', 'status', 'outcome'];
     displayedColumns = [
         'checkbox',
@@ -62,17 +62,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.dataSource = from(this.uow.currentGen.assetTrigActions);
-        this.uow.onAssetTriggerActionChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(atas => {
-                console.log(atas);
-                this.assetTriggerActions = atas;
-                this.checkboxes = {};
-                atas.map(ata => {
-                    this.checkboxes[ata.id] = false;
-                });
-            });
+        this.dataSource = new MatTableDataSource(this.uow.currentGen.assetTrigActions);
 
         // this._contactsService.onSelectedContactsChanged
         //     .pipe(takeUntil(this._unsubscribeAll))

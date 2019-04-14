@@ -18,11 +18,11 @@
                 {{ completionTime | minutesExpand }}
             </div>
             <div fxLayout="row">
-                <form [formGroup]="triggerFormGroup">
+                <form [formGroup]="triggerSelectionFormGroup" novalidate>
                     <mat-form-field floatLabel="never">
                         <mat-select
                             placeholder="Select Trigger"
-                            formControlName="trigger"
+                            formControlName="triggerSelect"
                             [compareWith]="compareTrigger"
                         >
                             <mat-option
@@ -65,7 +65,7 @@
 
         <div class="ml-24 my-20">
             <p-pickList
-                [source]="allActionItems"
+                [source]="allActionItems | async"
                 [target]="selectedActionItems"
                 [responsive]="true"
                 sourceHeader="Available Action Items"
