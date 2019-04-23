@@ -1,0 +1,131 @@
+<div class="dialog-content-wrapper">
+    <mat-toolbar matDialogTitle class="mat-accent m-0">
+        <mat-toolbar-row fxLayout="row" fxLayoutAlign="space-between center">
+            <span class="title dialog-title">{{ dialogTitle }}</span>
+            <button
+                mat-icon-button
+                (click)="cancel()"
+                aria-label="Close dialog"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-toolbar-row>
+        <!-- 
+        <mat-toolbar-row
+            class="toolbar-bottom py-16"
+            fxLayout="column"
+            fxLayoutAlign="center center"
+        >
+            <div class="contact-name mt-8"></div>
+        </mat-toolbar-row> -->
+    </mat-toolbar>
+
+    <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
+        <form [formGroup]="triggerFormGroup">
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>Trigger Milestone</mat-label>
+                    <mat-icon matSuffix class="secondary-text"
+                        >brightness_auto</mat-icon
+                    >
+                    <input
+                        name="milestone"
+                        formControlName="milestone"
+                        matInput
+                    />
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>Trigger Date Range</mat-label>
+                    <mat-icon
+                        [owlDateTimeTrigger]="triggerRangePicker"
+                        matSuffix
+                        class="secondary-text"
+                        >date_range</mat-icon
+                    >
+                    <input
+                        matInput
+                        name="triggerDateRange"
+                        formControlName="triggerDateRange"
+                        placeholder="Trigger Dates"
+                        [selectMode]="'range'"
+                        [owlDateTime]="triggerRangePicker"
+                        [min]="generationStart"
+                        [max]="generationStop"
+                    />
+                    <owl-date-time
+                        [pickerMode]="'dialog'"
+                        [stepMinute]="30"
+                        #triggerRangePicker
+                    ></owl-date-time>
+                </mat-form-field>
+            </div>
+
+            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
+                <mat-form-field appearance="outline" fxFlex>
+                    <input
+                        matInput
+                        name="triggerStart"
+                        formControlName="triggerStart"
+                        placeholder="Trigger Start"
+                        [selectMode]="'rangeFrom'"
+                        [owlDateTimeTrigger]="triggerStartPicker"
+                        [owlDateTime]="triggerStartPicker"
+                    />
+                    <owl-date-time
+                        [pickerMode]="'dialog'"
+                        #triggerStartPicker
+                    ></owl-date-time>
+                </mat-form-field>
+            </div> -->
+
+            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
+                <mat-form-field appearance="outline" fxFlex>
+                    <input
+                        matInput
+                        name="triggerStop"
+                        [selectMode]="'rangeTo'"
+                        formControlName="triggerStop"
+                        placeholder="Trigger Stop"
+                        [owlDateTimeTrigger]="triggerStopPicker"
+                        [owlDateTime]="triggerStopPicker"
+                    />
+                    <owl-date-time #triggerStopPicker></owl-date-time>
+                </mat-form-field>
+            </div> -->
+        </form>
+    </div>
+
+    <div
+        mat-dialog-actions
+        class="m-0 p-16"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+    >
+        <button
+            mat-stroked-button
+            color="warn"
+            class="mr-8"
+            (click)="deleteTrigger()"
+            aria-label="Delete"
+            matTooltip="Delete"
+        >
+            <span *ngIf="!triggerIsNew()">DELETE</span>
+            <span *ngIf="triggerIsNew()">CANCEL</span>
+        </button>
+        <button
+            *ngIf="triggerIsNew()"
+            mat-stroked-button
+            color="accent"
+            class="save-button"
+            (click)="acceptChanges()"
+            [disabled]="triggerFormGroup.invalid"
+            aria-label="ADD"
+        >
+            <span *ngIf="!triggerIsNew()">UPDATE</span>
+            <span *ngIf="triggerIsNew()">ADD</span>
+        </button>
+    </div>
+</div>

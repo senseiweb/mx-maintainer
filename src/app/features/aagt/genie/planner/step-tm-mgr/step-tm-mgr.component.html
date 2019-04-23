@@ -1,7 +1,11 @@
 <div id="gp-step-tm-mgr" class="page-layout simple">
     <!-- CONTENT -->
-    <div class="content p-24">
-        <div fxLayout="column" fxLayoutAlign="center">
+    <div class="content">
+        <div
+            fxLayout="column"
+            fxLayoutAlign="center"
+            [formGroup]="filteredFormGroup"
+        >
             <div
                 class="filters"
                 fxLayout="column"
@@ -12,29 +16,33 @@
                 <mat-form-field
                     appearance="outline"
                     floatLabel="always"
-                    class="course-search"
+                    class="team-search"
                 >
                     <mat-label>Search for a team</mat-label>
                     <input
                         matInput
-                        placeholder="Enter a keyword..."
-                        [(ngModel)]="searchTerm"
-                        (input)="filterCoursesByTerm()"
+                        placeholder="Search team ..."
+                        formControlName="searchTerm"
+                        name="searchTerm"
                     />
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="category-selector">
+                <mat-form-field
+                    appearance="outline"
+                    floatLabel="always"
+                    class="category-selector"
+                >
                     <mat-label>Team Category</mat-label>
                     <mat-select
-                        [(ngModel)]="currentCategory"
-                        (selectionChange)="filterCoursesByCategory()"
+                        [compareWith]="compareCategories"
+                        formControlName="currentCategory"
                     >
-                        <mat-option [value]="'all'">
+                        <mat-option>
                             All
                         </mat-option>
                         <mat-option
                             *ngFor="let category of teamCategories"
-                            [value]="category.id"
+                            [value]="category"
                         >
                             {{ category.teamType }}
                         </mat-option>
@@ -50,11 +58,11 @@
             >
                 <div
                     class="team"
-                    *ngFor="let team of filteredTeams"
+                    *ngFor="let team of filteredTeams; trackBy: team?.id"
                     fxFlex="100"
                     fxFlex.gt-xs="50"
                     fxFlex.gt-sm="33"
-                    [ngClass]="team.teamCategory.teamType"
+                    [ngClass]="team.teamCategory"
                     [@animate]="{ value: '*', params: { y: '100%' } }"
                 >
                     <div
@@ -66,8 +74,7 @@
                             class="header"
                             fxLayout="row"
                             fxLayoutAlign="center center"
-                            [style.background]="team.teamCategory.teamCatColor"
-                            [ngClass]="team.teamCategory.teamType + '-bg'"
+                            [ngClass]="team.teamCategory.teamCatColor"
                         >
                             <div class="category" fxFlex>
                                 {{ team.teamCategory.teamType }}
@@ -78,10 +85,9 @@
                                 fxLayout="row"
                                 fxLayoutAlign="center center"
                             >
-                                <mat-icon class="length-icon s-20"
-                                    >access_time</mat-icon
-                                >
-                                <div class="min">{{ team }} | minExpand</div>
+                                <div class="updated">
+                                    Team Size {{ team.numTeamMembers }}
+                                </div>
                             </div>
                         </div>
 
@@ -92,8 +98,11 @@
                             fxFlex="1 1 auto"
                         >
                             <div class="h1">{{ team.teamName }}</div>
-                            <div class="updated">
-                                Team Size {{ team.numOfMembers }}
+                            <mat-icon class="length-icon s-20"
+                                >access_time</mat-icon
+                            >
+                            <div class="min">
+                                {{ team.totalAvailDuringGen | minutesExpand }}
                             </div>
                         </div>
 
@@ -105,12 +114,7 @@
                             <button
                                 mat-button
                                 color="accent"
-                                [routerLink]="
-                                    '/apps/academy/courses/' +
-                                    course.id +
-                                    '/' +
-                                    course.slug
-                                "
+                                (click)="openTeam(team)"
                             >
                                 Add Availability
                             </button>
@@ -118,7 +122,7 @@
                     </div>
                 </div>
 
-                <div class="no-team" *ngIf="filteredCourses.length === 0">
+                <div class="no-team" *ngIf="filteredTeams.length === 0">
                     No teams found!
                 </div>
             </div>

@@ -1,23 +1,24 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import * as _ from 'lodash';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
+import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Assumption } from './assumption';
 import { GenerationAsset } from './generation-asset';
 import { Trigger } from './trigger';
 
 export enum GenStatusEnum {
-    draft = 'Draft',
-    planned = 'Planned',
-    active = 'Active',
-    historical = 'Historical'
+    Draft = 'Draft',
+    Planned = 'Planned',
+    Active = 'Active',
+    Historical = 'Historical'
 }
 
 export interface IDraftAsset {
     priority: number;
-    id: number;
+    asset: Asset;
 }
 
 export class Generation extends ebase.SpEntityBase {
@@ -28,7 +29,7 @@ export class Generation extends ebase.SpEntityBase {
     assignedAssetCount: number;
     genStartDate: Date;
     genEndDate: Date;
-    draftAssets: IDraftAsset[];
+    // draftAssets: Map<number, IDraftAsset>;
     assumptions: Assumption[];
     triggers: Trigger[];
     generationAssets: GenerationAsset[];
@@ -47,7 +48,7 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
     metadataFor = Generation;
 
     constructor() {
-        super(aagtCfg.AagtListName.Gen);
+        super(SpListName.Generation);
 
         this.entityDefinition.dataProperties.title = {
             dataType: this.dt.String,
@@ -79,12 +80,12 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
 
         this.entityDefinition.navigationProperties = {
             triggers: {
-                entityTypeName: aagtCfg.AagtListName.Trigger,
+                entityTypeName: SpListName.Trigger,
                 associationName: 'Generation_Triggers',
                 isScalar: false
             },
             generationAssets: {
-                entityTypeName: aagtCfg.AagtListName.GenAsset,
+                entityTypeName: SpListName.GenerationAsset,
                 associationName: 'Generation_Assets',
                 isScalar: false
             }
@@ -94,5 +95,15 @@ export class GenerationMetadata extends ebase.MetadataBase<Generation> {
             this.entityDefinition.dataProperties,
             this.baseDataProperties
         );
+
+        this.initializer = (_entity: Generation) => {
+            // _entity.draftAssets = new Map();
+            // _entity.generationAssets.forEach(ga => {
+            //     _entity.draftAssets.set(ga.assetId, {
+            //         priority: ga.mxPosition,
+            //         asset: ga.asset
+            //     });
+            // });
+        };
     }
 }

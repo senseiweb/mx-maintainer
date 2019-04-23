@@ -1,17 +1,18 @@
-import { AdapterType, BaseAdapter, BreezeConfig } from 'breeze-client/src/config';
-
-import { HttpResponse, SaveContext, SaveResult } from 'breeze-client/src/entity-manager';
-
 import { AjaxAdapter } from 'breeze-client/src/interface-registry';
 
 import { OData3BatchService } from '@odata';
 import { CustomDataServiceUtils } from 'app/global-data/service-adapter/sp-dataservice-utils';
 import { Entity, EntityKey } from 'breeze-client';
-import { EntityType } from 'breeze-client/src/entity-metadata';
 
+// tslint:disable: interface-name
+// tslint:disable: jsdoc-format
+// tslint:disable: ban-types
 declare module 'breeze-client/src/config' {
     interface BreezeConfig {
-        getAdapterInstance<T extends BaseAdapter>(interfaceName: AdapterType, adapterName?: string): AjaxAdapter;
+        getAdapterInstance<T extends BaseAdapter>(
+            interfaceName: AdapterType,
+            adapterName?: string
+        ): AjaxAdapter;
     }
     interface BaseAdapter {
         utils?: CustomDataServiceUtils;
@@ -56,10 +57,9 @@ declare module 'breeze-client/src/entity-manager' {
     // }
     // not subclasses of Error
     /**
-    For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
-    @adapter (see [[IDataServiceAdapter]])
-    @hidden @internal
-    */
+     * For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
+     * @adapter (see [[IDataServiceAdapter]])
+     * @hidden @internal */
     export interface EntityErrorFromServer {
         entityTypeName: string;
         keyValues: any[];
@@ -70,10 +70,10 @@ declare module 'breeze-client/src/entity-manager' {
     }
 
     /** Shape of a save error returned from the server.
-For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
-@adapter (see [[IDataServiceAdapter]])
-@hidden @internal
-*/
+     * For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
+     * @adapter (see [[IDataServiceAdapter]])
+     * @hidden @internal
+     * */
     export interface SaveErrorFromServer extends ServerError {
         entityErrors: EntityErrorFromServer[];
     }

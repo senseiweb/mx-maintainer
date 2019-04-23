@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { GenerationAsset } from './generation-asset';
 
 export class Asset extends ebase.SpEntityBase {
@@ -16,7 +16,7 @@ export class AssetMetadata extends ebase.MetadataBase<Asset> {
     metadataFor = Asset;
 
     constructor() {
-        super(aagtCfg.AagtListName.Asset);
+        super(SpListName.Asset);
         this.entityDefinition.dataProperties.alias = {
             dataType: this.dt.String,
             spInternalName: 'Title',

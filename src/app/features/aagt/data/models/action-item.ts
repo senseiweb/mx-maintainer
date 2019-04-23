@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 export class ActionItem extends ebase.SpEntityBase {
@@ -22,12 +22,14 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
     metadataFor = ActionItem;
 
     constructor() {
-        super(aagtCfg.AagtListName.ActionItem);
+        super(SpListName.ActionItem);
         this.entityDefinition.dataProperties.action = {
+            isNullable: false,
             dataType: this.dt.String,
             spInternalName: 'Title'
         };
         this.entityDefinition.dataProperties.shortCode = {
+            isNullable: false,
             dataType: this.dt.String
         };
         this.entityDefinition.dataProperties.teamCategoryId = {
@@ -48,7 +50,7 @@ export class ActionItemMetadata extends ebase.MetadataBase<ActionItem> {
                 isScalar: false
             },
             teamCategory: {
-                entityTypeName: aagtCfg.AagtListName.TeamCategory,
+                entityTypeName: SpListName.TeamCategory,
                 associationName: 'TeamCategory_Teams',
                 foreignKeyNames: ['teamCategoryId']
             }

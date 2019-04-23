@@ -27,22 +27,30 @@ export class OData3BatchService {
         return new OData3Changeset(uuid);
     }
 
-    createRequest(method: string, url: string, data: {}, contentId: string, requestHeaders: { [index: string]: string }): OData3Request {
+    createRequest(
+        method: string,
+        url: string,
+        data: {},
+        contentId: string,
+        requestHeaders: { [index: string]: string }
+    ): OData3Request {
         return new OData3Request(method, url, data, contentId, requestHeaders);
     }
 
-    async submitBatch(batch: OData3Batch): Promise<{ responses: OData3Response[]; rawResponse: HttpResponse }> {
+    async submitBatch(
+        batch: OData3Batch
+    ): Promise<{ responses: OData3Response[]; rawResponse: HttpResponse }> {
         const batchRequest = batch.getBatchRequest();
-        try {
-            const rawResponse = (await this.http
-                .post(batchRequest.url, batchRequest.body, { headers: batchRequest.headers, responseType: 'text', observe: 'response' })
-                .toPromise()) as any;
-            console.log(rawResponse);
-            const responses = this.parseBatchResponse(rawResponse);
-            return { responses, rawResponse };
-        } catch (error) {
-            throw new Error(error);
-        }
+        const rawResponse = (await this.http
+            .post(batchRequest.url, batchRequest.body, {
+                headers: batchRequest.headers,
+                responseType: 'text',
+                observe: 'response'
+            })
+            .toPromise()) as any;
+        console.log(rawResponse);
+        const responses = this.parseBatchResponse(rawResponse);
+        return { responses, rawResponse };
     }
 
     private parseBatchResponse(response: Response): any[] {
@@ -67,26 +75,39 @@ export class OData3BatchService {
         // console.log(batchParts);
         const batchPartBoundaryTypeRegex = RegExp('boundary=(.+)', 'm');
 
-        batchParts.forEach((batchPart, index) => {
+        batchParts.forEach(batchPart => {
             if (!this.contentTypeRegExp.test(batchPart)) {
                 return;
             }
 
             // console.log("-- Content for Batch Part " + i);
             // For each batch part, check to see if the part is a changeset.
-            const changeSetBoundaryMatch = batchPart.match(batchPartBoundaryTypeRegex);
+            const changeSetBoundaryMatch = batchPart.match(
+                batchPartBoundaryTypeRegex
+            );
             // console.log("----Boundary Search for item " + i)
             if (changeSetBoundaryMatch) {
                 // console.log("----Boundary Found for item " + i)
                 // console.log(changeSetBoundaryMatch)
                 // console.log("Getting changeset")
                 const changeSetBoundary = changeSetBoundaryMatch[1];
-                const changeSetContentRegex = RegExp('(--' + changeSetBoundary + '\r\n[^]+--' + changeSetBoundary + ')', 'i');
+                const changeSetContentRegex = RegExp(
+                    '(--' +
+                        changeSetBoundary +
+                        '\r\n[^]+--' +
+                        changeSetBoundary +
+                        ')',
+                    'i'
+                );
                 const changeSetBody = batchPart.match(changeSetContentRegex);
                 // console.log("changeSetBody")
                 // console.log(changeSetBody)
-                const changeSetPartRegex = RegExp('--' + changeSetBoundary + '(?:\r\n)?(?:--\r\n)?');
-                const changeSetParts = changeSetBody[1].split(changeSetPartRegex);
+                const changeSetPartRegex = RegExp(
+                    '--' + changeSetBoundary + '(?:\r\n)?(?:--\r\n)?'
+                );
+                const changeSetParts = changeSetBody[1].split(
+                    changeSetPartRegex
+                );
                 // console.log("changeSetParts")
                 // console.log(changeSetParts);
                 // console.log("Getting Changeset Parts");
@@ -192,7 +213,9 @@ export class OData3BatchService {
             ResponseText: httpDesc,
             Headers: httpHeaders,
             Data: response[2].match(/.*/)[0],
-            Success: +httpCode.substring(0, 1) !== 4 && +httpCode.substring(0, 1) !== 5
+            Success:
+                +httpCode.substring(0, 1) !== 4 &&
+                +httpCode.substring(0, 1) !== 5
         };
         return responseOut;
     }

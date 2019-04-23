@@ -1,21 +1,20 @@
 import { Injectable } from '@angular/core';
-import { ActionItemDetailComponent } from './action-item-detail.component';
+import { MatDialog } from '@angular/material';
 import { CanDeactivate } from '@angular/router';
 import { SaveModalDialogComponent } from 'app/common';
-import { MatDialog } from '@angular/material';
-
+import { ActionItemDetailDialogComponent } from './action-item-detail.dialog';
 
 @Injectable()
-export class ActionItemDeactiveGuard implements CanDeactivate<ActionItemDetailComponent> {
+export class ActionItemDeactiveGuard
+    implements CanDeactivate<ActionItemDetailDialogComponent> {
+    constructor(private saveDialog: MatDialog) {}
 
-    constructor(private saveDialog: MatDialog) { }
+    canDeactivate(component: ActionItemDetailDialogComponent): boolean {
+        if (!component) {
+            return true;
+        }
 
-    canDeactivate(component: ActionItemDetailComponent, ): boolean {
-        if (!component.hasUnsavedChanges()) { return true; }
-
-        const dialog = this.saveDialog.open(SaveModalDialogComponent, {
-
-        });
+        const dialog = this.saveDialog.open(SaveModalDialogComponent, {});
 
         dialog.afterClosed().subscribe(result => {
             return result === 'continue';

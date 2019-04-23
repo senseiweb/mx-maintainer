@@ -32,14 +32,14 @@
 
         <div class="ml-24 my-20">
             <p-pickList
-                [source]="nonSelectedAssets"
-                [target]="selectedAssets"
+                [source]="unSelectedCahched"
+                [target]="selectedCached"
                 [responsive]="true"
                 sourceHeader="Available Assets"
                 targetHeader="Selected Geneation Assets"
-                (onMoveToTarget)="addRemoveModifyAsset($event)"
-                (onTargetReorder)="addRemoveModifyAsset($event)"
-                (onMoveToSource)="addRemoveModifyAsset($event)"
+                (onMoveToTarget)="addAsset($event)"
+                (onTargetReorder)="rePrioritize($event)"
+                (onMoveToSource)="removeAsset($event)"
                 [disabled]="
                     !currentGen || !currentGen.entityAspect.validateEntity()
                 "

@@ -1,5 +1,13 @@
 import { AbstractControl, Validators, ValidatorFn } from '@angular/forms';
-import { DataMembers, Instantiable } from '@ctypes/breeze-type-customization';
+import {
+    bareEntity,
+    DataMembers,
+    EntityChildren,
+    FilterEntityCollection,
+    Instantiable,
+    Omit
+} from '@ctypes/breeze-type-customization';
+import { SpListName } from 'app/app-config.service';
 import {
     DataType,
     Entity,
@@ -20,18 +28,43 @@ export interface IValidatorCtx<T> {
 }
 
 export type IBreezeNgValidator<T> = { [key in keyof T]: Validators[] };
+type SpEntityType = Omit<EntityType, 'custom'>;
+
+export interface ISpEntityType extends SpEntityType {
+    custom?: {
+        defaultSelect?: string;
+        validatorMap?: {
+            [index: string]: ValidatorFn[];
+        };
+    };
+}
 
 export class SpEntityBase implements Entity {
     private iD: number; // sharepoint includes this property but we dont use it;
+    // client-side only; soft delete options
+    isSoftDeleted: boolean;
     entityAspect: EntityAspect;
-    entityType: EntityType;
+    entityType: ISpEntityType;
     id: number;
     modified: Date;
     created: Date;
     authorId: number;
     editorId: number;
-    __metadata?: SpMetadata;
-
+    __metadata: SpMetadata;
+    createChild = <T extends FilterEntityCollection<this>>(
+        entityType: keyof typeof SpListName,
+        defaultProps?: bareEntity<T>
+    ): T => {
+        const em = this.entityAspect.entityManager;
+        try {
+            // creates and attaches itself to the current em;
+            const newEntity = em.createEntity(entityType, defaultProps);
+            return (newEntity as any) as T;
+        } catch (e) {
+            const err = new Error(e);
+            console.log(err);
+        }
+    }
     // get $typeName(): string {
     //     if (!this.entityAspect) {return; }
     //     return this.entityType.shortName;
@@ -62,42 +95,46 @@ export class MetadataBase<T> {
 
     metadataFor: Instantiable<T>;
 
-    constructor(shortName: string) {
+    constructor(shortName: keyof typeof SpListName) {
         this.entityDefinition.shortName = shortName;
         this.entityDefinition.defaultResourceName = `web/lists/getByTitle('${shortName}')/items`;
     }
 
-    addDefaultSelect(type: EntityType): EntityType {
-        const customProp = type.custom;
+    addDefaultSelect(type: ISpEntityType): ISpEntityType {
         const excludeProps = ['__metadata'];
 
         if (type.isComplexType) {
             return;
         }
 
-        if (!customProp || !customProp['defaultSelect']) {
-            const selectItems = [];
-            type.dataProperties.forEach(prop => {
-                const isExcluded = excludeProps.some(
-                    exProp => exProp === prop.name
-                );
-                if (!prop.isUnmapped && !isExcluded) {
-                    selectItems.push(prop.name);
-                }
-            });
-            if (selectItems.length) {
-                if (!customProp) {
-                    type.custom = {};
-                }
-                type.custom = { defaultSelect: selectItems.join(',') };
-            }
+        if (type.custom && !type.custom.defaultSelect) {
+            return type;
         }
+        const selectItems = [];
+        type.dataProperties.forEach(prop => {
+            const isExcluded = excludeProps.some(
+                exProp => exProp === prop.name
+            );
+            if (!prop.isUnmapped && !isExcluded) {
+                selectItems.push(prop.name);
+            }
+        });
+
+        if (!selectItems.length) {
+            return type;
+        }
+        const selectList = selectItems.join(',');
+
+        type.custom = type.custom
+            ? (type.custom.defaultSelect = selectList)
+            : ({ defaultSelect: selectList } as any);
+
         return type;
     }
 
-    transformValidators(type: EntityType): void {
+    transformValidators(type: ISpEntityType): void {
         const customProp = type.custom ? type.custom : {};
-        const valMap = (customProp['validatorMap'] = {});
+        const valMap = (customProp.validatorMap = {});
         type.dataProperties.forEach(dp => {
             dp.validators.forEach(validator => {
                 let currentVal: ValidatorFn;

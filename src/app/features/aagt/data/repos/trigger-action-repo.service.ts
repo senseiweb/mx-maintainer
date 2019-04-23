@@ -1,42 +1,13 @@
 import { Injectable } from '@angular/core';
-import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
-import { EntityState } from 'breeze-client';
+import { SpListName } from 'app/app-config.service';
+import { BaseRepoService } from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';
-import { AagtListName, Trigger, TriggerAction } from '../models';
+import { TriggerAction } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class TriggerActionRepoService extends BaseRepoService<TriggerAction> {
     constructor(emService: AagtEmProviderService) {
-        super(AagtListName.TriggerAct, emService);
+        super(SpListName.TriggerAction, emService);
     }
-
-    createTrigAction(data: {
-        triggerId: number;
-        actionItemId: number;
-    }): TriggerAction {
-        return this.createBase(data);
-    }
-
-    // recoverDeletedTrigAction(data: {
-    //     triggerId: number;
-    //     actionItemId: number;
-    // }): TriggerAction | undefined {
-    //     const deletedTrigActions = this.entityManager.getEntities(
-    //         this.entityType,
-    //         EntityState.Deleted
-    //     ) as TriggerAction[];
-
-    //     const recoveredTrigAction = deletedTrigActions.filter(
-    //         ta =>
-    //             ta.triggerId === data.triggerId &&
-    //             ta.actionItemId === data.actionItemId
-    //     )[0];
-
-    //     if (recoveredTrigAction) {
-    //         recoveredTrigAction.entityAspect.setModified();
-    //         return recoveredTrigAction;
-    //     }
-    //     return undefined;
-    // }
 }

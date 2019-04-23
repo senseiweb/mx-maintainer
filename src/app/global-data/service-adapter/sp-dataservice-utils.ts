@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
     core,
     AbstractDataServiceAdapter,
@@ -18,6 +19,7 @@ export class CustomDataServiceUtils {
     requestDigest: string;
     spWeb: SP.Web;
     spCtx: SP.ClientContext;
+    httpClient: HttpClient;
 
     clientTypeNameToServer(clientTypeName: string): string {
         return `SP.Data.${clientTypeName}ListItem`;
@@ -52,7 +54,11 @@ export class CustomDataServiceUtils {
 
         const saveContext = response.saveContext;
 
-        let tmp = errObj.Message || errObj.ExceptionMessage || errObj.EntityErrors || errObj.Errors;
+        let tmp =
+            errObj.Message ||
+            errObj.ExceptionMessage ||
+            errObj.EntityErrors ||
+            errObj.Errors;
         const isDotNet = !!tmp;
         let message: string, entityErrors: any[];
         if (!isDotNet) {
@@ -73,7 +79,9 @@ export class CustomDataServiceUtils {
                 entityErrors.map(e => {
                     return {
                         errorName: e.ErrorName,
-                        entityTypeName: MetadataStore.normalizeTypeName(e.EntityTypeName),
+                        entityTypeName: MetadataStore.normalizeTypeName(
+                            e.EntityTypeName
+                        ),
                         keyValues: e.KeyValues,
                         propertyName: e.PropertyName,
                         errorMessage: e.ErrorMessage
@@ -82,7 +90,9 @@ export class CustomDataServiceUtils {
         }
 
         if (saveContext && entityErrors) {
-            const propNameFn = saveContext.entityManager.metadataStore.namingConvention.serverPropertyNameToClient;
+            const propNameFn =
+                saveContext.entityManager.metadataStore.namingConvention
+                    .serverPropertyNameToClient;
             entityErrors.forEach(e => {
                 e.propertyName = e.propertyName && propNameFn(e.propertyName);
             });
@@ -103,7 +113,12 @@ export class CustomDataServiceUtils {
         // If no protocol, turn base into an absolute URI
         if (window && serviceName.indexOf('//') < 0) {
             // no protocol; make it absolute
-            base = window.location.protocol + '//' + window.location.host + (core.stringStartsWith(serviceName, '/') ? '' : '/') + base;
+            base =
+                window.location.protocol +
+                '//' +
+                window.location.host +
+                (core.stringStartsWith(serviceName, '/') ? '' : '/') +
+                base;
         }
         return base + url;
     }
@@ -117,19 +132,26 @@ export class CustomDataServiceUtils {
         if (!entityType) {
             return mappingContext;
         }
-        const defaultSelect = entityType.custom && entityType.custom['defaultSelect'];
+        const defaultSelect =
+            entityType.custom && entityType.custom['defaultSelect'];
         mappingContext.query = query.select(defaultSelect);
         return mappingContext;
     }
 
-    getRequestDigestHeaders(defaultHeaders: { [index: string]: string }): { [index: string]: string } {
+    getRequestDigestHeaders(defaultHeaders: {
+        [index: string]: string;
+    }): { [index: string]: string } {
         if (!this.requestDigest) {
             return defaultHeaders;
         }
         return { 'X-RequestDigest': this.requestDigest };
     }
 
-    handleHttpErrors(reject: (reason: any) => void, response: HttpResponse, messagePrefix?: string): void {
+    handleHttpErrors(
+        reject: (reason: any) => void,
+        response: HttpResponse,
+        messagePrefix?: string
+    ): void {
         const err = this.createError(response);
         AbstractDataServiceAdapter._catchNoConnectionError(err);
 
@@ -145,7 +167,9 @@ export class CustomDataServiceUtils {
         }
         const propDataType = prop.dataType as DataType;
         if (propDataType === DataType.DateTimeOffset) {
-            val = val && new Date(val.getTime() - val.getTimezoneOffset() * 60000);
+            val =
+                val &&
+                new Date(val.getTime() - val.getTimezoneOffset() * 60000);
         } else if (prop.dataType) {
             // quoteJsonOData
             val = val != null ? val.toString() : val;

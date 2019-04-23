@@ -6,7 +6,11 @@ import {
 } from '@angular/core';
 import { IAppConfig } from '@ctypes/app-config';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import { AppConfig } from './app-config.service';
+import {
+    cfgFetchUserData,
+    cfgSetNavStructure,
+    SpConfig
+} from './app-config.service';
 import {
     rollbarFactory,
     AppErrorHandler,
@@ -21,23 +25,20 @@ import { UserModule } from './user/user.module';
 export const tokens: Map<string, InjectionToken<IAppConfig>> = new Map();
 tokens.set('tokenName', new InjectionToken<IAppConfig>('tokenName'));
 
-function loadCtx(
-    appConfig: AppConfig,
-    fuseNav: FuseNavigationService
-): () => Promise<boolean> {
+function loadCtx(fuseNav: FuseNavigationService): () => Promise<boolean> {
     return (): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             const spCtx = SP.ClientContext.get_current();
             const spWeb = spCtx.get_web();
-            appConfig.fuseNavigation = fuseNav;
+            SpConfig.cfgFuseNavService = fuseNav;
             spCtx.load(spWeb);
             spCtx.executeQueryAsync(
                 (sender, args) => {
-                    appConfig.sharepointMainAppSite = spWeb.get_url();
-                    appConfig.spClientCtx = spCtx;
-                    appConfig.spWeb = spWeb;
-                    appConfig.fetchUserData().then(() => {
-                        appConfig.setNavStructure();
+                    SpConfig.cfgSharepointMainAppSite = spWeb.get_url();
+                    SpConfig.spClientCtx = spCtx;
+                    SpConfig.spWeb = spWeb;
+                    cfgFetchUserData().then(() => {
+                        cfgSetNavStructure();
                         resolve(true);
                     });
                 },
@@ -57,7 +58,7 @@ function loadCtx(
             provide: APP_INITIALIZER,
             useFactory: loadCtx,
             multi: true,
-            deps: [AppConfig, FuseNavigationService]
+            deps: [FuseNavigationService]
         }
         // {
         //     provide: tokens.get('tokenName'),

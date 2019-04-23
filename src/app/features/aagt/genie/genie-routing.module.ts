@@ -2,24 +2,26 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {
     ActionItemsComponent,
-    ActionItemDetailComponent
+    ActionItemDetailDialogComponent
 } from './action-item-manager';
 import { AimUowService } from './action-item-manager/aim-uow.service';
-import { GenieBaseComponent } from './genie-base/genie-base.component';
-import { ListGenyComponent } from './list-geny/list-geny.component';
+import { GenListComponent } from './gen-list/gen-list.component';
+import { GenieBaseComponent } from './genie-base.component';
 import {
     AssetTriggerActionListComponent,
     AssetTriggerSidebarComponent,
-    NewGenerationDialogComponent,
+    GenerationDetailDialogComponent,
     PlannerComponent,
     PlannerUowService,
     StepAtaListComponent,
     StepGenAssetComponent,
     StepSummaryComponent,
-    StepTrigActionComponent
+    StepTrigActionComponent,
+    TriggerDetailDialogComponent
 } from './planner';
 
-import { NewTriggerDialogComponent } from './planner/step-trig-action/new-trigger/new-trigger-dialog';
+import { StepTeamManagerComponent } from './planner/step-tm-mgr/step-tm-mgr-component';
+import { TmAvailDetailDialogComponent } from './planner/step-tm-mgr/team-avail-detail/tm-avail-detail.dialog';
 import { TeamDetailDialogComponent } from './team-manager';
 import { TeamListComponent } from './team-manager/team-list/team-list.component';
 import { TeamUowService } from './team-manager/team-uow.service';
@@ -27,8 +29,9 @@ import { TeamUowService } from './team-manager/team-uow.service';
 export const routedComponents = [
     GenieBaseComponent,
     ActionItemsComponent,
-    ActionItemDetailComponent,
-    ListGenyComponent,
+    ActionItemDetailDialogComponent,
+    TmAvailDetailDialogComponent,
+    GenListComponent,
     TeamListComponent,
     PlannerComponent,
     StepGenAssetComponent,
@@ -37,9 +40,10 @@ export const routedComponents = [
     StepSummaryComponent,
     AssetTriggerSidebarComponent,
     AssetTriggerActionListComponent,
-    NewTriggerDialogComponent,
+    TriggerDetailDialogComponent,
     TeamDetailDialogComponent,
-    NewGenerationDialogComponent
+    StepTeamManagerComponent,
+    GenerationDetailDialogComponent
 ];
 
 const featureRoutes: Routes = [
@@ -53,7 +57,7 @@ const featureRoutes: Routes = [
             },
             {
                 path: 'list',
-                component: ListGenyComponent
+                component: GenListComponent
             },
             {
                 path: 'planner/:id',
@@ -61,19 +65,23 @@ const featureRoutes: Routes = [
                 resolve: { init: PlannerUowService },
                 children: [
                     {
-                        path: 'step1',
+                        path: 'step-gen-assets',
                         component: StepGenAssetComponent
                     },
                     {
-                        path: 'step2',
+                        path: 'step-trigger-actions',
                         component: StepTrigActionComponent
                     },
                     {
-                        path: 'step3',
+                        path: 'step-team-availability',
+                        component: StepTeamManagerComponent
+                    },
+                    {
+                        path: 'step-asset-trigger-actions',
                         component: StepAtaListComponent
                     },
                     {
-                        path: 'step4',
+                        path: 'step-summary',
                         component: StepSummaryComponent
                     }
                 ]
@@ -87,7 +95,7 @@ const featureRoutes: Routes = [
             },
             {
                 path: 'action-items/:id',
-                component: ActionItemDetailComponent,
+                component: ActionItemDetailDialogComponent,
                 resolve: {
                     actionItems: AimUowService
                 }

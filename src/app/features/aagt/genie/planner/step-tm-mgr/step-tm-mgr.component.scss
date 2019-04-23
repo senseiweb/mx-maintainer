@@ -54,7 +54,7 @@
 
     .content {
         .category-selector {
-            min-width: 320px;
+            min-width: 200px;
         }
 
         .filters {
@@ -67,7 +67,7 @@
                 margin: 0 auto;
             }
 
-            .course-search {
+            .team-search {
                 width: 320px;
 
                 @include media-breakpoint('gt-xs') {
@@ -87,11 +87,11 @@
                 text-align: center;
             }
 
-            .course {
+            .team {
                 padding: 16px;
 
                 &:hover {
-                    .course-content {
+                    .team-content {
                         border: none;
                         @include mat-elevation(12);
                     }

@@ -4,17 +4,18 @@ import { MatDialog, MatDialogConfig } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
 import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
-import { GenerationAsset, GenStatusEnum } from 'app/features/aagt/data';
 import { Observable, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
+import { GenStatusEnum } from '../../data';
 import { PlannerUowService } from './planner-uow.service';
 
-export type PlannerSteps =
-    | 'genAsset'
-    | 'ataList'
-    | 'summary'
-    | 'tmMgr'
-    | 'trigAction';
+export enum PlannerSteps {
+    'GenAsset',
+    'AtaList',
+    'Summary',
+    'TmMgr',
+    'TrigAction'
+}
 export type IStepperModel = {
     [key in PlannerSteps]?: {
         isValid: boolean;
@@ -30,8 +31,6 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
     genId: number;
     isLinear: boolean;
     stepperStatus: IStepperModel = {} as any;
-    genAssetsSelected: GenerationAsset[] = [];
-    assignedAssets: GenerationAsset[];
     private unsubscribeAll: Subject<any>;
 
     constructor(
@@ -72,20 +71,26 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
     ngOnInit() {
         this.genId = this.route.snapshot.params.id;
         this.uow.planGen(this.genId);
-        this.isLinear = this.uow.currentGen.genStatus === GenStatusEnum.draft;
+        this.isLinear = this.uow.currentGen.genStatus === GenStatusEnum.Draft;
+
+        // Object.keys(PlannerSteps).forEach(k => {
+        //     this.stepperStatus[k] = { isValid: false };
+        // });
 
         this.uow.onStepValidityChange
             .pipe(takeUntil(this.unsubscribeAll))
             .subscribe(stepStatus => {
                 const key = Object.keys(stepStatus)[0];
-                this.stepperStatus[key].isValid = stepStatus[key];
+                if (!key) {
+                    return;
+                }
+                this.stepperStatus[key] = stepStatus[key];
             });
         // this.getAlreadyAssignedAssets();
     }
 
-    onStepChange($event: StepperSelectionEvent): void {
-        this.uow.onStepperChange.next($event);
-    }
+    onStepChange = ($event: StepperSelectionEvent) =>
+        this.uow.onStepperChange.next($event)
 
     private confirmDeleteUnsavedData(): void {
         const dialogCfg = new MatDialogConfig();

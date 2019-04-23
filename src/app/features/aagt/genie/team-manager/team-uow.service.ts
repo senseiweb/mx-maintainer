@@ -1,115 +1,68 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { SaveResult } from 'breeze-client';
+import { forkJoin, BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import {
     AagtDataModule,
     Team,
     TeamCategory,
     TeamCategoryRepoService
 } from '../../data';
+import { AagtEmProviderService } from '../../data/aagt-emprovider.service';
 import { TeamRepoService } from '../../data/repos/team-repo.service';
 
 @Injectable({ providedIn: AagtDataModule })
 export class TeamUowService implements Resolve<any> {
-    teams: Team[];
-    onTeamListChange: BehaviorSubject<Team[]>;
-    onTeamChange: BehaviorSubject<Team>;
+    allTeams: Team[] = [];
+    currentTeam: Team;
     routeParams: any;
-    teamCategories: TeamCategory[];
+    teamCategories: TeamCategory[] = [];
+    isSaving: Observable<boolean>;
 
     constructor(
         private teamRepo: TeamRepoService,
-        private teamCatRepo: TeamCategoryRepoService
+        private teamCatRepo: TeamCategoryRepoService,
+        aagtEmService: AagtEmProviderService
     ) {
-        this.onTeamListChange = new BehaviorSubject([]);
-        this.onTeamChange = new BehaviorSubject({} as any);
+        this.isSaving = aagtEmService.onSaveInProgressChange;
     }
 
-    resolve(route: ActivatedRouteSnapshot): Promise<any> {
-        return new Promise((resolve, reject) => {
-            if (route.params.id) {
-                return Promise.all([
-                    this.fetchAllTeams(),
-                    this.fetchTeamCategories(),
-                    this.getTeam(route.params.id)
-                ])
-                    .then(resolve)
-                    .catch(e => {
-                        reject(e);
-                        throw new Error(e);
-                    });
-            }
-            return Promise.all([
-                this.fetchAllTeams(),
-                this.fetchTeamCategories()
-            ])
-                .then(resolve)
-                .catch(e => {
-                    reject(e);
-                    throw new Error(e);
-                });
-        });
+    resolve(route: ActivatedRouteSnapshot): Observable<any> {
+        return forkJoin(
+            this.teamCatRepo.all.pipe(
+                tap(teamCats => (this.teamCategories = teamCats))
+            ),
+            this.teamRepo.all.pipe(tap(teams => (this.allTeams = teams)))
+        );
     }
 
-    fetchAllTeams(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.teamRepo
-                .all()
-                .then(allTeams => {
-                    this.onTeamListChange.next(allTeams);
-                    resolve();
-                })
-                .catch(e => {
-                    reject(e);
-                    throw new Error(e);
-                });
-        });
+    createTeamCategory(): TeamCategory {
+        return this.teamCatRepo.create();
     }
 
-    fetchTeamCategories(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.teamCatRepo
-                .all()
-                .then(teamCats => {
-                    this.teamCategories = teamCats;
-                    resolve();
-                })
-                .catch(e => {
-                    reject(e);
-                    throw new Error(e);
-                });
-        });
+    createTeam(): Team {
+        return this.teamRepo.create();
     }
 
-    getTeam(id: string): Promise<void> {
-        let newTeam: Team;
-        return new Promise((resolve, reject) => {
-            if (id === 'new') {
-                newTeam = this.teamRepo.create();
-                this.onTeamChange.next(newTeam);
-                return resolve();
-            }
-            this.teamRepo
-                .withId(+id)
-                .then(team => {
-                    this.onTeamChange.next(team);
-                    return resolve();
-                })
-                .catch(e => {
-                    reject(e);
-                    throw new Error(e);
-                });
-        });
+    async getTeam(id: string): Promise<Team> {
+        const team = await this.teamRepo.withId(+id);
+
+        return team;
     }
 
-    saveTeam(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.teamRepo
-                .saveEntityChanges()
-                .then(() => {
-                    return resolve();
-                })
-                .catch(reject);
-        });
+    async saveTeamCategory(): Promise<SaveResult> {
+        if (this.teamCatRepo.hasChanges()) {
+            const teamCatSaveResult = await this.teamCatRepo.saveEntityChanges();
+            this.teamCategories = this.teamCatRepo.whereInCache();
+            return teamCatSaveResult;
+        }
+        return Promise.resolve(undefined);
+    }
+
+    async saveTeam(): Promise<SaveResult> {
+        const result = await this.teamRepo.saveEntityChanges();
+        this.allTeams = this.teamRepo.whereInCache();
+        return result;
     }
 }

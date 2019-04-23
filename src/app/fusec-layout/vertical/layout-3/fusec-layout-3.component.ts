@@ -2,10 +2,8 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import { AppConfig } from 'app/app-config.service';
-import { GlobalUserRepo } from 'app/global-data/repos/user-repo.serivce';
+import { FuseConfigService } from '@fuse/services/config.service';
 
 @Component({
     selector: 'fusec-vertical-layout-3',
@@ -20,19 +18,24 @@ export class FusecVerticalLayout3Component implements OnInit, OnDestroy {
     // Private
     private _unsubscribeAll: Subject<any>;
 
-    constructor(private _navService: FuseNavigationService, private _fuseConfigService: FuseConfigService, private userRepo: GlobalUserRepo) {
+    constructor(
+        private _navService: FuseNavigationService,
+        private _fuseConfigService: FuseConfigService
+    ) {
         // Set the private defaults
         this._unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
-        this.userRepo.setNavStruct();
+        // this.userRepo.setNavStruct();
         // Set the defaults
         this.navigation = this._navService.getCurrentNavigation();
         // Subscribe to config changes
-        this._fuseConfigService.config.pipe(takeUntil(this._unsubscribeAll)).subscribe(config => {
-            this.fuseConfig = config;
-        });
+        this._fuseConfigService.config
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(config => {
+                this.fuseConfig = config;
+            });
     }
 
     ngOnDestroy(): void {

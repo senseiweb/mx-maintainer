@@ -1,34 +1,14 @@
-import {
-    Component,
-    Input,
-    OnDestroy,
-    OnInit,
-    ViewEncapsulation
-} from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogConfig } from '@angular/material';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
+import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
-import {
-    AagtListName,
-    ActionItem,
-    Generation,
-    ITriggerActionItemShell,
-    Trigger,
-    TriggerAction
-} from 'app/features/aagt/data';
-import { AagtEmProviderService } from 'app/features/aagt/data/aagt-emprovider.service';
+import { Trigger } from 'app/features/aagt/data';
 import { SpEntityBase } from 'app/global-data';
-import {
-    Entity,
-    EntityAction,
-    EntityProperty,
-    EntityState,
-    SaveResult
-} from 'breeze-client';
+import { SaveResult } from 'breeze-client';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
+import { PlannerSteps } from '../planner.component';
 
 interface IChangeSet {
     entity: SpEntityBase;
@@ -131,79 +111,92 @@ export class StepSummaryComponent implements OnInit, OnDestroy {
 
     reset(): void {
         this.uow.rejectAllChanges();
-
-        this.uow.onStep1ValidityChange.next(false);
+        this.uow.onStepValidityChange.next({
+            [PlannerSteps[PlannerSteps.Summary]]: {
+                isValid: false
+            }
+        });
     }
 
     async saveChanges(): Promise<void> {
         let saveResult: SaveResult;
 
         const genChanges = this.changeSet.some(
-            cs => cs.shortName === AagtListName.Gen
+            cs => cs.shortName === SpListName.Generation
         );
         if (genChanges) {
-            this.setSavingStatus(AagtListName.Gen);
+            this.setSavingStatus(SpListName.Generation);
             try {
-                saveResult = await this.uow.saveGeneration();
+                saveResult = await this.uow.saveEntityChanges(
+                    SpListName.Generation
+                );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    AagtListName.Gen
+                    SpListName.Generation
                 );
             } catch (e) {}
         }
 
         const trigChanges = this.changeSet.some(
-            cs => cs.shortName === AagtListName.Trigger
+            cs => cs.shortName === SpListName.Trigger
         );
         if (trigChanges) {
-            this.setSavingStatus(AagtListName.Trigger);
+            this.setSavingStatus(SpListName.Trigger);
             try {
-                saveResult = await this.uow.saveTriggers();
+                saveResult = await this.uow.saveEntityChanges(
+                    SpListName.Trigger
+                );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    AagtListName.Trigger
+                    SpListName.Trigger
                 );
             } catch (e) {}
         }
 
         const genAssetChanages = this.changeSet.some(
-            cs => cs.shortName === AagtListName.GenAsset
+            cs => cs.shortName === SpListName.GenerationAsset
         );
         if (genAssetChanages) {
-            this.setSavingStatus(AagtListName.GenAsset);
+            this.setSavingStatus(SpListName.GenerationAsset);
             try {
-                saveResult = await this.uow.saveGenAssets();
+                saveResult = await this.uow.saveEntityChanges(
+                    SpListName.GenerationAsset
+                );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    AagtListName.GenAsset
+                    SpListName.GenerationAsset
                 );
             } catch (e) {}
         }
 
         const trigActions = this.changeSet.some(
-            cs => cs.shortName === AagtListName.TriggerAct
+            cs => cs.shortName === SpListName.TriggerAction
         );
         if (trigActions) {
-            this.setSavingStatus(AagtListName.TriggerAct);
+            this.setSavingStatus(SpListName.TriggerAction);
             try {
-                saveResult = await this.uow.saveTrigActions();
+                saveResult = await this.uow.saveEntityChanges(
+                    SpListName.TriggerAction
+                );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    AagtListName.TriggerAct
+                    SpListName.TriggerAction
                 );
             } catch (e) {}
         }
 
         const assetTrigActs = this.changeSet.some(
-            cs => cs.shortName === AagtListName.AssetTrigAct
+            cs => cs.shortName === SpListName.AssetTriggerAction
         );
         if (assetTrigActs) {
-            this.setSavingStatus(AagtListName.AssetTrigAct);
+            this.setSavingStatus(SpListName.AssetTriggerAction);
             try {
-                saveResult = await this.uow.saveAssetTrigActions();
+                saveResult = await this.uow.saveEntityChanges(
+                    SpListName.AssetTriggerAction
+                );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    AagtListName.AssetTrigAct
+                    SpListName.AssetTriggerAction
                 );
             } catch (e) {}
         }

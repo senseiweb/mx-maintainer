@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Trigger } from './trigger';
@@ -61,7 +61,7 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
     metadataFor = TriggerAction;
 
     constructor() {
-        super(aagtCfg.AagtListName.TriggerAct);
+        super(SpListName.TriggerAction);
         this.entityDefinition.dataProperties.title = {
             dataType: this.dt.String,
             isNullable: false
@@ -89,17 +89,17 @@ export class TriggerActionMetadata extends ebase.MetadataBase<TriggerAction> {
 
         this.entityDefinition.navigationProperties = {
             trigger: {
-                entityTypeName: aagtCfg.AagtListName.Trigger,
+                entityTypeName: SpListName.Trigger,
                 associationName: 'Trigger_Action',
                 foreignKeyNames: ['triggerId']
             },
             actionItem: {
-                entityTypeName: aagtCfg.AagtListName.ActionItem,
+                entityTypeName: SpListName.ActionItem,
                 associationName: 'Action_Trigger',
                 foreignKeyNames: ['actionItemId']
             },
             assetTriggerActions: {
-                entityTypeName: aagtCfg.AagtListName.AssetTrigAct,
+                entityTypeName: SpListName.AssetTriggerAction,
                 associationName: 'TrigAsset_AssetTrigAction',
                 isScalar: false
             }

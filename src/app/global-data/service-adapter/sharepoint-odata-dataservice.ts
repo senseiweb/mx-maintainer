@@ -5,11 +5,7 @@ import { CustomDataServiceUtils } from './sp-dataservice-utils';
 import {
     config,
     core,
-    AbstractDataServiceAdapter,
-    ChangeRequestInterceptor,
-    DataService,
     DataServiceAdapter,
-    EntityQuery,
     EntityType,
     HttpResponse,
     JsonResultsAdapter,
@@ -57,7 +53,7 @@ export class SpODataDataService implements DataServiceAdapter {
     extractSaveResults = (serializeData: string) => {
         let jsonData = serializeData;
         // Sharepoint deletes sends back an empty string
-        if (serializeData === '') {
+        if (!serializeData) {
             return serializeData;
         }
         if (typeof serializeData === 'string') {
@@ -102,7 +98,7 @@ export class SpODataDataService implements DataServiceAdapter {
         return new JsonResultsAdapter(jraConfig);
     }
 
-    saveChanges(
+    async saveChanges(
         saveContext: SaveContext,
         saveBundle: SaveBundle
     ): Promise<SaveResult> {
@@ -116,7 +112,8 @@ export class SpODataDataService implements DataServiceAdapter {
                       this.utils,
                       this.defaultHeaders
                   );
-        return saver.save();
+        const saveResult = await saver.save();
+        return saveResult;
     }
 
     visitNode = (

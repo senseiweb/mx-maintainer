@@ -62,7 +62,23 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.dataSource = new MatTableDataSource(this.uow.currentGen.assetTrigActions);
+        this.dataSource = new MatTableDataSource(
+            this.uow.currentGen.assetTrigActions
+        );
+        this.dataSource.filterPredicate = this.filterPedicate();
+
+        this.uow.onFilterChange
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(fc => {
+                const filterData: { alias?: string; milestone?: string } = {};
+                if (fc.asset.filterText !== 'all' && fc.asset.filterText) {
+                    filterData.alias = fc.asset.filterText;
+                }
+                if (fc.trigger.filterText !== 'all' && fc.trigger.filterText) {
+                    filterData.milestone = fc.trigger.filterText;
+                }
+                this.dataSource.filter = JSON.stringify(filterData);
+            });
 
         // this._contactsService.onSelectedContactsChanged
         //     .pipe(takeUntil(this._unsubscribeAll))
@@ -145,6 +161,30 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
         //     }
         //     this.confirmDialogRef = null;
         // });
+    }
+
+    filterPedicate(): (data: AssetTriggerAction, filter: string) => boolean {
+        return (data: AssetTriggerAction, filter: string): boolean => {
+            const filterParams: {
+                alias?: string;
+                milestone: string;
+            } = JSON.parse(filter);
+            const alias = filterParams.alias;
+            const milestone = filterParams.milestone;
+            if (alias && milestone) {
+                return (
+                    data.genAsset.asset.alias === alias &&
+                    data.triggerAction.trigger.milestone === milestone
+                );
+            }
+            if (alias) {
+                return data.genAsset.asset.alias === alias;
+            }
+            if (milestone) {
+                return data.triggerAction.trigger.milestone === milestone;
+            }
+            return false;
+        };
     }
 
     onSelectedChange(contactId): void {

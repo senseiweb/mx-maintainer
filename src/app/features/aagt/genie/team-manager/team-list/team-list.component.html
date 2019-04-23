@@ -102,7 +102,9 @@
                         >Team Type</mat-header-cell
                     >
                     <mat-cell *matCellDef="let team">
-                        <p class="text-truncate">{{ team.teamCategory }}</p>
+                        <p class="text-truncate">
+                            {{ team.teamCategory?.teamType }}
+                        </p>
                     </mat-cell>
                 </ng-container>
 
@@ -117,7 +119,7 @@
                     >
                     <mat-cell *matCellDef="let team" fxHide fxShow.gt-md>
                         <p class="text-truncate">
-                            {{ team.numberOfTeamMembers }}
+                            {{ team.numTeamMembers }}
                         </p>
                     </mat-cell>
                 </ng-container>

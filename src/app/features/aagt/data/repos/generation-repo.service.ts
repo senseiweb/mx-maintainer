@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
 import * as breeze from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';
-import { AagtListName, Generation, GenStatusEnum } from '../models';
+import { Generation, GenStatusEnum } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class GenerationRepoService extends BaseRepoService<Generation> {
     constructor(entityService: AagtEmProviderService) {
-        super(AagtListName.Gen, entityService);
+        super(SpListName.Generation, entityService);
     }
 
     createDraftGen(): Generation {
@@ -19,6 +20,6 @@ export class GenerationRepoService extends BaseRepoService<Generation> {
         if (existingDraft) {
             return existingDraft;
         }
-        return this.createBase({ genStatus: GenStatusEnum.draft });
+        return this.createBase({ genStatus: GenStatusEnum.Draft });
     }
 }

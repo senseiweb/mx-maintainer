@@ -1,7 +1,7 @@
 <div class="dialog-content-wrapper">
     <mat-toolbar matDialogTitle class="mat-accent m-0">
         <mat-toolbar-row fxLayout="row" fxLayoutAlign="space-between center">
-            <span class="title dialog-title">{{ dialogTitle }}</span>
+            <span class="title dialog-title">{{ dialogTitle }} </span>
             <button
                 mat-icon-button
                 (click)="cancel()"
@@ -10,16 +10,6 @@
                 <mat-icon>close</mat-icon>
             </button>
         </mat-toolbar-row>
-
-        <mat-toolbar-row
-            class="toolbar-bottom py-16"
-            fxLayout="column"
-            fxLayoutAlign="center center"
-        >
-            <div class="contact-name mt-8">
-                {{ currentGen.title }}
-            </div>
-        </mat-toolbar-row>
     </mat-toolbar>
 
     <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
@@ -27,20 +17,22 @@
             <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
                     <mat-label>Generation Title</mat-label>
-                    <mat-icon matSuffix class="secondary-text"
-                        >account_circle</mat-icon
-                    >
-                    <input name="title" formControlName="title" matInput />
+                    <input
+                        name="title"
+                        maxlength="25"
+                        formControlName="title"
+                        matInput
+                    />
                 </mat-form-field>
             </div>
 
             <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
-                    <mat-label>In Supprt Of</mat-label>
-                    <mat-icon matSuffix class="secondary-text"
-                        >account_circle</mat-icon
-                    >
+                    <mat-label>In Support Of</mat-label>
                     <mat-select formControlName="iso">
+                        <mat-option [value]=""
+                            >Select Supportted Operation</mat-option
+                        >
                         <mat-option *ngFor="let iso of allIsos" [value]="iso">
                             {{ iso }}
                         </mat-option>
@@ -52,7 +44,7 @@
                 <mat-form-field appearance="outline" fxFlex>
                     <mat-label>Generation Status</mat-label>
                     <mat-icon matSuffix class="secondary-text"
-                        >account_circle</mat-icon
+                        >storage</mat-icon
                     >
                     <mat-select formControlName="genStatus">
                         <mat-option
@@ -78,25 +70,33 @@
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="!rangeSet">
+            <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>Geneation Execution Dates</mat-label>
+                    <mat-icon
+                        [owlDateTimeTrigger]="planRangePicker"
+                        matSuffix
+                        class="secondary-text"
+                        >date_range</mat-icon
+                    >
                     <input
                         matInput
-                        name="getRangeDate"
+                        name="planDateRange"
                         formControlName="planDateRange"
                         placeholder="Planned Range"
                         [selectMode]="'range'"
-                        [owlDateTimeTrigger]="planRangePickert"
-                        [owlDateTime]="planRangePickert"
+                        [owlDateTime]="planRangePicker"
                     />
                     <owl-date-time
                         [pickerMode]="'dialog'"
-                        #planRangePickert
-                    ></owl-date-time>
+                        [panelClass]="'dateDialog'"
+                        #planRangePicker
+                    >
+                    </owl-date-time>
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
+            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
                 <mat-form-field appearance="outline" fxFlex>
                     <input
                         matInput
@@ -125,9 +125,12 @@
                         [owlDateTimeTrigger]="planStopPicker"
                         [owlDateTime]="planStopPicker"
                     />
-                    <owl-date-time #planStopPicker></owl-date-time>
+                    <owl-date-time
+                        [pickerMode]="'dialog'"
+                        #planStopPicker
+                    ></owl-date-time>
                 </mat-form-field>
-            </div>
+            </div> -->
         </form>
     </div>
 
@@ -138,8 +141,9 @@
         fxLayoutAlign="end center"
     >
         <button
-            *ngIf="action === 'edit'"
-            mat-button
+            *ngIf="formMode === 'edit'"
+            mat-stroked-button
+            color="warn"
             class="mr-8"
             (click)="deleteGeneration()"
             aria-label="Delete"
@@ -149,8 +153,9 @@
         </button>
 
         <button
-            *ngIf="action !== 'edit'"
-            mat-button
+            *ngIf="formMode !== 'edit'"
+            mat-stroked-button
+            color="accent"
             class="save-button"
             (click)="saveChanges()"
             [disabled]="genFormGroup.invalid"
@@ -160,8 +165,9 @@
         </button>
 
         <button
-            *ngIf="action === 'edit'"
-            mat-button
+            *ngIf="formMode === 'edit'"
+            mat-stroked-button
+            color="accent"
             class="save-button"
             (click)="saveChanges()"
             [disabled]="genFormGroup.invalid"

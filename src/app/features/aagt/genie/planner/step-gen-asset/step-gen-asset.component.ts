@@ -2,12 +2,14 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
 
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { Asset, Generation } from 'app/features/aagt/data';
-import { Observable, Subject } from 'rxjs';
+import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { SpListName } from 'app/app-config.service';
+import { Asset, Generation, GenerationAsset } from 'app/features/aagt/data';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
-import { IStepperModel } from '../planner.component';
-import { NewGenerationDialogComponent } from './new-generation/new-generation.dialog';
+import { IStepperModel, PlannerSteps } from '../planner.component';
+import { GenerationDetailDialogComponent } from './gen-detail/gen-detail.dialog';
 
 @Component({
     selector: 'genie-plan-gen-asset',
@@ -17,11 +19,10 @@ import { NewGenerationDialogComponent } from './new-generation/new-generation.di
     animations: fuseAnimations
 })
 export class StepGenAssetComponent implements OnInit, OnDestroy {
-    nonSelectedAssets: Asset[] = [];
-    selectedAssets: Asset[] = [];
+    unSelectedCahched: Asset[] = [];
+    selectedCached: Asset[] = [];
     currentGen: Generation;
     isoOperations: string[];
-    // genAssetsSelected = [];
     private unsubscribeAll: Subject<any>;
 
     constructor(private uow: PlannerUowService, private genDialog: MatDialog) {
@@ -33,30 +34,22 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
             setTimeout(() => this.addModifyGeneration(), 1500);
         }
         this.currentGen = this.uow.currentGen;
-        this.uow.onStepperChange.subscribe(stepEvent => {
-            if (stepEvent.previouslySelectedIndex === 0) {
-                this.uow.assetSelectionCheck();
-                // Object.keys(this.step1FormGroup.controls).forEach(
-                //     (key: keyof bareEntity<Generation>) => {
-                //         const field = this.step1FormGroup.get(key);
-                //         if (field.dirty) {
-                //             this.uow.currentGen[key] = field.value;
-                //         }
-                //     }
-                // );
+        const assignedAssets = this.currentGen.generationAssets;
+        const assets = this.uow.allAssets;
+        assets.forEach(asset => {
+            const assignedAsset = assignedAssets.find(
+                aa => asset.id === aa.assetId
+            );
+
+            if (assignedAsset) {
+                asset['mxPosition'] = assignedAsset.mxPosition;
+                this.selectedCached.push(asset);
+            } else {
+                this.unSelectedCahched.push(asset);
             }
         });
-
-        if (this.currentGen.generationAssets) {
-            this.currentGen.generationAssets.forEach(ga => {
-                const ix = this.nonSelectedAssets.findIndex(
-                    a => a.id === ga.assetId
-                );
-                this.selectedAssets.concat(
-                    this.nonSelectedAssets.splice(ix, 1)
-                );
-            });
-        }
+        this.unSelectedCahched.sort(this.unselectedCacheSorter);
+        this.selectedCached.sort(this.selectedCacheSorter);
     }
 
     ngOnDestroy() {
@@ -64,37 +57,82 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    addRemoveModifyAsset($event: { items: Asset[] }): void {
-        this.currentGen.draftAssets = this.selectedAssets.map((sa, ix) => {
-            sa['priority'] = ix + 1;
-            return {
-                priority: ix + 1,
-                id: sa.id
-            };
+    addAsset($event: { items: Asset[] }): void {
+        const alreadyAssigned = this.currentGen.generationAssets;
+        $event.items.forEach(asset => {
+            const alreadyExist = alreadyAssigned.find(
+                aa => aa.assetId === asset.id
+            );
+
+            if (alreadyExist) {
+                alreadyExist.isSoftDeleted = false;
+            } else {
+                const defaultProps: bareEntity<GenerationAsset> = {
+                    generation: this.currentGen,
+                    asset
+                };
+                this.currentGen.createChild<GenerationAsset>(
+                    SpListName.GenerationAsset,
+                    defaultProps
+                );
+            }
         });
 
-        this.currentGen.assignedAssetCount = this.selectedAssets.length;
-
-        this.nonSelectedAssets.forEach((sa, i) => {
-            sa['priority'] = undefined;
-        });
+        this.rePrioritize();
     }
 
     addModifyGeneration(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.panelClass = 'new-generation-dialog';
+        dialogCfg.panelClass = 'generation-detail-dialog';
         dialogCfg.data = this.currentGen;
+        dialogCfg.disableClose = true;
         this.genDialog
-            .open(NewGenerationDialogComponent, dialogCfg)
+            .open(GenerationDetailDialogComponent, dialogCfg)
             .afterClosed()
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(data => {
+            .pipe<IDialogResult<Generation>>(takeUntil(this.unsubscribeAll))
+            .subscribe(result => {
                 const stepper: IStepperModel = {
-                    genAsset: {
-                        isValid: this.currentGen.entityAspect.validateEntity()
+                    [PlannerSteps[PlannerSteps.GenAsset]]: {
+                        isValid: result.value.entityAspect.validateEntity()
                     }
                 };
                 this.uow.onStepValidityChange.next(stepper);
             });
+    }
+
+    removeAsset($event: { items: Asset[] }): void {
+        const genAssets = this.currentGen.generationAssets;
+        $event.items.forEach(asset => {
+            const existingAsset = genAssets.find(ga => ga.assetId === asset.id);
+            existingAsset.isSoftDeleted = true;
+            asset['mxPosition'] = undefined;
+        });
+
+        this.currentGen.assignedAssetCount = genAssets.length;
+
+        this.rePrioritize();
+    }
+
+    rePrioritize(): void {
+        const genAssets = this.currentGen.generationAssets;
+        this.selectedCached.forEach((scAsset, index) => {
+            const mxPosition = index + 1;
+            const genAsset = genAssets.find(ga => ga.assetId === scAsset.id);
+
+            genAsset.mxPosition =
+                genAsset.mxPosition !== mxPosition && mxPosition;
+
+            scAsset['mxPosition'] = mxPosition;
+        });
+
+        this.unSelectedCahched.sort(this.unselectedCacheSorter);
+    }
+
+    private selectedCacheSorter = (a: Asset, b: Asset): number => {
+        return a['mxPosition'] < b['mxPosition'] ? -1 : 1;
+    }
+
+    private unselectedCacheSorter = (a: Asset, b: Asset): number => {
+        return a.alias < b.alias ? -1 : 1;
     }
 }

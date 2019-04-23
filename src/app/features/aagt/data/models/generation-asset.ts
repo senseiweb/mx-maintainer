@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
-import { EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Generation } from './generation';
@@ -28,7 +27,7 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<
     metadataFor = GenerationAsset;
 
     constructor() {
-        super(aagtCfg.AagtListName.GenAsset);
+        super(SpListName.GenerationAsset);
         this.entityDefinition.dataProperties.health = {
             spInternalName: 'Title',
             dataType: this.dt.String,
@@ -48,17 +47,17 @@ export class GenerationAssetMetadata extends ebase.MetadataBase<
 
         this.entityDefinition.navigationProperties = {
             asset: {
-                entityTypeName: aagtCfg.AagtListName.Asset,
+                entityTypeName: SpListName.Asset,
                 foreignKeyNames: ['assetId'],
                 associationName: 'Asset_Generations'
             },
             generation: {
-                entityTypeName: aagtCfg.AagtListName.Gen,
+                entityTypeName: SpListName.Generation,
                 associationName: 'Generation_Assets',
                 foreignKeyNames: ['generationId']
             },
             assetTriggerActions: {
-                entityTypeName: aagtCfg.AagtListName.AssetTrigAct,
+                entityTypeName: SpListName.AssetTriggerAction,
                 associationName: 'GenAsset_AssetTrigAction',
                 isScalar: false
             }

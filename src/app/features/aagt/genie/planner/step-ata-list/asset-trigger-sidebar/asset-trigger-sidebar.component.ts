@@ -1,7 +1,13 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    Input,
+    OnDestroy,
+    OnInit
+} from '@angular/core';
 import { Asset, Generation } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { filter, take, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
@@ -17,27 +23,30 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
     // Private
     private unsubscribeAll: Subject<any>;
 
-    constructor(private planUow: PlannerUowService) {
+    constructor(
+        private uow: PlannerUowService,
+        private cdRef: ChangeDetectorRef
+    ) {
         // Set the private defaults
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
-        this.assetFilterBy = this.planUow.onAssetFilterChange.value;
-        this.triggerFilterBy = this.planUow.onTriggerFilterChange.value;
-        this.planUow.onTriggerActionsChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(trigActions => {
-                this.triggerNames = [
-                    ...new Set(trigActions.map(ta => ta.trigger.milestone))
-                ];
-            });
-        this.planUow.onGenerationAssetsChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(genAssets => {
-                this.assetNames = [
-                    ...new Set(genAssets.map(ga => ga.asset.alias))
-                ];
+        this.assetFilterBy = this.uow.onFilterChange.value.asset.filterText;
+        this.triggerFilterBy = this.uow.onFilterChange.value.trigger.filterText;
+        this.triggerNames = [
+            ...new Set(
+                this.uow.currentGen.triggers.map(trigger => trigger.milestone)
+            )
+        ];
+
+        this.uow.onStepperChange
+            .pipe(
+                filter(stepEvent => stepEvent.selectedIndex === 5),
+                takeUntil(this.unsubscribeAll)
+            )
+            .subscribe(_ => {
+                this.cdRef.detectChanges();
             });
     }
 
@@ -49,20 +58,36 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
 
     filterActionsByAsset(alias: string): void {
         if (!alias) {
-            this.planUow.onAssetFilterChange.next('all');
+            this.uow.onFilterChange.next({
+                asset: {
+                    filterText: 'all'
+                }
+            });
             this.assetFilterBy = 'all';
         } else {
-            this.planUow.onAssetFilterChange.next(alias);
+            this.uow.onFilterChange.next({
+                asset: {
+                    filterText: 'all'
+                }
+            });
             this.assetFilterBy = alias;
         }
     }
 
     filterActionsByTrigger(trigName: string): void {
         if (!trigName) {
-            this.planUow.onTriggerFilterChange.next('all');
+            this.uow.onFilterChange.next({
+                trigger: {
+                    filterText: 'all'
+                }
+            });
             this.triggerFilterBy = 'all';
         } else {
-            this.planUow.onTriggerFilterChange.next(trigName);
+            this.uow.onFilterChange.next({
+                trigger: {
+                    filterText: trigName
+                }
+            });
             this.triggerFilterBy = trigName;
         }
     }

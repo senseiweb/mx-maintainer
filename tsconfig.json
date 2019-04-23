@@ -8,13 +8,19 @@
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
         "downlevelIteration": true,
         "paths": {
             "breeze": ["node_modules/breeze-client/breeze-debug"],
             "@fuse": ["@fuse/"],
             "@ctypes": ["@ctypes/"],
             "@odata": ["@odata/"],
-            "sp-jsom": ["node_modules/@microsoft/sp-jsom"]
+            "sp-jsom": ["node_modules/@microsoft/sp-jsom"],
+            "core-js/es7/reflect": [
+                "../node_modules/core-js/proposals/reflect-metadata"
+            ],
+            "core-js/es6/*": ["../node_modules/core-js/es/*"]
         },
         "target": "es5",
         "typeRoots": ["node_modules/@types"],

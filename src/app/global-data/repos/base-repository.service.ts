@@ -1,21 +1,22 @@
-import { bareEntity, EntityChildren } from '@ctypes/breeze-type-customization';
+import { bareEntity } from '@ctypes/breeze-type-customization';
 import {
-    EntityKey,
     EntityManager,
     EntityQuery,
+    EntityState,
     EntityType,
     FetchStrategy,
     FilterQueryOp,
     Predicate,
     SaveResult
 } from 'breeze-client';
+import { QueryResult } from 'breeze-client/src/entity-manager';
 import * as _m from 'moment';
-import { from, timer, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, shareReplay, switchMap, take, takeUntil } from 'rxjs/operators';
+import { defer, BehaviorSubject, Observable, Subject } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { SpEntityBase } from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
 
-interface IRepoPredicateCache<T> {
+interface IRepoPredicateCache {
     [index: string]: _m.Moment;
 }
 
@@ -26,7 +27,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     protected entityType: EntityType;
     protected resourceName: string;
     private cached: Observable<T[]>;
-    private predicateCache: IRepoPredicateCache<T> = {};
+    private predicateCache: IRepoPredicateCache = {};
     private reload: Subject<any>;
     onSaveInProgressChange: BehaviorSubject<boolean>;
     private spChoiceFieldCache: SpChoiceCache<T> = {} as any;
@@ -52,19 +53,22 @@ export class BaseRepoService<T extends SpEntityBase> {
         this.resourceName = this.entityType.defaultResourceName;
         this.reload = new Subject();
         this.defaultFetchStrategy = FetchStrategy.FromServer;
-        console.log(`base created from ${entityTypeName}`);
     }
 
     get all(): Observable<T[]> {
-        if (this.cached) {
+        const freshTimeLimit = 6;
+
+        const cachedTime = this.predicateCache['all'];
+
+        const timeSinceLastServerQuery = cachedTime
+            ? _m.duration(cachedTime.diff(_m(), 'minutes'))
+            : freshTimeLimit + 1;
+
+        if (timeSinceLastServerQuery < 5 && this.cached) {
             return this.cached;
         }
-        const refreshTimer = timer(0, 300000);
-        this.cached = refreshTimer.pipe(
-            switchMap(_ => this.allEntities()),
-            takeUntil(this.reload),
-            _ => this.cached.pipe(shareReplay(1))
-        );
+
+        this.cached = this.allEntities().pipe(shareReplay(1));
         return this.cached;
     }
 
@@ -74,7 +78,7 @@ export class BaseRepoService<T extends SpEntityBase> {
     }
 
     private allEntities(): Observable<T[]> {
-        return from(this.executeQuery(this.baseQuery()));
+        return defer(() => this.executeQuery(this.baseQuery()));
     }
 
     protected createBase(options?: bareEntity<T>): T {
@@ -144,7 +148,15 @@ export class BaseRepoService<T extends SpEntityBase> {
             .where(predicate)
             .noTracking();
 
-        const response = await this.entityManager.executeQuery(query);
+        let response: QueryResult;
+
+        try {
+            response = await this.entityManager.executeQuery(query);
+        } catch (e) {
+            console.log(e);
+            throw new Error(e);
+        }
+
         const choices = response.results[0]['Choices'].results as string[];
 
         this.spChoiceFieldCache[fieldName] = choices;
@@ -229,7 +241,14 @@ export class BaseRepoService<T extends SpEntityBase> {
     //     }
     // }
 
-    whereInCache(predicate: Predicate): T[] {
+    whereInCache(predicate?: Predicate): T[] {
+        if (!predicate) {
+            return this.entityManager.getEntities(this.entityType, [
+                EntityState.Unchanged,
+                EntityState.Added,
+                EntityState.Modified
+            ]) as T[];
+        }
         const query = this.baseQuery().where(predicate);
         return this.executeCacheQuery(query) as T[];
     }

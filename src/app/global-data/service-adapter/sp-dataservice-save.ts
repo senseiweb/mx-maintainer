@@ -40,7 +40,7 @@ export class SpDataServiceSave {
         };
     }
 
-    private prepareSaveBundle(entity: Entity): Promise<HttpResponse> {
+    private async prepareSaveBundle(entity: Entity): Promise<HttpResponse> {
         this.saveContext.tempKeys = [];
         this.saveContext.originalEntities = [entity];
         const saveResult: SaveResult = {
@@ -77,8 +77,8 @@ export class SpDataServiceSave {
                 dataType: request.dataType,
                 data: request.payload,
                 headers: request.headers,
-                success: resolve,
-                error: reject
+                success: (sr: SaveResult) => resolve(sr as any),
+                error: error => reject(error)
             });
         });
     }
@@ -182,7 +182,8 @@ export class SpDataServiceSave {
                 entityTypeName: et.entityType.name,
                 keyValues: [et.entityAspect.getKey()]
             });
-            return;
+            saveResult.entities.push(et);
+            return saveResult;
         }
 
         // assume one entity per save, but may need to revisit if multiple result entities are exctracted
@@ -204,7 +205,7 @@ export class SpDataServiceSave {
             }
         }
 
-        saveResult.entities.push(rawEntity);
+        saveResult.entities.push(rawEntity || et);
         return saveResult;
     }
 
@@ -214,10 +215,11 @@ export class SpDataServiceSave {
                 this.saveBundle.entities[0]
             );
             this.saveContext.saveResult.httpResponse = response;
-            return this.prepareSaveResult(response);
+            const saveeResult = this.prepareSaveResult(response);
+            return saveeResult;
         } catch (error) {
             // this.processError(error);
-            Promise.reject(new Error(error));
+            throw new Error(error);
         }
     }
 }

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { Team } from './team';
 import { IJobReservation, TeamAvailability } from './team-availability';
 
@@ -19,8 +19,8 @@ export interface IJobReservationReceipt {
 }
 export class TeamCategory extends ebase.SpEntityBase {
     teamType: string;
+    teamCatColor: string;
     teams: Team[];
-
     addJobReservation = (
         request: IJobReservateionRequest
     ): IJobReservationReceipt => {
@@ -94,16 +94,20 @@ export class TeamCategoryMetadata extends ebase.MetadataBase<TeamCategory> {
     metadataFor = TeamCategory;
 
     constructor() {
-        super(aagtCfg.AagtListName.TeamCategory);
+        super(SpListName.TeamCategory);
         this.entityDefinition.dataProperties.teamType = {
             dataType: this.dt.String,
             isNullable: false,
             spInternalName: 'Title'
         };
 
+        this.entityDefinition.dataProperties.teamCatColor = {
+            dataType: this.dt.String
+        };
+
         this.entityDefinition.navigationProperties = {
             teams: {
-                entityTypeName: aagtCfg.AagtListName.Team,
+                entityTypeName: SpListName.Team,
                 associationName: 'TeamCategory_Teams',
                 isScalar: false
             }

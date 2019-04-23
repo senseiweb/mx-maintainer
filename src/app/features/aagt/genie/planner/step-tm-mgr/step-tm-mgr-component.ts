@@ -1,10 +1,26 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { zip, Subject } from 'rxjs';
+import {
+    combineAll,
+    debounce,
+    debounceTime,
+    distinctUntilChanged,
+    map,
+    startWith,
+    switchMap,
+    take,
+    takeUntil
+} from 'rxjs/operators';
 
 import { fuseAnimations } from '@fuse/animations';
 
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material';
+import { IDialogResult } from '@ctypes/breeze-type-customization';
+import { Team, TeamAvailability, TeamCategory } from 'app/features/aagt/data';
 import { PlannerUowService } from '../planner-uow.service';
+import { PlannerSteps } from '../planner.component';
+import { TmAvailDetailDialogComponent } from './team-avail-detail/tm-avail-detail.dialog';
 
 @Component({
     selector: 'genie-plan-step-tm-manager',
@@ -14,57 +30,106 @@ import { PlannerUowService } from '../planner-uow.service';
 })
 export class StepTeamManagerComponent implements OnInit, OnDestroy {
     categories: any[];
-    courses: any[];
-    coursesFilteredByCategory: any[];
-    filteredCourses: any[];
-    currentCategory: string;
+    private allTeams: Team[];
+    filteredTeams: Team[];
+    teamCategories: TeamCategory[];
+    currentCategory: TeamCategory;
+    filteredFormGroup: FormGroup;
     searchTerm: string;
 
-    private _unsubscribeAll: Subject<any>;
+    private unsubscribeAll: Subject<any>;
 
-    constructor(private uow: PlannerUowService) {
-        this.currentCategory = 'all';
-        this.searchTerm = '';
-
-        this._unsubscribeAll = new Subject();
+    constructor(
+        private planUow: PlannerUowService,
+        private teamDetailDialog: MatDialog,
+        private fb: FormBuilder
+    ) {
+        this.unsubscribeAll = new Subject();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.teamCategories = this.planUow.allTeamCats;
+        this.filteredTeams = this.allTeams = this.planUow.allTeams;
+        this.planUow.onStepValidityChange.next({
+            [PlannerSteps[PlannerSteps.TmMgr]]: {
+                isValid: true
+            }
+        });
+        this.filteredFormGroup = this.fb.group({
+            searchTerm: new FormControl(),
+            currentCategory: new FormControl()
+        });
+
+        this.filteredFormGroup
+            .get('searchTerm')
+            .valueChanges.pipe(
+                debounceTime(500),
+                distinctUntilChanged(),
+                startWith(''),
+                map(term => term.toLowerCase()),
+                takeUntil(this.unsubscribeAll)
+            )
+            .subscribe(term => {
+                this.searchTerm = term;
+                this.filterTeamsBy();
+            });
+
+        this.filteredFormGroup
+            .get('currentCategory')
+            .valueChanges.pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(selectCategory => {
+                this.currentCategory = selectCategory;
+                this.filterTeamsBy();
+            });
+    }
 
     ngOnDestroy(): void {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
-        this._unsubscribeAll.complete();
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
     }
 
-    filterTeamsByCategory(): void {
+    compareCategories(cat1: TeamCategory, cat2: TeamCategory): boolean {
+        return cat1 && cat2 ? cat1.id === cat2.id : cat1 === cat2;
+    }
+
+    filterTeamsBy(): void {
+        let teams = this.allTeams;
+
         // Filter
-        if (this.currentCategory === 'all') {
-            this.coursesFilteredByCategory = this.courses;
-            this.filteredCourses = this.courses;
-        } else {
-            this.coursesFilteredByCategory = this.courses.filter(course => {
-                return course.category === this.currentCategory;
-            });
+        teams =
+            (this.currentCategory &&
+                teams.filter(
+                    t => t.teamCategoryId === this.currentCategory.id
+                )) ||
+            teams;
 
-            this.filteredCourses = [...this.coursesFilteredByCategory];
-        }
-
-        this.filterTeamsByTerm();
+        teams =
+            (this.searchTerm &&
+                teams.filter(team =>
+                    JSON.stringify(team).includes(this.searchTerm)
+                )) ||
+            teams;
+        this.filteredTeams = teams;
     }
 
-    filterTeamsByTerm(): void {
-        const searchTerm = this.searchTerm.toLowerCase();
-
-        // Search
-        if (searchTerm === '') {
-            this.filteredCourses = this.coursesFilteredByCategory;
-        } else {
-            this.filteredCourses = this.coursesFilteredByCategory.filter(
-                course => {
-                    return course.title.toLowerCase().includes(searchTerm);
-                }
-            );
-        }
+    openTeam(team: Team): void {
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.data = team;
+        dialogCfg.panelClass = 'tm-avail-detail-dialog';
+        dialogCfg.disableClose = true;
+        this.teamDetailDialog
+            .open(TmAvailDetailDialogComponent, dialogCfg)
+            .afterClosed()
+            .pipe<IDialogResult<TeamAvailability>>(
+                takeUntil(this.unsubscribeAll)
+            )
+            .subscribe(result => {
+                const currentGen = this.planUow.currentGen;
+                team.calTotalAvailDuringGen(
+                    currentGen.genStartDate,
+                    currentGen.genEndDate
+                );
+            });
     }
 }

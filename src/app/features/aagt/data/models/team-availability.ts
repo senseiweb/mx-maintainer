@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
 import { Team } from './team';
 export interface IJobReservation {
     taskId: number;
@@ -60,7 +60,7 @@ export class TeamAvailabilityMetadata extends ebase.MetadataBase<
     metadataFor = TeamAvailability;
 
     constructor() {
-        super(aagtCfg.AagtListName.TeamAvail);
+        super(SpListName.TeamAvailability);
         this.entityDefinition.dataProperties.availabilityTitle = {
             spInternalName: 'Title',
             dataType: this.dt.String,
@@ -88,7 +88,7 @@ export class TeamAvailabilityMetadata extends ebase.MetadataBase<
 
         this.entityDefinition.navigationProperties = {
             team: {
-                entityTypeName: aagtCfg.AagtListName.Team,
+                entityTypeName: SpListName.Team,
                 associationName: 'Team_TeamAvailabilities',
                 foreignKeyNames: ['teamId']
             }

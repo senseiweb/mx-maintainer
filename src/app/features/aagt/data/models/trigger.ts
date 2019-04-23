@@ -1,13 +1,20 @@
 import { Injectable } from '@angular/core';
+import { SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
 import * as _m from 'moment';
+import { Action } from 'rxjs/internal/scheduler/Action';
 import { AagtDataModule } from '../aagt-data.module';
-import * as aagtCfg from './_aagt-feature-cfg';
+import { ActionItem } from './action-item';
 import { Generation } from './generation';
 import { TriggerAction } from './trigger-action';
 
+// interface IDraftActionItem {
+//     sequence: number;
+//     actionItem: ActionItem;
+// }
+
 export class Trigger extends ebase.SpEntityBase {
-    tempActionItems: Array<{ actionItemId: number; sequence: number }>;
+    // draftActionItems: Map<number, IDraftActionItem>;
     milestone: string;
     get completionTime(): number {
         if (!this.triggerActions) {
@@ -19,6 +26,7 @@ export class Trigger extends ebase.SpEntityBase {
     }
     triggerStart?: Date;
     triggerStop?: Date;
+    triggerDateRange: Date[];
     generationId: number;
     generation: Generation;
     triggerActions: TriggerAction[];
@@ -31,7 +39,7 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
     metadataFor = Trigger;
 
     constructor() {
-        super(aagtCfg.AagtListName.Trigger);
+        super(SpListName.Trigger);
         this.entityDefinition.dataProperties.milestone = {
             dataType: this.dt.String,
             spInternalName: 'Title'
@@ -49,12 +57,12 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
 
         this.entityDefinition.navigationProperties = {
             generation: {
-                entityTypeName: aagtCfg.AagtListName.Gen,
+                entityTypeName: SpListName.Generation,
                 associationName: 'Generation_Triggers',
                 foreignKeyNames: ['generationId']
             },
             triggerActions: {
-                entityTypeName: aagtCfg.AagtListName.TriggerAct,
+                entityTypeName: SpListName.TriggerAction,
                 associationName: 'Trigger_Action',
                 isScalar: false
             }
@@ -84,14 +92,13 @@ export class TriggerMetadata extends ebase.MetadataBase<Trigger> {
         });
 
         this.initializer = _entity => {
-            _entity.triggerActions
-                ? (_entity.tempActionItems = _entity.triggerActions.map(tra => {
-                      return {
-                          actionItemId: tra.actionItemId,
-                          sequence: tra.sequence
-                      };
-                  }))
-                : [];
+            // _entity.draftActionItems = new Map();
+            // _entity.triggerActions.forEach(tra =>
+            //     _entity.draftActionItems.set(tra.actionItemId, {
+            //         sequence: tra.sequence,
+            //         actionItem: tra.actionItem
+            //     })
+            // );
         };
     }
 }

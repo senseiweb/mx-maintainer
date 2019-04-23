@@ -18,11 +18,11 @@
                 {{ completionTime | minutesExpand }}
             </div>
             <div fxLayout="row">
-                <form [formGroup]="triggerSelectionFormGroup" novalidate>
+                <form [formGroup]="triggerSelectionFormGroup">
                     <mat-form-field floatLabel="never">
                         <mat-select
                             placeholder="Select Trigger"
-                            formControlName="triggerSelect"
+                            formControlName="trigger"
                             [compareWith]="compareTrigger"
                         >
                             <mat-option
@@ -39,7 +39,7 @@
                     <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
-                    <button mat-menu-item (click)="newTrigger()">
+                    <button mat-menu-item (click)="createNewTrigger()">
                         <mat-icon>alarm_add</mat-icon>
                         <span>New Trigger</span>
                     </button>
@@ -49,15 +49,7 @@
                         (click)="editTrigger()"
                     >
                         <mat-icon>alarm_on</mat-icon>
-                        <span>Edit Trigger</span>
-                    </button>
-                    <button
-                        mat-menu-item
-                        [disabled]="!triggers.length"
-                        (click)="deleteTrigger()"
-                    >
-                        <mat-icon>alarm_off</mat-icon>
-                        <span>Delete Trigger</span>
+                        <span>Modify Trigger</span>
                     </button>
                 </mat-menu>
             </div>
@@ -65,27 +57,27 @@
 
         <div class="ml-24 my-20">
             <p-pickList
-                [source]="allActionItems | async"
-                [target]="selectedActionItems"
+                [source]="unSelectedCache"
+                [target]="selectedCache"
                 [responsive]="true"
                 sourceHeader="Available Action Items"
                 targetHeader="Selected Action Items"
-                (onMoveToTarget)="addShell($event)"
+                (onMoveToTarget)="addActionItem($event)"
                 (onTargetReorder)="reSequence($event)"
-                (onMoveToSource)="removeShell($event)"
+                (onMoveToSource)="removeActionItem($event)"
                 [disabled]="!currentTrigger"
                 filterBy="shortCode,action"
                 [showSourceControls]="false"
             >
                 <ng-template let-actionItem pTemplate="item">
                     <div class="ui-helper-clearfix">
-                        <div [hidden]="!!actionItem.sequence">
+                        <div [hidden]="!!actionItem?.sequence">
                             <div
                                 fxLayout="row"
                                 fxLayoutAlign="space-around center"
                             >
                                 <span class="w-35-p">{{
-                                    actionItem.teamCategory
+                                    actionItem.teamCategory.teamType
                                 }}</span>
                                 <span class="w-50-p"
                                     >{{ actionItem.action }} [{{
@@ -97,7 +89,7 @@
                                 >
                             </div>
                         </div>
-                        <div [hidden]="!actionItem.sequence">
+                        <div [hidden]="!actionItem?.sequence">
                             <div
                                 fxLayout="row"
                                 fxLayoutAlign="space-between center"

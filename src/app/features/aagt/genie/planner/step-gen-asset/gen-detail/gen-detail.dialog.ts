@@ -5,21 +5,13 @@ import {
     OnInit,
     ViewEncapsulation
 } from '@angular/core';
-import {
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    Validators
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { ActivatedRoute, Route, Router } from '@angular/router';
-import { bareEntity } from '@ctypes/breeze-type-customization';
-import { fuseAnimations } from '@fuse/animations';
+import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { Generation, GenStatusEnum, Team } from 'app/features/aagt/data';
-import { DataProperty } from 'breeze-client';
 import * as _ from 'lodash';
+import * as _m from 'moment';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import * as sa from 'sweetalert2';
 import { PlannerUowService } from '../../planner-uow.service';
 
@@ -27,19 +19,17 @@ type GenModelProps = keyof bareEntity<Generation> | 'planDateRange';
 type GenFormModel = { [key in GenModelProps]: any };
 
 @Component({
-    selector: 'new-generation-dialog',
-    templateUrl: './new-generation.dialog.html',
-    styleUrls: ['./new-generation.dialog.scss'],
+    selector: 'generation-detail-dialog',
+    templateUrl: './gen-detail.dialog.html',
+    styleUrls: ['./gen-detail.dialog.scss'],
     encapsulation: ViewEncapsulation.None
 })
-export class NewGenerationDialogComponent implements OnInit, OnDestroy {
-    currentGen: Generation;
-    action: 'edit' | 'add';
+export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
+    formMode: 'edit' | 'add';
     genFormGroup: FormGroup;
     dialogTitle: string;
     allIsos: string[];
     isNew = false;
-    isValid = false;
     rangeSet = true;
     statusEnum = Object.keys(GenStatusEnum);
     private modelProps: GenModelProps[] = [
@@ -55,64 +45,52 @@ export class NewGenerationDialogComponent implements OnInit, OnDestroy {
     private unsubscribeAll: Subject<any>;
 
     constructor(
-        private dialogRef: MatDialogRef<NewGenerationDialogComponent>,
+        private dialogRef: MatDialogRef<GenerationDetailDialogComponent>,
         private formBuilder: FormBuilder,
-        private router: Router,
-        private route: ActivatedRoute,
         private uow: PlannerUowService,
-        @Inject(MAT_DIALOG_DATA) data: any
+        @Inject(MAT_DIALOG_DATA) private currentGen: Generation
     ) {
-        this.currentGen = data;
+        this.allIsos = this.uow.allIsoOptions;
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
         const gen = this.currentGen;
-        this.rangeSet = !!(gen.genStartDate && gen.genEndDate);
-        this.allIsos = this.uow.allIsoOptions;
+
+        // if no time is set...set default time to the next half hour
+        if (!gen.genStartDate) {
+            const start = _m();
+            const remainder = 30 - (start.minute() % 30);
+            const defaultStart = start.add(remainder, 'minute');
+
+            gen.genStartDate = defaultStart.toDate();
+            gen.genEndDate = defaultStart.add(1, 'day').toDate();
+        }
+
+        this.currentGen['planDateRange'] = [gen.genStartDate, gen.genEndDate];
 
         if (gen.entityAspect.entityState.isAdded()) {
-            this.action = 'add';
+            this.formMode = 'add';
             this.dialogTitle = 'Add New Generation';
-            gen.genStatus = gen.genStatus || GenStatusEnum.draft;
         } else {
-            this.action = 'edit';
+            this.formMode = 'edit';
             this.dialogTitle = `Edit Generation ${this.currentGen.title}`;
         }
 
-        const formModel: GenFormModel = {} as any;
+        const formModel: Partial<GenFormModel> = {};
         const genType = gen.entityType;
 
         this.modelProps.forEach(prop => {
-            const dp = gen[prop] as DataProperty;
             formModel[prop] = new FormControl(
-                prop,
-                genType.custom['validatorMap'][prop]
+                this.currentGen[prop],
+                genType.custom.validatorMap[prop]
             );
         });
 
-        this.genFormGroup = this.formBuilder.group({
-            title: new FormControl(gen.title, [Validators.required]),
-            isActive: new FormControl(gen.isActive),
-            iso: new FormControl(gen.iso),
-            assignedAssetCount: new FormControl(gen.assignedAssetCount),
-            genStartDate: new FormControl(gen.genStartDate),
-            genEndDate: new FormControl(gen.genEndDate),
-            planDateRange: new FormControl(),
-            genStatus: new FormControl(gen.genStatus)
-        });
-
-        this.genFormGroup.valueChanges
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(value => {
-                console.log(value);
-            });
-
-        this.genFormGroup.statusChanges
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(valid => {
-                this.isValid = valid === 'VALID';
-            });
+        this.genFormGroup = this.formBuilder.group(formModel);
+        this.genFormGroup
+            .get('assignedAssetCount')
+            .disable({ onlySelf: true, emitEvent: false });
     }
 
     ngOnDestroy(): void {
@@ -122,7 +100,10 @@ export class NewGenerationDialogComponent implements OnInit, OnDestroy {
 
     cancel(): void {
         this.currentGen.entityAspect.rejectChanges();
-        this.dialogRef.close();
+        const genDialogResult: IDialogResult<Team> = {
+            wasConceled: true
+        };
+        this.dialogRef.close(genDialogResult);
     }
 
     async deleteGeneration(): Promise<void> {
@@ -172,18 +153,27 @@ export class NewGenerationDialogComponent implements OnInit, OnDestroy {
                 'Team has been deleted',
                 'success'
             );
-            this.router.navigate(['../../action-items'], {
-                relativeTo: this.route
-            });
         } catch (e) {}
     }
 
-    saveChanges(del: string): void {
-        Object.keys(this.genFormGroup.controls).forEach(
-            (key: keyof bareEntity<Team>) => {
-                this.currentGen[key] = this.genFormGroup.get(key).value;
+    saveChanges(): void {
+        this.modelProps.forEach(prop => {
+            const formValue = this.genFormGroup.get(prop).value;
+            if (prop === 'planDateRange' && formValue) {
+                this.currentGen.genStartDate = formValue[0];
+                this.currentGen.genEndDate = formValue[1];
+            } else {
+                const currProp = this.currentGen[prop];
+                if (currProp !== formValue) {
+                    this.currentGen[prop as any] = formValue;
+                }
             }
-        );
-        this.dialogRef.close(this.currentGen);
+        });
+
+        const genDialogResult: IDialogResult<Generation> = {
+            confirmChange: true,
+            value: this.currentGen
+        };
+        this.dialogRef.close(genDialogResult);
     }
 }

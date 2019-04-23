@@ -1,6 +1,6 @@
 @import 'src/@fuse/scss/fuse';
 
-.new-generation-dialog {
+.asset-detail-dialog {
     @include media-breakpoint('xs') {
         width: 100%;
     }
@@ -31,5 +31,15 @@
         width: 500px;
         display: flex;
         flex-direction: column;
+    }
+}
+.owl-dt-container {
+    &.owl-dt-dialog-container {
+        font-size: 1em;
+    }
+}
+.dateDialog {
+    &.owl-dt-dialog {
+        font-size: 1.1em;
     }
 }

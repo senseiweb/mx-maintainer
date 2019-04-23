@@ -1,23 +1,16 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material';
+import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
+import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
-import {
-    ActionItem,
-    ITriggerActionItemShell,
-    Trigger
-} from 'app/features/aagt/data';
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, map, switchMap } from 'rxjs/operators';
-import * as sa from 'sweetalert2';
+import { ActionItem, Trigger, TriggerAction } from 'app/features/aagt/data';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
-import { NewTriggerDialogComponent } from './new-trigger/new-trigger-dialog';
-import { bareEntity } from '@ctypes/breeze-type-customization';
-import { trigger } from '@angular/animations';
-
-type TriggerModelProps = keyof bareEntity<Trigger> | 'triggerDateRange';
-type TriggerFormModel = { [key in TriggerModelProps]: any };
+import { PlannerSteps } from '../planner.component';
+import { TriggerDetailDialogComponent } from './trigger-detail/trigger-detail.dialog';
 
 @Component({
     selector: 'genie-plan-trig-actions',
@@ -30,16 +23,11 @@ type TriggerFormModel = { [key in TriggerModelProps]: any };
 export class StepTrigActionComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     triggers: Trigger[];
-    allActionItems: Observable<ActionItem[]>;
-    selectedActionItems: ActionItem[];
+    selectedCache: ActionItem[] = [];
+    unSelectedCache: ActionItem[] = [];
     triggerSelectionFormGroup: FormGroup;
     completionTime: number;
-    private modelProps: TriggerModelProps[] = [
-        'milestone',
-        'triggerStart',
-        'triggerStop',
-        'triggerDateRange'
-    ]
+
     private unsubscribeAll: Subject<any>;
 
     constructor(
@@ -48,103 +36,46 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         private uow: PlannerUowService
     ) {
         this.unsubscribeAll = new Subject();
-        this.selectedActionItems = [];
     }
 
     ngOnInit() {
+        this.triggers = this.uow.currentGen.triggers.filter(
+            t => !t.isSoftDeleted
+        );
+        this.triggers.sort(this.triggerSorter);
 
         this.uow.onStepperChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(stepEvent => {
-            if (stepEvent.previouslySelectedIndex === 1) {
-                this.uow.triggerActionSelectionCheck();
-            }
+            .pipe(
+                filter(sc => sc.selectedIndex === 1),
+                takeUntil(this.unsubscribeAll)
+            )
+            .subscribe(_ => {
+                this.uow.onStepValidityChange.next({
+                    [PlannerSteps[PlannerSteps.TrigAction]]: {
+                        isValid: !!this.triggers.filter(t => !t.isSoftDeleted)
+                            .length
+                    }
+                });
             });
-
-        const formModel: TriggerFormModel = {} as any;
-        const genType = gen.entityType;
 
         this.triggerSelectionFormGroup = this.formBuilder.group({
-            triggerSelect: new FormControl(this.currentTrigger)
-        })
-
-        this.triggerSelectionFormGroup
-            .valueChanges
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe((selectedTrigger: Trigger) => {
-                if (!selectedTrigger) {
-                    return;
-                }
-
-            });
-        
-        this.allActionItems = this.uow.allActionItems.pipe(
-            map(ai => ai.filter(a => a.assignable)),
-            switchMap(ais => {
-                return 
-            },
-            map()
-            takeUntil(this.unsubscribeAll)
-        );
-        
-        this.triggers = this.uow.currentGen.triggers;
-
-        this.uow.onStepValidityChange.next({
-            trigAction: {
-                isValid: !!this.triggers.length
-            }
+            trigger: new FormControl(this.currentTrigger)
         });
 
-        // this.triggerFormGroup
-        //     .get('trigger')
-        //     .valueChanges.pipe(takeUntil(this.unsubscribeAll))
-        //     .subscribe((selectedTrigger: Trigger) => {
-        //         if (!selectedTrigger) {
-        //             return;
-        //         }
+        this.triggerSelectionFormGroup
+            .get('trigger')
+            .valueChanges.pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(selectedTrigger => {
+                this.currentTrigger = selectedTrigger;
+                this.filterBasedOnTrigger(selectedTrigger);
+            });
 
-        //         // clear all previous selected actionItem and put them back in the unselected pile
-        //         if (this.selectedActionItems.length) {
-        //             this.allActionItems = this.allActionItems.concat(
-        //                 this.selectedActionItems.splice(0)
-        //             );
-        //         }
-
-        //         // reset all sequence numbers to null
-        //         this.allActionItems.forEach(ai => {
-        //             ai['sequence'] = undefined;
-        //         });
-
-        //         // map temp items, if they do not exist
-        //         if (
-        //             !selectedTrigger.tempActionItems.length &&
-        //             selectedTrigger.triggerActions.length
-        //         ) {
-        //             selectedTrigger.tempActionItems = selectedTrigger.triggerActions.map(
-        //                 tra => {
-        //                     return {
-        //                         actionItemId: tra.actionItemId,
-        //                         sequence: tra.sequence
-        //                     };
-        //                 }
-        //             );
-        //         }
-
-        //         // re-calcuate selected action items based on new selected triggers
-
-        //         selectedTrigger.tempActionItems.forEach(actItem => {
-        //             const index = this.allActionItems.findIndex(
-        //                 ai => ai.id === actItem.actionItemId
-        //             );
-        //             const actionItem = this.allActionItems.splice(index, 1)[0];
-        //             actionItem['sequence'] = actItem.sequence;
-        //             this.selectedActionItems.push(actionItem);
-        //         });
-        //         this.sortActionItem(this.selectedActionItems, 'sequence');
-        //         this.sortActionItem(this.allActionItems, 'teamType');
-        //         this.currentTrigger = selectedTrigger;
-        //         this.completionTime = this.calculateCompeletionTime();
-        //     });
+        // if triggers exist set a defult selected value
+        if (this.triggers.length) {
+            this.triggerSelectionFormGroup.setValue({
+                triggerSelect: this.triggers[0]
+            });
+        }
     }
 
     ngOnDestroy(): void {
@@ -152,23 +83,36 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    addShell($event: { items: ITriggerActionItemShell[] }): void {
-        $event.items.forEach(item => {
-            const sequence = (item.sequence =
-                this.selectedActionItems.findIndex(ai => ai.id === item.id) +
-                1);
+    addActionItem($event: { items: ActionItem[] }): void {
+        const triggerActions = this.currentTrigger.triggerActions;
 
-            this.currentTrigger.tempActionItems.push({
-                actionItemId: item.id,
-                sequence
-            });
+        $event.items.forEach(actionItem => {
+            const alreadyExist = triggerActions.find(
+                ta => ta.actionItemId === actionItem.id
+            );
 
-            this.completionTime = this.calculateCompeletionTime();
+            if (alreadyExist) {
+                alreadyExist.isSoftDeleted = false;
+            } else {
+                const defaultProps: bareEntity<TriggerAction> = {
+                    trigger: this.currentTrigger,
+                    actionItem
+                };
+
+                this.currentTrigger.createChild<TriggerAction>(
+                    SpListName.TriggerAction,
+                    defaultProps
+                );
+            }
         });
+
+        this.completionTime = this.calculateCompeletionTime();
+
+        this.reSequence();
     }
 
     calculateCompeletionTime(): number {
-        return this.selectedActionItems
+        return this.selectedCache
             .map(x => x.duration)
             .reduce((duration1, duration2) => duration1 + duration2, 0);
     }
@@ -177,111 +121,130 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         return trig1 && trig2 ? trig1.id === trig2.id : trig1 === trig2;
     }
 
-    deleteTrigger(): void {
-        const config: sa.SweetAlertOptions = {
-            title: 'Delete Trigger?',
-            text: `Are you sure you?
-            All associated trigger action will be deleted as well!
-            This action cannot be undone!`,
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        };
-        sa.default.fire(config).then(result => {
-            if (!result.value) {
-                return;
-            }
-            this.uow.deleteTriggerGraph(this.currentTrigger);
-            const index = this.triggers.findIndex(
-                trig => this.currentTrigger.id === trig.id
+    filterBasedOnTrigger(selectedTrigger: Trigger): void {
+        const actionItems = this.uow.allActionItems;
+        const triggerActionItems = selectedTrigger
+            ? selectedTrigger.triggerActions.filter(
+                  trigAct => !trigAct.isSoftDeleted
+              )
+            : [];
+
+        this.unSelectedCache.length = 0;
+        this.selectedCache.length = 0;
+
+        actionItems.forEach(ai => {
+            const existingTrigAct = triggerActionItems.find(
+                trigAct => trigAct.actionItemId === ai.id
             );
-            this.triggers.splice(index, 1);
-            sa.default.fire('Deleted!', 'Trigger has been deleted', 'success');
-        });
-        
-        this.uow.onStepValidityChange.next({
-            trigAction: {
-                isValid: !!this.triggers.length
+
+            if (existingTrigAct) {
+                ai['sequence'] = existingTrigAct.sequence;
+                this.selectedCache.push(ai);
+            } else {
+                ai['sequnce'] = undefined;
+                this.unSelectedCache.push(ai);
             }
         });
+
+        this.selectedCache.sort(this.selectCacheSorter);
+        this.unSelectedCache.sort(this.unselectedCacheSorter);
     }
-    
-    filterBySelectedTriger(actionItems: ActionItem[]): Observable<ActionItem[]> {
-        return this.triggerSelectionFormGroup.valueChanges.pipe(
-            map((selectedTrigger: Trigger) => {
-                const ids = selectedTrigger.tempActionItems.map(tai => tai.actionItemId);
-                 return actionItems.filter(ai => !ids.includes(ai.id))
-            })
-        );    }
 
     editTrigger(): void {
         const dialogCfg = new MatDialogConfig();
         dialogCfg.data = this.currentTrigger;
         this.trigdialog
-            .open(NewTriggerDialogComponent, dialogCfg)
+            .open(TriggerDetailDialogComponent, dialogCfg)
             .afterClosed()
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(confirmedChange => {
-                if (!confirmedChange) {
-                    this.currentTrigger.entityAspect.rejectChanges();
+            .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
+            .subscribe(reesult => {
+                if (reesult.confirmDeletion) {
+                    if (!this.uow.currentGen.triggers.length) {
+                        this.triggerSelectionFormGroup.controls[
+                            'trigger'
+                        ].setValue('');
+                    }
+                } else {
+                    // ReSort just in case the date was changed;
+                    this.triggers.sort(this.triggerSorter);
                 }
             });
     }
 
-    newTrigger(): void {
+    createNewTrigger(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.uow.newTrigger(this.uow.currentGen.id);
+        dialogCfg.data = this.uow.createNewTrigger(this.uow.currentGen.id);
+        dialogCfg.panelClass = 'trigger-detail-dialog';
         this.trigdialog
-            .open(NewTriggerDialogComponent, dialogCfg)
+            .open(TriggerDetailDialogComponent, dialogCfg)
             .afterClosed()
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(data => {
-                if (data) {
-                    this.triggers.push(data);
-                    this.uow.onTriggersChange.next(this.triggers);
-                    this.triggerFormGroup.controls['trigger'].setValue(data);
-                    this.uow.onStep2ValidityChange.next(!!this.triggers.length);
+            .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
+            .subscribe(result => {
+                if (result.wasConceled) {
+                    return;
                 }
+
+                this.triggers = this.uow.currentGen.triggers.filter(
+                    t => !t.isSoftDeleted
+                );
+
+                this.triggers.sort(this.triggerSorter);
+
+                this.triggerSelectionFormGroup.controls['trigger'].setValue(
+                    result.value
+                );
+
+                this.uow.onStepValidityChange.next({
+                    [PlannerSteps[PlannerSteps.TrigAction]]: {
+                        isValid: true
+                    }
+                });
             });
     }
 
-    removeShell($event: { items: ITriggerActionItemShell[] }): void {
-        $event.items.forEach(item => {
-            const index = this.currentTrigger.tempActionItems.findIndex(
-                ai => ai.actionItemId === item.id
+    removeActionItem($event: { items: ActionItem[] }): void {
+        const triggerActions = this.currentTrigger.triggerActions;
+
+        $event.items.forEach(actionItem => {
+            const existingTrigAct = triggerActions.find(
+                trigAct => trigAct.actionItemId === actionItem.id
             );
-            this.currentTrigger.tempActionItems.splice(index, 1);
-            item.sequence = undefined;
+
+            existingTrigAct.isSoftDeleted = true;
+
+            actionItem['sequence'] = undefined;
         });
-        this.reSequence();
+
         this.completionTime = this.calculateCompeletionTime();
+        this.reSequence();
     }
 
-    reSequence($event?: { items: ITriggerActionItemShell[] }): void {
-        this.selectedActionItems.forEach((sta, i) => {
-            const sequence = i + 1;
-            const relatedTra = this.currentTrigger.tempActionItems.filter(
-                item => item.actionItemId === sta.id
-            )[0];
+    reSequence(): void {
+        const triggerActions = this.currentTrigger.triggerActions;
 
-            if (relatedTra.sequence !== sequence) {
-                relatedTra.sequence = sta['sequence'] = sequence;
-            }
+        this.selectedCache.forEach((scAction, index) => {
+            const sequence = index + 1;
+            const trigAction = triggerActions.find(
+                trigAct => trigAct.id === scAction.id && !trigAct.isSoftDeleted
+            );
+
+            trigAction.sequence = trigAction.sequence !== sequence && sequence;
+
+            scAction['sequence'] = sequence;
         });
-        this.completionTime = this.currentTrigger.completionTime;
+
+        this.unSelectedCache.sort(this.unselectedCacheSorter);
     }
 
-    private sortActionItem(data: ActionItem[], key): ActionItem[] {
-        return data.sort((a: ActionItem, b: ActionItem) => {
-            const propA: number | string = a[key];
-            const propB: number | string = b[key];
+    private selectCacheSorter = (a: ActionItem, b: ActionItem): number => {
+        return a['sequence'] < b['sequence'] ? -1 : 1;
+    }
 
-            const valueA = isNaN(+propA) ? propA : +propA;
-            const valueB = isNaN(+propB) ? propB : +propB;
+    private triggerSorter = (a: Trigger, b: Trigger) => {
+        return a.triggerStart < b.triggerStart ? -1 : 1;
+    }
 
-            return valueA < valueB ? -1 : 1;
-        });
+    private unselectedCacheSorter = (a: ActionItem, b: ActionItem): number => {
+        return a.teamCategory.teamType < b.teamCategory.teamType ? -1 : 1;
     }
 }

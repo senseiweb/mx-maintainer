@@ -57,7 +57,7 @@
             <!-- ADD BUTTON -->
             <button
                 mat-raised-button
-                [routerLink]="'../action-items/new'"
+                (click)="addNewActionItem()"
                 class="add-action-item-button fuse-white mt-24 mt-md-0"
             >
                 <span>ADD ACTION ITEM</span>
@@ -117,7 +117,7 @@
                     >
                     <mat-cell *matCellDef="let actionItem" fxHide fxShow.gt-md>
                         <p class="team-type text-truncate">
-                            {{ actionItem.teamCategory }}
+                            {{ actionItem.teamCategory?.teamType }}
                         </p>
                     </mat-cell>
                 </ng-container>
@@ -169,7 +169,7 @@
                     *matRowDef="let actionItem; columns: displayedColumns"
                     class="action"
                     matRipple
-                    [routerLink]="'../action-items/' + actionItem.id + ''"
+                    (click)="editActionItem(actionItem)"
                 >
                 </mat-row>
             </mat-table>

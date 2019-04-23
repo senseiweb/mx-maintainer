@@ -1,3 +1,4 @@
+import { findNode } from '@angular/compiler';
 import {
     Component,
     Inject,
@@ -12,13 +13,21 @@ import {
     Validators
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { bareEntity } from '@ctypes/breeze-type-customization';
+import {
+    bareEntity,
+    IDialogResult,
+    Omit
+} from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
-import { Team } from 'app/features/aagt/data';
-import { Subject } from 'rxjs';
+import { Team, TeamCategory } from 'app/features/aagt/data';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as sa from 'sweetalert2';
 import { TeamUowService } from '../team-uow.service';
+
+type TeamModelProps = keyof bareEntity<Team>;
+type TeamFormModel = { [key in TeamModelProps]: any };
+type TeamCatFormMode = 'edit' | 'select' | 'add';
 
 @Component({
     selector: 'team-detail-dialog',
@@ -28,52 +37,68 @@ import { TeamUowService } from '../team-uow.service';
     encapsulation: ViewEncapsulation.None
 })
 export class TeamDetailDialogComponent implements OnInit, OnDestroy {
-    currentTeam: Team;
-    action: 'edit' | 'add';
+    formMode: 'edit' | 'add';
     teamFormGroup: FormGroup;
-    teamCategories: string[];
+    teamCategories: TeamCategory[];
+    teamCatFormMode: TeamCatFormMode;
+    selectedTeamCat: TeamCategory;
+    isDeleting = false;
+    isSaving: Observable<boolean>;
     dialogTitle: string;
     teamCatgories: string[];
-    isNew = false;
-    isValid = false;
+    private modelProps: TeamModelProps[] = [
+        'teamName',
+        'teamCategory',
+        'numTeamMembers',
+        'notes'
+    ];
     private unsubscribeAll: Subject<any>;
 
     constructor(
         private dialogRef: MatDialogRef<TeamDetailDialogComponent>,
         private formBuilder: FormBuilder,
-        private uow: TeamUowService,
-        @Inject(MAT_DIALOG_DATA) data: any
+        private teamUow: TeamUowService,
+        @Inject(MAT_DIALOG_DATA) private currentTeam: Team
     ) {
-        this.currentTeam = data;
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
         const team = this.currentTeam;
-        this.teamCategories = this.uow.teamCategories.map(tc => tc.teamType);
+        this.teamCategories = this.teamUow.teamCategories;
         if (this.currentTeam.entityAspect.entityState.isAdded()) {
-            this.action = 'add';
-            this.dialogTitle = 'Add Team';
+            this.formMode = 'add';
+            this.dialogTitle = 'Add New Team';
         } else {
-            this.action = 'edit';
-            this.dialogTitle = 'Edit Team';
+            this.formMode = 'edit';
+            this.dialogTitle = `Editing ${this.currentTeam.teamName}`;
         }
 
-        this.teamFormGroup = this.formBuilder.group({
-            teamName: new FormControl(team.teamName, [Validators.required]),
-            teamCategory: new FormControl(
-                team.teamCategory,
-                Validators.required
-            ),
-            numberOfTeamMembers: new FormControl(team.numTeamMembers),
-            notes: new FormControl(team.notes)
+        this.teamCatFormMode = 'select';
+
+        const formModel: Partial<TeamFormModel> = {};
+        const teamType = team.entityType;
+
+        this.modelProps.forEach(prop => {
+            formModel[prop] = new FormControl(
+                team[prop],
+                teamType.custom.validatorMap[prop]
+            );
         });
-        this.teamCategories = this.uow.teamCategories.map(tc => tc.teamType);
-        this.teamFormGroup.statusChanges
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(valid => {
-                this.isValid = valid === 'VALID';
+
+        formModel['editCategory'] = new FormControl();
+
+        this.teamFormGroup = this.formBuilder.group(formModel);
+
+        this.teamFormGroup
+            .get('teamCategory')
+            .valueChanges.pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(selectedCat => {
+                this.selectedTeamCat = selectedCat;
             });
+
+        this.selectedTeamCat = this.currentTeam.teamCategory;
+        this.isSaving = this.teamUow.isSaving;
     }
 
     ngOnDestroy(): void {
@@ -81,12 +106,83 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
+    addCategory(): void {
+        const newTeamCat = this.teamUow.createTeamCategory();
+        this.selectedTeamCat = newTeamCat;
+        this.editCategory();
+    }
+
     cancel(): void {
         this.currentTeam.entityAspect.rejectChanges();
-        this.dialogRef.close();
+        const teamDialogResult: IDialogResult<Team> = {
+            wasConceled: true
+        };
+        this.dialogRef.close(teamDialogResult);
+    }
+
+    cancelCategory(): void {
+        this.selectedTeamCat.entityAspect.rejectChanges();
+        this.selectedTeamCat = undefined;
+        this.teamCatFormMode = 'select';
+    }
+
+    compareCategories(cat1: TeamCategory, cat2: TeamCategory): boolean {
+        return cat1 && cat2 ? cat1.id === cat2.id : cat1 === cat2;
+    }
+
+    async confirmedDelete(): Promise<void> {
+        await sa.default.fire('Deleted!', 'Item has been deleted', 'success');
     }
 
     async deleteTeam(): Promise<void> {
+        const result = await this.confirmDeletion();
+        if (!result.value) {
+            return;
+        }
+        this.isDeleting = true;
+        this.currentTeam.teamAvailabilites.forEach(ta =>
+            ta.entityAspect.setDeleted()
+        );
+        this.currentTeam.entityAspect.setDeleted();
+        try {
+            const saveResult = await this.teamUow.saveTeam();
+            const diagResult: IDialogResult<Team> = {
+                confirmDeletion: true,
+                value: saveResult as any
+            };
+            await this.confirmedDelete();
+            this.dialogRef.close(diagResult);
+        } catch (e) {
+            await sa.default.fire(
+                'U Oh!',
+                'There was a problem deleting this team, please try again later',
+                'error'
+            );
+            console.log(e);
+        } finally {
+            this.isDeleting = false;
+            const errorResult: IDialogResult<Team> = {
+                confirmDeletion: false
+            };
+            this.dialogRef.close(errorResult);
+        }
+    }
+
+    async deleteTeamCategory(): Promise<void> {
+        const response = await this.confirmDeletion();
+        if (!response) {
+            return;
+        }
+        this.selectedTeamCat.entityAspect.setDeleted();
+        // TODO: add error handler
+        const result = await this.teamUow.saveTeamCategory();
+        this.teamCategories = this.teamUow.teamCategories;
+        this.teamCatFormMode = 'select';
+        this.teamFormGroup.get('teamCategory').setValue(undefined);
+        this.confirmedDelete();
+    }
+
+    async confirmDeletion(): Promise<any> {
         const config: sa.SweetAlertOptions = {
             title: 'Delete Trigger?',
             text: `Are you sure you?
@@ -97,30 +193,63 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
             cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, delete it!'
         };
-        try {
-            const result = await sa.default.fire(config);
-            if (!result.value) {
-                return;
-            }
+        const result = await sa.default.fire(config);
 
-            this.currentTeam.teamAvailabilites.forEach(ta =>
-                ta.entityAspect.setDeleted()
-            );
-            this.currentTeam.entityAspect.setDeleted();
-            const saveResult = await this.uow.saveTeam();
-            this.dialogRef.close(saveResult);
-            sa.default.fire('Deleted!', 'Team has been deleted', 'success');
-        } catch (e) {}
+        return result;
     }
 
-    saveChanges(del: string): void {
-        Object.keys(this.teamFormGroup.controls).forEach(
-            (key: keyof bareEntity<Team>) => {
-                this.currentTeam[key] = this.teamFormGroup.get(key).value;
-            }
-        );
-        this.uow.saveTeam().then(saveResult => {
-            this.dialogRef.close(this.currentTeam);
+    editCategory(): void {
+        this.teamCatFormMode = 'edit';
+
+        const editFormControl = this.teamFormGroup.get('editCategory' as any);
+
+        editFormControl.setValue(this.selectedTeamCat.teamType, {
+            emitValue: false
         });
+
+        editFormControl.valueChanges
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(changes => {
+                this.selectedTeamCat.teamType = changes;
+            });
+    }
+
+    async saveCategory(): Promise<void> {
+        const s = await this.teamUow.saveTeamCategory();
+        this.teamCategories = this.teamUow.teamCategories;
+        this.teamFormGroup
+            .get('teamCategory')
+            .setValue(this.selectedTeamCat, { emitValue: false });
+        this.teamCatFormMode = 'select';
+    }
+
+    async saveChanges(): Promise<void> {
+        this.modelProps.forEach(prop => {
+            const currProp = this.currentTeam[prop];
+            const teamProp = this.teamFormGroup.get(prop).value;
+            // Only update properties that have changes
+            if (currProp !== teamProp) {
+                this.currentTeam[prop] = teamProp;
+            }
+        });
+        try {
+            const saveResult = await this.teamUow.saveTeam();
+            const diagResult: IDialogResult<Team> = {
+                confirmChange: true,
+                value: saveResult as any
+            };
+            this.dialogRef.close(diagResult);
+        } catch (e) {
+            await sa.default.fire(
+                'U Oh!',
+                'There was a problem saving this team, please try again later',
+                'error'
+            );
+            console.log(e);
+            const result: IDialogResult<Team> = {
+                confirmChange: false
+            };
+            this.dialogRef.close(result);
+        }
     }
 }

@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { bareEntity } from '@ctypes/breeze-type-customization';
+import { SpListName } from 'app/app-config.service';
 import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
 import { EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';
-import { AagtListName, GenerationAsset } from '../models';
+import { GenerationAsset } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
 export class GenAssetRepoService extends BaseRepoService<GenerationAsset> {
     constructor(entityService: AagtEmProviderService) {
-        super(AagtListName.GenAsset, entityService);
+        super(SpListName.GenerationAsset, entityService);
     }
 
     createGenerationAsset(data: bareEntity<GenerationAsset>): GenerationAsset {

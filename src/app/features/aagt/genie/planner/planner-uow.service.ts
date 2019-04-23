@@ -8,7 +8,6 @@ import {
 } from 'breeze-client';
 import {
     AagtDataModule,
-    AagtListName,
     ActionItem,
     ActionItemRepo,
     Asset,
@@ -37,16 +36,22 @@ import {
 } from '@angular/router';
 
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { prepareSyntheticListenerFunctionName } from '@angular/compiler/src/render3/util';
 import { bareEntity } from '@ctypes/breeze-type-customization';
-import { trimLabel } from '@swimlane/ngx-charts';
 import { AssetTriggerActionRepoService } from 'app/features/aagt/data/repos/asset-trigger-action-repo.service';
 import {} from 'app/features/aagt/data/repos/trigger-action-repo.service';
 import { BaseRepoService, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
-import { forkJoin, from, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, filter, map, mergeMap } from 'rxjs/operators';
+import {
+    defer,
+    forkJoin,
+    from,
+    BehaviorSubject,
+    Observable,
+    Subject
+} from 'rxjs';
+
+import { SpListName } from 'app/app-config.service';
 import {
     AagtEmProviderService,
     IEntityChange
@@ -56,28 +61,25 @@ import { IStepperModel } from './planner.component';
 
 export type FilterType = 'asset' | 'trigger';
 export type FilterChange = {
-    [key in FilterType]: {
+    [key in FilterType]?: {
         filterText: string;
     }
 };
 
 @Injectable({ providedIn: AagtDataModule })
 export class PlannerUowService implements Resolve<any> {
-    allAssetsOptions: Asset[];
-    allIsoOptions: string[];
-    allActionItems: Observable<ActionItem[]>;
-    allAssetTriggerActions: AssetTriggerAction[];
-    allTeamCats: TeamCategory[];
+    allAssets: Asset[] = [];
+    allIsoOptions: string[] = [];
+    allActionItems: ActionItem[] = [];
+    allTeamCats: TeamCategory[] = [];
+    allTeams: Team[] = [];
     canDeactivatePlaaner: BehaviorSubject<boolean>;
     currentGen: Generation;
-    genTriggers: Trigger[];
     onStepValidityChange: BehaviorSubject<IStepperModel>;
     onStepperChange: Subject<StepperSelectionEvent>;
     onFilterChange: BehaviorSubject<FilterChange>;
     onEntitiesChange: Observable<SpEntityBase[]>;
-    selectedAssets: Asset[];
     private entityChangeSet: Entity[];
-    private emSubsId: number;
     saveAll: any;
 
     constructor(
@@ -96,10 +98,16 @@ export class PlannerUowService implements Resolve<any> {
     ) {
         this.canDeactivatePlaaner = new BehaviorSubject(true);
         this.onEntitiesChange = new Observable();
-        this.onStepValidityChange = new BehaviorSubject({} as any);
-        this.onFilterChange = new BehaviorSubject({} as any);
+        this.onStepValidityChange = new BehaviorSubject({});
+        this.onFilterChange = new BehaviorSubject({
+            asset: {
+                filterText: 'all'
+            },
+            trigger: {
+                filterText: 'all'
+            }
+        });
         this.onStepperChange = new Subject();
-        this.emProvider.onEntityChange.subscribe(this.entityChanges);
     }
 
     resolve(
@@ -110,133 +118,116 @@ export class PlannerUowService implements Resolve<any> {
 
         this.planGen(id);
 
-        const neededObs = [
+        this.onStepperChange.subscribe((stepEvent: StepperSelectionEvent) => {
+            switch (stepEvent.previouslySelectedIndex) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+            }
+        });
+
+        const requiredData: Array<Observable<any>> = [
             this.actionItemRepo.all,
+            defer(() => this.genRepo.spChoiceValues('iso')),
             this.teamCatRepo.all,
-            from(this.genRepo.spChoiceValues('iso')),
+            this.teamRepo.all,
             this.assetRepo.all
         ];
 
         if (id === 'new') {
-            return this.onEntitiesChange.pipe(x => forkJoin(neededObs));
+            const resolver = forkJoin(requiredData);
+
+            resolver.subscribe(
+                ([actionItems, isoChoices, teamCats, teams, assets]) => {
+                    this.allActionItems = actionItems;
+                    this.allIsoOptions = isoChoices;
+                    this.allTeamCats = teamCats;
+                    this.allTeams = teams;
+                    this.allAssets = assets;
+                }
+            );
+
+            return resolver;
         }
 
-        neededObs.push(from(this.fetchGenerationAssets));
-        neededObs.push(from(this.fetchGenTrigAndActions));
+        const additionalData = [
+            defer(this.fetchGenerationAssets),
+            defer(this.fetchGenTrigAndActions)
+        ];
+        requiredData.concat(additionalData);
 
-        return this.onEntitiesChange.pipe(x => forkJoin(neededObs));
+        const extendResolver = forkJoin(requiredData);
 
-        // this.onFilterChange
-        //     .pipe(filter(fil => !!(fil.asset && fil.asset.filterText)))
-        //     .subscribe(fil => {
-        //         let atas = this.updateAssetTriggerActions();
-
-        //         if (fil.asset.filterText !== 'all') {
-        //             atas = atas.filter(
-        //                 ata =>
-        //                     ata.triggerAction.trigger.milestone ===
-        //                     fil.asset.filterText
-        //             );
-        //         }
-        //         if (fil.asset.filterText !== 'all') {
-        //             atas = atas.filter(
-        //                 ata => ata.genAsset.asset.alias === fil.asset.filterText
-        //             );
-        //         }
-        //         this.onEntitiesChange.next(atas);
-        //     });
-
-        // this.onFilterChange.subscribe(txtFilter => {
-        //     let atas = this.updateAssetTriggerActions();
-
-        //     const assetFilter =
-        //         (txtFilter.asset && txtFilter.asset.filterText) || 'all';
-
-        //     const triggerFilter =
-        //         (txtFilter.trigger && txtFilter.trigger.filterText) || 'all';
-
-        //     if (assetFilter !== 'all') {
-        //         atas = atas.filter(
-        //             ata => ata.genAsset.asset.alias === assetFilter
-        //         );
-        //     }
-
-        //     if (triggerFilter !== 'all') {
-        //         atas = atas.filter(
-        //             ata => ata.triggerAction.trigger.milestone === triggerFilter
-        //         );
-        //     }
-        //     this.onEntitiesChange.next(atas);
-        // });
-    }
-
-    assetSelectionCheck(): void {
-        this.currentGen.generationAssets.forEach(genAsset => {
-            const genAssetDeselected = !this.selectedAssets.some(
-                assets => genAsset.assetId === assets.id
-            );
-            if (genAssetDeselected) {
-                genAsset.assetTriggerActions.forEach(ata => {
-                    ata.entityAspect.setDeleted();
-                });
-                genAsset.entityAspect.setDeleted();
+        extendResolver.subscribe(
+            ([
+                actionItems,
+                isoChoices,
+                teamCats,
+                teams,
+                assets,
+                genAssets,
+                genTrigAndActions
+            ]) => {
+                this.allActionItems = actionItems;
+                this.allIsoOptions = isoChoices;
+                this.allTeamCats = teamCats;
+                this.allTeams = teams;
+                this.allAssets = assets;
             }
-        });
-
-        this.selectedAssets.forEach(asset => {
-            const newGenAssetSelected = !this.currentGen.generationAssets.some(
-                genAsset => genAsset.assetId === asset.id
-            );
-            if (newGenAssetSelected) {
-                const data = {
-                    generationId: this.currentGen.id,
-                    assetId: asset.id
-                };
-                this.createGenerationAsset(data);
-            }
-        });
-    }
-
-    createGenerationAsset(data: {
-        generationId: number;
-        assetId: number;
-    }): GenerationAsset {
-        const genAsset = this.genAssetRepo.createGenerationAsset(data);
-        const trigActions = _.flatMap(
-            this.currentGen.triggers,
-            x => x.triggerActions
         );
-        trigActions.forEach(tra => {
-            const assetTrigActionData = {
-                genAssetId: genAsset.id,
-                triggerActionId: tra.id,
-                sequence: tra.sequence
-            };
-            this.assetTrigActionRepo.createAssetTriggerAction(
-                assetTrigActionData
-            );
-        });
-        return genAsset;
+
+        return extendResolver;
     }
 
-    createTriggerAction(data: {
-        triggerId: number;
-        actionItemId: number;
-        sequence: number;
-    }): TriggerAction {
-        const newTrigAction = this.triggerActionRepo.createTrigAction(data);
-        this.currentGen.generationAssets.forEach(genAsset => {
-            const assetTrigActionData = {
-                genAssetId: genAsset.id,
-                triggerActionId: newTrigAction.id,
-                sequence: newTrigAction.sequence
-            };
-            this.assetTrigActionRepo.createAssetTriggerAction(
-                assetTrigActionData
-            );
-        });
-        return newTrigAction;
-    }
+    // createGenerationAsset(data: {
+    //     generationId: number;
+    //     assetId: number;
+    //     mxPosition: number;
+    // }): GenerationAsset {
+    //     const genAsset = this.genAssetRepo.createGenerationAsset(data);
+    //     const trigActions = _.flatMap(
+    //         this.currentGen.triggers,
+    //         x => x.triggerActions
+    //     );
+    //     trigActions.forEach(tra => {
+    //         const assetTrigActionData = {
+    //             genAssetId: genAsset.id,
+    //             triggerActionId: tra.id,
+    //             sequence: tra.sequence
+    //         };
+    //         // this.assetTrigActionRepo.createAssetTriggerAction(
+    //         //     assetTrigActionData
+    //         // );
+    //     });
+    //     return genAsset;
+    // }
+
+    createTeamAvailability = (info: {
+        teamId: number;
+        availStart: Date;
+        availEnd: Date;
+        manHoursAvail: number;
+    }) => this.teamAvailRepo.create(info)
+
+    // createTriggerAction(data: {
+    //     triggerId: number;
+    //     actionItemId: number;
+    //     sequence: number;
+    // }): TriggerAction {
+    //     const newTrigAction = this.triggerActionRepo.createTrigAction(data);
+    //     this.currentGen.generationAssets.forEach(genAsset => {
+    //         const assetTrigActionData = {
+    //             genAssetId: genAsset.id,
+    //             triggerActionId: newTrigAction.id,
+    //             sequence: newTrigAction.sequence
+    //         };
+    //         // this.assetTrigActionRepo.createAssetTriggerAction(
+    //         //     assetTrigActionData
+    //         // );
+    //     });
+    //     return newTrigAction;
+    // }
 
     deleteTriggerGraph(trigger: Trigger): void {
         const tras = trigger.triggerActions;
@@ -260,80 +251,86 @@ export class PlannerUowService implements Resolve<any> {
         triggerAction.entityAspect.setDeleted();
     }
 
-    private entityChanges(entityChanges: IEntityChange[]): void {
-        const propChanges = entityChanges.filter(
-            chng => chng.entityAction === EntityAction.PropertyChange
-        );
-        if (!propChanges.length) {
-            return;
-        }
-        const genChanges = propChanges.filter(
-            chng => chng.entity.entityType.shortName === AagtListName.Gen
-        );
-        if (genChanges) {
-            if (
-                genChanges.some(chng => {
-                    const propName: keyof bareEntity<Generation> =
-                        chng.args.propertyName;
-                    return (
-                        propName === 'genEndDate' || propName === 'genStartDate'
-                    );
-                })
-            ) {
-                this.planAssetTaskActions();
-                return;
-            }
-        }
-        const triggerChanges = propChanges.filter(
-            chng => chng.entity.entityType.shortName === AagtListName.Trigger
-        );
-        if (triggerChanges) {
-            if (
-                triggerChanges.some(chng => {
-                    const propName: keyof bareEntity<Trigger> =
-                        chng.args.propertyName;
-                    return (
-                        propName === 'triggerStart' ||
-                        propName === 'triggerStop'
-                    );
-                })
-            ) {
-                this.planAssetTaskActions();
-                return;
-            }
-        }
-        const trigActions = propChanges.filter(
-            chng => chng.entity.entityType.shortName === AagtListName.TriggerAct
-        );
-        if (trigActions) {
-            if (
-                trigActions.some(chng => {
-                    const propName: keyof bareEntity<TriggerAction> =
-                        chng.args.propertyName;
-                    return propName === 'sequence';
-                })
-            ) {
-                this.planAssetTaskActions();
-                return;
-            }
-        }
-        const assetTrigActs = propChanges.filter(
-            chng =>
-                chng.entity.entityType.shortName === AagtListName.AssetTrigAct
-        );
-        if (assetTrigActs) {
-            if (
-                assetTrigActs.some(chng => {
-                    const propName: keyof bareEntity<AssetTriggerAction> =
-                        chng.args.propertyName;
-                    return propName === 'sequence';
-                })
-            ) {
-                this.planAssetTaskActions();
-                return;
-            }
-        }
+    private genAssetChnage(): void {
+        // this.emProvider.onEntityManagerChange
+        //     .pipe<IEntityChange<>>()
+        //     .subscribe();
     }
+
+    // private entityChanges(entityChanges: IEntityChange[]): void {
+    //     const propChanges = entityChanges.filter(
+    //         chng => chng.entityAction === EntityAction.PropertyChange
+    //     );
+    //     if (!propChanges.length) {
+    //         return;
+    //     }
+    //     const genChanges = propChanges.filter(
+    //         chng => chng.entity.entityType.shortName === SpListName.Gen
+    //     );
+    //     if (genChanges) {
+    //         if (
+    //             genChanges.some(chng => {
+    //                 const propName: keyof bareEntity<Generation> =
+    //                     chng.args.propertyName;
+    //                 return (
+    //                     propName === 'genEndDate' || propName === 'genStartDate'
+    //                 );
+    //             })
+    //         ) {
+    //             this.planAssetTaskActions();
+    //             return;
+    //         }
+    //     }
+    //     const triggerChanges = propChanges.filter(
+    //         chng => chng.entity.entityType.shortName === SpListName.Trigger
+    //     );
+    //     if (triggerChanges) {
+    //         if (
+    //             triggerChanges.some(chng => {
+    //                 const propName: keyof bareEntity<Trigger> =
+    //                     chng.args.propertyName;
+    //                 return (
+    //                     propName === 'triggerStart' ||
+    //                     propName === 'triggerStop'
+    //                 );
+    //             })
+    //         ) {
+    //             this.planAssetTaskActions();
+    //             return;
+    //         }
+    //     }
+    //     const trigActions = propChanges.filter(
+    //         chng => chng.entity.entityType.shortName === SpListName.TriggerAct
+    //     );
+    //     if (trigActions) {
+    //         if (
+    //             trigActions.some(chng => {
+    //                 const propName: keyof bareEntity<TriggerAction> =
+    //                     chng.args.propertyName;
+    //                 return propName === 'sequence';
+    //             })
+    //         ) {
+    //             this.planAssetTaskActions();
+    //             return;
+    //         }
+    //     }
+    //     const assetTrigActs = propChanges.filter(
+    //         chng =>
+    //             chng.entity.entityType.shortName === SpListName.AssetTrigAct
+    //     );
+    //     if (assetTrigActs) {
+    //         if (
+    //             assetTrigActs.some(chng => {
+    //                 const propName: keyof bareEntity<AssetTriggerAction> =
+    //                     chng.args.propertyName;
+    //                 return propName === 'sequence';
+    //             })
+    //         ) {
+    //             this.planAssetTaskActions();
+    //             return;
+    //         }
+    //     }
+    // }
 
     private fetchGenerationAssets(): Observable<any> {
         const genAssetPredicate = this.genAssetRepo.makePredicate(
@@ -419,7 +416,7 @@ export class PlannerUowService implements Resolve<any> {
         return this.currentGen.triggers.map(trig => trig.milestone);
     }
 
-    newTrigger(generationId: number): Trigger {
+    createNewTrigger(generationId: number): Trigger {
         const newTrigger = this.triggerRepo.newTrigger(generationId);
         return newTrigger;
     }
@@ -548,22 +545,22 @@ export class PlannerUowService implements Resolve<any> {
         return this.entityChangeSet;
     }
 
-    async saveEntityChanges(entityName: AagtListName): Promise<SaveResult> {
+    async saveEntityChanges(entityName: SpListName): Promise<SaveResult> {
         let repo: BaseRepoService<any>;
         switch (entityName) {
-            case AagtListName.Gen:
+            case SpListName.Generation:
                 repo = this.genRepo;
                 break;
-            case AagtListName.GenAsset:
+            case SpListName.GenerationAsset:
                 repo = this.genAssetRepo;
                 break;
-            case AagtListName.Trigger:
+            case SpListName.Trigger:
                 repo = this.triggerRepo;
                 break;
-            case AagtListName.TriggerAct:
+            case SpListName.TriggerAction:
                 repo = this.triggerActionRepo;
                 break;
-            case AagtListName.AssetTrigAct:
+            case SpListName.AssetTriggerAction:
                 repo = this.assetTrigActionRepo;
                 break;
         }
@@ -571,65 +568,49 @@ export class PlannerUowService implements Resolve<any> {
         return success;
     }
 
-    triggerActionSelectionCheck(): void {
-        this.currentGen.triggers.forEach(trig => {
-            // ignore if nothing change on the trigger, i.e. just visited the step
+    // triggerActionSelectionCheck(): void {
+    //     this.currentGen.triggers.forEach(trig => {
+    //         // ignore if nothing change on the trigger, i.e. just visited the step
 
-            // delete triggerActions and AssetTrigActions graphs
-            const actionItemIds = trig.tempActionItems;
-            trig.triggerActions.forEach(tra => {
-                let existingItemIndex: number;
+    //         // delete triggerActions and AssetTrigActions graphs
+    //         const draftActionItems = trig.draftActionItems;
+    //         const triggerActions = trig.triggerActions;
 
-                const existActionItem = actionItemIds.find((ai, index) => {
-                    if (ai.actionItemId === tra.actionItemId) {
-                        existingItemIndex = index;
-                        return true;
-                    }
-                    return false;
-                });
+    //         triggerActions.forEach(tra => {
+    //             const draftActionItem = draftActionItems.get(tra.actionItemId);
 
-                if (existActionItem) {
-                    // if triggerAction already exist, check if the sequences has changed
-                    if (existActionItem.sequence !== tra.sequence) {
-                        tra.sequence = existActionItem.sequence;
-                    }
-                    // remove the id from the action item list
-                    actionItemIds.splice(existingItemIndex, 1);
-                } else {
-                    // assumes the triggerAction was deleted, so delete graph
-                    this.deleteTriggerActionGraph(tra);
-                }
-            });
+    //             if (draftActionItem) {
+    //                 // if triggerAction already exist, check if the sequences has changed
+    //                 if (tra.sequence !== draftActionItem.sequence) {
+    //                     tra.sequence = draftActionItem.sequence;
+    //                 }
+    //             } else {
+    //                 // assumes the triggerAction was deleted, so delete graph
+    //                 this.deleteTriggerActionGraph(tra);
+    //             }
 
-            // create new triggerActions, only new action item should be left in array
-            actionItemIds.forEach(aii => {
-                this.createTriggerAction({
-                    triggerId: trig.id,
-                    actionItemId: aii.actionItemId,
-                    sequence: aii.sequence
-                });
-            });
+    //             // remove the id from the action item list
+    //             draftActionItems.delete(tra.actionItemId);
+    //         });
 
-            // reset the action items list with the result of deletion and creations
-            trig.tempActionItems = trig.triggerActions.map(tra => {
-                return {
-                    actionItemId: tra.actionItemId,
-                    sequence: tra.sequence
-                };
-            });
-        });
-    }
+    //         // create new triggerActions, only new action item should be left in array
+    //         draftActionItems.forEach((aii, key) => {
+    //             this.createTriggerAction({
+    //                 triggerId: trig.id,
+    //                 actionItemId: key,
+    //                 sequence: aii['sequence']
+    //             });
+    //         });
 
-    // updateTriggerActions(): void {
-    //     const tra = _.flatMap(this.currentGen.triggers, x => x.triggerActions);
-    //     this.next(tra);
-    // }
+    //         draftActionItems.clear();
 
-    // updateAssetTriggerActions(): AssetTriggerAction[] {
-    //     const atas = _.flatMap(this.currentGen.triggers, x =>
-    //         _.flatMap(x.triggerActions, m => m.assetTriggerActions)
-    //     );
-    //     this.onEntitiesChange.next(atas);
-    //     return atas;
+    //         // reset the action items list with the result of deletion and creations
+    //         trig.triggerActions.forEach(tra => {
+    //             draftActionItems.set(tra.actionItemId, {
+    //                 sequence: tra.sequence,
+    //                 actionItem: tra.actionItem
+    //             });
+    //         });
+    //     });
     // }
 }

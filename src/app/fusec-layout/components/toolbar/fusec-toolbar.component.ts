@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import * as _ from 'lodash';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
-import { FuseConfigService } from '@fuse/services/config.service';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
+import { FuseConfigService } from '@fuse/services/config.service';
 
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import { AppConfig } from 'app/app-config.service';
+import { cfgSetNavStructure, SpConfig } from 'app/app-config.service';
 
 @Component({
     selector: 'fusec-toolbar',
@@ -32,8 +32,7 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
         private _fuseConfigService: FuseConfigService,
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
-        private _navService: FuseNavigationService,
-        private appConfig: AppConfig
+        private _navService: FuseNavigationService
     ) {
         // Set the defaults
         this.userStatusOptions = [
@@ -82,16 +81,21 @@ export class FusecToolbarComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         // Subscribe to the config changes
-        this._fuseConfigService.config.pipe(takeUntil(this._unsubscribeAll)).subscribe(settings => {
-            this.horizontalNavbar = settings.layout.navbar.position === 'top';
-            this.rightNavbar = settings.layout.navbar.position === 'right';
-            this.hiddenNavbar = settings.layout.navbar.hidden === true;
-        });
+        this._fuseConfigService.config
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(settings => {
+                this.horizontalNavbar =
+                    settings.layout.navbar.position === 'top';
+                this.rightNavbar = settings.layout.navbar.position === 'right';
+                this.hiddenNavbar = settings.layout.navbar.hidden === true;
+            });
 
         // Set the selected language from default languages
-        this.selectedLanguage = _.find(this.languages, { id: this._translateService.currentLang });
-        this.appConfig.setNavStructure();
-        this.userName = this.appConfig.my.lastName;
+        this.selectedLanguage = _.find(this.languages, {
+            id: this._translateService.currentLang
+        });
+        cfgSetNavStructure();
+        this.userName = SpConfig.cfgMy.lastName;
         this.navigation = this._navService.getCurrentNavigation();
     }
 

@@ -10,9 +10,11 @@ import {
     MatDialog,
     MatDialogConfig,
     MatPaginator,
-    MatSort
+    MatSort,
+    MatTableDataSource
 } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
+import { IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { Team } from 'app/features/aagt/data';
 import { FilesDataSource } from 'app/global-data/';
@@ -29,7 +31,7 @@ import { TeamUowService } from '../team-uow.service';
     encapsulation: ViewEncapsulation.None
 })
 export class TeamListComponent implements OnInit, OnDestroy {
-    dataSource: FilesDataSource<Team>;
+    dataSource: MatTableDataSource<Team>;
     displayedColumns = ['id', 'teamName', 'teamCategory', 'teamMemberCount'];
     @ViewChild(MatPaginator)
     paginator: MatPaginator;
@@ -43,20 +45,14 @@ export class TeamListComponent implements OnInit, OnDestroy {
     private unsubscribeAll: Subject<any>;
 
     constructor(
-        private uow: TeamUowService,
-        private teamDialog: MatDialog,
-        private route: ActivatedRoute
+        private teamUow: TeamUowService,
+        private teamDetailDialog: MatDialog
     ) {
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit() {
-        this.dataSource = new FilesDataSource(
-            this.uow.onTeamListChange.value,
-            this.paginator,
-            this.sort,
-            this.uow.onTeamListChange
-        );
+        this.dataSource = new MatTableDataSource(this.teamUow.allTeams);
 
         fromEvent(this.filter.nativeElement, 'keyup')
             .pipe(
@@ -81,30 +77,29 @@ export class TeamListComponent implements OnInit, OnDestroy {
         const dialogCfg = new MatDialogConfig();
         dialogCfg.panelClass = 'team-detail-dialog';
         dialogCfg.data = team;
-        this.teamDialog
+        this.teamDetailDialog
             .open(TeamDetailDialogComponent, dialogCfg)
             .afterClosed()
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(data => {
-                if (data) {
-                    this.uow.fetchAllTeams();
+            .pipe<IDialogResult<Team>>(takeUntil(this.unsubscribeAll))
+            .subscribe(result => {
+                if (!result.wasConceled) {
+                    this.dataSource.data = this.teamUow.allTeams;
                 }
             });
     }
 
     newTeam(): void {
         const dialogCfg = new MatDialogConfig();
-        this.uow.getTeam('new');
-        dialogCfg.data = this.uow.onTeamChange.value;
+        dialogCfg.data = this.teamUow.createTeam();
         dialogCfg.panelClass = 'team-detail-dialog';
-
-        this.teamDialog
+        dialogCfg.disableClose = true;
+        this.teamDetailDialog
             .open(TeamDetailDialogComponent, dialogCfg)
             .afterClosed()
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(data => {
-                if (data) {
-                    this.uow.fetchAllTeams();
+            .pipe<IDialogResult<Team>>(takeUntil(this.unsubscribeAll))
+            .subscribe(result => {
+                if (!result.wasConceled) {
+                    this.dataSource.data = this.teamUow.allTeams;
                 }
             });
     }
