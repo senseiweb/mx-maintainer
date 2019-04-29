@@ -230,26 +230,26 @@ export class PlannerUowService implements Resolve<any> {
     // }
 
     deleteTriggerGraph(trigger: Trigger): void {
-        const tras = trigger.triggerActions;
-        if (tras) {
-            tras.forEach(tra => this.deleteTriggerActionGraph(tra));
-        }
-        trigger.entityAspect.setDeleted();
+        // const tras = trigger.triggerActions;
+        // if (tras) {
+        //     tras.forEach(tra => this.deleteTriggerActionGraph(tra));
+        // }
+        // trigger.entityAspect.setDeleted();
     }
 
-    deleteTriggerActionGraph(triggerAction: TriggerAction): void {
-        const atas = triggerAction.assetTriggerActions;
-        if (atas) {
-            atas.forEach(ata => {
-                const state = ata.entityAspect.entityState;
-                if (!state.isDeleted()) {
-                    ata.preDeleteState = state;
-                }
-                ata.entityAspect.setDeleted();
-            });
-        }
-        triggerAction.entityAspect.setDeleted();
-    }
+    // deleteTriggerActionGraph(triggerAction: TriggerAction): void {
+    //     const atas = triggerAction.assetTriggerActions;
+    //     if (atas) {
+    //         atas.forEach(ata => {
+    //             const state = ata.entityAspect.entityState;
+    //             if (!state.isDeleted()) {
+    //                 ata.preDeleteState = state;
+    //             }
+    //             ata.entityAspect.setDeleted();
+    //         });
+    //     }
+    //     triggerAction.entityAspect.setDeleted();
+    // }
 
     private genAssetChnage(): void {
         // this.emProvider.onEntityManagerChange

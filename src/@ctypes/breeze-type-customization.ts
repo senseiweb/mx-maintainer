@@ -51,7 +51,11 @@ export interface SpDataDef extends dtDef {
     hasMany: boolean;
     spInternalName: string;
 }
-
+export interface SpDataDef extends dtDef {
+    dataType: DataType;
+    hasMany: boolean;
+    spInternalName: string;
+}
 export interface IDialogResult<T> {
     wasConceled?: boolean;
     confirmDeletion?: boolean;

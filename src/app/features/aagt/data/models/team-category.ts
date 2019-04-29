@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
-import { SpListName } from 'app/app-config.service';
+import { MxmAppName, SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
+import {
+    BzDataProp,
+    BzEntity,
+    BzNavProp
+} from 'app/global-data/models/_entity-decorators';
+import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
@@ -17,10 +23,26 @@ export interface IJobReservationReceipt {
     plannedEnd: _m.Moment;
     durationPlanned: _m.Duration;
 }
+
+@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamCategory })
 export class TeamCategory extends ebase.SpEntityBase {
+    @BzDataProp({
+        dataType: DataType.String,
+        isNullable: false,
+        spInternalName: 'Title'
+    })
     teamType: string;
+
+    @BzDataProp({
+        dataType: DataType.String,
+        isNullable: false,
+        spInternalName: 'Title'
+    })
     teamCatColor: string;
+
+    @BzNavProp()
     teams: Team[];
+
     addJobReservation = (
         request: IJobReservateionRequest
     ): IJobReservationReceipt => {
@@ -87,35 +109,35 @@ export class TeamCategory extends ebase.SpEntityBase {
     }
 }
 
-@Injectable({
-    providedIn: AagtDataModule
-})
-export class TeamCategoryMetadata extends ebase.MetadataBase<TeamCategory> {
-    metadataFor = TeamCategory;
+// @Injectable({
+//     providedIn: AagtDataModule
+// })
+// export class TeamCategoryMetadata extends ebase.MetadataBase<TeamCategory> {
+//     metadataFor = TeamCategory;
 
-    constructor() {
-        super(SpListName.TeamCategory);
-        this.entityDefinition.dataProperties.teamType = {
-            dataType: this.dt.String,
-            isNullable: false,
-            spInternalName: 'Title'
-        };
+//     constructor() {
+//         super(SpListName.TeamCategory);
+//         this.entityDefinition.dataProperties.teamType = {
+//             dataType: this.dt.String,
+//             isNullable: false,
+//             spInternalName: 'Title'
+//         };
 
-        this.entityDefinition.dataProperties.teamCatColor = {
-            dataType: this.dt.String
-        };
+//         this.entityDefinition.dataProperties.teamCatColor = {
+//             dataType: this.dt.String
+//         };
 
-        this.entityDefinition.navigationProperties = {
-            teams: {
-                entityTypeName: SpListName.Team,
-                associationName: 'TeamCategory_Teams',
-                isScalar: false
-            }
-        };
+//         this.entityDefinition.navigationProperties = {
+//             teams: {
+//                 entityTypeName: SpListName.Team,
+//                 associationName: 'TeamCategory_Teams',
+//                 isScalar: false
+//             }
+//         };
 
-        Object.assign(
-            this.entityDefinition.dataProperties,
-            this.baseDataProperties
-        );
-    }
-}
+//         Object.assign(
+//             this.entityDefinition.dataProperties,
+//             this.baseDataProperties
+//         );
+//     }
+// }

@@ -80,6 +80,7 @@ export class EntityDefinition<T> implements SpEntityDef<T> {
                  * expect: 'SpConfigData:#SP.Data.Aagt': { configKey: 'Title' },
                  */
                 if (dpKey === 'spInternalName' && dataProp.spInternalName) {
+                    debugger;
                     const dictKey = `${this.shortName}:#${namespace}`;
                     const dictProp = { [propKey]: dataProp[dpKey] };
                     if (dict[dictKey]) {

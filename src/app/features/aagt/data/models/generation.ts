@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
-import { SpListName } from 'app/app-config.service';
+import { MxmAppName, SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
+import {
+    BzDataProp,
+    BzEntity,
+    BzNavProp
+} from 'app/global-data/models/_entity-decorators';
+import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import { AagtDataModule } from '../aagt-data.module';
 import { Asset } from './asset';
@@ -16,23 +22,39 @@ export enum GenStatusEnum {
     Historical = 'Historical'
 }
 
-export interface IDraftAsset {
-    priority: number;
-    asset: Asset;
-}
-
+@BzEntity(MxmAppName.Aagt, { shortName: SpListName.Generation })
 export class Generation extends ebase.SpEntityBase {
+    @BzDataProp()
     title: string;
+
+    @BzDataProp()
     isActive: boolean;
+
+    @BzDataProp()
     iso: string;
+
+    @BzDataProp({
+        dataType: DataType.String
+    })
     genStatus: GenStatusEnum;
+
+    @BzDataProp()
     assignedAssetCount: number;
+
+    @BzDataProp()
     genStartDate: Date;
+
+    @BzDataProp()
     genEndDate: Date;
-    // draftAssets: Map<number, IDraftAsset>;
+
     assumptions: Assumption[];
+
+    @BzNavProp()
     triggers: Trigger[];
+
+    @BzDataProp()
     generationAssets: GenerationAsset[];
+
     get assetTrigActions(): AssetTriggerAction[] {
         if (!this.generationAssets) {
             return;
@@ -41,69 +63,69 @@ export class Generation extends ebase.SpEntityBase {
     }
 }
 
-@Injectable({
-    providedIn: AagtDataModule
-})
-export class GenerationMetadata extends ebase.MetadataBase<Generation> {
-    metadataFor = Generation;
+// @Injectable({
+//     providedIn: AagtDataModule
+// })
+// export class GenerationMetadata extends ebase.MetadataBase<Generation> {
+//     metadataFor = Generation;
 
-    constructor() {
-        super(SpListName.Generation);
+//     constructor() {
+//         super(SpListName.Generation);
 
-        this.entityDefinition.dataProperties.title = {
-            dataType: this.dt.String,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.isActive = {
-            dataType: this.dt.Boolean,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.iso = {
-            dataType: this.dt.String,
-            isNullable: true
-        };
-        this.entityDefinition.dataProperties.genStatus = {
-            dataType: this.dt.String,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.assignedAssetCount = {
-            dataType: this.dt.Int16,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.genStartDate = {
-            dataType: this.dt.DateTime,
-            isNullable: true
-        };
-        this.entityDefinition.dataProperties.genEndDate = {
-            dataType: this.dt.DateTime
-        };
+//         this.entityDefinition.dataProperties.title = {
+//             dataType: this.dt.String,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.isActive = {
+//             dataType: this.dt.Boolean,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.iso = {
+//             dataType: this.dt.String,
+//             isNullable: true
+//         };
+//         this.entityDefinition.dataProperties.genStatus = {
+//             dataType: this.dt.String,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.assignedAssetCount = {
+//             dataType: this.dt.Int16,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.genStartDate = {
+//             dataType: this.dt.DateTime,
+//             isNullable: true
+//         };
+//         this.entityDefinition.dataProperties.genEndDate = {
+//             dataType: this.dt.DateTime
+//         };
 
-        this.entityDefinition.navigationProperties = {
-            triggers: {
-                entityTypeName: SpListName.Trigger,
-                associationName: 'Generation_Triggers',
-                isScalar: false
-            },
-            generationAssets: {
-                entityTypeName: SpListName.GenerationAsset,
-                associationName: 'Generation_Assets',
-                isScalar: false
-            }
-        };
+//         this.entityDefinition.navigationProperties = {
+//             triggers: {
+//                 entityTypeName: SpListName.Trigger,
+//                 associationName: 'Generation_Triggers',
+//                 isScalar: false
+//             },
+//             generationAssets: {
+//                 entityTypeName: SpListName.GenerationAsset,
+//                 associationName: 'Generation_Assets',
+//                 isScalar: false
+//             }
+//         };
 
-        Object.assign(
-            this.entityDefinition.dataProperties,
-            this.baseDataProperties
-        );
+//         Object.assign(
+//             this.entityDefinition.dataProperties,
+//             this.baseDataProperties
+//         );
 
-        this.initializer = (_entity: Generation) => {
-            // _entity.draftAssets = new Map();
-            // _entity.generationAssets.forEach(ga => {
-            //     _entity.draftAssets.set(ga.assetId, {
-            //         priority: ga.mxPosition,
-            //         asset: ga.asset
-            //     });
-            // });
-        };
-    }
-}
+//         this.initializer = (_entity: Generation) => {
+//             // _entity.draftAssets = new Map();
+//             // _entity.generationAssets.forEach(ga => {
+//             //     _entity.draftAssets.set(ga.assetId, {
+//             //         priority: ga.mxPosition,
+//             //         asset: ga.asset
+//             //     });
+//             // });
+//         };
+//     }
+// }

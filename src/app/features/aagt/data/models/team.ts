@@ -1,20 +1,40 @@
 import { Injectable } from '@angular/core';
-import { SpListName } from 'app/app-config.service';
+import { MxmAppName, SpListName } from 'app/app-config.service';
 import * as ebase from 'app/global-data';
+import {
+    BzDataProp,
+    BzEntity,
+    BzNavProp
+} from 'app/global-data/models/_entity-decorators';
+import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import { AagtDataModule } from '../aagt-data.module';
 import { TeamAvailability } from './team-availability';
 import { TeamCategory } from './team-category';
 
+@BzEntity(MxmAppName.Aagt, { shortName: SpListName.Team })
 export class Team extends ebase.SpEntityBase {
     totalAvailDuringGen: number;
+
+    @BzDataProp()
     teamName: string;
+
+    @BzDataProp()
     teamCategoryId: number;
+
+    @BzNavProp<Team>('teamCategoryId')
     teamCategory: TeamCategory;
+
+    @BzDataProp()
     numTeamMembers: number;
+
+    @BzDataProp()
     notes: string;
+
+    @BzNavProp()
     teamAvailabilites: TeamAvailability[];
+
     calTotalAvailDuringGen = (start: Date, end: Date) => {
         let teamAvails = 0;
 
@@ -38,48 +58,48 @@ export class Team extends ebase.SpEntityBase {
     }
 }
 
-@Injectable({
-    providedIn: AagtDataModule
-})
-export class TeamMetadata extends ebase.MetadataBase<Team> {
-    metadataFor = Team;
+// @Injectable({
+//     providedIn: AagtDataModule
+// })
+// export class TeamMetadata extends ebase.MetadataBase<Team> {
+//     metadataFor = Team;
 
-    constructor() {
-        super(SpListName.Team);
-        this.entityDefinition.dataProperties.teamCategoryId = {
-            dataType: this.dt.Int16,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.teamName = {
-            dataType: this.dt.String,
-            isNullable: false,
-            spInternalName: 'Title'
-        };
-        this.entityDefinition.dataProperties.numTeamMembers = {
-            dataType: this.dt.Int16,
-            isNullable: false
-        };
-        this.entityDefinition.dataProperties.notes = {
-            dataType: this.dt.String
-        };
+//     constructor() {
+//         super(SpListName.Team);
+//         this.entityDefinition.dataProperties.teamCategoryId = {
+//             dataType: this.dt.Int16,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.teamName = {
+//             dataType: this.dt.String,
+//             isNullable: false,
+//             spInternalName: 'Title'
+//         };
+//         this.entityDefinition.dataProperties.numTeamMembers = {
+//             dataType: this.dt.Int16,
+//             isNullable: false
+//         };
+//         this.entityDefinition.dataProperties.notes = {
+//             dataType: this.dt.String
+//         };
 
-        this.entityDefinition.navigationProperties = {
-            teamAvailabilites: {
-                entityTypeName: SpListName.TeamAvailability,
-                associationName: 'Team_TeamAvailabilities',
-                isScalar: false
-            },
+//         this.entityDefinition.navigationProperties = {
+//             teamAvailabilites: {
+//                 entityTypeName: SpListName.TeamAvailability,
+//                 associationName: 'Team_TeamAvailabilities',
+//                 isScalar: false
+//             },
 
-            teamCategory: {
-                entityTypeName: SpListName.TeamCategory,
-                associationName: 'TeamCategory_Teams',
-                foreignKeyNames: ['teamCategoryId']
-            }
-        };
+//             teamCategory: {
+//                 entityTypeName: SpListName.TeamCategory,
+//                 associationName: 'TeamCategory_Teams',
+//                 foreignKeyNames: ['teamCategoryId']
+//             }
+//         };
 
-        Object.assign(
-            this.entityDefinition.dataProperties,
-            this.baseDataProperties
-        );
-    }
-}
+//         Object.assign(
+//             this.entityDefinition.dataProperties,
+//             this.baseDataProperties
+//         );
+//     }
+// }

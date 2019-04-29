@@ -3,7 +3,6 @@ import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
 import { SPUserProfileProperties } from './global-data';
 
-
 export class SpConfig {
     static cfgWebApplicationSite = 'http://localhost:4202';
     static cfgSharepointMainAppSite = '';
@@ -27,6 +26,10 @@ export class SpConfig {
     };
 }
 
+export enum SpListType {
+    ActionItem
+}
+
 export enum SpListName {
     ActionItem = 'ActionItem',
     AssetTriggerAction = 'AssetTriggerAction',
@@ -41,18 +44,29 @@ export enum SpListName {
     Trigger = 'Trigger'
 }
 
+export const enum MxmAppName {
+    Aagt
+}
+
+// tslint:disable-next-line: ban-types
+export const MxmAssignedModels = new Map<MxmAppName, Function[]>();
+
 export const cfgNavStructure = {
     name: '',
     navItems: [] as FuseNavigation[]
 };
 
 export const cfgFeatureSpAppSite = (appName: string): string => {
-    const site = `${SpConfig.cfgSharepointMainAppSite}/mx-maintainer/${appName}/_api/`;
+    const site = `${
+        SpConfig.cfgSharepointMainAppSite
+    }/mx-maintainer/${appName}/_api/`;
     return site.replace('mx-maintainer//', 'mx-maintainer/');
 };
 
 export const cfgApiAddress = (appName: string): string => {
-    const site = `${SpConfig.cfgWebApplicationSite}/mx-maintainer/${appName}/_api/`;
+    const site = `${
+        SpConfig.cfgWebApplicationSite
+    }/mx-maintainer/${appName}/_api/`;
     return site.replace('mx-maintainer//', 'mx-maintainer/');
 };
 
