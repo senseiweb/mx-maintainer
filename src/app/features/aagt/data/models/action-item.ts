@@ -31,7 +31,7 @@ export class ActionItem extends ebase.SpEntityBase {
     @BzValid_IsRequired
     teamCategoryId: number;
 
-    @BzNavProp<ActionItem>('teamCategoryId')
+    @BzNavProp<ActionItem>({rt: 'TeamCategory', fk: 'teamCategoryId'})
     teamCategory: TeamCategory;
 
     @BzDataProp()
@@ -40,7 +40,7 @@ export class ActionItem extends ebase.SpEntityBase {
     @BzDataProp()
     notes: string;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'TriggerAction',})
     actionTriggers: TriggerAction[];
 }
 

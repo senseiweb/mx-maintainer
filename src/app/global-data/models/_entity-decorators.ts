@@ -86,15 +86,13 @@ export function BzEntity(
             entityProps.shortName
         }')/items`;
 
-        constructor.prototype._makeNameingDict = (resourceName: string) => {};
+        constructor.prototype._makeNameingDict = makeNamingDictionary;
 
         constructor.prototype._removeBzSetupFramework = () => {
             delete constructor.prototype.defaultResourceName;
             delete constructor.prototype._bzDataProps;
             delete constructor.prototype._createTypeInStore;
         };
-
-        debugger;
     };
 }
 
@@ -171,11 +169,13 @@ interface IBzDataPropDecorator {
 interface IBzEntityPropDecorator {
     _bzDataProps: Map<string, Partial<SpDataDef>>;
     _bzNavProps: Map<string, Partial<SpNavDef<any>>>;
+    _makeNameingDict: (namespace: string, customDictionary: ICustomNameDictionary, entity: SpEntityDecorator) => ICustomNameDictionary;
+    _createTypeInStore: (store: MetadataStore) => void;
     // Naming Dictionary SpListName:#Namespace:{propName: spInternalName}
     _bzNamingDict: Map<string, { [key: string]: string }>;
 }
 
-type SpEntityDecorator = SpEntityBase &
+export type SpEntityDecorator = SpEntityBase &
     Partial<IBzEntityPropDecorator> &
     Partial<IBzValidators>;
 
@@ -196,29 +196,29 @@ export function BzDataProp(props?: Partial<SpDataDef>): PropertyDecorator {
     return (target: SpEntityDecorator, key: string) => {
         target._bzDataProps = target._bzDataProps || new Map();
 
+        props = props || {};
+
         if (props.spInternalName) {
             target._bzNamingDict = target._bzNamingDict || new Map();
 
             const nameDictKey = target.constructor.name;
 
-            const nameConversion = target[key];
-
             if (target._bzNamingDict.has(nameDictKey)) {
                 const dictProp = target._bzNamingDict.get(nameDictKey);
-                dictProp[key] = nameConversion;
+                dictProp[key] = props.spInternalName;
             } else {
                 target._bzNamingDict.set(`${nameDictKey}:#`, {
-                    [key]: nameConversion
+                    [key]: props.spInternalName
                 });
             }
         }
-        debugger;
+
         // @ts-ignore
         const propType = Reflect.getMetadata('design:type', target, key).name;
         // const propType = undefined;
 
         if (!props.dataType) {
-            switch (propType) {
+            switch (propType.toLowerCase()) {
                 case 'string':
                     props.dataType = DataType.String;
                     break;
@@ -228,8 +228,11 @@ export function BzDataProp(props?: Partial<SpDataDef>): PropertyDecorator {
                 case 'boolean':
                     props.dataType = DataType.Boolean;
                     break;
+                case 'date':
+                    props.dataType = DataType.DateTime;
+                    break;
                 default:
-                    throw new Error('Entity datatype unknown and missing');
+                    throw new Error(`Datatype ${propType} unknown or missing on Entity ${target.constructor.name}`);
             }
         }
 
@@ -237,27 +240,24 @@ export function BzDataProp(props?: Partial<SpDataDef>): PropertyDecorator {
     };
 }
 
-export function BzNavProp<T>(foreignKey?: keyof T): PropertyDecorator {
+// rt = reflective type
+export function BzNavProp<T>(meta: { rt: string, fk?: keyof T}): PropertyDecorator {
     return (target: SpEntityDecorator, key: string) => {
         target._bzNavProps = target._bzNavProps || new Map();
-        debugger;
 
-        // @ts-ignore
-        const foreignTypeName = Reflect.getMetadata('design:type', target, key)
-            .name;
         // const foreignTypeName = undefined;
         const navProp: Partial<SpNavDef<any>> = {
-            entityTypeName: foreignTypeName
+            entityTypeName: meta.rt
         };
 
-        navProp.isScalar = !!foreignKey;
+        navProp.isScalar = !!meta.fk;
 
         navProp.associationName = navProp.isScalar
-            ? `${foreignTypeName}_${target.constructor.name}`
-            : `${target.constructor.name}_${foreignTypeName}`;
+            ? `${meta.rt}_${target.constructor.name}`
+            : `${target.constructor.name}_${meta.rt}`;
 
         if (navProp.isScalar) {
-            navProp.foreignKeyNames = [foreignKey];
+            navProp.foreignKeyNames = [meta.fk];
         }
 
         target._bzNavProps.set(key, navProp);
@@ -351,4 +351,26 @@ function bzValidatorWrapper(validator: Validator): ValidatorFn {
         const result = validator.validate(c.value, validator.context);
         return result ? { [result.propertyName]: result.errorMessage } : null;
     };
+}
+interface ICustomNameDictionary {
+    [index: string]: {
+        [index: string]: string;
+    }
+}
+function makeNamingDictionary(namespace: string, customDictionary: ICustomNameDictionary, entity: SpEntityDecorator): ICustomNameDictionary {
+    if (!entity._bzNamingDict) {
+        return customDictionary;
+    }
+    const keys = entity._bzNamingDict.keys();
+    for (const key of keys) {
+        const dictKey = key + namespace;
+        const dictProp = entity._bzNamingDict.get(key);
+        if (customDictionary[dictKey]) {
+            Object.assign(customDictionary[dictKey], dictProp);
+        } else {
+            const newEntry = { [dictKey]: dictProp };
+            Object.assign(customDictionary, newEntry);
+        }
+    }
+    return customDictionary;
 }

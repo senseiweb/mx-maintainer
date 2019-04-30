@@ -40,7 +40,7 @@ export class TeamCategory extends ebase.SpEntityBase {
     })
     teamCatColor: string;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'Team'})
     teams: Team[];
 
     addJobReservation = (

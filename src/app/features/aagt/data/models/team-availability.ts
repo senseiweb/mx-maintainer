@@ -65,7 +65,7 @@ export class TeamAvailability extends ebase.SpEntityBase {
     @BzDataProp()
     manHoursAvail: number;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'Team'})
     team: Team;
 
     durationFromStart = (start: _m.Moment): number => {

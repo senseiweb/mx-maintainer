@@ -25,10 +25,16 @@ export class GenerationAsset extends ebase.SpEntityBase {
     @BzDataProp()
     mxPosition: number;
 
-    @BzNavProp<GenerationAsset>('assetId')
+    @BzNavProp<GenerationAsset>({
+        rt: 'Asset',
+        fk: 'assetId'
+    })
     asset: Asset;
 
-    @BzNavProp<GenerationAsset>('generationId')
+    @BzNavProp<GenerationAsset>({
+        rt: 'Generation',
+        fk: 'generationId'
+    })
     generation: Generation;
 
     @BzDataProp()
@@ -38,7 +44,7 @@ export class GenerationAsset extends ebase.SpEntityBase {
     @BzValid_IsRequired
     assetId: number;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'AssetTriggerAction'})
     assetTriggerActions: AssetTriggerAction[];
 }
 

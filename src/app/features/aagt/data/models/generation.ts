@@ -49,10 +49,10 @@ export class Generation extends ebase.SpEntityBase {
 
     assumptions: Assumption[];
 
-    @BzNavProp()
+    @BzNavProp({rt: 'Trigger'})
     triggers: Trigger[];
 
-    @BzDataProp()
+    @BzNavProp({ rt: 'GeneartionAsset'})
     generationAssets: GenerationAsset[];
 
     get assetTrigActions(): AssetTriggerAction[] {

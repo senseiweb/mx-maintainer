@@ -68,13 +68,21 @@ export class TriggerAction extends ebase.SpEntityBase {
         }`;
     }
 
-    @BzNavProp<TriggerAction>('actionItemId')
+    @BzNavProp<TriggerAction>({
+        rt: 'ActionItem',
+        fk: 'actionItemId'
+    })
     actionItem: ActionItem;
 
-    @BzNavProp<TriggerAction>('triggerId')
+    @BzNavProp<TriggerAction>({
+        rt: 'Trigger',
+        fk: 'triggerId'
+    })
     trigger: Trigger;
 
-    @BzNavProp()
+    @BzNavProp<TriggerAction>({
+        rt: 'AssetTriggerAction'
+    })
     assetTriggerActions: AssetTriggerAction[];
 }
 

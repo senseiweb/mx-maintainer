@@ -80,10 +80,15 @@ export class AssetTriggerAction extends ebase.SpEntityBase {
     @BzDataProp()
     isConcurrentable: boolean;
 
-    @BzNavProp<AssetTriggerAction>('genAssetId')
+    @BzNavProp<AssetTriggerAction>({
+        rt: 'GenerationAsset',
+        fk: 'genAssetId'})
     genAsset: GenerationAsset;
 
-    @BzNavProp<AssetTriggerAction>('triggerActionId')
+    @BzNavProp<AssetTriggerAction>({
+        rt: 'TriggerAction',
+        fk: 'triggerActionId'
+    })
     triggerAction: TriggerAction;
 }
 

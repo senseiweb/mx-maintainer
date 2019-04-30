@@ -26,7 +26,7 @@ export class Asset extends ebase.SpEntityBase {
     @BzDataProp()
     notes: string;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'GenerationAsset'})
     assetGenerations: GenerationAsset[];
 }
 

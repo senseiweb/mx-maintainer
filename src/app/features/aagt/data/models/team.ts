@@ -23,7 +23,10 @@ export class Team extends ebase.SpEntityBase {
     @BzDataProp()
     teamCategoryId: number;
 
-    @BzNavProp<Team>('teamCategoryId')
+    @BzNavProp<Team>({
+        rt: 'TeamCategory',
+        fk: 'teamCategoryId'
+    })
     teamCategory: TeamCategory;
 
     @BzDataProp()
@@ -32,7 +35,9 @@ export class Team extends ebase.SpEntityBase {
     @BzDataProp()
     notes: string;
 
-    @BzNavProp()
+    @BzNavProp<Team>({
+        rt: 'TeamAvailability'
+    })
     teamAvailabilites: TeamAvailability[];
 
     calTotalAvailDuringGen = (start: Date, end: Date) => {

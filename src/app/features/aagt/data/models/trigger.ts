@@ -33,16 +33,18 @@ export class Trigger extends ebase.SpEntityBase {
     @BzDataProp()
     triggerStop?: Date;
 
-    @BzDataProp()
     triggerDateRange: Date[];
 
     @BzDataProp()
     generationId: number;
 
-    @BzNavProp<Trigger>('generationId')
+    @BzNavProp<Trigger>({
+        rt: 'Generation',
+        fk: 'generationId'
+    })
     generation: Generation;
 
-    @BzNavProp()
+    @BzNavProp({rt: 'TriggerAction'})
     triggerActions: TriggerAction[];
 
     @BzValid_CustomValidator<Trigger>()
