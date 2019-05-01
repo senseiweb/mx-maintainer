@@ -53,9 +53,16 @@ export class SpEntityBase implements Entity {
     id: number;
     @BzDataProp()
     modified: Date;
+    @BzDataProp()
     created: Date;
+    @BzDataProp()
     authorId: number;
+    @BzDataProp()
     editorId: number;
+    @BzDataProp({
+        complexTypeName: '__metadata:#SP.Data',
+        isNullable: false
+    })
     __metadata: SpMetadata;
     createChild = <T extends FilterEntityCollection<this>>(
         entityType: keyof typeof SpListName,

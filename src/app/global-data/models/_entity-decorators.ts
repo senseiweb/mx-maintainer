@@ -26,9 +26,9 @@ import { EntityDefinition } from './custom-entity-def';
 type knownShortName = keyof typeof SpListName;
 
 export function BzEntity(
-    forAppNamed: MxmAppName,
+    forAppNamed: MxmAppName | 'All',
     entityProps: {
-        shortName: knownShortName | '__metadata';
+        shortName: knownShortName | 'SpMetadata';
         isComplexType?: boolean;
         namespace?: string;
     }
@@ -78,8 +78,8 @@ export function BzEntity(
                 type = new EntityType(typeDef as any);
 
                 type.custom = type.custom
-                    ? // @ts-ignore
-                      (type.custom.defaultSelect = selectStatement.join(','))
+                    // @ts-ignore
+                    ? (type.custom.defaultSelect = selectStatement.join(','))
                     : ({ defaultSelect: selectStatement.join(',') } as any);
             }
 
@@ -239,7 +239,7 @@ export function BzDataProp(props?: Partial<SpDataDef>): PropertyDecorator {
         const propType = Reflect.getMetadata('design:type', target, key).name;
         // const propType = undefined;
 
-        if (!props.dataType) {
+        if (!props.dataType && !props.complexTypeName) {
             switch (propType.toLowerCase()) {
                 case 'string':
                     props.dataType = DataType.String;
