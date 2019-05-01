@@ -16,6 +16,7 @@ import {
     Validator
 } from 'breeze-client';
 import * as _ from 'lodash';
+import { BzDataProp } from './_entity-decorators';
 import { EntityDefinition } from './custom-entity-def';
 import { SpMetadata } from './sp-metadata';
 
@@ -45,7 +46,12 @@ export class SpEntityBase implements Entity {
     isSoftDeleted: boolean;
     entityAspect: EntityAspect;
     entityType: ISpEntityType;
+
+    @BzDataProp({
+        isPartOfKey: true
+    })
     id: number;
+    @BzDataProp()
     modified: Date;
     created: Date;
     authorId: number;
