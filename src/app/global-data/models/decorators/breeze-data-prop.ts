@@ -34,7 +34,7 @@ export const BzDataProp = (props?: Partial<SpDataDef>): PropertyDecorator => {
                 const dictProp = target._bzNamingDict.get(nameDictKey);
                 dictProp[key] = props.spInternalName;
             } else {
-                target._bzNamingDict.set(`${nameDictKey}:#`, {
+                target._bzNamingDict.set(nameDictKey, {
                     [key]: props.spInternalName
                 });
             }

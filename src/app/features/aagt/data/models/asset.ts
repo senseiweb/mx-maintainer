@@ -30,28 +30,3 @@ export class Asset extends SpEntityBase {
     @BzNavProp({rt: 'GenerationAsset'})
     assetGenerations: GenerationAsset[];
 }
-
-// @Injectable({ providedIn: AagtDataModule })
-// export class AssetMetadata extends ebase.MetadataBase<Asset> {
-//     metadataFor = Asset;
-
-//     constructor() {
-//         super(SpListName.Asset);
-//         this.entityDefinition.dataProperties.alias = {
-//             dataType: this.dt.String,
-//             spInternalName: 'Title',
-//             isNullable: false
-//         };
-//         this.entityDefinition.dataProperties.location = {
-//             dataType: this.dt.String
-//         };
-//         this.entityDefinition.dataProperties.notes = {
-//             dataType: this.dt.String
-//         };
-
-//         Object.assign(
-//             this.entityDefinition.dataProperties,
-//             this.baseDataProperties
-//         );
-//     }
-// }

@@ -194,15 +194,15 @@ const removedEntityScaffold = (constructor: Function) => {
 const makeNamingDictionary = (
     namespace: string,
     customDictionary: ICustomNameDictionary,
-    entity: SpEntityDecorator
+    entity: SpEntityDecorator & Function
 ): ICustomNameDictionary => {
-    if (!entity._bzNamingDict) {
+    if (!entity.prototype._bzNamingDict) {
         return customDictionary;
     }
-    const keys = entity._bzNamingDict.keys();
+    const keys = entity.prototype._bzNamingDict.keys();
     for (const key of keys) {
-        const dictKey = key + namespace;
-        const dictProp = entity._bzNamingDict.get(key);
+        const dictKey = `${key}:#${namespace}`;
+        const dictProp = entity.prototype._bzNamingDict.get(key);
         if (customDictionary[dictKey]) {
             Object.assign(customDictionary[dictKey], dictProp);
         } else {
@@ -266,7 +266,6 @@ const createTypeInStore = (
             ? (type.custom['defaultSelect'] = selectStatement)
             : ({ defaultSelect: selectStatement } as any);
 
-        console.log(type.custom['defaultSelect']);
     }
 
     store.addEntityType(type);

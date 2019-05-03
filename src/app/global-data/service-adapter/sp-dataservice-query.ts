@@ -41,7 +41,9 @@ export class CustomQueryContext {
                 headers,
                 params: query.parameters,
                 success: resolve,
-                error: reject
+                error: (error) => {
+                    console.log(error);
+                }
             });
         });
     }

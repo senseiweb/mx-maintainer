@@ -36,8 +36,7 @@ export class TeamCategory extends SpEntityBase {
 
     @BzDataProp({
         dataType: DataType.String,
-        isNullable: false,
-        spInternalName: 'Title'
+        isNullable: false
     })
     teamCatColor: string;
 
@@ -109,36 +108,3 @@ export class TeamCategory extends SpEntityBase {
         return orderedTeamAvails[0];
     }
 }
-
-// @Injectable({
-//     providedIn: AagtDataModule
-// })
-// export class TeamCategoryMetadata extends ebase.MetadataBase<TeamCategory> {
-//     metadataFor = TeamCategory;
-
-//     constructor() {
-//         super(SpListName.TeamCategory);
-//         this.entityDefinition.dataProperties.teamType = {
-//             dataType: this.dt.String,
-//             isNullable: false,
-//             spInternalName: 'Title'
-//         };
-
-//         this.entityDefinition.dataProperties.teamCatColor = {
-//             dataType: this.dt.String
-//         };
-
-//         this.entityDefinition.navigationProperties = {
-//             teams: {
-//                 entityTypeName: SpListName.Team,
-//                 associationName: 'TeamCategory_Teams',
-//                 isScalar: false
-//             }
-//         };
-
-//         Object.assign(
-//             this.entityDefinition.dataProperties,
-//             this.baseDataProperties
-//         );
-//     }
-// }

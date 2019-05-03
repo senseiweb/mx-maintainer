@@ -37,7 +37,9 @@ export class CustomNameConventionService {
     private serverToClientDictionary: { [index: string]: EntityType };
     private sourceConvention: NamingConvention;
 
-    constructor() {}
+    constructor() {
+        console.log('Naming Convention loaded');
+    }
 
     createNameDictionary(name: string, sourceConv: NamingConvention, clientToServerDict: ICustomClientDict): NamingConvention {
         if (!(sourceConv instanceof NamingConvention)) {

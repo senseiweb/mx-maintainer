@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 const appRoutes: Routes = [
     {
         path: 'aagt',
-        loadChildren: 'app/features/aagt/aagt.module#AagtModule'
+        loadChildren: './features/aagt/aagt.module#AagtModule'
     },
     {
         path: '',
@@ -23,5 +23,5 @@ const appRoutes: Routes = [
     exports: [RouterModule]
 })
 export class AppRoutingModule {
-    constructor() {}
+    constructor() { }
 }

@@ -18,7 +18,9 @@ import { TeamCategory } from './team-category';
 export class Team extends SpEntityBase {
     totalAvailDuringGen: number;
 
-    @BzDataProp()
+    @BzDataProp({
+        spInternalName: 'Title'
+    })
     teamName: string;
 
     @BzDataProp()
@@ -63,49 +65,3 @@ export class Team extends SpEntityBase {
         this.totalAvailDuringGen = teamAvails;
     }
 }
-
-// @Injectable({
-//     providedIn: AagtDataModule
-// })
-// export class TeamMetadata extends ebase.MetadataBase<Team> {
-//     metadataFor = Team;
-
-//     constructor() {
-//         super(SpListName.Team);
-//         this.entityDefinition.dataProperties.teamCategoryId = {
-//             dataType: this.dt.Int16,
-//             isNullable: false
-//         };
-//         this.entityDefinition.dataProperties.teamName = {
-//             dataType: this.dt.String,
-//             isNullable: false,
-//             spInternalName: 'Title'
-//         };
-//         this.entityDefinition.dataProperties.numTeamMembers = {
-//             dataType: this.dt.Int16,
-//             isNullable: false
-//         };
-//         this.entityDefinition.dataProperties.notes = {
-//             dataType: this.dt.String
-//         };
-
-//         this.entityDefinition.navigationProperties = {
-//             teamAvailabilites: {
-//                 entityTypeName: SpListName.TeamAvailability,
-//                 associationName: 'Team_TeamAvailabilities',
-//                 isScalar: false
-//             },
-
-//             teamCategory: {
-//                 entityTypeName: SpListName.TeamCategory,
-//                 associationName: 'TeamCategory_Teams',
-//                 foreignKeyNames: ['teamCategoryId']
-//             }
-//         };
-
-//         Object.assign(
-//             this.entityDefinition.dataProperties,
-//             this.baseDataProperties
-//         );
-//     }
-// }
