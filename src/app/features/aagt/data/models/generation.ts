@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
-    BzNavProp
-} from 'app/global-data/models/_entity-decorators';
+    BzNavProp,
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import { AagtDataModule } from '../aagt-data.module';
@@ -23,7 +24,7 @@ export enum GenStatusEnum {
 }
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Generation })
-export class Generation extends ebase.SpEntityBase {
+export class Generation extends SpEntityBase {
     @BzDataProp()
     title: string;
 

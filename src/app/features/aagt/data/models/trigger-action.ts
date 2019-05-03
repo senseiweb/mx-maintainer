@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
-    BzNavProp
-} from 'app/global-data/models/_entity-decorators';
+    BzNavProp,
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Trigger } from './trigger';
@@ -21,7 +22,7 @@ export interface ITriggerActionItemShell {
 }
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.TriggerAction })
-export class TriggerAction extends ebase.SpEntityBase {
+export class TriggerAction extends SpEntityBase {
     private _actionItemId: number;
     private _triggerId: number;
     private _sequence: number;

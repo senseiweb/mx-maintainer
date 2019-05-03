@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
     BzNavProp,
-    BzValid_IsRequired
-} from 'app/global-data/models/_entity-decorators';
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { Asset } from './asset';
@@ -16,7 +16,7 @@ import { Generation } from './generation';
 export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNKNOWN';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.GenerationAsset })
-export class GenerationAsset extends ebase.SpEntityBase {
+export class GenerationAsset extends SpEntityBase {
     @BzDataProp({
         spInternalName: 'Title'
     })
@@ -44,7 +44,7 @@ export class GenerationAsset extends ebase.SpEntityBase {
     @BzValid_IsRequired
     assetId: number;
 
-    @BzNavProp({rt: 'AssetTriggerAction'})
+    @BzNavProp({ rt: 'AssetTriggerAction' })
     assetTriggerActions: AssetTriggerAction[];
 }
 

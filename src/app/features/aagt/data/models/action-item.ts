@@ -1,19 +1,20 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
+
 import {
     BzDataProp,
     BzEntity,
     BzNavProp,
-    BzValid_IsRequired
-} from 'app/global-data/models/_entity-decorators';
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.ActionItem })
-export class ActionItem extends ebase.SpEntityBase {
+export class ActionItem extends SpEntityBase {
     @BzDataProp({
         isNullable: false,
         spInternalName: 'Title'
@@ -31,7 +32,7 @@ export class ActionItem extends ebase.SpEntityBase {
     @BzValid_IsRequired
     teamCategoryId: number;
 
-    @BzNavProp<ActionItem>({rt: 'TeamCategory', fk: 'teamCategoryId'})
+    @BzNavProp<ActionItem>({ rt: 'TeamCategory', fk: 'teamCategoryId' })
     teamCategory: TeamCategory;
 
     @BzDataProp()
@@ -40,7 +41,7 @@ export class ActionItem extends ebase.SpEntityBase {
     @BzDataProp()
     notes: string;
 
-    @BzNavProp({rt: 'TriggerAction',})
+    @BzNavProp({ rt: 'TriggerAction' })
     actionTriggers: TriggerAction[];
 }
 

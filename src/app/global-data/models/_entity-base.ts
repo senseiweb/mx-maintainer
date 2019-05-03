@@ -16,8 +16,8 @@ import {
     Validator
 } from 'breeze-client';
 import * as _ from 'lodash';
-import { BzDataProp } from './_entity-decorators';
 import { EntityDefinition } from './custom-entity-def';
+import { BzDataProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
 
 export interface IValidatorCtx<T> {
@@ -40,7 +40,7 @@ export interface ISpEntityType extends SpEntityType {
     };
 }
 
-export class SpEntityBase implements Entity {
+export abstract class SpEntityBase implements Entity {
     private iD: number; // sharepoint includes this property but we dont use it;
     // client-side only; soft delete options
     isSoftDeleted: boolean;
@@ -61,7 +61,8 @@ export class SpEntityBase implements Entity {
     editorId: number;
     @BzDataProp({
         complexTypeName: '__metadata:#SP.Data',
-        isNullable: false
+        isNullable: false,
+        isScalar: true
     })
     __metadata: SpMetadata;
     createChild = <T extends FilterEntityCollection<this>>(

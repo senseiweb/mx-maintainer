@@ -16,13 +16,8 @@ import {
 import { init } from 'rollbar';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import {
-    ISpEntityType,
-    MetadataBase,
-    SpEntityBase,
-    SpEntityDecorator
-} from '../models';
-import { CustomMetadataHelperService } from '../service-adapter/custom-metadata-helper';
+import { ISpEntityType, MetadataBase, SpEntityBase } from '../models';
+// import { CustomMetadataHelperService } from '../service-adapter/custom-metadata-helper';
 import { CustomNameConventionService } from '../service-adapter/custom-namingConventionDict';
 import { CoreEmProviderService } from './core-em-provider.service';
 
@@ -40,15 +35,12 @@ export class BaseEmProviderService {
 
     constructor(
         private http: HttpClient,
-        private metaHelper: CustomMetadataHelperService,
+        // private metaHelper: CustomMetadataHelperService,
         private nameConv: CustomNameConventionService,
         private emProviderService: CoreEmProviderService,
         appSiteName: string,
         private featureNameSpace: string,
-        private appName: MxmAppName,
-        private appEntities: Array<
-            Instantiable<MetadataBase<SpEntityBase>>
-        > = []
+        private appName: MxmAppName
     ) {
         this.featureAppSiteName = appSiteName;
         this.onSaveInProgressChange = new BehaviorSubject(false);
@@ -100,7 +92,11 @@ export class BaseEmProviderService {
         // });
 
         this.nameConv.updateDictionary(clientToServerNameDictionary);
-
+        // this.emProviderService.metadataStore.registerEntityTypeCtor(
+        //     type.shortName,
+        //     meta.metadataFor,
+        //     meta.initializer
+        // );
         this.entityManager.entityChanged.subscribe(changedArgs =>
             this.onEntityManagerChange.next(changedArgs)
         );

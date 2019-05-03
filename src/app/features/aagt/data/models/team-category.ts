@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
-    BzNavProp
-} from 'app/global-data/models/_entity-decorators';
+    BzNavProp,
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -25,7 +26,7 @@ export interface IJobReservationReceipt {
 }
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamCategory })
-export class TeamCategory extends ebase.SpEntityBase {
+export class TeamCategory extends SpEntityBase {
     @BzDataProp({
         dataType: DataType.String,
         isNullable: false,

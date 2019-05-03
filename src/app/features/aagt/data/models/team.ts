@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
-    BzNavProp
-} from 'app/global-data/models/_entity-decorators';
+    BzNavProp,
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -14,7 +15,7 @@ import { TeamAvailability } from './team-availability';
 import { TeamCategory } from './team-category';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Team })
-export class Team extends ebase.SpEntityBase {
+export class Team extends SpEntityBase {
     totalAvailDuringGen: number;
 
     @BzDataProp()

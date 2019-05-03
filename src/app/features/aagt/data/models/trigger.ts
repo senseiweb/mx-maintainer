@@ -1,18 +1,19 @@
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import * as ebase from 'app/global-data';
 import {
     BzDataProp,
     BzEntity,
     BzNavProp,
-    BzValid_CustomValidator
-} from 'app/global-data/models/_entity-decorators';
+    BzValid_CustomValidator,
+    BzValid_IsRequired,
+    SpEntityBase
+} from 'app/global-data';
 import { Validator } from 'breeze-client';
 import * as _m from 'moment';
 import { Generation } from './generation';
 import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Trigger })
-export class Trigger extends ebase.SpEntityBase {
+export class Trigger extends SpEntityBase {
     @BzDataProp({
         spInternalName: 'Title'
     })
@@ -44,7 +45,7 @@ export class Trigger extends ebase.SpEntityBase {
     })
     generation: Generation;
 
-    @BzNavProp({rt: 'TriggerAction'})
+    @BzNavProp({ rt: 'TriggerAction' })
     triggerActions: TriggerAction[];
 
     @BzValid_CustomValidator<Trigger>()

@@ -49,7 +49,7 @@ export const enum MxmAppName {
 }
 
 // tslint:disable-next-line: ban-types
-export const MxmAssignedModels = new Map<MxmAppName | 'All', Function[]>();
+export const MxmAssignedModels = new Map<MxmAppName | 'Global', Function[]>();
 
 export const cfgNavStructure = {
     name: '',
