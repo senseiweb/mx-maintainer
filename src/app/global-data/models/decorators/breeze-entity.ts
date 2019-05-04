@@ -1,4 +1,4 @@
-import { Validators } from '@angular/forms';
+import { Validators, ValidatorFn } from '@angular/forms';
 import { SpDataDef, SpNavDef } from '@ctypes/breeze-type-customization';
 import {
     MxmAppName,
@@ -13,7 +13,7 @@ import {
     MetadataStore,
     Validator
 } from 'breeze-client';
-import { SpEntityBase } from '../_entity-base';
+import { IBreezeNgValidator, SpEntityBase } from '../_entity-base';
 import { bzValidatorWrapper } from './breeze-validation';
 
 export type SpEntityDecorator = SpEntityBase &
@@ -41,12 +41,8 @@ interface ICustomNameDictionary {
 }
 
 export interface IBzValidators {
-    bzValidator?: {
-        [index: string]: {
-            entityValidators: Validator[];
-            formValidators: Validators[];
-        };
-    };
+    frmValidator?: Map<string, ValidatorFn[]>;
+    etValidator?: Map<string, Validator[]>;
 }
 
 const copyDataProps = (
@@ -122,19 +118,18 @@ const copyDataProps = (
         : targetDefaultSelect;
 };
 
-const setValidations = (etType: EntityType, bzValidators: IBzValidators) => {
+const setValidations = (
+    etType: EntityType,
+    frmValidator: Map<string, ValidatorFn[]>,
+    etValidator: Map<string, Validator[]>,
+    finalFrmValidators: Map<string, ValidatorFn[]>
+): Map<string, ValidatorFn[]> => {
     etType.dataProperties.forEach(dp => {
-        const propBzValidator =
-            bzValidators && bzValidators[dp.name]
-                ? bzValidators[dp.name]
-                : ((bzValidators as any) = {}[dp.name] = {
-                      entityValidators: [],
-                      formValidators: []
-                  });
-
+        let finalFormValidatorsForProp = finalFrmValidators.get(dp.name) || [];
         const dt = dp.dataType as any;
 
-        // add validators that breeze auto finds based on datatype
+        // add validators that breeze auto finds based on datatype, then
+        // push them into the data property and in the form validation
         const validateCtor =
             !dt || dt === DataType.String ? null : dt.validatorCtor;
 
@@ -146,39 +141,48 @@ const setValidations = (etType: EntityType, bzValidators: IBzValidators) => {
 
             if (!exists) {
                 dp.validators.push(validator);
-                propBzValidator.formValidators.push(
-                    bzValidatorWrapper(validator)
-                );
+                finalFormValidatorsForProp.push(bzValidatorWrapper(validator));
             }
         }
 
-        // process props that have validation annotations
-        const annotatedValidators = Object.keys(bzValidators);
-
-        const hasEntityLevelValidation = annotatedValidators.includes('entity');
-
-        if (hasEntityLevelValidation) {
-            const entityLevelValidators =
-                bzValidators['entity'].entityValidators;
+        // process props that have validation annotations, take the breeze
+        // specific validators, if they are entity level push them into the
+        // into the entity.
+        const entityLevelValidators = etValidator.get('entity');
+        if (entityLevelValidators) {
             entityLevelValidators.forEach(val => {
-                if (etType.validators.some(val.name)) {
+                if (etType.validators.some(etV => etV.name === val.name)) {
                     return;
                 }
                 etType.validators.push(val);
             });
         }
 
-        // const hasPropLevelValidation = annotatedValidators.includes(dp.name);
-        // if (hasPropLevelValidation) {
-        //     const validators = bzValidators[dp.name].entityValidators;
-        //     validators.forEach(val => {
-        //         if (dp.validators.some(val.name)) {
-        //             return;
-        //         }
-        //         dp.validators.push(val);
-        //     });
-        // }
+        // process props that have validation annotations, take the breeze
+        // specific validators,  push them into the into the entity.
+        const etValidatorsForProp = etValidator.get(dp.name);
+
+        if (etValidatorsForProp) {
+            etValidatorsForProp.forEach(val => {
+                if (dp.validators.some(dpv => dpv.name === val.name)) {
+                    return;
+                }
+                dp.validators.push(val);
+            });
+        }
+
+        // grab the existing formValidators and copy to the final;
+        finalFormValidatorsForProp = [
+            ...new Set(finalFormValidatorsForProp),
+            ...new Set(frmValidator.get(dp.name))
+        ];
+
+        if (finalFormValidatorsForProp.length) {
+            finalFrmValidators.set(dp.name, finalFormValidatorsForProp);
+        }
     });
+
+    return finalFrmValidators;
 };
 
 const removedEntityScaffold = (constructor: Function) => {
@@ -188,7 +192,10 @@ const removedEntityScaffold = (constructor: Function) => {
     delete constructor.prototype._createTypeInStore;
     delete constructor.prototype._bzNamingDict;
     delete constructor.prototype._bzDefaultSelect;
+    delete constructor.prototype._makeNameingDict;
     delete constructor.prototype.initializer;
+    delete constructor.prototype.bzValidator;
+    delete constructor.prototype.etValidator;
 };
 
 const makeNamingDictionary = (
@@ -242,9 +249,10 @@ const createTypeInStore = (
         typeDef.navigationProperties = {};
     }
 
-    const defaultSelect = copyDataProps(typeDef, constructor, entityProps);
+    typeDef.namespace = entityProps.namespace =
+        entityProps.namespace || featureNamespace;
 
-    typeDef.namespace = entityProps.namespace || featureNamespace;
+    const defaultSelect = copyDataProps(typeDef, constructor, entityProps);
 
     let type: EntityType | ComplexType;
 
@@ -265,7 +273,6 @@ const createTypeInStore = (
         type.custom = type.custom
             ? (type.custom['defaultSelect'] = selectStatement)
             : ({ defaultSelect: selectStatement } as any);
-
     }
 
     store.addEntityType(type);
@@ -278,11 +285,33 @@ const createTypeInStore = (
     }
 
     const intializer = constructor.prototype.initializer;
+
+    // need to set a default for the case when the base
+    // class is being process and contains no validations;
+    const frmValidator: Map<string, ValidatorFn[]> =
+        constructor.prototype.frmValidator || new Map();
+
+    const etValidator: Map<string, Validator[]> =
+        constructor.prototype.etValidator || new Map();
+
+    const formValidators = setValidations(
+        type as EntityType,
+        frmValidator,
+        etValidator,
+        new Map()
+    );
+
+    if (formValidators.size) {
+        if (type.custom) {
+            type.custom.formValidators = formValidators;
+        } else {
+            type.custom = { formValidators };
+        }
+    }
+
     removedEntityScaffold(constructor);
 
     store.registerEntityTypeCtor(type.shortName, constructor, intializer);
-
-    setValidations(type as EntityType, constructor.prototype.bzValidator);
 };
 
 export const BzEntity = (
@@ -301,7 +330,6 @@ export const BzEntity = (
             modelCollection.push(constructor);
             MxmAssignedModels.set(forAppNamed, modelCollection);
         }
-
         constructor.prototype._createTypeInStore = (
             store: MetadataStore,
             namespace: string,

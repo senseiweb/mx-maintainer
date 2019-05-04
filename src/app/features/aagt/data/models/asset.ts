@@ -27,6 +27,6 @@ export class Asset extends SpEntityBase {
     @BzDataProp()
     notes: string;
 
-    @BzNavProp({rt: 'GenerationAsset'})
+    @BzNavProp({ rt: SpListName.GenerationAsset })
     assetGenerations: GenerationAsset[];
 }

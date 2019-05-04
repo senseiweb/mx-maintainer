@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CanDeactivateGuard } from 'app/common/can-deactivate-guard.service';
 import { ConfirmUnsavedDataComponent } from 'app/common/confirm-unsaved-data-modal/confirm-unsaved-data-modal.component';
 import { Observable, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { GenStatusEnum } from '../../data';
 import { PlannerUowService } from './planner-uow.service';
 
@@ -43,29 +43,6 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
 
     canDeactivate(): Observable<boolean> {
         return this.uow.canDeactivatePlaaner;
-        // const currentGen = this.uow.currentGen;
-        // const isNewGen = this.uow.currentGen.entityAspect.entityState.isAdded();
-
-        // if (isNewGen) {
-        //     const hasValidGen = currentGen.entityAspect.validateEntity();
-        //     const hasKids = currentGen.triggers || currentGen.generationAssets;
-
-        //     if (hasValidGen && hasKids) {
-        //         this.confirmDeleteUnsavedData();
-        //     } else {
-        //         this.uow.canDeactivatePlaaner.next(true);
-        //     }
-        // }
-
-        // const newValidGeneration = this.uow.currentGen.entityAspect.entityState.isAdded() &&
-        //     this.uow.currentGen.entityAspect.validateEntity();
-
-        // const newGenWithKids = this.uow.currentGen.id < 0
-
-        // if (this.uow.currentGen.id < 0 &&
-        //     this.uow.currentGen.entityAspect.validateEntity()) {
-
-        //     }
     }
 
     ngOnInit() {
@@ -73,12 +50,11 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
         this.uow.planGen(this.genId);
         this.isLinear = this.uow.currentGen.genStatus === GenStatusEnum.Draft;
 
-        // Object.keys(PlannerSteps).forEach(k => {
-        //     this.stepperStatus[k] = { isValid: false };
-        // });
-
         this.uow.onStepValidityChange
-            .pipe(takeUntil(this.unsubscribeAll))
+            .pipe(
+                debounceTime(1500),
+                takeUntil(this.unsubscribeAll)
+            )
             .subscribe(stepStatus => {
                 const key = Object.keys(stepStatus)[0];
                 if (!key) {
@@ -86,7 +62,6 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
                 }
                 this.stepperStatus[key] = stepStatus[key];
             });
-        // this.getAlreadyAssignedAssets();
     }
 
     onStepChange = ($event: StepperSelectionEvent) =>
@@ -102,9 +77,4 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
                 this.uow.canDeactivatePlaaner.next(confirmation);
             });
     }
-
-    // private getAlreadyAssignedAssets(): void {
-    //     if (this.uow.currentGen.entityAspect.entityState.isAdded()) { return; }
-    //     this.uow.getGenerationAssets();
-    // }
 }

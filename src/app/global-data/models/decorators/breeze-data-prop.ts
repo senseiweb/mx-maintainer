@@ -1,23 +1,47 @@
-import { diPublicInInjector } from '@angular/core/src/render3/di';
+import { enumerable } from '@ctypes/app-config';
 import { SpDataDef } from '@ctypes/breeze-type-customization';
 import { DataType } from 'breeze-client';
+import { SpEntityBase } from '../_entity-base';
 import { SpEntityDecorator } from './breeze-entity';
 
 export const BzDataProp = (props?: Partial<SpDataDef>): PropertyDecorator => {
     return (target: SpEntityDecorator, key: string) => {
-        target._bzDataProps = !Object.getOwnPropertyDescriptor(
-            target,
-            '_bzDataProps'
-        )
-            ? new Map()
-            : target._bzDataProps;
+        if (
+            target &&
+            target.constructor &&
+            target.constructor.name === 'SpEntityBase'
+        ) {
+            if (!Object.getOwnPropertyDescriptor(target, '_bzDataProps')) {
+                // Define properties on the base case so we can re-used them in future classes
+                // but remove enumerablility so breeze doesn't add them as unmapped properties
+                Object.defineProperties(target, {
+                    _bzDataProps: {
+                        enumerable: false,
+                        writable: true,
+                        value: new Map()
+                    },
+                    _bzDefaultSelect: {
+                        value: [],
+                        writable: true,
+                        enumerable: false
+                    }
+                });
+            }
+        } else {
+            target._bzDataProps = !Object.getOwnPropertyDescriptor(
+                target,
+                '_bzDataProps'
+            )
+                ? new Map()
+                : target._bzDataProps;
 
-        target._bzDefaultSelect = !Object.getOwnPropertyDescriptor(
-            target,
-            '_bzDefaultSelect'
-        )
-            ? []
-            : target._bzDefaultSelect;
+            target._bzDefaultSelect = !Object.getOwnPropertyDescriptor(
+                target,
+                '_bzDefaultSelect'
+            )
+                ? []
+                : target._bzDefaultSelect;
+        }
 
         props = props || {};
 
@@ -67,7 +91,6 @@ export const BzDataProp = (props?: Partial<SpDataDef>): PropertyDecorator => {
                     );
             }
         }
-
         target._bzDataProps.set(key, props);
     };
 };

@@ -50,8 +50,6 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        const trigType = this.currentTrigger.entityType;
-
         // if no time is set...set default time to the next half hour
         if (!this.currentTrigger.triggerStart) {
             const start = _m();
@@ -74,11 +72,15 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
             : `Edit ${this.currentTrigger.milestone} Trigger`;
 
         const formModel: Partial<TriggerFormModel> = {};
+        const trigType = this.currentTrigger.entityType;
+
+        const formValidators =
+            trigType.custom && trigType.custom.formValidators;
 
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 this.currentTrigger[prop],
-                trigType.custom.validatorMap[prop]
+                formValidators && formValidators.get(prop)
             );
         });
 
@@ -122,7 +124,7 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
             if (!result.value) {
                 return;
             }
-            this.uow.deleteTriggerGraph(this.currentTrigger);
+            // this.uow.deleteTriggerGraph(this.currentTrigger);
             const diaResult: IDialogResult<Trigger> = {
                 confirmDeletion: true
             };

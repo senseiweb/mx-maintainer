@@ -66,7 +66,7 @@ export class TeamAvailability extends SpEntityBase {
     @BzDataProp()
     manHoursAvail: number;
 
-    @BzNavProp({rt: 'Team'})
+    @BzNavProp({rt: SpListName.Team})
     team: Team;
 
     durationFromStart = (start: _m.Moment): number => {

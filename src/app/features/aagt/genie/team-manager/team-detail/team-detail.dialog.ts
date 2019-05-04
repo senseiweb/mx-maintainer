@@ -77,12 +77,13 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
         this.teamCatFormMode = 'select';
 
         const formModel: Partial<TeamFormModel> = {};
-        const teamType = team.entityType;
+        const formValidators =
+            team.entityType.custom && team.entityType.custom.formValidators;
 
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 team[prop],
-                teamType.custom.validatorMap[prop]
+                formValidators && formValidators.get(prop)
             );
         });
 

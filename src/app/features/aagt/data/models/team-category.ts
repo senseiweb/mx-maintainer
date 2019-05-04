@@ -40,7 +40,7 @@ export class TeamCategory extends SpEntityBase {
     })
     teamCatColor: string;
 
-    @BzNavProp({rt: 'Team'})
+    @BzNavProp({rt: SpListName.Team})
     teams: Team[];
 
     addJobReservation = (

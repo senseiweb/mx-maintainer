@@ -26,13 +26,13 @@ export class GenerationAsset extends SpEntityBase {
     mxPosition: number;
 
     @BzNavProp<GenerationAsset>({
-        rt: 'Asset',
+        rt: SpListName.Asset,
         fk: 'assetId'
     })
     asset: Asset;
 
     @BzNavProp<GenerationAsset>({
-        rt: 'Generation',
+        rt: SpListName.Generation,
         fk: 'generationId'
     })
     generation: Generation;
@@ -44,6 +44,6 @@ export class GenerationAsset extends SpEntityBase {
     @BzValid_IsRequired
     assetId: number;
 
-    @BzNavProp({ rt: 'AssetTriggerAction' })
+    @BzNavProp({ rt: SpListName.AssetTriggerAction })
     assetTriggerActions: AssetTriggerAction[];
 }

@@ -50,10 +50,10 @@ export class Generation extends SpEntityBase {
 
     assumptions: Assumption[];
 
-    @BzNavProp({rt: 'Trigger'})
+    @BzNavProp({ rt: SpListName.Trigger })
     triggers: Trigger[];
 
-    @BzNavProp({ rt: 'GeneartionAsset'})
+    @BzNavProp({ rt: SpListName.GenerationAsset })
     generationAssets: GenerationAsset[];
 
     get assetTrigActions(): AssetTriggerAction[] {

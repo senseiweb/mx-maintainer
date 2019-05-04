@@ -82,12 +82,12 @@ export class AssetTriggerAction extends SpEntityBase {
     isConcurrentable: boolean;
 
     @BzNavProp<AssetTriggerAction>({
-        rt: 'GenerationAsset',
+        rt: SpListName.GenerationAsset,
         fk: 'genAssetId'})
     genAsset: GenerationAsset;
 
     @BzNavProp<AssetTriggerAction>({
-        rt: 'TriggerAction',
+        rt: SpListName.TriggerAction,
         fk: 'triggerActionId'
     })
     triggerAction: TriggerAction;

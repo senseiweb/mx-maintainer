@@ -1,16 +1,11 @@
-import {  Validators, ValidatorFn } from '@angular/forms';
+import { Validators, ValidatorFn } from '@angular/forms';
 import {
     bareEntity,
-       FilterEntityCollection,
-        Omit
+    FilterEntityCollection,
+    Omit
 } from '@ctypes/breeze-type-customization';
 import { SpListName } from 'app/app-config.service';
-import {
-    
-    Entity,
-    EntityAspect,
-    EntityType,
-} from 'breeze-client';
+import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
 import { BzDataProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
@@ -29,9 +24,7 @@ type SpEntityType = Omit<EntityType, 'custom'>;
 export interface ISpEntityType extends SpEntityType {
     custom?: {
         defaultSelect?: string;
-        validatorMap?: {
-            [index: string]: ValidatorFn[];
-        };
+        formValidators?: Map<string, ValidatorFn[]>;
     };
 }
 

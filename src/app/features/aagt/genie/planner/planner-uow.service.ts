@@ -14,7 +14,6 @@ import {
     AssetRepoService,
     AssetTriggerAction,
     Generation,
-    GenerationAsset,
     GenerationRepoService,
     GenAssetRepoService,
     IJobReservateionRequest,
@@ -24,7 +23,6 @@ import {
     TeamCategory,
     TeamCategoryRepoService,
     Trigger,
-    TriggerAction,
     TriggerActionRepoService,
     TriggerRepoService
 } from '../../data';
@@ -180,29 +178,6 @@ export class PlannerUowService implements Resolve<any> {
         return extendResolver;
     }
 
-    // createGenerationAsset(data: {
-    //     generationId: number;
-    //     assetId: number;
-    //     mxPosition: number;
-    // }): GenerationAsset {
-    //     const genAsset = this.genAssetRepo.createGenerationAsset(data);
-    //     const trigActions = _.flatMap(
-    //         this.currentGen.triggers,
-    //         x => x.triggerActions
-    //     );
-    //     trigActions.forEach(tra => {
-    //         const assetTrigActionData = {
-    //             genAssetId: genAsset.id,
-    //             triggerActionId: tra.id,
-    //             sequence: tra.sequence
-    //         };
-    //         // this.assetTrigActionRepo.createAssetTriggerAction(
-    //         //     assetTrigActionData
-    //         // );
-    //     });
-    //     return genAsset;
-    // }
-
     createTeamAvailability = (info: {
         teamId: number;
         availStart: Date;
@@ -210,127 +185,6 @@ export class PlannerUowService implements Resolve<any> {
         manHoursAvail: number;
     }) => this.teamAvailRepo.create(info)
 
-    // createTriggerAction(data: {
-    //     triggerId: number;
-    //     actionItemId: number;
-    //     sequence: number;
-    // }): TriggerAction {
-    //     const newTrigAction = this.triggerActionRepo.createTrigAction(data);
-    //     this.currentGen.generationAssets.forEach(genAsset => {
-    //         const assetTrigActionData = {
-    //             genAssetId: genAsset.id,
-    //             triggerActionId: newTrigAction.id,
-    //             sequence: newTrigAction.sequence
-    //         };
-    //         // this.assetTrigActionRepo.createAssetTriggerAction(
-    //         //     assetTrigActionData
-    //         // );
-    //     });
-    //     return newTrigAction;
-    // }
-
-    deleteTriggerGraph(trigger: Trigger): void {
-        // const tras = trigger.triggerActions;
-        // if (tras) {
-        //     tras.forEach(tra => this.deleteTriggerActionGraph(tra));
-        // }
-        // trigger.entityAspect.setDeleted();
-    }
-
-    // deleteTriggerActionGraph(triggerAction: TriggerAction): void {
-    //     const atas = triggerAction.assetTriggerActions;
-    //     if (atas) {
-    //         atas.forEach(ata => {
-    //             const state = ata.entityAspect.entityState;
-    //             if (!state.isDeleted()) {
-    //                 ata.preDeleteState = state;
-    //             }
-    //             ata.entityAspect.setDeleted();
-    //         });
-    //     }
-    //     triggerAction.entityAspect.setDeleted();
-    // }
-
-    private genAssetChnage(): void {
-        // this.emProvider.onEntityManagerChange
-        //     .pipe<IEntityChange<>>()
-        //     .subscribe();
-    }
-
-    // private entityChanges(entityChanges: IEntityChange[]): void {
-    //     const propChanges = entityChanges.filter(
-    //         chng => chng.entityAction === EntityAction.PropertyChange
-    //     );
-    //     if (!propChanges.length) {
-    //         return;
-    //     }
-    //     const genChanges = propChanges.filter(
-    //         chng => chng.entity.entityType.shortName === SpListName.Gen
-    //     );
-    //     if (genChanges) {
-    //         if (
-    //             genChanges.some(chng => {
-    //                 const propName: keyof bareEntity<Generation> =
-    //                     chng.args.propertyName;
-    //                 return (
-    //                     propName === 'genEndDate' || propName === 'genStartDate'
-    //                 );
-    //             })
-    //         ) {
-    //             this.planAssetTaskActions();
-    //             return;
-    //         }
-    //     }
-    //     const triggerChanges = propChanges.filter(
-    //         chng => chng.entity.entityType.shortName === SpListName.Trigger
-    //     );
-    //     if (triggerChanges) {
-    //         if (
-    //             triggerChanges.some(chng => {
-    //                 const propName: keyof bareEntity<Trigger> =
-    //                     chng.args.propertyName;
-    //                 return (
-    //                     propName === 'triggerStart' ||
-    //                     propName === 'triggerStop'
-    //                 );
-    //             })
-    //         ) {
-    //             this.planAssetTaskActions();
-    //             return;
-    //         }
-    //     }
-    //     const trigActions = propChanges.filter(
-    //         chng => chng.entity.entityType.shortName === SpListName.TriggerAct
-    //     );
-    //     if (trigActions) {
-    //         if (
-    //             trigActions.some(chng => {
-    //                 const propName: keyof bareEntity<TriggerAction> =
-    //                     chng.args.propertyName;
-    //                 return propName === 'sequence';
-    //             })
-    //         ) {
-    //             this.planAssetTaskActions();
-    //             return;
-    //         }
-    //     }
-    //     const assetTrigActs = propChanges.filter(
-    //         chng =>
-    //             chng.entity.entityType.shortName === SpListName.AssetTrigAct
-    //     );
-    //     if (assetTrigActs) {
-    //         if (
-    //             assetTrigActs.some(chng => {
-    //                 const propName: keyof bareEntity<AssetTriggerAction> =
-    //                     chng.args.propertyName;
-    //                 return propName === 'sequence';
-    //             })
-    //         ) {
-    //             this.planAssetTaskActions();
-    //             return;
-    //         }
-    //     }
-    // }
 
     private fetchGenerationAssets(): Observable<any> {
         const genAssetPredicate = this.genAssetRepo.makePredicate(
@@ -567,50 +421,4 @@ export class PlannerUowService implements Resolve<any> {
         const success = await repo.saveEntityChanges();
         return success;
     }
-
-    // triggerActionSelectionCheck(): void {
-    //     this.currentGen.triggers.forEach(trig => {
-    //         // ignore if nothing change on the trigger, i.e. just visited the step
-
-    //         // delete triggerActions and AssetTrigActions graphs
-    //         const draftActionItems = trig.draftActionItems;
-    //         const triggerActions = trig.triggerActions;
-
-    //         triggerActions.forEach(tra => {
-    //             const draftActionItem = draftActionItems.get(tra.actionItemId);
-
-    //             if (draftActionItem) {
-    //                 // if triggerAction already exist, check if the sequences has changed
-    //                 if (tra.sequence !== draftActionItem.sequence) {
-    //                     tra.sequence = draftActionItem.sequence;
-    //                 }
-    //             } else {
-    //                 // assumes the triggerAction was deleted, so delete graph
-    //                 this.deleteTriggerActionGraph(tra);
-    //             }
-
-    //             // remove the id from the action item list
-    //             draftActionItems.delete(tra.actionItemId);
-    //         });
-
-    //         // create new triggerActions, only new action item should be left in array
-    //         draftActionItems.forEach((aii, key) => {
-    //             this.createTriggerAction({
-    //                 triggerId: trig.id,
-    //                 actionItemId: key,
-    //                 sequence: aii['sequence']
-    //             });
-    //         });
-
-    //         draftActionItems.clear();
-
-    //         // reset the action items list with the result of deletion and creations
-    //         trig.triggerActions.forEach(tra => {
-    //             draftActionItems.set(tra.actionItemId, {
-    //                 sequence: tra.sequence,
-    //                 actionItem: tra.actionItem
-    //             });
-    //         });
-    //     });
-    // }
 }

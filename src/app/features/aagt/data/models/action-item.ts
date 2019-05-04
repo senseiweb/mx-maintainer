@@ -32,15 +32,18 @@ export class ActionItem extends SpEntityBase {
     @BzValid_IsRequired
     teamCategoryId: number;
 
-    @BzNavProp<ActionItem>({ rt: 'TeamCategory', fk: 'teamCategoryId' })
+    @BzNavProp<ActionItem>({
+        rt: SpListName.TeamCategory,
+        fk: 'teamCategoryId'
+    })
     teamCategory: TeamCategory;
 
     @BzDataProp()
     assignable: boolean;
 
-    @BzDataProp()
+    // @BzDataProp()
     notes: string;
 
-    @BzNavProp({ rt: 'TriggerAction' })
+    @BzNavProp({ rt: SpListName.TriggerAction })
     actionTriggers: TriggerAction[];
 }

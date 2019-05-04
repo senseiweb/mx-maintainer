@@ -91,12 +91,13 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
         this.teamCatFormMode = 'select';
 
         const formModel: Partial<ActionItemFormModel> = {};
-        const aiType = ai.entityType;
+        const formValidators =
+            ai.entityType.custom && ai.entityType.custom.formValidators;
 
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 this.currentActionItem[prop],
-                aiType.custom.validatorMap[prop]
+                formValidators && formValidators.get(prop)
             );
         });
 

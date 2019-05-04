@@ -9,35 +9,42 @@ export const bzValidatorWrapper = (validator: Validator): ValidatorFn => {
     };
 };
 
-export const BzValid_IsRequired = (target: SpEntityDecorator, key: string) => {
-    target.bzValidator = target.bzValidator || {};
+const addValidators = (
+    target: any,
+    key: string,
+    etValidator: Validators,
+    frmValidator: ValidatorFn
+) => {
+    target.frmValidator = target.frmValidator || new Map();
+    target.etValidator = target.etValidator || new Map();
 
-    const validatorList = (target.bzValidator[key] = target.bzValidator[
-        key
-    ] || {
-        formValidators: [],
-        entityValidators: []
-    });
+    const frmValidators = target.frmValidator.get(key) || [];
+    if (frmValidators) {
+        frmValidators.push(frmValidator);
+    } else {
+        target.frmValidator.set(key, [frmValidator]);
+    }
 
-    validatorList.entityValidators.push(Validator.required());
-    validatorList.formValidators.push(Validators.required);
+    const entyValidator = target.etValidator.get(key);
+    if (entyValidator) {
+        entyValidator.push(etValidator);
+    } else {
+        target.etValidator.set(key, [etValidator]);
+    }
+};
+
+export const BzValid_IsRequired = (target: any, key: string) => {
+    addValidators(target, key, Validator.required(), Validators.required);
 };
 
 export const BzValid_Maxlength = (length: number): PropertyDecorator => {
-    return (target: SpEntityDecorator, key: string) => {
-        target.bzValidator = target.bzValidator || {};
-
-        const validatorList = (target.bzValidator[key] = target.bzValidator[
-            key
-        ] || {
-            formValidators: [],
-            entityValidators: []
-        });
-
-        validatorList.entityValidators.push(
-            Validator.maxLength({ maxLength: length })
+    return (target: any, key: string) => {
+        addValidators(
+            target,
+            key,
+            Validator.maxLength({ maxLength: length }),
+            Validators.maxLength(length)
         );
-        validatorList.formValidators.push(Validators.maxLength(length));
     };
 };
 
@@ -49,18 +56,12 @@ export const BzValid_CustomValidator = <T>(
         key: string,
         descriptor: TypedPropertyDescriptor<any>
     ) => {
-        target.bzValidator = target.bzValidator || {};
-
-        const valProp = propertyTarget || 'entity';
-
-        const validatorList = (target.bzValidator[valProp] = target.bzValidator[
-            valProp
-        ] || {
-            formValidators: [],
-            entityValidators: []
-        });
-
-        validatorList.entityValidators.push(target[key]);
-        validatorList.formValidators.push(bzValidatorWrapper(target[key]));
+        const customValidator = target[key];
+        addValidators(
+            target,
+            key,
+            customValidator,
+            bzValidatorWrapper(customValidator)
+        );
     };
 };

@@ -40,12 +40,12 @@ export class Trigger extends SpEntityBase {
     generationId: number;
 
     @BzNavProp<Trigger>({
-        rt: 'Generation',
+        rt: SpListName.Generation,
         fk: 'generationId'
     })
     generation: Generation;
 
-    @BzNavProp({ rt: 'TriggerAction' })
+    @BzNavProp({ rt: SpListName.TriggerAction })
     triggerActions: TriggerAction[];
 
     @BzValid_CustomValidator<Trigger>()

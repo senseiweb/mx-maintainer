@@ -27,7 +27,7 @@ export class Team extends SpEntityBase {
     teamCategoryId: number;
 
     @BzNavProp<Team>({
-        rt: 'TeamCategory',
+        rt: SpListName.TeamCategory,
         fk: 'teamCategoryId'
     })
     teamCategory: TeamCategory;
@@ -39,7 +39,7 @@ export class Team extends SpEntityBase {
     notes: string;
 
     @BzNavProp<Team>({
-        rt: 'TeamAvailability'
+        rt: SpListName.TeamAvailability
     })
     teamAvailabilites: TeamAvailability[];
 

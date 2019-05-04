@@ -1,9 +1,10 @@
 import { SpNavDef } from '@ctypes/breeze-type-customization';
+import { SpListName } from 'app/app-config.service';
 import { SpEntityDecorator } from './breeze-entity';
 
 // rt = reflective type
 export const BzNavProp = <T>(meta: {
-    rt: string;
+    rt: SpListName;
     fk?: keyof T;
 }): PropertyDecorator => {
     return (target: SpEntityDecorator, key: string) => {

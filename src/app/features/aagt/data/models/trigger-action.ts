@@ -70,19 +70,19 @@ export class TriggerAction extends SpEntityBase {
     }
 
     @BzNavProp<TriggerAction>({
-        rt: 'ActionItem',
+        rt: SpListName.ActionItem,
         fk: 'actionItemId'
     })
     actionItem: ActionItem;
 
     @BzNavProp<TriggerAction>({
-        rt: 'Trigger',
+        rt: SpListName.TriggerAction,
         fk: 'triggerId'
     })
     trigger: Trigger;
 
     @BzNavProp<TriggerAction>({
-        rt: 'AssetTriggerAction'
+        rt: SpListName.TriggerAction
     })
     assetTriggerActions: AssetTriggerAction[];
 }
