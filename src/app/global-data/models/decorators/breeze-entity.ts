@@ -16,6 +16,7 @@ import {
 import { IBreezeNgValidator, SpEntityBase } from '../_entity-base';
 import { bzValidatorWrapper } from './breeze-validation';
 
+// tslint:disable: ban-types
 export type SpEntityDecorator = SpEntityBase &
     Partial<IBzEntityPropDecorator> &
     Partial<IBzValidators>;

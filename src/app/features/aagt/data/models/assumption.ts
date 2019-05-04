@@ -8,35 +8,3 @@ export class Assumption extends ebase.SpEntityBase {
     remarks: string;
     generationId: number;
 }
-
-// @Injectable({
-//     providedIn: AagtDataModule
-// })
-// export class AssumptionMetadata extends ebase.MetadataBase<Assumption> {
-//     metadataFor = Assumption;
-
-//     constructor() {
-//         super('Assumption');
-//         this.entityDefinition.dataProperties.area = {
-//             dataType: this.dt.String,
-//             isNullable: false
-//         };
-//         this.entityDefinition.dataProperties.category = {
-//             dataType: this.dt.String,
-//             isNullable: false
-//         };
-//         this.entityDefinition.dataProperties.remarks = {
-//             dataType: this.dt.String,
-//             isNullable: true
-//         };
-//         this.entityDefinition.dataProperties.generationId = {
-//             dataType: this.dt.Int32,
-//             isNullable: false
-//         };
-
-//         Object.assign(
-//             this.entityDefinition.dataProperties,
-//             this.baseDataProperties
-//         );
-//     }
-// }

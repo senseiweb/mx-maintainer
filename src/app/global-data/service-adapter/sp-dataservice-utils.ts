@@ -60,7 +60,9 @@ export class CustomDataServiceUtils {
             errObj.EntityErrors ||
             errObj.Errors;
         const isDotNet = !!tmp;
-        let message: string, entityErrors: any[];
+        let message: string;
+        let entityErrors: any[];
+        
         if (!isDotNet) {
             message = errObj.message;
             entityErrors = errObj.errors || errObj.entityErrors;

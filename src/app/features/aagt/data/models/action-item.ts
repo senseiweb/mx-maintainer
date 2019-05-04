@@ -1,6 +1,4 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-
 import {
     BzDataProp,
     BzEntity,
@@ -8,8 +6,6 @@ import {
     BzValid_IsRequired,
     SpEntityBase
 } from 'app/global-data';
-import { DataType } from 'breeze-client';
-import { AagtDataModule } from '../aagt-data.module';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
