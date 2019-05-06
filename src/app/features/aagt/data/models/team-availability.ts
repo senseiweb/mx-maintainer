@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
+    BzProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
     SpEntityBase
 } from 'app/global-data';
 import { DataType } from 'breeze-client';
@@ -20,8 +18,8 @@ export interface IJobReservation {
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamAvailability })
 export class TeamAvailability extends SpEntityBase {
-    @BzDataProp({
-        dataType: DataType.String,
+
+    @BzProp('data', {
         spInternalName: 'Title'
     })
     availabilityTitle: string;
@@ -37,9 +35,11 @@ export class TeamAvailability extends SpEntityBase {
         });
         return availShiftTime.subtract(totalJobTime).asHours() < 1;
     }
+
     get jobResSerialize(): string {
         return JSON.stringify(this.jobReservations);
     }
+
     set jobResSerialize(serializeJob) {
         if (!serializeJob) {
             return;
@@ -52,21 +52,28 @@ export class TeamAvailability extends SpEntityBase {
         this.jobReservations = [];
     }
 
-    @BzDataProp()
+    @BzProp('data', {
+        dataCfg: {isNullable: false}
+    })
     teamId: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     availStart: Date;
 
     nextAvail: _m.Moment;
 
-    @BzDataProp()
+    @BzProp('data', {})
     availEnd: Date;
 
-    @BzDataProp()
+    @BzProp('data', {})
     manHoursAvail: number;
 
-    @BzNavProp({rt: SpListName.Team})
+    @BzProp('nav', {
+        relativeEntity: SpListName.Team,
+        navCfg: {
+            isScalar: true,
+        }
+    })
     team: Team;
 
     durationFromStart = (start: _m.Moment): number => {

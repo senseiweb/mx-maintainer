@@ -1,5 +1,5 @@
-import { Validators, ValidatorFn } from '@angular/forms';
-import { SpDataDef, SpNavDef } from '@ctypes/breeze-type-customization';
+import { Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { SpDataDef, SpNavDef, SpEntityDef } from '@ctypes/breeze-type-customization';
 import {
     MxmAppName,
     MxmAssignedModels,
@@ -13,27 +13,31 @@ import {
     MetadataStore,
     Validator
 } from 'breeze-client';
-import { IBreezeNgValidator, SpEntityBase } from '../_entity-base';
-import { bzValidatorWrapper } from './breeze-validation';
+import { SpEntityBase, SpConstructor } from '../_entity-base';
+import { EntityTypeConfig, NavigationPropertyConfig, DataPropertyConfig, DataProperty } from 'breeze-client/src/entity-metadata';
+import { SpMetadata } from '../sp-metadata';
+import { IBzPropCollection } from './breeze-prop';
+import { CustomNameConventionService } from 'app/global-data/service-adapter/custom-namingConventionDict';
+
 
 // tslint:disable: ban-types
-export type SpEntityDecorator = SpEntityBase &
-    Partial<IBzEntityPropDecorator> &
-    Partial<IBzValidators>;
+// export type SpEntityDecorator = SpEntityBase &
+//     Partial<IBzEntityPropDecorator> &
+//     Partial<IBzValidators>;
 
-interface IBzEntityPropDecorator {
-    _bzDataProps: Map<string, Partial<SpDataDef>>;
-    _bzNavProps: Map<string, Partial<SpNavDef<any>>>;
-    _bzDefaultSelect: string[];
-    _makeNameingDict: (
-        namespace: string,
-        customDictionary: ICustomNameDictionary,
-        entity: SpEntityDecorator
-    ) => ICustomNameDictionary;
-    _createTypeInStore: (store: MetadataStore) => void;
-    // Naming Dictionary SpListName:#Namespace:{propName: spInternalName}
-    _bzNamingDict: Map<string, { [key: string]: string }>;
-}
+// interface IBzEntityPropDecorator {
+//     _bzDataProps: Map<string, Partial<SpDataDef>>;
+//     _bzNavProps: Map<string, Partial<SpNavDef<any>>>;
+//     _bzDefaultSelect: string[];
+//     _makeNameingDict: (
+//         namespace: string,
+//         customDictionary: ICustomNameDictionary,
+//         entity: SpEntityDecorator
+//     ) => ICustomNameDictionary;
+//     _createTypeInStore: (store: MetadataStore) => void;
+//     // Naming Dictionary SpListName:#Namespace:{propName: spInternalName}
+//     _bzNamingDict: Map<string, { [key: string]: string }>;
+// }
 
 interface ICustomNameDictionary {
     [index: string]: {
@@ -41,309 +45,560 @@ interface ICustomNameDictionary {
     };
 }
 
-export interface IBzValidators {
-    frmValidator?: Map<string, ValidatorFn[]>;
-    etValidator?: Map<string, Validator[]>;
+// export interface IBzValidators {
+//     frmValidator?: Map<string, ValidatorFn[]>;
+//     etValidator?: Map<string, Validator[]>;
+// }
+
+// export type SpValidNavType<T> = { [P in keyof T]: T[P] extends SpEntityBase | SpEntityBase[] ? T : never };
+
+export interface IBzDataConfig {
+    propType: 'data';
+    spInternalName?: string;
+    dataCfg?: Partial<DataPropertyConfig>;
 }
 
-const copyDataProps = (
-    typeDef: { dataProperties: {}; navigationProperties?: {} },
-    targetConstructor: Function,
-    entityProps: {
-        shortName: keyof typeof SpListName | '__metadata';
-        isComplexType?: boolean;
-        namespace?: string;
-    }
-): string[] => {
-    const dataProps: Map<string, Partial<SpDataDef>> =
-        targetConstructor.prototype._bzDataProps || [];
+export interface IBzNavConfig {
+    propType: 'nav';
+    navCfg: Partial<NavigationPropertyConfig>;
+    relativeEntity: keyof typeof SpListName;
+}
 
-    const navProps: Map<string, Partial<SpDataDef>> =
-        targetConstructor.prototype._bzNavProps || [];
+export type BzScaffodPropType = IBzDataConfig | IBzNavConfig;
 
-    // dataProps.delete('spInternalName');
+export type ExcludePropTypeKey<TProp> = TProp extends 'propType'  ? never : TProp;
 
-    dataProps.forEach((dpValue, dpKey) => {
-        const propTypeName = dpValue['complexTypeName'];
+export type ExcludeTypeField<A> = Partial<{ [K in ExcludePropTypeKey<keyof A>]: A[K] }>;
 
-        if (propTypeName) {
-            // append the namespace to entityTypeName if missing
-            const nsStart = propTypeName && propTypeName.indexOf(':#');
+export type ExtractConfigParameters<A, T> = A extends { propType: T }
+    ? ExcludeTypeField<A>
+    : never;
 
-            if (nsStart === -1) {
-                // name is unqualified; append the namespace
-                dpValue['complexTypeName'] += ':#' + entityProps.namespace;
-            }
-        }
+export type BzPropType = BzScaffodPropType['propType'];
 
-        typeDef.dataProperties[dpKey] = dpValue;
-    });
 
-    navProps.forEach((dpValue, dpKey) => {
-        let propTypeName = dpValue['entityTypeName'];
+// const copyDataProps = (
+//     typeDef: { dataProperties: {}; navigationProperties?: {} },
+//     targetConstructor: Function,
+//     entityProps: {
+//         shortName: keyof typeof SpListName | '__metadata';
+//         isComplexType?: boolean;
+//         namespace?: string;
+//     }
+// ): string[] => {
+//     // const dataProps: Map<string, Partial<SpDataDef>> =
+//     //     targetConstructor.prototype._bzDataProps || [];
 
-        // append the namespace to entityTypeName if missing
-        const nsStart = propTypeName.indexOf(':#');
-        if (nsStart === -1) {
-            // name is unqualified; append the namespace
-            dpValue['entityTypeName'] += ':#' + entityProps.namespace;
-        } else {
-            propTypeName = propTypeName.slice(0, nsStart);
-        }
+//     const navProps: Map<string, Partial<SpDataDef>> =
+//         targetConstructor.prototype._bzNavProps || [];
 
-        typeDef.navigationProperties[dpKey] = dpValue;
-    });
+//     // dataProps.delete('spInternalName');
 
-    // if (entityProps.isComplexType) {
-    //     delete typeDef.navigationProperties;
-    //     return typeDef;
-    // }
-    const baseEntityProps = Object.getPrototypeOf(targetConstructor);
-    let parentDefaultSelect: string[];
-    if (
-        baseEntityProps &&
-        baseEntityProps.prototype &&
-        baseEntityProps.prototype._bzDataProps
-    ) {
-        baseEntityProps.prototype._bzDataProps.forEach((dpValue, dpKey) => {
-            typeDef.dataProperties[dpKey] = dpValue;
-        });
+//     // dataProps.forEach((dpValue, dpKey) => {
+//     //     const propTypeName = dpValue['complexTypeName'];
 
-        parentDefaultSelect = baseEntityProps.prototype._bzDefaultSelect;
-    }
+//     //     if (propTypeName) {
+//     //         // append the namespace to entityTypeName if missing
+//     //         const nsStart = propTypeName && propTypeName.indexOf(':#');
 
-    const targetDefaultSelect = targetConstructor.prototype._bzDefaultSelect;
+//     //         if (nsStart === -1) {
+//     //             // name is unqualified; append the namespace
+//     //             dpValue['complexTypeName'] += ':#' + entityProps.namespace;
+//     //         }
+//     //     }
 
-    return parentDefaultSelect
-        ? targetDefaultSelect.concat(parentDefaultSelect)
-        : targetDefaultSelect;
-};
+//     //     typeDef.dataProperties[dpKey] = dpValue;
+//     // });
 
-const setValidations = (
-    etType: EntityType,
-    frmValidator: Map<string, ValidatorFn[]>,
-    etValidator: Map<string, Validator[]>,
-    finalFrmValidators: Map<string, ValidatorFn[]>
-): Map<string, ValidatorFn[]> => {
-    etType.dataProperties.forEach(dp => {
-        let finalFormValidatorsForProp = finalFrmValidators.get(dp.name) || [];
-        const dt = dp.dataType as any;
+//     navProps.forEach((dpValue, dpKey) => {
+//         let propTypeName = dpValue['entityTypeName'];
 
-        // add validators that breeze auto finds based on datatype, then
-        // push them into the data property and in the form validation
-        const validateCtor =
-            !dt || dt === DataType.String ? null : dt.validatorCtor;
+//         // append the namespace to entityTypeName if missing
+//         const nsStart = propTypeName.indexOf(':#');
+//         if (nsStart === -1) {
+//             // name is unqualified; append the namespace
+//             dpValue['entityTypeName'] += ':#' + entityProps.namespace;
+//         } else {
+//             propTypeName = propTypeName.slice(0, nsStart);
+//         }
 
-        if (validateCtor) {
-            const validator = validateCtor();
-            const exists = dp.validators.some(
-                val => val.name === validator.name
-            );
+//         typeDef.navigationProperties[dpKey] = dpValue;
+//     });
 
-            if (!exists) {
-                dp.validators.push(validator);
-                finalFormValidatorsForProp.push(bzValidatorWrapper(validator));
-            }
-        }
+//     // if (entityProps.isComplexType) {
+//     //     delete typeDef.navigationProperties;
+//     //     return typeDef;
+//     // }
+//     const baseEntityProps = Object.getPrototypeOf(targetConstructor);
+//     let parentDefaultSelect: string[];
+//     if (
+//         baseEntityProps &&
+//         baseEntityProps.prototype &&
+//         baseEntityProps.prototype._bzDataProps
+//     ) {
+//         baseEntityProps.prototype._bzDataProps.forEach((dpValue, dpKey) => {
+//             typeDef.dataProperties[dpKey] = dpValue;
+//         });
 
-        // process props that have validation annotations, take the breeze
-        // specific validators, if they are entity level push them into the
-        // into the entity.
-        const entityLevelValidators = etValidator.get('entity');
-        if (entityLevelValidators) {
-            entityLevelValidators.forEach(val => {
-                if (etType.validators.some(etV => etV.name === val.name)) {
-                    return;
-                }
-                etType.validators.push(val);
-            });
-        }
+//         parentDefaultSelect = baseEntityProps.prototype._bzDefaultSelect;
+//     }
 
-        // process props that have validation annotations, take the breeze
-        // specific validators,  push them into the into the entity.
-        const etValidatorsForProp = etValidator.get(dp.name);
+//     const targetDefaultSelect = targetConstructor.prototype._bzDefaultSelect;
 
-        if (etValidatorsForProp) {
-            etValidatorsForProp.forEach(val => {
-                if (dp.validators.some(dpv => dpv.name === val.name)) {
-                    return;
-                }
-                dp.validators.push(val);
-            });
-        }
+//     return parentDefaultSelect
+//         ? targetDefaultSelect.concat(parentDefaultSelect)
+//         : targetDefaultSelect;
+// };
 
-        // grab the existing formValidators and copy to the final;
-        finalFormValidatorsForProp = [
-            ...new Set(finalFormValidatorsForProp),
-            ...new Set(frmValidator.get(dp.name))
-        ];
+// const setValidations = (
+//     etType: EntityType,
+//     frmValidator: Map<string, ValidatorFn[]>,
+//     etValidator: Map<string, Validator[]>,
+//     finalFrmValidators: Map<string, ValidatorFn[]>
+// ): Map<string, ValidatorFn[]> => {
+//     etType.dataProperties.forEach(dp => {
+//         let finalFormValidatorsForProp = finalFrmValidators.get(dp.name) || [];
+//         const dt = dp.dataType as any;
 
-        if (finalFormValidatorsForProp.length) {
-            finalFrmValidators.set(dp.name, finalFormValidatorsForProp);
-        }
-    });
+//         // add validators that breeze auto finds based on datatype, then
+//         // push them into the data property and in the form validation
+//         const validateCtor =
+//             !dt || dt === DataType.String ? null : dt.validatorCtor;
 
-    return finalFrmValidators;
-};
+//         if (validateCtor) {
+//             const validator = validateCtor();
+//             const exists = dp.validators.some(
+//                 val => val.name === validator.name
+//             );
 
-const removedEntityScaffold = (constructor: Function) => {
-    delete constructor.prototype.defaultResourceName;
-    delete constructor.prototype._bzDataProps;
-    delete constructor.prototype._bzNavProps;
-    delete constructor.prototype._createTypeInStore;
-    delete constructor.prototype._bzNamingDict;
-    delete constructor.prototype._bzDefaultSelect;
-    delete constructor.prototype._makeNameingDict;
-    delete constructor.prototype.initializer;
-    delete constructor.prototype.bzValidator;
-    delete constructor.prototype.etValidator;
-};
+//             if (!exists) {
+//                 dp.validators.push(validator);
+//                 finalFormValidatorsForProp.push(bzValidatorWrapper(validator));
+//             }
+//         }
 
-const makeNamingDictionary = (
-    namespace: string,
-    customDictionary: ICustomNameDictionary,
-    entity: SpEntityDecorator & Function
-): ICustomNameDictionary => {
-    if (!entity.prototype._bzNamingDict) {
-        return customDictionary;
-    }
-    const keys = entity.prototype._bzNamingDict.keys();
-    for (const key of keys) {
-        const dictKey = `${key}:#${namespace}`;
-        const dictProp = entity.prototype._bzNamingDict.get(key);
-        if (customDictionary[dictKey]) {
-            Object.assign(customDictionary[dictKey], dictProp);
-        } else {
-            const newEntry = { [dictKey]: dictProp };
-            Object.assign(customDictionary, newEntry);
-        }
-    }
-    return customDictionary;
-};
+//         // process props that have validation annotations, take the breeze
+//         // specific validators, if they are entity level push them into the
+//         // into the entity.
+//         const entityLevelValidators = etValidator.get('entity');
+//         if (entityLevelValidators) {
+//             entityLevelValidators.forEach(val => {
+//                 if (etType.validators.some(etV => etV.name === val.name)) {
+//                     return;
+//                 }
+//                 etType.validators.push(val);
+//             });
+//         }
 
-const createTypeInStore = (
-    constructor: Function,
-    entityProps: {
-        shortName: keyof typeof SpListName | '__metadata';
-        isComplexType?: boolean;
-        namespace?: string;
-    },
-    featureNamespace: string,
-    store: MetadataStore,
-    autoGenKeyType?: AutoGeneratedKeyType
-) => {
-    const typeDef: {
-        shortName: string;
-        dataProperties: {};
-        navigationProperties?: {};
-        defaultResourceName?: string;
-        autoGeneratedKeyType: AutoGeneratedKeyType;
-        namespace: string;
-    } = {
-        shortName: entityProps.shortName,
-        dataProperties: {},
-        namespace: '',
-        autoGeneratedKeyType: undefined
+//         // process props that have validation annotations, take the breeze
+//         // specific validators,  push them into the into the entity.
+//         const etValidatorsForProp = etValidator.get(dp.name);
+
+//         if (etValidatorsForProp) {
+//             etValidatorsForProp.forEach(val => {
+//                 if (dp.validators.some(dpv => dpv.name === val.name)) {
+//                     return;
+//                 }
+//                 dp.validators.push(val);
+//             });
+//         }
+
+//         // grab the existing formValidators and copy to the final;
+//         finalFormValidatorsForProp = [
+//             ...new Set(finalFormValidatorsForProp),
+//             ...new Set(frmValidator.get(dp.name))
+//         ];
+
+//         if (finalFormValidatorsForProp.length) {
+//             finalFrmValidators.set(dp.name, finalFormValidatorsForProp);
+//         }
+//     });
+
+//     return finalFrmValidators;
+// };
+
+// const removedEntityScaffold = (constructor: Function) => {
+//     delete constructor.prototype.defaultResourceName;
+//     delete constructor.prototype._bzDataProps;
+//     delete constructor.prototype._bzNavProps;
+//     delete constructor.prototype._createTypeInStore;
+//     delete constructor.prototype._bzNamingDict;
+//     delete constructor.prototype._bzDefaultSelect;
+//     delete constructor.prototype._makeNameingDict;
+//     delete constructor.prototype.initializer;
+//     delete constructor.prototype.bzValidator;
+//     delete constructor.prototype.etValidator;
+// };
+
+// const makeNamingDictionary = (
+//     namespace: string,
+//     customDictionary: ICustomNameDictionary,
+//     entity: SpEntityDecorator & Function
+// ): ICustomNameDictionary => {
+//     if (!entity.prototype._bzNamingDict) {
+//         return customDictionary;
+//     }
+//     const keys = entity.prototype._bzNamingDict.keys();
+//     for (const key of keys) {
+//         const dictKey = `${key}:#${namespace}`;
+//         const dictProp = entity.prototype._bzNamingDict.get(key);
+//         if (customDictionary[dictKey]) {
+//             Object.assign(customDictionary[dictKey], dictProp);
+//         } else {
+//             const newEntry = { [dictKey]: dictProp };
+//             Object.assign(customDictionary, newEntry);
+//         }
+//     }
+//     return customDictionary;
+// };
+
+
+// tslint:disable-next-line: only-arrow-functions
+ const bzValidatorWrapper = function(validator: Validator) {
+    return (c: AbstractControl): { [error: string]: any } => {
+        const result = validator.validate(c.value, validator.context);
+        return result ? { [result.propertyName]: result.errorMessage } : null;
     };
-
-    if (!entityProps.isComplexType) {
-        typeDef.navigationProperties = {};
-    }
-
-    typeDef.namespace = entityProps.namespace =
-        entityProps.namespace || featureNamespace;
-
-    const defaultSelect = copyDataProps(typeDef, constructor, entityProps);
-
-    let type: EntityType | ComplexType;
-
-    if (entityProps.isComplexType) {
-        type = new ComplexType(typeDef as any);
-    } else {
-        typeDef.autoGeneratedKeyType =
-            autoGenKeyType || AutoGeneratedKeyType.Identity;
-
-        typeDef.defaultResourceName = `web/lists/getByTitle('${
-            typeDef.shortName
-        }')/items`;
-
-        type = new EntityType(typeDef as any);
-
-        const selectStatement = defaultSelect.join(',');
-
-        type.custom = type.custom
-            ? (type.custom['defaultSelect'] = selectStatement)
-            : ({ defaultSelect: selectStatement } as any);
-    }
-
-    store.addEntityType(type);
-
-    if (!type.isComplexType) {
-        store.setEntityTypeForResourceName(
-            entityProps.shortName,
-            type as EntityType
-        );
-    }
-
-    const intializer = constructor.prototype.initializer;
-
-    // need to set a default for the case when the base
-    // class is being process and contains no validations;
-    const frmValidator: Map<string, ValidatorFn[]> =
-        constructor.prototype.frmValidator || new Map();
-
-    const etValidator: Map<string, Validator[]> =
-        constructor.prototype.etValidator || new Map();
-
-    const formValidators = setValidations(
-        type as EntityType,
-        frmValidator,
-        etValidator,
-        new Map()
-    );
-
-    if (formValidators.size) {
-        if (type.custom) {
-            type.custom.formValidators = formValidators;
-        } else {
-            type.custom = { formValidators };
-        }
-    }
-
-    removedEntityScaffold(constructor);
-
-    store.registerEntityTypeCtor(type.shortName, constructor, intializer);
 };
 
-export const BzEntity = (
-    forAppNamed: MxmAppName | 'Global',
-    entityProps: {
-        shortName: keyof typeof SpListName | '__metadata';
-        isComplexType?: boolean;
-        namespace?: string;
+class NewTypeForStore {
+
+    public typeDef: Partial<SpEntityDef<any>> = {};
+    public newBzEntityType: EntityType | ComplexType;
+    private entityProps: IBzEntityProps = {} as any;
+    private etConstructor: Function;
+    private initializer: (entity: any) => void;
+
+    constructor(private target: IBreezeScaffoldProto,
+        private dictService: CustomNameConventionService,
+        private store: MetadataStore) {
+        this.etConstructor = this.target as any;
+        this.target = (this.target as any).prototype;
+
+        Object.assign(this.entityProps, this.target.spBzEntity.entityProps);
+        if (this.target.bzEntityInit) {
+            Object.assign(this.initializer, this.target.bzEntityInit);
+        }
+        this.step1_SetDefaults()
+            .step2_FixUpProps()
+            .step3_AddEntityBaseProps()
+            .step4_MakeDefaultSelect()
+            .step5_AddNameDictToService()
+            .step6_CreateTypeAndRegister()
+            .step7_CreateFormValidation()
+            .step8_RemoveEntityScaffold()
+            .step9_RegisterEntity();
+
     }
-): ClassDecorator => {
-    return constructor => {
+
+
+    private step1_SetDefaults(): this {
+        const ep = this.entityProps;
+        this.typeDef.shortName = ep.shortName;
+        this.typeDef.dataProperties = {};
+        this.typeDef.custom = {};
+        this.typeDef.isComplexType = ep.isComplexType;
+        if (!ep.isComplexType) {
+            this.typeDef.navigationProperties = {};
+        }
+        this.typeDef.namespace = ep.namespace;
+        return this;
+    }
+
+    private step2_FixUpProps(propColl?: IBzPropCollection): this {
+        const decoratedProps = propColl || this.target.propCollection;
+        decoratedProps.props
+            .filter(dp => dp.propType === 'data')
+            .forEach((dp: IBzDataConfig) => {
+                if (dp.dataCfg.complexTypeName) {
+                    let cplxName = dp.dataCfg.complexTypeName;
+                    const nsStart = cplxName.indexOf(':#');
+                    if (nsStart === -1) {
+                        cplxName += ':#' + this.entityProps.namespace;
+                    }
+                    dp.dataCfg.complexTypeName = cplxName;
+                }
+                this.typeDef.dataProperties[dp.dataCfg.name] = dp.dataCfg as any;
+            });
+        
+        decoratedProps.props
+            .filter(dp => dp.propType === 'nav')
+            .forEach((dp: IBzNavConfig) => {
+                if (dp.navCfg.entityTypeName) {
+                    let etName = dp.navCfg.entityTypeName;
+                    const nsStart = etName.indexOf(':#');
+                    if (nsStart === -1) {
+                        etName += ':#' + this.entityProps.namespace;
+                    }
+                    dp.navCfg.entityTypeName = etName;
+                }
+                this.typeDef.navigationProperties[dp.navCfg.name] = dp.navCfg as any;
+            });
+        
+        return this;
+    }
+
+    private step3_AddEntityBaseProps(): this {
+        const baseEntityProps = Object.getPrototypeOf(this.target);
+        if (baseEntityProps && baseEntityProps.propCollection) {
+            this.step2_FixUpProps(baseEntityProps.propCollection);
+        }
+        return this;
+    }
+
+    private step4_MakeDefaultSelect(): this  {
+        if (this.typeDef.isComplexType) {
+            return this;
+        }
+
+        const keys = Object.keys(this.typeDef.dataProperties);
+        const dpNames = [];
+
+        for (const key of keys) {
+            if (this.typeDef.dataProperties[key].complexTypeName) {
+                continue;
+            }
+            dpNames.push(key);
+        }
+
+        this.typeDef.custom['defaultSelect'] = dpNames.join(',');
+
+        return this;
+    }
+
+    private step5_AddNameDictToService(): this {
+        const dict = this.target.propCollection.propNameDictionary;
+        const dictForType = {};
+
+        const keys = dict.keys();
+        for (const key of keys) {
+            const dictKey = `${key}:#${this.entityProps.namespace}`;
+            const dictProp = dict.get(key);
+            if (dictForType[dictKey]) {
+                Object.assign(dict[dictKey], dictProp);
+            } else {
+                const newEntry = { [dictKey]: dictProp };
+                Object.assign(dictForType, newEntry);
+            }
+        }
+
+        if (Object.keys(dictForType).length !== 0) {
+            this.dictService.updateDictionary(dictForType)
+        }
+        return this;
+    }
+
+    private step6_CreateTypeAndRegister(): this {
+        const ep = this.entityProps;
+        ep.isComplexType ?
+            this.subStep6_CreateComplexType() :
+            this.subStep6_CreateEntityype();
+        this.store.addEntityType(this.newBzEntityType);
+        return this;
+    }
+
+    private subStep6_CreateComplexType(): void {
+        this.newBzEntityType = new ComplexType(this.typeDef as any);
+    }
+
+    private subStep6_CreateEntityype(): void {
+        const ep = this.entityProps;
+        this.typeDef.autoGeneratedKeyType = ep.autoKeyGenType || AutoGeneratedKeyType.Identity;
+        this.typeDef.defaultResourceName = `web/lists/getByTitle('${
+            ep.shortName
+            }')/items`;
+        this.newBzEntityType = new EntityType(this.typeDef as any);
+    }
+
+    private step7_CreateFormValidation(dataProps?: DataProperty[]): this {
+
+        const formValidators: Map<string, ValidatorFn[]> = this.newBzEntityType.custom['formValidators'] = new Map();
+        const dps = dataProps || this.newBzEntityType.dataProperties;
+
+        dps.filter(dp => dp.dataType)
+            .forEach(dp => {
+                const dt = dp.dataType as DataType;
+                
+                if (dp.dataType !== DataType.String) {
+                    if (dt.validatorCtor) {
+                        const validator = dt.validatorCtor();
+                        const exists = dp.validators.some(val => val.name === validator.name);
+                        if (!exists) {
+                            dp.validators.push(validator);
+                        }
+                    }
+                }
+                const frmValidatorWrappers = dp.validators.map(validator => bzValidatorWrapper(validator));
+                formValidators.set(dp.name, frmValidatorWrappers);
+            });
+
+        return this;
+    }
+
+    private step8_RemoveEntityScaffold(): this {
+        delete this.target.propCollection;
+        delete this.target.spBzEntity;
+        delete this.target.bzEntityInit;
+                return this;
+    }
+
+    private step9_RegisterEntity(): this {
+        this.store.registerEntityTypeCtor(this.entityProps.shortName, this.etConstructor, this.initializer);
+        return this;
+    }
+}
+
+// const createTypeInStore = (
+//     constructor: Function,
+//     entityProps: {
+//         shortName: keyof typeof SpListName | '__metadata';
+//         isComplexType?: boolean;
+//         namespace?: string;
+//     },
+//     featureNamespace: string,
+//     store: MetadataStore,
+//     autoGenKeyType?: AutoGeneratedKeyType
+// ) => {
+//     const typeDef: {
+//         shortName: string;
+//         dataProperties: {};
+//         navigationProperties?: {};
+//         defaultResourceName?: string;
+//         autoGeneratedKeyType: AutoGeneratedKeyType;
+//         namespace: string;
+//     } = {
+//         shortName: entityProps.shortName,
+//         dataProperties: {},
+//         namespace: '',
+//         autoGeneratedKeyType: undefined
+//     };
+
+//     if (!entityProps.isComplexType) {
+//         typeDef.navigationProperties = {};
+//     }
+
+//     typeDef.namespace = entityProps.namespace =
+//         entityProps.namespace || featureNamespace;
+
+//     const defaultSelect = copyDataProps(typeDef, constructor, entityProps);
+
+//     let type: EntityType | ComplexType;
+
+//     if (entityProps.isComplexType) {
+//         type = new ComplexType(typeDef as any);
+//     } else {
+//         typeDef.autoGeneratedKeyType =
+//             autoGenKeyType || AutoGeneratedKeyType.Identity;
+
+//         typeDef.defaultResourceName = `web/lists/getByTitle('${
+//             typeDef.shortName
+//         }')/items`;
+
+//         type = new EntityType(typeDef as any);
+
+//         const selectStatement = defaultSelect.join(',');
+
+//         type.custom = type.custom
+//             ? (type.custom['defaultSelect'] = selectStatement)
+//             : ({ defaultSelect: selectStatement } as any);
+//     }
+
+//     store.addEntityType(type);
+
+//     if (!type.isComplexType) {
+//         store.setEntityTypeForResourceName(
+//             entityProps.shortName,
+//             type as EntityType
+//         );
+//     }
+
+//     const intializer = constructor.prototype.initializer;
+
+//     // need to set a default for the case when the base
+//     // class is being process and contains no validations;
+//     const frmValidator: Map<string, ValidatorFn[]> =
+//         constructor.prototype.frmValidator || new Map();
+
+//     const etValidator: Map<string, Validator[]> =
+//         constructor.prototype.etValidator || new Map();
+
+//     const formValidators = setValidations(
+//         type as EntityType,
+//         frmValidator,
+//         etValidator,
+//         new Map()
+//     );
+
+//     if (formValidators.size) {
+//         if (type.custom) {
+//             type.custom.formValidators = formValidators;
+//         } else {
+//             type.custom = { formValidators };
+//         }
+//     }
+
+//     removedEntityScaffold(constructor);
+
+//     store.registerEntityTypeCtor(type.shortName, constructor, intializer);
+// };
+
+export interface IBreezeScaffoldProto {
+    spBzEntity: ISpBreezeEntity;
+    propCollection: IBzPropCollection;
+    spBzNameDict: ICustomNameDictionary;
+    bzEntityInit: () => void;
+}
+
+export interface ISpBreezeEntity {
+    entityProps: IBzEntityProps;
+    createTypeForStore: (store: MetadataStore,
+        nameDictionaryService: CustomNameConventionService,
+        namespace: string) => void;
+}
+
+export interface IBzEntityProps {
+    shortName: keyof typeof SpListName | '__metadata';
+    isComplexType?: boolean;
+    namespace?: string;
+    autoKeyGenType?: AutoGeneratedKeyType;
+}
+
+export const BzEntity = <TClass extends SpConstructor<SpEntityBase | SpMetadata>>(
+    forAppNamed: MxmAppName | 'Global',
+    entityProps:IBzEntityProps
+) => {
+    return (constructor: TClass): void => {
+        class SpBreezeEntity implements ISpBreezeEntity {
+            entityProps = entityProps;
+
+            constructor() {}
+            
+            createTypeForStore = (store: MetadataStore,
+                nameDictionaryService: CustomNameConventionService,
+                namespace?: string) => {
+                entityProps.namespace = entityProps.namespace || namespace;
+                return new NewTypeForStore(constructor as any, nameDictionaryService, store);
+            }
+        }
+        
+        if (!Object.getOwnPropertyDescriptor(
+            constructor,
+            'spBzEntity'
+        )) {
+            Object.defineProperty(constructor.prototype, 'spBzEntity', {
+                enumerable: false,
+                value: new SpBreezeEntity(),
+                writable: true,
+                configurable: true
+            });
+        }
+        
         if (constructor.name !== 'SpEntityBase') {
             const modelCollection = MxmAssignedModels.has(forAppNamed)
                 ? MxmAssignedModels.get(forAppNamed)
                 : [];
-            modelCollection.push(constructor);
+            modelCollection.push(constructor as any);
             MxmAssignedModels.set(forAppNamed, modelCollection);
         }
-        constructor.prototype._createTypeInStore = (
-            store: MetadataStore,
-            namespace: string,
-            autoGenKeyType?: AutoGeneratedKeyType
-        ) =>
-            createTypeInStore(
-                constructor,
-                entityProps,
-                namespace,
-                store,
-                autoGenKeyType
-            );
-
-        constructor.prototype._makeNameingDict = makeNamingDictionary;
     };
 };

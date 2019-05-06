@@ -53,7 +53,6 @@ export class BaseEmProviderService {
             this.featureAppSiteName
         );
 
-     
         this.entityManager = new EntityManager({
             dataService: this.dataService,
             metadataStore: this.emProviderService.metadataStore
@@ -61,24 +60,11 @@ export class BaseEmProviderService {
 
         const appModels = MxmAssignedModels.get(this.appName);
 
-        appModels.forEach(app => {
-            const entity = app as any;
-            const clientToServerNameDictionary = {};
-            // must update the naming dictionary before creating entity type as breeze
-            // will check the name to creat the nameOnServer property;
-            entity.prototype._makeNameingDict(
-                this.featureNameSpace,
-                clientToServerNameDictionary,
-                entity
-            );
-
-            this.nameConv.updateDictionary(clientToServerNameDictionary);
-
-            entity.prototype._createTypeInStore(
-                this.entityManager.metadataStore,
-                this.featureNameSpace
-            );
-        });
+        appModels.forEach(bzScaffold =>
+            (bzScaffold as any).prototype.spBzEntity.createTypeForStore(this.entityManager.metadataStore,
+                this.nameConv,
+                this.featureNameSpace)
+        );
       
         this.entityManager.entityChanged.subscribe(changedArgs =>
             this.onEntityManagerChange.next(changedArgs)

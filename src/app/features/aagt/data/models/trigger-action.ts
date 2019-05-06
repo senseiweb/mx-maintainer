@@ -1,11 +1,8 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
-    SpEntityBase
+    SpEntityBase,
+    BzProp
 } from 'app/global-data';
 import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
@@ -21,22 +18,22 @@ export interface ITriggerActionItemShell {
     teamCategory?: string;
 }
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TriggerAction })
+@BzEntity(MxmAppName.Aagt, {shortName: SpListName.TriggerAction})
 export class TriggerAction extends SpEntityBase {
     private _actionItemId: number;
     private _triggerId: number;
     private _sequence: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     title: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     totalExecutionTime: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     averageExecutionTime: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     get sequence(): number {
         return this._sequence;
     }
@@ -47,7 +44,7 @@ export class TriggerAction extends SpEntityBase {
         }`;
     }
 
-    @BzDataProp()
+    @BzProp('data', {})
     get actionItemId(): number {
         return this._actionItemId;
     }
@@ -58,7 +55,7 @@ export class TriggerAction extends SpEntityBase {
         }`;
     }
 
-    @BzDataProp()
+    @BzProp('data', {})
     get triggerId(): number {
         return this._triggerId;
     }
@@ -69,20 +66,24 @@ export class TriggerAction extends SpEntityBase {
         }`;
     }
 
-    @BzNavProp<TriggerAction>({
-        rt: SpListName.ActionItem,
-        fk: 'actionItemId'
+    @BzProp('nav', {
+        navCfg: {
+            isScalar: true
+        },
+        relativeEntity: SpListName.ActionItem
     })
     actionItem: ActionItem;
 
-    @BzNavProp<TriggerAction>({
-        rt: SpListName.TriggerAction,
-        fk: 'triggerId'
+    @BzProp('nav', {
+        relativeEntity: SpListName.Trigger,
+        navCfg: {
+            isScalar: true,
+        }
     })
     trigger: Trigger;
 
-    @BzNavProp<TriggerAction>({
-        rt: SpListName.TriggerAction
+    @BzProp('nav', {
+        relativeEntity: SpListName.AssetTriggerAction
     })
     assetTriggerActions: AssetTriggerAction[];
 }

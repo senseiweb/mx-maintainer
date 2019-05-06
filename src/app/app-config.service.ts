@@ -1,7 +1,7 @@
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
-import { SPUserProfileProperties } from './global-data';
+import { SPUserProfileProperties, IBreezeScaffoldProto } from './global-data';
 
 export class SpConfig {
     static cfgWebApplicationSite = 'http://localhost:4202';
@@ -49,7 +49,7 @@ export const enum MxmAppName {
 }
 
 // tslint:disable-next-line: ban-types
-export const MxmAssignedModels = new Map<MxmAppName | 'Global', Function[]>();
+export const MxmAssignedModels = new Map<MxmAppName | 'Global', IBreezeScaffoldProto[]>();
 
 export const cfgNavStructure = {
     name: '',

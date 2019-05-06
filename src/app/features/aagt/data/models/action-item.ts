@@ -1,45 +1,45 @@
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
+    BzProp,
     SpEntityBase
 } from 'app/global-data';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.ActionItem })
+@BzEntity(MxmAppName.Aagt, {shortName: SpListName.ActionItem})
 export class ActionItem extends SpEntityBase {
-    @BzDataProp({
-        isNullable: false,
+    @BzProp('data', {
+        dataCfg: {
+            isNullable: false
+        },
         spInternalName: 'Title'
     })
     action: string;
 
-    @BzDataProp()
-    @BzValid_IsRequired
+    @BzProp('data', {})
     shortCode: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     duration: number;
 
-    @BzDataProp()
-    @BzValid_IsRequired
+    @BzProp('data', {})
     teamCategoryId: number;
 
-    @BzNavProp<ActionItem>({
-        rt: SpListName.TeamCategory,
-        fk: 'teamCategoryId'
+    @BzProp('nav', {
+        relativeEntity: SpListName.TeamCategory,
+        navCfg: { isScalar: true}
     })
     teamCategory: TeamCategory;
 
-    @BzDataProp()
+    @BzProp('data', {})
     assignable: boolean;
 
     // @BzDataProp()
     notes: string;
 
-    @BzNavProp({ rt: SpListName.TriggerAction })
+    @BzProp('nav', {
+        relativeEntity: SpListName.TriggerAction,
+    })
     actionTriggers: TriggerAction[];
 }

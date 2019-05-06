@@ -1,7 +1,4 @@
-import { Injectable } from '@angular/core';
-import { GlobalDataModule } from '../data.module';
-import * as ebase from './_entity-base';
-import { BzDataProp, BzEntity } from './decorators';
+import { BzProp, BzEntity } from './decorators';
 
 @BzEntity('Global', {
     shortName: '__metadata',
@@ -9,12 +6,12 @@ import { BzDataProp, BzEntity } from './decorators';
     namespace: 'SP.Data'
 })
 export class SpMetadata {
-    @BzDataProp()
+    @BzProp('data', {})
     id: string;
-    @BzDataProp()
+    @BzProp('data', {})
     uri: string;
-    @BzDataProp()
+    @BzProp('data', {})
     etag: string;
-    @BzDataProp()
+    @BzProp('data', {})
     type: string;
 }

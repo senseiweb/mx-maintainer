@@ -1,11 +1,8 @@
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
+    BzProp,
     BzEntity,
-    BzNavProp,
-    BzValid_CustomValidator,
-    BzValid_IsRequired,
-    SpEntityBase
+    SpEntityBase,
 } from 'app/global-data';
 import { Validator } from 'breeze-client';
 import * as _m from 'moment';
@@ -14,9 +11,8 @@ import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Trigger })
 export class Trigger extends SpEntityBase {
-    @BzDataProp({
-        spInternalName: 'Title'
-    })
+
+    @BzProp('data', {spInternalName: 'Title'})
     milestone: string;
 
     get completionTime(): number {
@@ -28,27 +24,33 @@ export class Trigger extends SpEntityBase {
             .reduce((duration1, duration2) => duration1 + duration2, 0);
     }
 
-    @BzDataProp()
+    @BzProp('data', {})
     triggerStart?: Date;
 
-    @BzDataProp()
+    @BzProp('data', {})
     triggerStop?: Date;
 
     triggerDateRange: Date[];
 
-    @BzDataProp()
+    @BzProp('data', {
+        dataCfg: {isNullable: false}
+    })
     generationId: number;
 
-    @BzNavProp<Trigger>({
-        rt: SpListName.Generation,
-        fk: 'generationId'
+    @BzProp('nav', {
+        relativeEntity: SpListName.Generation,
+        navCfg: {
+            isScalar: true
+        }
     })
     generation: Generation;
 
-    @BzNavProp({ rt: SpListName.TriggerAction })
+    @BzProp('nav', {
+        relativeEntity: SpListName.TriggerAction
+    })
     triggerActions: TriggerAction[];
 
-    @BzValid_CustomValidator<Trigger>()
+    // TODO: Need to handle this registeration
     validateTrigger(): Validator {
         return new Validator('duplicateTriggerMiles', (entity: this, ctx) => {
             if (!entity || !entity.milestone) {

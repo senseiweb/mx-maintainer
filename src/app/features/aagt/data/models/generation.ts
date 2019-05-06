@@ -1,16 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
+    BzProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
     SpEntityBase
 } from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
-import { AagtDataModule } from '../aagt-data.module';
-import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Assumption } from './assumption';
 import { GenerationAsset } from './generation-asset';
@@ -25,35 +21,37 @@ export enum GenStatusEnum {
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Generation })
 export class Generation extends SpEntityBase {
-    @BzDataProp()
+    @BzProp('data', {})
     title: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     isActive: boolean;
 
-    @BzDataProp()
+    @BzProp('data', {})
     iso: string;
 
-    @BzDataProp({
-        dataType: DataType.String
-    })
+    @BzProp('data', {})
     genStatus: GenStatusEnum;
 
-    @BzDataProp()
+    @BzProp('data', {})
     assignedAssetCount: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     genStartDate: Date;
 
-    @BzDataProp()
+    @BzProp('data', {})
     genEndDate: Date;
 
     assumptions: Assumption[];
 
-    @BzNavProp({ rt: SpListName.Trigger })
+    @BzProp('nav', {
+        relativeEntity: SpListName.Trigger,
+    })
     triggers: Trigger[];
 
-    @BzNavProp({ rt: SpListName.GenerationAsset })
+    @BzProp('nav', {
+        relativeEntity: SpListName.GenerationAsset,
+    })
     generationAssets: GenerationAsset[];
 
     get assetTrigActions(): AssetTriggerAction[] {

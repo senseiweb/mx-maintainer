@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
+    BzProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
     SpEntityBase
 } from 'app/global-data';
 import { DataType } from 'breeze-client';
@@ -15,18 +13,21 @@ import { GenerationAsset } from './generation-asset';
     shortName: SpListName.Asset
 })
 export class Asset extends SpEntityBase {
-    @BzDataProp({
-        spInternalName: 'Title',
-        isNullable: false
+
+    @BzProp('data', {
+        dataCfg: { isNullable: false },
+        spInternalName: 'Title'
     })
     alias: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     location: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     notes: string;
 
-    @BzNavProp({ rt: SpListName.GenerationAsset })
+    @BzProp('nav', {
+        relativeEntity: SpListName.GenerationAsset
+    })
     assetGenerations: GenerationAsset[];
 }

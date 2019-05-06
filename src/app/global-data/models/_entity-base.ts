@@ -7,8 +7,8 @@ import {
 import { SpListName } from 'app/app-config.service';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
-import { BzDataProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
+import { BzProp } from './decorators';
 
 export interface IValidatorCtx<T> {
     value: T;
@@ -35,24 +35,32 @@ export abstract class SpEntityBase implements Entity {
     entityAspect: EntityAspect;
     entityType: ISpEntityType;
 
-    @BzDataProp({
-        isPartOfKey: true
-    })
+    @BzProp('data', {
+        dataCfg: {isPartOfKey: true}
+        })
     id: number;
-    @BzDataProp()
+    
+    @BzProp('data', {})
     modified: Date;
-    @BzDataProp()
+    
+    @BzProp('data', {})
     created: Date;
-    @BzDataProp()
+    
+    @BzProp('data', {})
     authorId: number;
-    @BzDataProp()
+    
+    @BzProp('data', {})
     editorId: number;
-    @BzDataProp({
-        complexTypeName: '__metadata:#SP.Data',
-        isNullable: false,
-        isScalar: true
+    
+    @BzProp('data', {
+        dataCfg: {
+            isNullable: false,
+            complexTypeName: '__metadata:#SP.Data', 
+            
+        }
     })
     __metadata: SpMetadata;
+    
     createChild = <T extends FilterEntityCollection<this>>(
         entityType: keyof typeof SpListName,
         defaultProps?: bareEntity<T>
@@ -67,8 +75,8 @@ export abstract class SpEntityBase implements Entity {
             console.log(err);
         }
     }
-    // get $typeName(): string {
-    //     if (!this.entityAspect) {return; }
-    //     return this.entityType.shortName;
-    // }
+
+
 }
+
+export type SpConstructor<T> = new (...args: any[]) => T;

@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzDataProp,
+    BzProp,
     BzEntity,
-    BzNavProp,
-    BzValid_IsRequired,
-    SpEntityBase
+    SpEntityBase,
 } from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
@@ -16,30 +14,31 @@ import { TeamCategory } from './team-category';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Team })
 export class Team extends SpEntityBase {
-    totalAvailDuringGen: number;
+    totalAvailDuringGen:  number;
 
-    @BzDataProp({
-        spInternalName: 'Title'
-    })
+    @BzProp('data', {spInternalName: 'Title'})
     teamName: string;
 
-    @BzDataProp()
+    @BzProp('data', {})
     teamCategoryId: number;
 
-    @BzNavProp<Team>({
-        rt: SpListName.TeamCategory,
-        fk: 'teamCategoryId'
+
+    @BzProp('nav', {
+        navCfg: {
+            isScalar: true
+        },
+        relativeEntity: SpListName.TeamCategory
     })
     teamCategory: TeamCategory;
 
-    @BzDataProp()
+    @BzProp('data', {})
     numTeamMembers: number;
 
-    @BzDataProp()
+    @BzProp('data', {})
     notes: string;
-
-    @BzNavProp<Team>({
-        rt: SpListName.TeamAvailability
+    
+    @BzProp('nav', {
+        relativeEntity: SpListName.TeamAvailability
     })
     teamAvailabilites: TeamAvailability[];
 
