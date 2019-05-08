@@ -83,7 +83,7 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 team[prop],
-                formValidators && formValidators.get(prop)
+                formValidators && formValidators.propVal.get(prop)
             );
         });
 

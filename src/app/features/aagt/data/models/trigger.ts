@@ -1,18 +1,20 @@
+import { ValidatorFn } from '@angular/forms';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import {
-    BzProp,
+    BzCustomValidator,
     BzEntity,
-    SpEntityBase,
+    BzProp,
+    SpEntityBase
 } from 'app/global-data';
 import { Validator } from 'breeze-client';
+import { ValidationFn } from 'breeze-client/src/validate';
 import * as _m from 'moment';
 import { Generation } from './generation';
 import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Trigger })
 export class Trigger extends SpEntityBase {
-
-    @BzProp('data', {spInternalName: 'Title'})
+    @BzProp('data', { spInternalName: 'Title' })
     milestone: string;
 
     get completionTime(): number {
@@ -33,7 +35,7 @@ export class Trigger extends SpEntityBase {
     triggerDateRange: Date[];
 
     @BzProp('data', {
-        dataCfg: {isNullable: false}
+        dataCfg: { isNullable: false }
     })
     generationId: number;
 
@@ -50,24 +52,32 @@ export class Trigger extends SpEntityBase {
     })
     triggerActions: TriggerAction[];
 
-    // TODO: Need to handle this registeration
-    validateTrigger(): Validator {
-        return new Validator('duplicateTriggerMiles', (entity: this, ctx) => {
-            if (!entity || !entity.milestone) {
-                return true;
+    @BzCustomValidator<Trigger>({
+        validatorScope: 'entity',
+        targetedProperty: 'milestone',
+        reqProps: ['milestone']
+    })
+    duplicateTriggerMiles(): Validator {
+        const validatorName = 'duplicateTriggerMiles';
+        const validatorFn = (entity: this, ctx: any): boolean => {
+            let isValid = true;
+            if (!ctx || !ctx.milestone) {
+                return isValid;
             }
-            const existing = entity.generation.triggers.map(trig => {
-                if (trig.milestone && trig.milestone) {
-                    return trig.milestone;
-                }
-            });
-            if (!existing) {
-                return true;
-            }
-            if (existing.includes(entity.milestone)) {
-                return false;
-            }
-            return true;
-        });
+            isValid = !entity.generation.triggers.some(
+                trig =>
+                    trig.milestone &&
+                    trig.milestone.toLowerCase() === ctx.milestone.toLowerCase()
+            );
+            return isValid;
+        };
+        const additionalCtx = {
+            message: context =>
+                `The milesont "${
+                    context.milestone
+                }" matches an already existing milestone for this generation!`
+        };
+
+        return new Validator(validatorName, validatorFn, additionalCtx);
     }
 }

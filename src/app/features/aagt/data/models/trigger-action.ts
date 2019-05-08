@@ -1,9 +1,5 @@
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzEntity,
-    SpEntityBase,
-    BzProp
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Trigger } from './trigger';
@@ -18,7 +14,7 @@ export interface ITriggerActionItemShell {
     teamCategory?: string;
 }
 
-@BzEntity(MxmAppName.Aagt, {shortName: SpListName.TriggerAction})
+@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TriggerAction })
 export class TriggerAction extends SpEntityBase {
     private _actionItemId: number;
     private _triggerId: number;
@@ -77,7 +73,7 @@ export class TriggerAction extends SpEntityBase {
     @BzProp('nav', {
         relativeEntity: SpListName.Trigger,
         navCfg: {
-            isScalar: true,
+            isScalar: true
         }
     })
     trigger: Trigger;

@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-     SpEntityBase
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { Asset } from './asset';
@@ -15,7 +11,6 @@ export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNKNOWN';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.GenerationAsset })
 export class GenerationAsset extends SpEntityBase {
-   
     @BzProp('data', {})
     health: AssetStatus;
 
@@ -23,7 +18,7 @@ export class GenerationAsset extends SpEntityBase {
     mxPosition: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Trigger,
+        relativeEntity: SpListName.Asset,
         navCfg: {
             isScalar: true
         }
@@ -31,15 +26,15 @@ export class GenerationAsset extends SpEntityBase {
     asset: Asset;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Trigger,
+        relativeEntity: SpListName.Generation,
         navCfg: {
-            isScalar: true,
+            isScalar: true
         }
     })
     generation: Generation;
 
     @BzProp('data', {
-        dataCfg: { isNullable: false}
+        dataCfg: { isNullable: false }
     })
     generationId: number;
 
@@ -51,8 +46,7 @@ export class GenerationAsset extends SpEntityBase {
     assetId: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.AssetTriggerAction,
-       
+        relativeEntity: SpListName.AssetTriggerAction
     })
     assetTriggerActions: AssetTriggerAction[];
 }

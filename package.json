@@ -5,6 +5,7 @@
         "tslint-check": "tslint-config-prettier-check ./src/tslint.json",
         "ng": "ng",
         "start": "ts-node ./server.ts | ng serve --port 4202 --proxy-config proxy.conf.json --open --configuration development",
+        "compodoc": "npx compodoc -p src/tsconfig.app.json",
         "start-hmr": "ng serve --port 4203 --configuration hmr --source-map=false --hmr-warning=false",
         "start-hmr-sourcemaps": "ng serve --configuration hmr --source-map=true --hmr-warning=false",
         "build": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --configuration=sharepoint-dev --eval-source-map",

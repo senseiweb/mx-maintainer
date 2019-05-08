@@ -5,7 +5,14 @@ import {
     OnInit,
     ViewEncapsulation
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import {
+    FormBuilder,
+    FormControl,
+    FormGroup,
+    Validator,
+    Validators,
+    ValidatorFn
+} from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import {
     bareEntity,
@@ -13,6 +20,7 @@ import {
     Omit
 } from '@ctypes/breeze-type-customization';
 import { Trigger } from 'app/features/aagt/data';
+import * as _ from 'lodash';
 import * as _m from 'moment';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -50,7 +58,7 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        // if no time is set...set default time to the next half hour
+        /** if no time is set...set default time to the next half hour */
         if (!this.currentTrigger.triggerStart) {
             const start = _m();
             const remainder = 30 - (start.minute() % 30);
@@ -78,14 +86,20 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
             trigType.custom && trigType.custom.formValidators;
 
         this.modelProps.forEach(prop => {
-            formModel[prop] = new FormControl(
-                this.currentTrigger[prop],
-                formValidators && formValidators.get(prop)
-            );
+            formModel[prop] = new FormControl(this.currentTrigger[prop], {
+                validators: formValidators && formValidators.propVal.get(prop),
+                updateOn: 'blur'
+            });
         });
 
         this.triggerFormGroup = this.formBuilder.group(formModel);
+        const frmGrpValidator = trigType.custom.formValidators.entityVal.map(
+            ev => ev(this.currentTrigger)
+        );
 
+        this.triggerFormGroup.setValidators(
+            Validators.compose(frmGrpValidator)
+        );
         this.triggerFormGroup
             .get('triggerDateRange')
             .valueChanges.pipe(takeUntil(this.unsubscribeAll))
@@ -124,11 +138,33 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
             if (!result.value) {
                 return;
             }
-            // this.uow.deleteTriggerGraph(this.currentTrigger);
+            /**
+             * if the trigger has been marked as deleted, then all children
+             * (triggerActions) and grandchildren (atas) should be marked as
+             * soft deleted.
+             */
+            const atas = _.flatMap(
+                this.currentTrigger.triggerActions,
+                x => x.assetTriggerActions
+            );
+            atas.forEach(ata => (ata.isSoftDeleted = true));
+            this.currentTrigger.triggerActions.forEach(
+                ta => (ta.isSoftDeleted = true)
+            );
+            /**
+             * Report back to the caller that trigger has been soft deleted and
+             * notify view that the deletion was successfull.
+             */
             const diaResult: IDialogResult<Trigger> = {
                 confirmDeletion: true
             };
-            sa.default.fire('Deleted!', 'Trigger has been deleted', 'success');
+
+            sa.default.fire(
+                'Deleted!',
+                'The trigger, trigger actions, and asset trigger action were marked for deletion',
+                'success'
+            );
+
             this.dialogRef.close(diaResult);
         });
     }

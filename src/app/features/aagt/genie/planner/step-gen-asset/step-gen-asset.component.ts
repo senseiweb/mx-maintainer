@@ -68,8 +68,8 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
                 alreadyExist.isSoftDeleted = false;
             } else {
                 const defaultProps: bareEntity<GenerationAsset> = {
-                    generation: this.currentGen,
-                    asset
+                    generationId: this.currentGen.id,
+                    assetId: asset.id
                 };
                 this.currentGen.createChild<GenerationAsset>(
                     SpListName.GenerationAsset,

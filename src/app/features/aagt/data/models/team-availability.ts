@@ -1,14 +1,7 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-    SpEntityBase
-} from 'app/global-data';
-import { DataType } from 'breeze-client';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
-import { AagtDataModule } from '../aagt-data.module';
 import { Team } from './team';
 export interface IJobReservation {
     taskId: number;
@@ -18,7 +11,6 @@ export interface IJobReservation {
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamAvailability })
 export class TeamAvailability extends SpEntityBase {
-
     @BzProp('data', {
         spInternalName: 'Title'
     })
@@ -53,7 +45,7 @@ export class TeamAvailability extends SpEntityBase {
     }
 
     @BzProp('data', {
-        dataCfg: {isNullable: false}
+        dataCfg: { isNullable: false }
     })
     teamId: number;
 
@@ -71,7 +63,7 @@ export class TeamAvailability extends SpEntityBase {
     @BzProp('nav', {
         relativeEntity: SpListName.Team,
         navCfg: {
-            isScalar: true,
+            isScalar: true
         }
     })
     team: Team;

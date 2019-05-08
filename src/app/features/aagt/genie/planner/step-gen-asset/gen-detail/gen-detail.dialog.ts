@@ -78,12 +78,13 @@ export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
         }
 
         const formModel: Partial<GenFormModel> = {};
-        const formValidators = gen.entityType.custom &&  gen.entityType.custom.formValidators;
+        const formValidators =
+            gen.entityType.custom && gen.entityType.custom.formValidators;
 
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 this.currentGen[prop],
-                formValidators && formValidators.get(prop)
+                formValidators && formValidators.propVal.get(prop)
             );
         });
 

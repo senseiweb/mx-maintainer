@@ -174,6 +174,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     createNewTrigger(): void {
         const dialogCfg = new MatDialogConfig();
         dialogCfg.data = this.uow.createNewTrigger(this.uow.currentGen.id);
+        dialogCfg.disableClose = true;
         dialogCfg.panelClass = 'trigger-detail-dialog';
         this.trigdialog
             .open(TriggerDetailDialogComponent, dialogCfg)
@@ -191,7 +192,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                 this.triggers.sort(this.triggerSorter);
 
                 this.triggerSelectionFormGroup.controls['trigger'].setValue(
-                    result.value
+                    result.value || this.triggers[0]
                 );
 
                 this.uow.onStepValidityChange.next({
@@ -225,7 +226,9 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         this.selectedCache.forEach((scAction, index) => {
             const sequence = index + 1;
             const trigAction = triggerActions.find(
-                trigAct => trigAct.id === scAction.id && !trigAct.isSoftDeleted
+                trigAct =>
+                    trigAct.actionItemId === scAction.id &&
+                    !trigAct.isSoftDeleted
             );
 
             trigAction.sequence = trigAction.sequence !== sequence && sequence;

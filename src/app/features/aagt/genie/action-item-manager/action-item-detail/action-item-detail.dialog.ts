@@ -97,7 +97,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(
                 this.currentActionItem[prop],
-                formValidators && formValidators.get(prop)
+                formValidators && formValidators.propVal.get(prop)
             );
         });
 

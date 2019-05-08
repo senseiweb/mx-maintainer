@@ -40,9 +40,7 @@
                 (onMoveToTarget)="addAsset($event)"
                 (onTargetReorder)="rePrioritize($event)"
                 (onMoveToSource)="removeAsset($event)"
-                [disabled]="
-                    !currentGen || !currentGen.entityAspect.validateEntity()
-                "
+                [disabled]="!currentGen"
                 [showSourceControls]="false"
             >
                 <ng-template let-asset pTemplate="item">

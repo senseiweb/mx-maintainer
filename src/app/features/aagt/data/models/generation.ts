@@ -1,11 +1,5 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-    SpEntityBase
-} from 'app/global-data';
-import { DataType } from 'breeze-client';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Assumption } from './assumption';
@@ -45,12 +39,12 @@ export class Generation extends SpEntityBase {
     assumptions: Assumption[];
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Trigger,
+        relativeEntity: SpListName.Trigger
     })
     triggers: Trigger[];
 
     @BzProp('nav', {
-        relativeEntity: SpListName.GenerationAsset,
+        relativeEntity: SpListName.GenerationAsset
     })
     generationAssets: GenerationAsset[];
 
