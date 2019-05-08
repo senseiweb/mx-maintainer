@@ -5,6 +5,7 @@ import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
+import * as _ from 'lodash';
 import { ActionItem, Trigger, TriggerAction } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -83,26 +84,35 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
+    /**
+     * Method called when the user input moves over Actions from the
+     * available Action list to the assigned Trigger Action.
+     */
     addActionItem($event: { items: ActionItem[] }): void {
         const triggerActions = this.currentTrigger.triggerActions;
 
+        /** Loop over the available, */
         $event.items.forEach(actionItem => {
-            const alreadyExist = triggerActions.find(
+            const existingTrigAct = triggerActions.find(
                 ta => ta.actionItemId === actionItem.id
             );
 
-            if (alreadyExist) {
-                alreadyExist.isSoftDeleted = false;
+            if (existingTrigAct) {
+                existingTrigAct.isSoftDeleted = false;
+                existingTrigAct.assetTriggerActions.forEach(atas => !atas.isSoftDeleted);
             } else {
                 const defaultProps: bareEntity<TriggerAction> = {
                     trigger: this.currentTrigger,
                     actionItem
                 };
 
-                this.currentTrigger.createChild<TriggerAction>(
+                const newTrigAction = this.currentTrigger.createChild<TriggerAction>(
                     SpListName.TriggerAction,
                     defaultProps
                 );
+                this.currentTrigger.generation.generationAssets.forEach(ga => {
+                    ga.createChild()
+                });
             }
         });
 

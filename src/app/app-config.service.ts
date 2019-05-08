@@ -1,7 +1,20 @@
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
-import { SPUserProfileProperties, IBreezeScaffoldProto } from './global-data';
+import {
+    ActionItem,
+    Asset,
+    AssetTriggerAction,
+    Assumption,
+    Generation,
+    GenerationAsset,
+    Team,
+    TeamAvailability,
+    TeamCategory,
+    Trigger,
+    TriggerAction
+} from './features/aagt/data';
+import { IBreezeScaffoldProto, SPUserProfileProperties } from './global-data';
 
 export class SpConfig {
     static cfgWebApplicationSite = 'http://localhost:4202';
@@ -26,9 +39,19 @@ export class SpConfig {
     };
 }
 
-export enum SpListType {
-    ActionItem
-}
+type EnumString<T> = Extract<keyof typeof SpListName, string>;
+export type SpListEntityType =
+    | Record<SpListName.ActionItem, ActionItem>
+    | Record<SpListName.AssetTriggerAction, AssetTriggerAction>
+    | Record<SpListName.Asset, Asset>
+    | Record<SpListName.Assumption, Assumption>
+    | Record<SpListName.Generation, Generation>
+    | Record<SpListName.GenerationAsset, GenerationAsset>
+    | Record<SpListName.TeamAvailability, TeamAvailability>
+    | Record<SpListName.Team, Team>
+    | Record<SpListName.TeamCategory, TeamCategory>
+    | Record<SpListName.TriggerAction, TriggerAction>
+    | Record<SpListName.Trigger, Trigger>;
 
 export enum SpListName {
     ActionItem = 'ActionItem',
@@ -44,12 +67,66 @@ export enum SpListName {
     Trigger = 'Trigger'
 }
 
+// interface IEtActionItem  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtAssetTriggerAction  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtAction {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtAssumption  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtGeneration  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtGenerationAsset  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtTeamAvailability  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtTeam  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtActionItem  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtActionItem  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtActionItem  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+// interface IEtActionItem  {
+//     entityName: SpListName.ActionItem;
+//     entityKind: ActionItem;
+// }
+
+// export type SpTypeMap = IEtActionItem |
+
 export const enum MxmAppName {
     Aagt
 }
 
 // tslint:disable-next-line: ban-types
-export const MxmAssignedModels = new Map<MxmAppName | 'Global', IBreezeScaffoldProto[]>();
+export const MxmAssignedModels = new Map<
+    MxmAppName | 'Global',
+    IBreezeScaffoldProto[]
+>();
 
 export const cfgNavStructure = {
     name: '',

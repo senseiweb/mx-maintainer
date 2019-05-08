@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import {
     Entity,
-    EntityAction,
     FilterQueryOp,
     Predicate,
     SaveResult
 } from 'breeze-client';
+
 import {
     AagtDataModule,
     ActionItem,
@@ -51,8 +51,7 @@ import {
 
 import { SpListName } from 'app/app-config.service';
 import {
-    AagtEmProviderService,
-    IEntityChange
+    AagtEmProviderService
 } from '../../data/aagt-emprovider.service';
 import { TeamRepoService } from '../../data/repos/team-repo.service';
 import { IStepperModel } from './planner.component';
