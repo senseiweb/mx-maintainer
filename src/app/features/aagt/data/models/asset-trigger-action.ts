@@ -23,7 +23,7 @@ type AtaAllowedOutcomes =
     | 'blamed'
     | 'untouched';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.AssetTriggerAction })
+@BzEntity(MxmAppName.Aagt, {})
 export class AssetTriggerAction extends SpEntityBase {
     readonly shortname = 'AssetTriggerAction';
 

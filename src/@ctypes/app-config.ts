@@ -12,6 +12,7 @@ import {
     Trigger,
     TriggerAction
 } from 'app/features/aagt/data';
+import { SpEntityBase, FilterChildEntityProp } from 'app/global-data';
 
 export declare class IAppConfig {
     static aggtFeatureAppSite: string;
@@ -24,7 +25,7 @@ export declare class IAppConfig {
  * @param value true|false
  */
 export function enumerable(value: boolean) {
-    return function(target: any, propertyKey: string) {
+    return (target: any, propertyKey: string) => {
         const descriptor =
             Object.getOwnPropertyDescriptor(target, propertyKey) || {};
         if (descriptor.enumerable !== value) {
@@ -41,6 +42,10 @@ export function enumerable(value: boolean) {
 // export type SpListNames = keyof typeof SpListName;
 
 export type SpEntityOfType = SpListEntities['shortname'];
+
+// export type SpChildOfType<T extends SpEntityBase> = T['shortname'] extends SpListEntities ? T : never;
+
+// export type DiscriminateChildUnion<T extends SpListEntities> = ;
 
 export type DiscriminateUnion<T extends SpEntityOfType> = Partial<Extract<
     SpListEntities,
@@ -70,7 +75,6 @@ export type SpListEntities =
     | ActionItem
     | AssetTriggerAction
     | Asset
-    | Assumption
     | GenerationAsset
     | Generation
     | TeamAvailability

@@ -1,11 +1,11 @@
 import { BzProp, BzEntity } from './decorators';
 
 @BzEntity('Global', {
-    shortName: '__metadata',
     isComplexType: true,
     namespace: 'SP.Data'
 })
 export class SpMetadata {
+    readonly shortname = '__metadata';
     @BzProp('data', {})
     id: string;
     @BzProp('data', {})

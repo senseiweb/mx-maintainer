@@ -14,9 +14,9 @@ export interface ITriggerActionItemShell {
     teamCategory?: string;
 }
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TriggerAction })
+@BzEntity(MxmAppName.Aagt, {})
 export class TriggerAction extends SpEntityBase {
-    readonly shortname = SpListName.TriggerAction;
+    readonly shortname = 'TriggerAction';
 
     private _actionItemId: number;
     private _triggerId: number;

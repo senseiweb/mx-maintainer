@@ -71,10 +71,7 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
                     generationId: this.currentGen.id,
                     assetId: asset.id
                 };
-                this.currentGen.createChild<GenerationAsset>(
-                    SpListName.GenerationAsset,
-                    defaultProps
-                );
+                this.currentGen.createChild('Generation');
             }
         });
 

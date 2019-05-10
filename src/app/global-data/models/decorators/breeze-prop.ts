@@ -1,7 +1,6 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 import { DataType, Validator } from 'breeze-client';
-import { ValidationFn } from 'breeze-client/src/validate';
-import { IBzCustomFormValidators, SpEntityBase } from '../_entity-base';
+import { SpEntityBase } from '../_entity-base';
 import { SpMetadata } from '../sp-metadata';
 import {
     BzPropType,

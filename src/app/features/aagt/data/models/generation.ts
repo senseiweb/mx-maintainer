@@ -13,9 +13,9 @@ export enum GenStatusEnum {
     Historical = 'Historical'
 }
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.Generation })
+@BzEntity(MxmAppName.Aagt, {})
 export class Generation extends SpEntityBase {
-    readonly shortname = SpListName.Generation;
+    readonly shortname = 'Generation';
 
     @BzProp('data', {})
     title: string;

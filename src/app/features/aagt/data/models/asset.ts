@@ -5,9 +5,7 @@ import { DataType } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { GenerationAsset } from './generation-asset';
 
-@BzEntity(MxmAppName.Aagt, {
-    shortName: SpListName.Asset
-})
+@BzEntity(MxmAppName.Aagt, {})
 export class Asset extends SpEntityBase {
     readonly shortname = 'Asset';
 

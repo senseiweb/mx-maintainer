@@ -1,17 +1,14 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
-import { DataType } from 'breeze-client';
-import { AagtDataModule } from '../aagt-data.module';
 import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
 import { Generation } from './generation';
 
 export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNKNOWN';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.GenerationAsset })
+@BzEntity(MxmAppName.Aagt, {})
 export class GenerationAsset extends SpEntityBase {
-    readonly shortname = SpListName.GenerationAsset;
+    readonly shortname = 'GenerationAsset';
 
     @BzProp('data', {})
     health: AssetStatus;

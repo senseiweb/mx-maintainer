@@ -1,21 +1,20 @@
 import { Validators, ValidatorFn } from '@angular/forms';
 import {
     DiscriminateUnion,
-    MapDiscriminatedUnion,
-    NarrowAction,
     SpEntityOfType,
     SpListEntities,
-    SpListNames
+    DiscriminateChildUnion,
+    SpChildOfType,
 } from '@ctypes/app-config';
 import {
     bareEntity,
     FilterEntityCollection,
-    Omit
+    Omit,
+    Unarray,
+    FilterEntityPropCollection
 } from '@ctypes/breeze-type-customization';
-import { SpListName } from 'app/app-config.service';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
-import { never } from 'rxjs';
 import { BzProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
 
@@ -30,6 +29,18 @@ export interface IValidatorCtx<T> {
 export type IBreezeNgValidator<T> = { [key in keyof T]: Validators[] };
 
 export type SpConstructor<T> = new (...args: any[]) => T;
+
+export type FilterEntityCollection2<T extends SpEntityOfType> =
+    { [K in keyof T]: T[K] extends SpEntityBase[] ? (K extends Array<infer U> ? U : K) : never }['shortname'];
+
+// export type SpChildOfType<T> = T extends SpListEntities ? SpListEntities['shortname']: never;
+
+// export type SpChildOfType<T> =
+//     FilterEntityChildProp<T> extends SpListEntities ? T['shortname'] : never;
+
+
+    // export type FilterChildEntityProp<T> =
+    // Pick<T, { [K in keyof T]: T[K] extends SpEntityBase[] ? T['shortname'] : never }>;
 
 type SpEntityType = Omit<EntityType, 'custom'>;
 export interface IBzCustomFormValidators {
@@ -100,7 +111,7 @@ export abstract class SpEntityBase implements Entity {
      */
     createChild = <TChild extends SpEntityOfType>(
         childType: TChild,
-        defaultProps?: DiscriminateUnion<TChild>
+        defaultProps?: DiscriminateChildUnion<TChild>
     ): any => {
         const em = this.entityAspect.entityManager;
         try {

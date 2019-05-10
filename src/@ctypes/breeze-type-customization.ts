@@ -5,6 +5,7 @@ import {
     EntityType,
     NavigationProperty
 } from 'breeze-client';
+import { SpEntityBase } from 'app/global-data';
 
 // tslint:disable: interface-name
 
@@ -16,6 +17,8 @@ export type FilterType<T, U> = { [key in keyof T]: T extends U ? key : never };
 export type FilterEntityCollection<T> = Unarray<
     T[FilterEntityPropCollection<T>]
 >;
+
+
 
 export type Unarray<T> = T extends Array<infer U> ? U : T;
 

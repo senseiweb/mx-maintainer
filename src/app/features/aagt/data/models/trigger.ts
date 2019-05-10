@@ -11,9 +11,9 @@ import * as _m from 'moment';
 import { Generation } from './generation';
 import { TriggerAction } from './trigger-action';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.Trigger })
+@BzEntity(MxmAppName.Aagt, {})
 export class Trigger extends SpEntityBase {
-    readonly shortname = SpListName.Trigger;
+    readonly shortname = 'Trigger';
 
     @BzProp('data', { spInternalName: 'Title' })
     milestone: string;

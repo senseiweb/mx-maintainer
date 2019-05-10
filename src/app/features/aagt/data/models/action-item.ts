@@ -3,7 +3,7 @@ import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.ActionItem })
+@BzEntity(MxmAppName.Aagt, {})
 export class ActionItem extends SpEntityBase {
     readonly shortname = 'ActionItem';
 

@@ -9,9 +9,9 @@ export interface IJobReservation {
     jobEnd: _m.Moment;
 }
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamAvailability })
+@BzEntity(MxmAppName.Aagt, {})
 export class TeamAvailability extends SpEntityBase {
-    readonly shortname = SpListName.TeamAvailability;
+    readonly shortname = 'TeamAvailability';
 
     @BzProp('data', {
         spInternalName: 'Title'

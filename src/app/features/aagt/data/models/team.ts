@@ -8,9 +8,9 @@ import { AagtDataModule } from '../aagt-data.module';
 import { TeamAvailability } from './team-availability';
 import { TeamCategory } from './team-category';
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.Team })
+@BzEntity(MxmAppName.Aagt, {})
 export class Team extends SpEntityBase {
-    readonly shortname = SpListName.Team;
+    readonly shortname = 'Team';
 
     totalAvailDuringGen: number;
 

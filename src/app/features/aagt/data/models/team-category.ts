@@ -19,9 +19,9 @@ export interface IJobReservationReceipt {
     durationPlanned: _m.Duration;
 }
 
-@BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamCategory })
+@BzEntity(MxmAppName.Aagt, {})
 export class TeamCategory extends SpEntityBase {
-    readonly shortname = SpListName.TeamCategory;
+    readonly shortname = 'TeamCategory';
 
     @BzProp('data', {
         spInternalName: 'Title',
