@@ -1,4 +1,4 @@
-export interface SPUserProfileProperties {
+export interface ISPUserProfileProperties {
     UserProfile_GUID?: string;
     SID?: string;
     ADGuid?: string;

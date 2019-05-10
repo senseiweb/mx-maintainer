@@ -14,7 +14,7 @@ import {
     Trigger,
     TriggerAction
 } from './features/aagt/data';
-import { IBreezeScaffoldProto, SPUserProfileProperties } from './global-data';
+import { IBreezeScaffoldProto, ISPUserProfileProperties } from './global-data';
 
 export class SpConfig {
     static cfgWebApplicationSite = 'http://localhost:4202';
@@ -27,7 +27,7 @@ export class SpConfig {
         lastName: string;
         firstName: string;
         spAccountName: string;
-        profileProps: SPUserProfileProperties;
+        profileProps: ISPUserProfileProperties;
         spGroups: Array<{ id: number; title: string }>;
     } = {
         id: 'Not Set',
@@ -39,33 +39,33 @@ export class SpConfig {
     };
 }
 
-type EnumString<T> = Extract<keyof typeof SpListName, string>;
-export type SpListEntityType =
-    | Record<SpListName.ActionItem, ActionItem>
-    | Record<SpListName.AssetTriggerAction, AssetTriggerAction>
-    | Record<SpListName.Asset, Asset>
-    | Record<SpListName.Assumption, Assumption>
-    | Record<SpListName.Generation, Generation>
-    | Record<SpListName.GenerationAsset, GenerationAsset>
-    | Record<SpListName.TeamAvailability, TeamAvailability>
-    | Record<SpListName.Team, Team>
-    | Record<SpListName.TeamCategory, TeamCategory>
-    | Record<SpListName.TriggerAction, TriggerAction>
-    | Record<SpListName.Trigger, Trigger>;
+// type EnumString<T> = Extract<keyof typeof SpListName, string>;
+// export type SpListEntityType =
+//     | Record<SpListName.ActionItem, ActionItem>
+//     | Record<SpListName.AssetTriggerAction, AssetTriggerAction>
+//     | Record<SpListName.Asset, Asset>
+//     | Record<SpListName.Assumption, Assumption>
+//     | Record<SpListName.Generation, Generation>
+//     | Record<SpListName.GenerationAsset, GenerationAsset>
+//     | Record<SpListName.TeamAvailability, TeamAvailability>
+//     | Record<SpListName.Team, Team>
+//     | Record<SpListName.TeamCategory, TeamCategory>
+//     | Record<SpListName.TriggerAction, TriggerAction>
+//     | Record<SpListName.Trigger, Trigger>;
 
-export enum SpListName {
-    ActionItem = 'ActionItem',
-    AssetTriggerAction = 'AssetTriggerAction',
-    Asset = 'Asset',
-    Assumption = 'Assumption',
-    Generation = 'Generation',
-    GenerationAsset = 'GenerationAsset',
-    TeamAvailability = 'TeamAvailability',
-    Team = 'Team',
-    TeamCategory = 'TeamCategory',
-    TriggerAction = 'TriggerAction',
-    Trigger = 'Trigger'
-}
+// export enum SpListName {
+//     ActionItem = 'ActionItem',
+//     AssetTriggerAction = 'AssetTriggerAction',
+//     Asset = 'Asset',
+//     Assumption = 'Assumption',
+//     Generation = 'Generation',
+//     GenerationAsset = 'GenerationAsset',
+//     TeamAvailability = 'TeamAvailability',
+//     Team = 'Team',
+//     TeamCategory = 'TeamCategory',
+//     TriggerAction = 'TriggerAction',
+//     Trigger = 'Trigger'
+// }
 
 // interface IEtActionItem  {
 //     entityName: SpListName.ActionItem;

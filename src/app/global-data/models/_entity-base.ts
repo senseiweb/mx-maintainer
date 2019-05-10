@@ -2,16 +2,14 @@ import { Validators, ValidatorFn } from '@angular/forms';
 import {
     DiscriminateUnion,
     SpEntityOfType,
-    SpListEntities,
-    DiscriminateChildUnion,
-    SpChildOfType,
+    SpListEntities
 } from '@ctypes/app-config';
 import {
     bareEntity,
     FilterEntityCollection,
+    FilterEntityPropCollection,
     Omit,
-    Unarray,
-    FilterEntityPropCollection
+    Unarray
 } from '@ctypes/breeze-type-customization';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
@@ -30,19 +28,19 @@ export type IBreezeNgValidator<T> = { [key in keyof T]: Validators[] };
 
 export type SpConstructor<T> = new (...args: any[]) => T;
 
-export type FilterEntityCollection2<T extends SpEntityOfType> =
-    { [K in keyof T]: T[K] extends SpEntityBase[] ? (K extends Array<infer U> ? U : K) : never }['shortname'];
-
-// export type SpChildOfType<T> = T extends SpListEntities ? SpListEntities['shortname']: never;
-
-// export type SpChildOfType<T> =
-//     FilterEntityChildProp<T> extends SpListEntities ? T['shortname'] : never;
-
-
-    // export type FilterChildEntityProp<T> =
-    // Pick<T, { [K in keyof T]: T[K] extends SpEntityBase[] ? T['shortname'] : never }>;
+export type FilterEntityColNames<T extends SpEntityBase> = Unarray<
+    T[FilterEntityPropCollection<T>]
+> extends SpListEntities
+    ? T['shortname']
+    : never;
 
 type SpEntityType = Omit<EntityType, 'custom'>;
+
+export type EntityChildProps<T> = DiscriminateUnion<Extract<T, SpEntityOfType>>;
+export type EntityChildType<T> = Extract<
+    DiscriminateUnion<Extract<T, SpEntityOfType>>,
+    SpEntityBase
+>;
 export interface IBzCustomFormValidators {
     propVal: Map<string, ValidatorFn[]>;
     entityVal: Array<(entity: SpEntityBase) => ValidatorFn>;
@@ -109,19 +107,14 @@ export abstract class SpEntityBase implements Entity {
      * Convientant method for creating child entities for a
      * given parenet.
      */
-    createChild = <TChild extends SpEntityOfType>(
+    createChild = <TChild extends FilterEntityColNames<this>>(
         childType: TChild,
-        defaultProps?: DiscriminateChildUnion<TChild>
-    ): any => {
+        defaultProps?: EntityChildProps<TChild>
+    ): EntityChildProps<TChild> => {
         const em = this.entityAspect.entityManager;
-        try {
-            // creates and attaches itself to the current em;
-            const newEntity = em.createEntity(childType, defaultProps);
-            return (newEntity as any) as T;
-        } catch (e) {
-            const err = new Error(e);
-            console.log(err);
-        }
+        // creates and attaches itself to the current em;
+        const newEntity = em.createEntity(childType, defaultProps);
+        return (newEntity as any) as EntityChildType<TChild>;
     }
     // createChild = <T extends FilterEntityCollection<this>>(
     //     childType: SpListName

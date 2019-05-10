@@ -2,7 +2,6 @@ import { SpEntityDef } from '@ctypes/breeze-type-customization';
 import {
     MxmAppName,
     MxmAssignedModels,
-    SpListName
 } from 'app/app-config.service';
 import { CustomNameConventionService } from 'app/global-data/service-adapter/custom-namingConventionDict';
 import {
@@ -24,6 +23,7 @@ import {
     bzPropValidatorWrapper,
     BzPropCollection
 } from './breeze-prop';
+import { SpListEntities } from '@ctypes/app-config';
 
 interface ICustomNameDictionary {
     [index: string]: {
@@ -40,7 +40,7 @@ export interface IBzDataConfig {
 export interface IBzNavConfig {
     propType: 'nav';
     navCfg: Partial<NavigationPropertyConfig>;
-    relativeEntity: keyof typeof SpListName;
+    relativeEntity: SpListEntities['shortname'];
 }
 
 export type BzPropType = BzScaffodPropType['propType'];

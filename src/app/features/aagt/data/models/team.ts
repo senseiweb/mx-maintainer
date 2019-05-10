@@ -1,10 +1,7 @@
-import { Injectable } from '@angular/core';
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
-import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
-import { AagtDataModule } from '../aagt-data.module';
 import { TeamAvailability } from './team-availability';
 import { TeamCategory } from './team-category';
 
@@ -24,7 +21,7 @@ export class Team extends SpEntityBase {
         navCfg: {
             isScalar: true
         },
-        relativeEntity: SpListName.TeamCategory
+        relativeEntity: 'TeamCategory'
     })
     teamCategory: TeamCategory;
 
@@ -35,7 +32,7 @@ export class Team extends SpEntityBase {
     notes: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TeamAvailability
+        relativeEntity: 'TeamAvailability'
     })
     teamAvailabilites: TeamAvailability[];
 

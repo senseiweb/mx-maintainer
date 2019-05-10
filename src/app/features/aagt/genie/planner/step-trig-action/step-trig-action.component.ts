@@ -3,7 +3,6 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
-import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
 import { ActionItem, Trigger, TriggerAction } from 'app/features/aagt/data';
 import * as _ from 'lodash';
@@ -108,11 +107,13 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     actionItem
                 };
 
-                const newTrigAction = this.currentTrigger.createChild<
-                    TriggerAction
-                >(SpListName.TriggerAction, defaultProps);
+                const newTrigAction = this.currentTrigger.createChild('Trigger', {
+                    generationId: 
+                });
                 this.currentTrigger.generation.generationAssets.forEach(ga => {
-                    ga.createChild();
+                    ga.createChild('GenerationAsset', {
+                        asset: ga.asset
+                    });
                 });
             }
         });

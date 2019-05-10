@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { ActionItem } from './action-item';
 import { AssetTriggerAction } from './asset-trigger-action';
@@ -23,13 +23,13 @@ export class TriggerAction extends SpEntityBase {
     private _sequence: number;
 
     @BzProp('data', {})
-    title: string;
+    title?: string;
 
     @BzProp('data', {})
-    totalExecutionTime: number;
+    totalExecutionTime?: number;
 
     @BzProp('data', {})
-    averageExecutionTime: number;
+    averageExecutionTime?: number;
 
     @BzProp('data', {})
     get sequence(): number {
@@ -68,12 +68,12 @@ export class TriggerAction extends SpEntityBase {
         navCfg: {
             isScalar: true
         },
-        relativeEntity: SpListName.ActionItem
+        relativeEntity: 'ActionItem'
     })
     actionItem: ActionItem;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Trigger,
+        relativeEntity: 'Trigger',
         navCfg: {
             isScalar: true
         }
@@ -81,7 +81,7 @@ export class TriggerAction extends SpEntityBase {
     trigger: Trigger;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.AssetTriggerAction
+        relativeEntity: 'AssetTriggerAction'
     })
     assetTriggerActions: AssetTriggerAction[];
 }

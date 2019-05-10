@@ -1,8 +1,5 @@
-import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
-import { DataType, EntityAction, EntityState } from 'breeze-client';
-import { AagtDataModule } from '../aagt-data.module';
+import { BzEntity, BzProp, SpEntityBase, foreignKey } from 'app/global-data';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
 import { TriggerAction } from './trigger-action';
@@ -60,15 +57,15 @@ export class AssetTriggerAction extends SpEntityBase {
     actualStop: Date;
 
     @BzProp('data', {})
-    completedByTeamId?: number;
+    completedByTeamId: number;
 
     completedByTeam?: Team;
 
     @BzProp('data', {})
-    genAssetId: number;
+    genAssetId: foreignKey;
 
     @BzProp('data', {})
-    triggerActionId: number;
+    triggerActionId: foreignKey;
 
     @BzProp('data', {})
     isConcurrentable: boolean;

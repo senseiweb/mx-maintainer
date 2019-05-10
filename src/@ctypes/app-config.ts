@@ -1,4 +1,3 @@
-import { SpListName } from 'app/app-config.service';
 import {
     ActionItem,
     Asset,
@@ -12,7 +11,6 @@ import {
     Trigger,
     TriggerAction
 } from 'app/features/aagt/data';
-import { SpEntityBase, FilterChildEntityProp } from 'app/global-data';
 
 export declare class IAppConfig {
     static aggtFeatureAppSite: string;
@@ -37,19 +35,13 @@ export function enumerable(value: boolean) {
     };
 }
 
-
-// export type SpListNames = keyof typeof SpListName;
-// export type SpListNames = keyof typeof SpListName;
-
 export type SpEntityOfType = SpListEntities['shortname'];
 
-// export type SpChildOfType<T extends SpEntityBase> = T['shortname'] extends SpListEntities ? T : never;
+export type foreignKey = number;
 
-// export type DiscriminateChildUnion<T extends SpListEntities> = ;
-
-export type DiscriminateUnion<T extends SpEntityOfType> = Partial<Extract<
+export type DiscriminateUnion<T extends SpEntityOfType> = Extract<
     SpListEntities,
-    { shortname: T }>
+    { shortname: T }
 >;
 
 // export type MapDiscriminatedUnion<
@@ -63,14 +55,6 @@ export type DiscriminateUnion<T extends SpEntityOfType> = Partial<Extract<
 //     V extends T[K]
 // > = T extends Record<K, V> ? T : never;
 
-// export type MapDiscriminatedUnion<
-//     T extends Record<K, string>,
-//     K extends keyof T
-// > = { [V in T[K]]: DiscriminateUnion<T, K, V> };
-// export type SpChildType<T> = { T extends keyof typeof FilterEntityCollection<T>};
-
-// export type SpEntityOfType = keyof SpListEntities['shortname'];
-
 export type SpListEntities =
     | ActionItem
     | AssetTriggerAction
@@ -83,12 +67,12 @@ export type SpListEntities =
     | TriggerAction
     | Trigger;
 
-export interface SpUserGroup {
+export interface ISpUserGroup {
     groupId: string;
     groupName: string;
 }
 
-export interface SPUserProfileProperties {
+export interface ISPUserProfileProperties {
     UserProfile_GUID?: string;
     SID?: string;
     ADGuid?: string;

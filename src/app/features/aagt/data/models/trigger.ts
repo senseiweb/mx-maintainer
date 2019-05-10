@@ -1,5 +1,5 @@
 import { ValidatorFn } from '@angular/forms';
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import {
     BzCustomValidator,
     BzEntity,
@@ -16,7 +16,7 @@ export class Trigger extends SpEntityBase {
     readonly shortname = 'Trigger';
 
     @BzProp('data', { spInternalName: 'Title' })
-    milestone: string;
+    milestone?: string;
 
     get completionTime(): number {
         if (!this.triggerActions) {
@@ -33,7 +33,7 @@ export class Trigger extends SpEntityBase {
     @BzProp('data', {})
     triggerStop?: Date;
 
-    triggerDateRange: Date[];
+    triggerDateRange?: Date[];
 
     @BzProp('data', {
         dataCfg: { isNullable: false }
@@ -41,24 +41,24 @@ export class Trigger extends SpEntityBase {
     generationId: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Generation,
+        relativeEntity: 'Generation',
         navCfg: {
             isScalar: true
         }
     })
-    generation: Generation;
+    generation?: Generation;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TriggerAction
+        relativeEntity: 'TriggerAction'
     })
-    triggerActions: TriggerAction[];
+    triggerActions?: TriggerAction[];
 
     @BzCustomValidator<Trigger>({
         validatorScope: 'entity',
         targetedProperty: 'milestone',
         reqProps: ['milestone']
     })
-    duplicateTriggerMiles(): Validator {
+    private duplicateTriggerMiles(): Validator {
         const validatorName = 'duplicateTriggerMiles';
         const validatorFn = (entity: this, ctx: any): boolean => {
             let isValid = true;
