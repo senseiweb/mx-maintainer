@@ -2,10 +2,11 @@ import { Validators, ValidatorFn } from '@angular/forms';
 import {
     DiscriminateUnion,
     SpEntityOfType,
-    SpListEntities
+    SpListEntities,
+    CompleteEntity
 } from '@ctypes/app-config';
 import {
-    bareEntity,
+    RawEntity,
     FilterEntityCollection,
     FilterEntityPropCollection,
     Omit,
@@ -15,6 +16,7 @@ import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
 import { BzProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
+import { DiffieHellman } from 'crypto';
 
 export interface IValidatorCtx<T> {
     value: T;
@@ -28,15 +30,13 @@ export type IBreezeNgValidator<T> = { [key in keyof T]: Validators[] };
 
 export type SpConstructor<T> = new (...args: any[]) => T;
 
-export type FilterEntityColNames<T extends SpEntityBase> = Unarray<
-    T[FilterEntityPropCollection<T>]
-> extends SpListEntities
-    ? T['shortname']
-    : never;
-
 type SpEntityType = Omit<EntityType, 'custom'>;
 
-export type EntityChildProps<T> = DiscriminateUnion<Extract<T, SpEntityOfType>>;
+export type FilterEntityColNames<T extends SpEntityBase>
+    = Extract<FilterEntityCollection<T>, SpListEntities>['shortname'];
+
+
+export type EntityChildProps<T> = Partial<DiscriminateUnion<Extract<T, SpEntityOfType>>>;
 export type EntityChildType<T> = Extract<
     DiscriminateUnion<Extract<T, SpEntityOfType>>,
     SpEntityBase
@@ -81,19 +81,19 @@ export abstract class SpEntityBase implements Entity {
     @BzProp('data', {
         dataCfg: { isPartOfKey: true }
     })
-    id: number;
+    id?: number;
 
     @BzProp('data', {})
-    modified: Date;
+    modified?: Date;
 
     @BzProp('data', {})
-    created: Date;
+    created?: Date;
 
     @BzProp('data', {})
-    authorId: number;
+    authorId?: number;
 
     @BzProp('data', {})
-    editorId: number;
+    editorId?: number;
 
     @BzProp('data', {
         dataCfg: {
@@ -101,7 +101,7 @@ export abstract class SpEntityBase implements Entity {
             complexTypeName: '__metadata:#SP.Data'
         }
     })
-    __metadata: SpMetadata;
+    __metadata?: SpMetadata;
 
     /**
      * Convientant method for creating child entities for a
@@ -114,7 +114,7 @@ export abstract class SpEntityBase implements Entity {
         const em = this.entityAspect.entityManager;
         // creates and attaches itself to the current em;
         const newEntity = em.createEntity(childType, defaultProps);
-        return (newEntity as any) as EntityChildType<TChild>;
+        return (newEntity as any);
     }
     // createChild = <T extends FilterEntityCollection<this>>(
     //     childType: SpListName

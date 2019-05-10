@@ -1,5 +1,5 @@
 import { DiscriminateUnion, SpListEntities } from '@ctypes/app-config';
-import { bareEntity } from '@ctypes/breeze-type-customization';
+import { RawEntity } from '@ctypes/breeze-type-customization';
 import {
     EntityManager,
     EntityQuery,
@@ -14,7 +14,7 @@ import { QueryResult } from 'breeze-client/src/entity-manager';
 import * as _m from 'moment';
 import { defer, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { FilterEntityColNames, SpEntityBase } from '../models/_entity-base';
+import { FilterEntityColNames} from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
 
 interface IRepoPredicateCache {
@@ -23,7 +23,7 @@ interface IRepoPredicateCache {
 
 type SpChoiceCache<T> = { [index in keyof T]: string[] };
 
-export class BaseRepoService<
+export abstract class BaseRepoService<
     TEnityName extends SpListEntities['shortname'],
     TEntity extends DiscriminateUnion<TEnityName>
 > {
@@ -79,7 +79,7 @@ export class BaseRepoService<
         return defer(() => this.executeQuery(this.baseQuery()));
     }
 
-    protected createBase(options?: bareEntity<TEntity>): TEntity {
+    protected createBase(options?: RawEntity<TEntity>): TEntity {
         return this.entityManager.createEntity(
             this.entityType.shortName,
             options

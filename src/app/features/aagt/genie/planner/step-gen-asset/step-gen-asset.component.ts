@@ -1,9 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
-
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
-import { SpListName } from 'app/app-config.service';
+import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { Asset, Generation, GenerationAsset } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -67,11 +65,11 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
             if (alreadyExist) {
                 alreadyExist.isSoftDeleted = false;
             } else {
-                const defaultProps: bareEntity<GenerationAsset> = {
+                const defaultProps: RawEntity<GenerationAsset> = {
                     generationId: this.currentGen.id,
                     assetId: asset.id
                 };
-                this.currentGen.createChild('Generation');
+                this.currentGen.createChild('GenerationAsset', defaultProps)
             }
         });
 

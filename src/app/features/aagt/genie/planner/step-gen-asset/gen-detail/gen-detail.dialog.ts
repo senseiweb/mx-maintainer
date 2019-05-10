@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { Generation, GenStatusEnum, Team } from 'app/features/aagt/data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import * as sa from 'sweetalert2';
 import { PlannerUowService } from '../../planner-uow.service';
 
-type GenModelProps = keyof bareEntity<Generation> | 'planDateRange';
+type GenModelProps = keyof RawEntity<Generation> | 'planDateRange';
 type GenFormModel = { [key in GenModelProps]: any };
 
 @Component({

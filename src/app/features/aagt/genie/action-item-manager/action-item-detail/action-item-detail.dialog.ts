@@ -1,4 +1,3 @@
-import { Location } from '@angular/common';
 import {
     Component,
     Inject,
@@ -11,27 +10,21 @@ import { MatDialogRef, MatSnackBar, MAT_DIALOG_DATA } from '@angular/material';
 import { Observable, Subject } from 'rxjs';
 
 import {
-    debounceTime,
-    distinctUntilChanged,
     filter,
-    map,
-    startWith,
     takeUntil
 } from 'rxjs/operators';
 
-import { ActivatedRoute, Router } from '@angular/router';
-import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
 import { ActionItem } from 'app/features/aagt/data';
 import { TeamCategory } from 'app/features/aagt/data/models/team-category';
-import { EntityFormBuilder, EntityFormGroup } from 'app/global-data/';
-import { Action } from 'rxjs/internal/scheduler/Action';
+import { EntityFormGroup } from 'app/global-data/';
 import * as sa from 'sweetalert2';
 import { AimUowService } from '../aim-uow.service';
+import { SpFormModel, SpFormProps } from '@ctypes/app-config';
+import { Action } from 'rxjs/internal/scheduler/Action';
 
-type ActionItemModelProps = keyof bareEntity<ActionItem>;
-type ActionItemFormModel = { [key in keyof bareEntity<ActionItem>]: any };
 type TeamCatFormMode = 'edit' | 'select' | 'add';
 @Component({
     selector: 'action-item-detail-dialog',
@@ -64,7 +57,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
     actionItemFormGroup: EntityFormGroup<ActionItem>;
     formattedDuration: string;
     teamCategories: TeamCategory[];
-    private modelProps: ActionItemModelProps[] = [
+    private modelProps: Array<SpFormProps<ActionItem>> = [
         'action',
         'teamCategory',
         'assignable',
@@ -73,8 +66,6 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
         'notes'
     ];
     private unsubscribeAll: Subject<any>;
-
-    d;
 
     ngOnInit() {
         const ai = this.currentActionItem;
@@ -90,7 +81,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
         this.teamCatFormMode = 'select';
 
-        const formModel: Partial<ActionItemFormModel> = {};
+        const formModel: SpFormModel<ActionItem> = {};
         const formValidators =
             ai.entityType.custom && ai.entityType.custom.formValidators;
 
@@ -170,15 +161,6 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
         this.actionItemFormGroup.get('teamCategory').setValue(undefined);
         this.confirmDelete();
     }
-
-    // private async createTeamCat(teamType: string): Promise<TeamCategory> {
-    //     const newTeamCat = this.aimUow.createTeamCategory();
-    //     newTeamCat.teamType = teamType;
-    //     try {
-    //         const s = await this.aimUow.saveTeamCategory();
-    //         return newTeamCat;
-    //     } catch (e) {}
-    // }
 
     async deleteItem(): Promise<any> {
         const config: sa.SweetAlertOptions = {

@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import { AssetTriggerAction } from './asset-trigger-action';
@@ -41,12 +41,12 @@ export class Generation extends SpEntityBase {
     assumptions: Assumption[];
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Trigger
+        relativeEntity: 'Trigger'
     })
     triggers: Trigger[];
 
     @BzProp('nav', {
-        relativeEntity: SpListName.GenerationAsset
+        relativeEntity: 'GenerationAsset'
     })
     generationAssets: GenerationAsset[];
 

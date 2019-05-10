@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { bareEntity } from '@ctypes/breeze-type-customization';
+import { RawEntity } from '@ctypes/breeze-type-customization';
 import { SpListName } from 'app/app-config.service';
 import { BaseRepoService } from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
@@ -22,7 +22,7 @@ export class TeamCategoryRepoService extends BaseRepoService<TeamCategory> {
     }
 
     create(): TeamCategory {
-        const defaultProps: bareEntity<TeamCategory> = {};
+        const defaultProps: RawEntity<TeamCategory> = {};
         defaultProps.teamCatColor = this.getRandomColor();
         return this.createBase(defaultProps);
     }

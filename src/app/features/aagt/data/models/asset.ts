@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { GenerationAsset } from './generation-asset';
 
@@ -19,7 +19,7 @@ export class Asset extends SpEntityBase {
     notes: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.GenerationAsset
+        relativeEntity: 'GenerationAsset'
     })
     assetGenerations: GenerationAsset[];
 }

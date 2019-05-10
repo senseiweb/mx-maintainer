@@ -8,7 +8,7 @@ import {
 import { Observable } from 'rxjs';
 
 import { Entity } from 'breeze-client';
-import { Omit, bareEntity } from '@ctypes/breeze-type-customization';
+import { Omit, RawEntity } from '@ctypes/breeze-type-customization';
 
 export interface EntityAbstractControl<T = Entity> extends AbstractControl {
     readonly valueChanges: Observable<T>;
@@ -51,8 +51,8 @@ export interface EntityFormArray<T = Entity> extends FormArray {
 }
 export declare type AugmentedFormGroup = Omit<FormGroup, 'get' | 'controls'>;
 export interface EntityFormGroup<T> extends AugmentedFormGroup {
-    controls: { [key in keyof bareEntity<T>]: AbstractControl };
-    get(path: Array<keyof bareEntity<T>> | keyof bareEntity<T>): AbstractControl | null;
+    controls: { [key in keyof RawEntity<T>]: AbstractControl };
+    get(path: Array<keyof RawEntity<T>> | keyof RawEntity<T>): AbstractControl | null;
 }
 
 // export declare class EntityFormBuilder<T> extends FormBuilder {
@@ -66,7 +66,7 @@ export interface EntityFormGroup<T> extends AugmentedFormGroup {
 export declare type AugmentedFormBuilder = Omit<FormBuilder, 'group'>;
 export interface EntityFormBuilder<T> extends AugmentedFormBuilder {
     group(
-        controlsConfig: { [key in keyof bareEntity<T>]: any },
+        controlsConfig: { [key in keyof RawEntity<T>]: any },
         options?:
             | AbstractControlOptions
             | {

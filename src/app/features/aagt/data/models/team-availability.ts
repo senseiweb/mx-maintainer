@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -63,7 +63,7 @@ export class TeamAvailability extends SpEntityBase {
     manHoursAvail: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Team,
+        relativeEntity: 'Team',
         navCfg: {
             isScalar: true
         }

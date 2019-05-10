@@ -58,7 +58,7 @@ export class Trigger extends SpEntityBase {
         targetedProperty: 'milestone',
         reqProps: ['milestone']
     })
-    private duplicateTriggerMiles(): Validator {
+    private duplicateTriggerMiles?(): Validator {
         const validatorName = 'duplicateTriggerMiles';
         const validatorFn = (entity: this, ctx: any): boolean => {
             let isValid = true;

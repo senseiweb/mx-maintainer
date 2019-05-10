@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
 import { ActionItem, Trigger, TriggerAction } from 'app/features/aagt/data';
@@ -39,11 +39,24 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+
+        /**
+         * At this point filter out soft deleted trigger, but need to re
+         * rethink this, as there isn't current way to ui to allow for 
+         * reverting trigger deletions.
+         */
         this.triggers = this.uow.currentGen.triggers.filter(
             t => !t.isSoftDeleted
         );
+
+        // 
         this.triggers.sort(this.triggerSorter);
 
+        /**
+         * Every time the step is change from this step [index 1]
+         * check if the step is still valid, in this case step
+         * is considered valid if there are triggers present/
+         */
         this.uow.onStepperChange
             .pipe(
                 filter(sc => sc.selectedIndex === 1),
@@ -58,10 +71,16 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                 });
             });
 
+        /** Creates the trigger selection group */
         this.triggerSelectionFormGroup = this.formBuilder.group({
             trigger: new FormControl(this.currentTrigger)
         });
 
+        /**
+         * Listen for changes on the trigger selection form.
+         * On change filter the selected action based on each 
+         * of the selected trigger
+         */
         this.triggerSelectionFormGroup
             .get('trigger')
             .valueChanges.pipe(takeUntil(this.unsubscribeAll))
@@ -102,17 +121,19 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     atas => !atas.isSoftDeleted
                 );
             } else {
-                const defaultProps: bareEntity<TriggerAction> = {
+                const defaultProps: RawEntity<TriggerAction> = {
                     trigger: this.currentTrigger,
                     actionItem
                 };
 
-                const newTrigAction = this.currentTrigger.createChild('Trigger', {
-                    generationId: 
-                });
+                const newTrigAction = this.currentTrigger.createChild('TriggerAction',
+                    defaultProps) as any;
+                
                 this.currentTrigger.generation.generationAssets.forEach(ga => {
-                    ga.createChild('GenerationAsset', {
-                        asset: ga.asset
+                    ga.createChild('AssetTriggerAction', {
+                        genAsset: ga,
+                        triggerAction: newTrigAction,
+
                     });
                 });
             }

@@ -1,5 +1,5 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
-import { BzEntity, BzProp, SpEntityBase, foreignKey } from 'app/global-data';
+import { MxmAppName } from 'app/app-config.service';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
 import { TriggerAction } from './trigger-action';
@@ -62,22 +62,22 @@ export class AssetTriggerAction extends SpEntityBase {
     completedByTeam?: Team;
 
     @BzProp('data', {})
-    genAssetId: foreignKey;
+    genAssetId: number;
 
     @BzProp('data', {})
-    triggerActionId: foreignKey;
+    triggerActionId: number;
 
     @BzProp('data', {})
     isConcurrentable: boolean;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.GenerationAsset,
+        relativeEntity: 'GenerationAsset',
         navCfg: { isScalar: true }
     })
     genAsset: GenerationAsset;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TriggerAction,
+        relativeEntity: 'Trigger',
         navCfg: { isScalar: true }
     })
     triggerAction: TriggerAction;

@@ -1,4 +1,3 @@
-import { findNode } from '@angular/compiler';
 import {
     Component,
     Inject,
@@ -10,13 +9,11 @@ import {
     FormBuilder,
     FormControl,
     FormGroup,
-    Validators
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import {
-    bareEntity,
+    RawEntity,
     IDialogResult,
-    Omit
 } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { Team, TeamCategory } from 'app/features/aagt/data';
@@ -25,7 +22,7 @@ import { takeUntil } from 'rxjs/operators';
 import * as sa from 'sweetalert2';
 import { TeamUowService } from '../team-uow.service';
 
-type TeamModelProps = keyof bareEntity<Team>;
+type TeamModelProps = keyof RawEntity<Team>;
 type TeamFormModel = { [key in TeamModelProps]: any };
 type TeamCatFormMode = 'edit' | 'select' | 'add';
 
@@ -46,7 +43,7 @@ export class TeamDetailDialogComponent implements OnInit, OnDestroy {
     isSaving: Observable<boolean>;
     dialogTitle: string;
     teamCatgories: string[];
-    private modelProps: TeamModelProps[] = [
+    private modelProps = [
         'teamName',
         'teamCategory',
         'numTeamMembers',

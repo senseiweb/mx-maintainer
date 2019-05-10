@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
@@ -25,7 +25,7 @@ export class ActionItem extends SpEntityBase {
     teamCategoryId: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TeamCategory,
+        relativeEntity: 'TeamCategory',
         navCfg: { isScalar: true }
     })
     teamCategory: TeamCategory;
@@ -37,7 +37,7 @@ export class ActionItem extends SpEntityBase {
     notes: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TriggerAction
+        relativeEntity: 'TriggerAction'
     })
     actionTriggers: TriggerAction[];
 }

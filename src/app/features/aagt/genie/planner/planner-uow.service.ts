@@ -34,7 +34,6 @@ import {
 } from '@angular/router';
 
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { bareEntity } from '@ctypes/breeze-type-customization';
 import { AssetTriggerActionRepoService } from 'app/features/aagt/data/repos/asset-trigger-action-repo.service';
 import {} from 'app/features/aagt/data/repos/trigger-action-repo.service';
 import { BaseRepoService, SpEntityBase } from 'app/global-data';
@@ -49,7 +48,6 @@ import {
     Subject
 } from 'rxjs';
 
-import { SpListName } from 'app/app-config.service';
 import {
     AagtEmProviderService
 } from '../../data/aagt-emprovider.service';

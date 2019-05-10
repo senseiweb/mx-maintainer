@@ -15,7 +15,7 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import {
-    bareEntity,
+    RawEntity,
     IDialogResult,
     Omit
 } from '@ctypes/breeze-type-customization';
@@ -27,7 +27,7 @@ import { takeUntil } from 'rxjs/operators';
 import * as sa from 'sweetalert2';
 import { PlannerUowService } from '../../planner-uow.service';
 
-type TriggerModelProps = keyof Omit<bareEntity<Trigger>, 'completionTime'>;
+type TriggerModelProps = keyof Omit<RawEntity<Trigger>, 'completionTime'>;
 type TriggerFormModel = { [key in TriggerModelProps]: any };
 
 @Component({
@@ -85,6 +85,7 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
         const formValidators =
             trigType.custom && trigType.custom.formValidators;
 
+        /** Loop through the needed form props and create the form control with validators */
         this.modelProps.forEach(prop => {
             formModel[prop] = new FormControl(this.currentTrigger[prop], {
                 validators: formValidators && formValidators.propVal.get(prop),
@@ -93,6 +94,7 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
         });
 
         this.triggerFormGroup = this.formBuilder.group(formModel);
+
         const frmGrpValidator = trigType.custom.formValidators.entityVal.map(
             ev => ev(this.currentTrigger)
         );

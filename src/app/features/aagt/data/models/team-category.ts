@@ -1,12 +1,9 @@
-import { Injectable } from '@angular/core';
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
-import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
-import { AagtDataModule } from '../aagt-data.module';
-import { Team } from './team';
 import { IJobReservation, TeamAvailability } from './team-availability';
+import { Team } from './team';
 
 export interface IJobReservateionRequest {
     taskId: number;
@@ -33,7 +30,7 @@ export class TeamCategory extends SpEntityBase {
     teamCatColor: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Team
+        relativeEntity: 'Team'
     })
     teams: Team[];
 

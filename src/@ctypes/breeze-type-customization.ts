@@ -18,8 +18,6 @@ export type FilterEntityCollection<T> = Unarray<
     T[FilterEntityPropCollection<T>]
 >;
 
-
-
 export type Unarray<T> = T extends Array<infer U> ? U : T;
 
 export type FilterEntityPropCollection<T> = keyof Partial<
@@ -36,7 +34,7 @@ export type ExtreBareEntityProps =
     | 'entityDefinition'
     | '$typeName';
 
-export type bareEntity<T> = Partial<
+export type RawEntity<T> = Partial<
     Pick<T, Exclude<keyof T, keyof Entity | ExtreBareEntityProps>>
 >;
 
@@ -64,15 +62,15 @@ export interface IDialogResult<T> {
 
 // tslint:disable-next-line: interface-name
 export interface SpNavDef<T> extends navDef {
-    foreignKeyNames?: Array<keyof bareEntity<T>>;
+    foreignKeyNames?: Array<keyof RawEntity<T>>;
 }
 export type DataMembers<T> = {
-    [key in keyof bareEntity<T>]: Partial<SpDataDef>
+    [key in keyof RawEntity<T>]: Partial<SpDataDef>
 };
 
-export type ClientNameDict<T> = { [bkey in keyof bareEntity<T>]: string };
+export type ClientNameDict<T> = { [bkey in keyof RawEntity<T>]: string };
 export type NavMembers<T> = {
-    [key in keyof bareEntity<T>]: Partial<SpNavDef<T>>
+    [key in keyof RawEntity<T>]: Partial<SpNavDef<T>>
 };
 
 export interface SpEntityDef<T> extends Partial<CustomEtDef> {

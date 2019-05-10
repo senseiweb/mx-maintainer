@@ -1,4 +1,4 @@
-import { MxmAppName, SpListName } from 'app/app-config.service';
+import { MxmAppName} from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';
@@ -17,7 +17,7 @@ export class GenerationAsset extends SpEntityBase {
     mxPosition: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Asset,
+        relativeEntity: 'Asset',
         navCfg: {
             isScalar: true
         }
@@ -25,7 +25,7 @@ export class GenerationAsset extends SpEntityBase {
     asset: Asset;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Generation,
+        relativeEntity: 'Generation',
         navCfg: {
             isScalar: true
         }
@@ -45,7 +45,7 @@ export class GenerationAsset extends SpEntityBase {
     assetId: number;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.AssetTriggerAction
+        relativeEntity: 'AssetTriggerAction'
     })
     assetTriggerActions: AssetTriggerAction[];
 }

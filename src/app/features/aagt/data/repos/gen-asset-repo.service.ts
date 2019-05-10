@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { bareEntity } from '@ctypes/breeze-type-customization';
+import { RawEntity } from '@ctypes/breeze-type-customization';
 import { SpListName } from 'app/app-config.service';
 import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
 import { EntityState } from 'breeze-client';
@@ -8,12 +8,12 @@ import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { GenerationAsset } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
-export class GenAssetRepoService extends BaseRepoService<GenerationAsset> {
+export class GenAssetRepoService extends BaseRepoService {
     constructor(entityService: AagtEmProviderService) {
-        super(SpListName.GenerationAsset, entityService);
+        super();
     }
 
-    createGenerationAsset(data: bareEntity<GenerationAsset>): GenerationAsset {
+    createGenerationAsset(data: RawEntity<GenerationAsset>): GenerationAsset {
         data.health = 'UNKNOWN';
         return this.createBase(data);
     }
