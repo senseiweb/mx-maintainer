@@ -5,8 +5,8 @@ import { bareEntity, IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
-import * as _ from 'lodash';
 import { ActionItem, Trigger, TriggerAction } from 'app/features/aagt/data';
+import * as _ from 'lodash';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
@@ -99,19 +99,20 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
 
             if (existingTrigAct) {
                 existingTrigAct.isSoftDeleted = false;
-                existingTrigAct.assetTriggerActions.forEach(atas => !atas.isSoftDeleted);
+                existingTrigAct.assetTriggerActions.forEach(
+                    atas => !atas.isSoftDeleted
+                );
             } else {
                 const defaultProps: bareEntity<TriggerAction> = {
                     trigger: this.currentTrigger,
                     actionItem
                 };
 
-                const newTrigAction = this.currentTrigger.createChild<TriggerAction>(
-                    SpListName.TriggerAction,
-                    defaultProps
-                );
+                const newTrigAction = this.currentTrigger.createChild<
+                    TriggerAction
+                >(SpListName.TriggerAction, defaultProps);
                 this.currentTrigger.generation.generationAssets.forEach(ga => {
-                    ga.createChild()
+                    ga.createChild();
                 });
             }
         });

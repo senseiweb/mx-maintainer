@@ -15,6 +15,8 @@ export enum GenStatusEnum {
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Generation })
 export class Generation extends SpEntityBase {
+    readonly shortname = SpListName.Generation;
+
     @BzProp('data', {})
     title: string;
 

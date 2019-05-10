@@ -1,14 +1,12 @@
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzEntity,
-    BzProp,
-    SpEntityBase
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { TeamCategory } from './team-category';
 import { TriggerAction } from './trigger-action';
 
-@BzEntity(MxmAppName.Aagt, {shortName: SpListName.ActionItem})
+@BzEntity(MxmAppName.Aagt, { shortName: SpListName.ActionItem })
 export class ActionItem extends SpEntityBase {
+    readonly shortname = 'ActionItem';
+
     @BzProp('data', {
         dataCfg: {
             isNullable: false
@@ -28,7 +26,7 @@ export class ActionItem extends SpEntityBase {
 
     @BzProp('nav', {
         relativeEntity: SpListName.TeamCategory,
-        navCfg: { isScalar: true}
+        navCfg: { isScalar: true }
     })
     teamCategory: TeamCategory;
 
@@ -39,7 +37,7 @@ export class ActionItem extends SpEntityBase {
     notes: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.TriggerAction,
+        relativeEntity: SpListName.TriggerAction
     })
     actionTriggers: TriggerAction[];
 }

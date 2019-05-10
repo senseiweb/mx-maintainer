@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-    SpEntityBase
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -25,18 +21,19 @@ export interface IJobReservationReceipt {
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.TeamCategory })
 export class TeamCategory extends SpEntityBase {
+    readonly shortname = SpListName.TeamCategory;
 
     @BzProp('data', {
         spInternalName: 'Title',
-        dataCfg: { isNullable: false}
+        dataCfg: { isNullable: false }
     })
     teamType: string;
 
-    @BzProp('data', {dataCfg:{isNullable: false}})
+    @BzProp('data', { dataCfg: { isNullable: false } })
     teamCatColor: string;
 
     @BzProp('nav', {
-        relativeEntity: SpListName.Team,
+        relativeEntity: SpListName.Team
     })
     teams: Team[];
 

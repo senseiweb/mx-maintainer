@@ -1,5 +1,13 @@
 import { Validators, ValidatorFn } from '@angular/forms';
 import {
+    DiscriminateUnion,
+    MapDiscriminatedUnion,
+    NarrowAction,
+    SpEntityOfType,
+    SpListEntities,
+    SpListNames
+} from '@ctypes/app-config';
+import {
     bareEntity,
     FilterEntityCollection,
     Omit
@@ -59,6 +67,8 @@ export abstract class SpEntityBase implements Entity {
     /** Provided by Breeze after the entity is created */
     entityType: ISpEntityType;
 
+    abstract readonly shortname: string;
+
     @BzProp('data', {
         dataCfg: { isPartOfKey: true }
     })
@@ -88,18 +98,32 @@ export abstract class SpEntityBase implements Entity {
      * Convientant method for creating child entities for a
      * given parenet.
      */
-    createChild = <T extends FilterEntityCollection<this>>(
-        entityType: keyof typeof SpListName,
-        defaultProps?: bareEntity<T>
-    ): T => {
+    createChild = <TChild extends SpEntityOfType>(
+        childType: TChild,
+        defaultProps?: DiscriminateUnion<TChild>
+    ): any => {
         const em = this.entityAspect.entityManager;
         try {
             // creates and attaches itself to the current em;
-            const newEntity = em.createEntity(entityType, defaultProps);
+            const newEntity = em.createEntity(childType, defaultProps);
             return (newEntity as any) as T;
         } catch (e) {
             const err = new Error(e);
             console.log(err);
         }
     }
+    // createChild = <T extends FilterEntityCollection<this>>(
+    //     childType: SpListName
+    //     defaultProps?: bareEntity<T>
+    // ): T => {
+    //     const em = this.entityAspect.entityManager;
+    //     try {
+    //         // creates and attaches itself to the current em;
+    //         const newEntity = em.createEntity(entityType, defaultProps);
+    //         return (newEntity as any) as T;
+    //     } catch (e) {
+    //         const err = new Error(e);
+    //         console.log(err);
+    //     }
+    // }
 }

@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-    SpEntityBase,
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { DataType } from 'breeze-client';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -14,14 +10,15 @@ import { TeamCategory } from './team-category';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Team })
 export class Team extends SpEntityBase {
-    totalAvailDuringGen:  number;
+    readonly shortname = SpListName.Team;
 
-    @BzProp('data', {spInternalName: 'Title'})
+    totalAvailDuringGen: number;
+
+    @BzProp('data', { spInternalName: 'Title' })
     teamName: string;
 
     @BzProp('data', {})
     teamCategoryId: number;
-
 
     @BzProp('nav', {
         navCfg: {
@@ -36,7 +33,7 @@ export class Team extends SpEntityBase {
 
     @BzProp('data', {})
     notes: string;
-    
+
     @BzProp('nav', {
         relativeEntity: SpListName.TeamAvailability
     })

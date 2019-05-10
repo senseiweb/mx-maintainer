@@ -1,3 +1,18 @@
+import { SpListName } from 'app/app-config.service';
+import {
+    ActionItem,
+    Asset,
+    AssetTriggerAction,
+    Assumption,
+    Generation,
+    GenerationAsset,
+    Team,
+    TeamAvailability,
+    TeamCategory,
+    Trigger,
+    TriggerAction
+} from 'app/features/aagt/data';
+
 export declare class IAppConfig {
     static aggtFeatureAppSite: string;
     static sharepointMainAppSite: string;
@@ -20,6 +35,49 @@ export function enumerable(value: boolean) {
         }
     };
 }
+
+
+// export type SpListNames = keyof typeof SpListName;
+// export type SpListNames = keyof typeof SpListName;
+
+export type SpEntityOfType = SpListEntities['shortname'];
+
+export type DiscriminateUnion<T extends SpEntityOfType> = Partial<Extract<
+    SpListEntities,
+    { shortname: T }>
+>;
+
+// export type MapDiscriminatedUnion<
+//     T extends Record<keyof typeof SpListName, string>,
+//     K extends keyof T
+// > = { [V in T[K]]: DiscriminateUnion<T, K, V> };
+
+// export type DiscriminateUnion<
+//     T,
+//     K extends keyof T,
+//     V extends T[K]
+// > = T extends Record<K, V> ? T : never;
+
+// export type MapDiscriminatedUnion<
+//     T extends Record<K, string>,
+//     K extends keyof T
+// > = { [V in T[K]]: DiscriminateUnion<T, K, V> };
+// export type SpChildType<T> = { T extends keyof typeof FilterEntityCollection<T>};
+
+// export type SpEntityOfType = keyof SpListEntities['shortname'];
+
+export type SpListEntities =
+    | ActionItem
+    | AssetTriggerAction
+    | Asset
+    | Assumption
+    | GenerationAsset
+    | Generation
+    | TeamAvailability
+    | TeamCategory
+    | Team
+    | TriggerAction
+    | Trigger;
 
 export interface SpUserGroup {
     groupId: string;

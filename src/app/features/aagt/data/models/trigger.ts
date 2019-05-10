@@ -7,13 +7,14 @@ import {
     SpEntityBase
 } from 'app/global-data';
 import { Validator } from 'breeze-client';
-import { ValidationFn } from 'breeze-client/src/validate';
 import * as _m from 'moment';
 import { Generation } from './generation';
 import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.Trigger })
 export class Trigger extends SpEntityBase {
+    readonly shortname = SpListName.Trigger;
+
     @BzProp('data', { spInternalName: 'Title' })
     milestone: string;
 

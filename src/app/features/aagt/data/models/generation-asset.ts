@@ -11,6 +11,8 @@ export type AssetStatus = 'FMC' | 'PMC' | 'NMC' | 'UNKNOWN';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.GenerationAsset })
 export class GenerationAsset extends SpEntityBase {
+    readonly shortname = SpListName.GenerationAsset;
+
     @BzProp('data', {})
     health: AssetStatus;
 

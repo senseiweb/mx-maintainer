@@ -1,47 +1,44 @@
 import { Injectable } from '@angular/core';
 import { MxmAppName, SpListName } from 'app/app-config.service';
-import {
-    BzProp,
-    BzEntity,
-    SpEntityBase
-} from 'app/global-data';
+import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { DataType, EntityAction, EntityState } from 'breeze-client';
 import { AagtDataModule } from '../aagt-data.module';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
 import { TriggerAction } from './trigger-action';
 
-type AtaAllowedActionStatus = | 'Planned'
+type AtaAllowedActionStatus =
+    | 'Planned'
     | 'Unscheduled'
     | 'In-progress'
     | 'Scheduled'
     | 'Rescheduled'
     | 'Delayed';
 
-type AtaAllowedOutcomes = 
-| 'PCW'
-| 'completed [on-time]'
-| 'completed [early]'
-| 'completed [late]'
-| 'blamed'
-| 'untouched';
+type AtaAllowedOutcomes =
+    | 'PCW'
+    | 'completed [on-time]'
+    | 'completed [early]'
+    | 'completed [late]'
+    | 'blamed'
+    | 'untouched';
 
 @BzEntity(MxmAppName.Aagt, { shortName: SpListName.AssetTriggerAction })
 export class AssetTriggerAction extends SpEntityBase {
+    readonly shortname = 'AssetTriggerAction';
 
     @BzProp('data', {})
     sequence: number;
 
     @BzProp('data', {
         dataCfg: {
-            isNullable: false,
+            isNullable: false
         },
         spInternalName: 'Title'
     })
     actionStatus: AtaAllowedActionStatus;
-    
-    @BzProp('data', {
-    })
+
+    @BzProp('data', {})
     outcome: AtaAllowedOutcomes;
 
     @BzProp('data', {})
@@ -65,7 +62,6 @@ export class AssetTriggerAction extends SpEntityBase {
     @BzProp('data', {})
     completedByTeamId?: number;
 
-
     completedByTeam?: Team;
 
     @BzProp('data', {})
@@ -77,15 +73,15 @@ export class AssetTriggerAction extends SpEntityBase {
     @BzProp('data', {})
     isConcurrentable: boolean;
 
-     @BzProp('nav', {
+    @BzProp('nav', {
         relativeEntity: SpListName.GenerationAsset,
-        navCfg: {isScalar: true}
+        navCfg: { isScalar: true }
     })
     genAsset: GenerationAsset;
 
     @BzProp('nav', {
         relativeEntity: SpListName.TriggerAction,
-        navCfg: {isScalar: true}
+        navCfg: { isScalar: true }
     })
     triggerAction: TriggerAction;
 }
