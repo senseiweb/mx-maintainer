@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { RawEntity } from '@ctypes/breeze-type-customization';
-import { SpListName } from 'app/app-config.service';
 import { BaseRepoService } from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { TeamCategory } from '../models/team-category';
 
 @Injectable({ providedIn: AagtDataModule })
-export class TeamCategoryRepoService extends BaseRepoService<TeamCategory> {
+export class TeamCategoryRepoService extends BaseRepoService<'TeamCategory'> {
     constructor(emService: AagtEmProviderService) {
-        super(SpListName.TeamCategory, emService);
+        super('TeamCategory', emService);
     }
 
     private getRandomColor(): string {

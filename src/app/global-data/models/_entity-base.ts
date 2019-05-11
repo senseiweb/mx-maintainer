@@ -2,21 +2,18 @@ import { Validators, ValidatorFn } from '@angular/forms';
 import {
     DiscriminateUnion,
     SpEntityOfType,
-    SpListEntities,
-    CompleteEntity
+    SpListEntities
 } from '@ctypes/app-config';
 import {
-    RawEntity,
     FilterEntityCollection,
-    FilterEntityPropCollection,
     Omit,
+    RawEntity,
     Unarray
 } from '@ctypes/breeze-type-customization';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
 import { BzProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
-import { DiffieHellman } from 'crypto';
 
 export interface IValidatorCtx<T> {
     value: T;
@@ -32,11 +29,14 @@ export type SpConstructor<T> = new (...args: any[]) => T;
 
 type SpEntityType = Omit<EntityType, 'custom'>;
 
-export type FilterEntityColNames<T extends SpEntityBase>
-    = Extract<FilterEntityCollection<T>, SpListEntities>['shortname'];
+export type FilterEntityColNames<T extends SpEntityBase> = Extract<
+    FilterEntityCollection<T>,
+    SpListEntities
+>['shortname'];
 
-
-export type EntityChildProps<T> = Partial<DiscriminateUnion<Extract<T, SpEntityOfType>>>;
+export type EntityChildProps<T> = Partial<
+    DiscriminateUnion<Extract<T, SpEntityOfType>>
+>;
 export type EntityChildType<T> = Extract<
     DiscriminateUnion<Extract<T, SpEntityOfType>>,
     SpEntityBase
@@ -114,7 +114,7 @@ export abstract class SpEntityBase implements Entity {
         const em = this.entityAspect.entityManager;
         // creates and attaches itself to the current em;
         const newEntity = em.createEntity(childType, defaultProps);
-        return (newEntity as any);
+        return newEntity as any;
     }
     // createChild = <T extends FilterEntityCollection<this>>(
     //     childType: SpListName

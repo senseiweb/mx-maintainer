@@ -1,3 +1,4 @@
+import { FormControl } from '@angular/forms';
 import {
     ActionItem,
     Asset,
@@ -13,7 +14,6 @@ import {
 } from 'app/features/aagt/data';
 import { SpEntityBase } from 'app/global-data';
 import { Omit, RawEntity } from './breeze-type-customization';
-import { FormControl } from '@angular/forms';
 
 export declare class IAppConfig {
     static aggtFeatureAppSite: string;
@@ -42,11 +42,14 @@ export type SpEntityOfType = SpListEntities['shortname'];
 
 export type CompleteEntity<T> = { [P in keyof T]-?: T[P] };
 
-export type SpFormProps<T extends SpEntityBase> = Extract<keyof Partial<RawEntity<Omit<T, 'shortname'>>>, string>;
+export type SpFormProps<T extends SpEntityBase> = Extract<
+    keyof Partial<RawEntity<Omit<T, 'shortname'>>>,
+    string
+>;
 
 export type SpFormModel<T extends SpEntityBase> = {
-    [index in SpFormProps<T>]?: FormControl;
-}
+    [index in SpFormProps<T>]?: FormControl
+};
 
 export type DiscriminateUnion<T extends SpEntityOfType> = Extract<
     SpListEntities,
