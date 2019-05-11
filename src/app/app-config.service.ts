@@ -1,19 +1,6 @@
 import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
 import { FuseNavigation } from '@fuse/types';
 import * as availNav from 'app/core/app-nav-structure';
-import {
-    ActionItem,
-    Asset,
-    AssetTriggerAction,
-    Assumption,
-    Generation,
-    GenerationAsset,
-    Team,
-    TeamAvailability,
-    TeamCategory,
-    Trigger,
-    TriggerAction
-} from './features/aagt/data';
 import { IBreezeScaffoldProto, ISPUserProfileProperties } from './global-data';
 
 export class SpConfig {
@@ -38,85 +25,6 @@ export class SpConfig {
         spGroups: []
     };
 }
-
-// type EnumString<T> = Extract<keyof typeof SpListName, string>;
-// export type SpListEntityType =
-//     | Record<SpListName.ActionItem, ActionItem>
-//     | Record<SpListName.AssetTriggerAction, AssetTriggerAction>
-//     | Record<SpListName.Asset, Asset>
-//     | Record<SpListName.Assumption, Assumption>
-//     | Record<SpListName.Generation, Generation>
-//     | Record<SpListName.GenerationAsset, GenerationAsset>
-//     | Record<SpListName.TeamAvailability, TeamAvailability>
-//     | Record<SpListName.Team, Team>
-//     | Record<SpListName.TeamCategory, TeamCategory>
-//     | Record<SpListName.TriggerAction, TriggerAction>
-//     | Record<SpListName.Trigger, Trigger>;
-
-// export enum SpListName {
-//     ActionItem = 'ActionItem',
-//     AssetTriggerAction = 'AssetTriggerAction',
-//     Asset = 'Asset',
-//     Assumption = 'Assumption',
-//     Generation = 'Generation',
-//     GenerationAsset = 'GenerationAsset',
-//     TeamAvailability = 'TeamAvailability',
-//     Team = 'Team',
-//     TeamCategory = 'TeamCategory',
-//     TriggerAction = 'TriggerAction',
-//     Trigger = 'Trigger'
-// }
-
-// interface IEtActionItem  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtAssetTriggerAction  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtAction {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtAssumption  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtGeneration  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtGenerationAsset  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtTeamAvailability  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtTeam  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtActionItem  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtActionItem  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtActionItem  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-// interface IEtActionItem  {
-//     entityName: SpListName.ActionItem;
-//     entityKind: ActionItem;
-// }
-
-// export type SpTypeMap = IEtActionItem |
 
 export const enum MxmAppName {
     Aagt
