@@ -1,3 +1,4 @@
+import { SpEntityBase } from 'app/global-data';
 import {
     DataProperty,
     DataType,
@@ -5,28 +6,30 @@ import {
     EntityType,
     NavigationProperty
 } from 'breeze-client';
-import { SpEntityBase } from 'app/global-data';
+import { SpListEntities } from './app-config';
 
 // tslint:disable: interface-name
-
 export type Instantiable<T> = new (...args: any[]) => T;
 
-export type FilterType<T, U> = { [key in keyof T]: T extends U ? key : never };
-
 // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html
-export type FilterEntityCollection<T> = Unarray<
-    T[FilterEntityPropCollection<T>]
->;
-
 export type Unarray<T> = T extends Array<infer U> ? U : T;
 
-export type FilterEntityPropCollection<T> = keyof Partial<
-    Pick<T, { [K in keyof T]: T[K] extends Entity[] ? K : never }[keyof T]>
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+// https://github.com/Microsoft/TypeScript/wiki/What's-new-in-TypeScript#keyof-and-lookup-types
+export type EntityChildrenKind<T extends SpEntityBase> = Extract<
+    { [P in keyof T]: T[P] extends Array<infer U> ? U : never }[keyof T],
+    SpEntityBase
 >;
 
-export type EntityChildren<T> = Extract<FilterEntityPropCollection<T>, string>;
+export type EntityChildShortName<T extends SpEntityBase> = EntityChildrenKind<
+    T
+>['shortname'];
 
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+export type SelectedEntityKind<T extends string> = Extract<
+    SpListEntities,
+    { shortname: T }
+>;
 
 export type ExtreBareEntityProps =
     | 'entityType'
@@ -49,8 +52,8 @@ export type navDef = Omit<NavigationProperty, 'foreignKeyNames'>;
 
 export interface SpDataDef extends dtDef {
     dataType: DataType;
-    //hasMany: boolean;
-    //spInternalName: string;
+    // hasMany: boolean;
+    // spInternalName: string;
 }
 export interface IDialogResult<T> {
     wasConceled?: boolean;

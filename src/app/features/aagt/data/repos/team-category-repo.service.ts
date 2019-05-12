@@ -6,7 +6,7 @@ import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { TeamCategory } from '../models/team-category';
 
 @Injectable({ providedIn: AagtDataModule })
-export class TeamCategoryRepoService extends BaseRepoService<'TeamCategory'> {
+export class TeamCategoryRepoService extends BaseRepoService<TeamCategory> {
     constructor(emService: AagtEmProviderService) {
         super('TeamCategory', emService);
     }

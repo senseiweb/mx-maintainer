@@ -5,7 +5,6 @@ import { CustomDataServiceUtils } from 'app/global-data/service-adapter/sp-datas
 import { Entity, EntityKey } from 'breeze-client';
 
 // tslint:disable: interface-name
-// tslint:disable: jsdoc-format
 // tslint:disable: ban-types
 declare module 'breeze-client/src/config' {
     interface BreezeConfig {
@@ -52,14 +51,11 @@ declare module 'breeze-client/src/entity-manager' {
         entitiesWithErrors: Entity[];
     }
 
-    // export interface HttpResponse {
-    //     saveContext: SaveContext | any;
-    // }
-    // not subclasses of Error
     /**
      * For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
      * @adapter (see [[IDataServiceAdapter]])
-     * @hidden @internal */
+     * @hidden @internal 
+     */
     export interface EntityErrorFromServer {
         entityTypeName: string;
         keyValues: any[];
@@ -69,11 +65,12 @@ declare module 'breeze-client/src/entity-manager' {
         propertyName: string;
     }
 
-    /** Shape of a save error returned from the server.
+    /**
+     * Shape of a save error returned from the server.
      * For use by breeze plugin authors only. The class is for use in building a [[IDataServiceAdapter]] implementation.
      * @adapter (see [[IDataServiceAdapter]])
      * @hidden @internal
-     * */
+     */
     export interface SaveErrorFromServer extends ServerError {
         entityErrors: EntityErrorFromServer[];
     }

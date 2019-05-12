@@ -6,7 +6,7 @@ import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { Generation, GenStatusEnum } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
-export class GenerationRepoService extends BaseRepoService<'Generation'> {
+export class GenerationRepoService extends BaseRepoService<Generation> {
     constructor(entityService: AagtEmProviderService) {
         super('Generation', entityService);
     }

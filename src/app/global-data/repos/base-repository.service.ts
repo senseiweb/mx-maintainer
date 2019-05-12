@@ -1,5 +1,7 @@
-import { DiscriminateUnion, SpListEntities } from '@ctypes/app-config';
-import { RawEntity } from '@ctypes/breeze-type-customization';
+import {
+    EntityChildrenKind,
+    RawEntity
+} from '@ctypes/breeze-type-customization';
 import {
     EntityManager,
     EntityQuery,
@@ -14,7 +16,8 @@ import { QueryResult } from 'breeze-client/src/entity-manager';
 import * as _m from 'moment';
 import { defer, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
-import { FilterEntityColNames } from '../models/_entity-base';
+import { SpEntityBase } from '../models';
+// import { FilterEntityColNames } from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
 
 interface IRepoPredicateCache {
@@ -22,24 +25,20 @@ interface IRepoPredicateCache {
 }
 
 type SpChoiceCache<T> = { [index in keyof T]: string[] };
-export abstract class BaseRepoService<
-    TEntityName extends SpListEntities['shortname']
-> {
+export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
     protected entityManager: EntityManager;
     protected entityType: EntityType;
     protected resourceName: string;
-    private cached: Observable<Array<DiscriminateUnion<TEntityName>>>;
+    private cached: Observable<TRepoFor[]>;
     private predicateCache: IRepoPredicateCache = {};
     private reload: Subject<any>;
     onSaveInProgressChange: BehaviorSubject<boolean>;
-    private spChoiceFieldCache: SpChoiceCache<
-        DiscriminateUnion<TEntityName>
-    > = {} as any;
+    private spChoiceFieldCache: SpChoiceCache<TRepoFor> = {} as any;
 
     protected defaultFetchStrategy: FetchStrategy;
 
     constructor(
-        entityTypeName: TEntityName,
+        entityTypeName: TRepoFor['shortname'],
         emProviderService: BaseEmProviderService
     ) {
         this.entityType = emProviderService.entityManager.metadataStore.getEntityType(
@@ -53,7 +52,7 @@ export abstract class BaseRepoService<
         this.defaultFetchStrategy = FetchStrategy.FromServer;
     }
 
-    get all(): Observable<Array<DiscriminateUnion<TEntityName>>> {
+    get all(): Observable<TRepoFor[]> {
         const freshTimeLimit = 6;
 
         const cachedTime = this.predicateCache['all'];
@@ -75,17 +74,8 @@ export abstract class BaseRepoService<
         this.cached = null;
     }
 
-    private allEntities(): Observable<Array<DiscriminateUnion<TEntityName>>> {
+    private allEntities(): Observable<TRepoFor[]> {
         return defer(() => this.executeQuery(this.baseQuery()));
-    }
-
-    protected createBase(
-        options?: RawEntity<DiscriminateUnion<TEntityName>>
-    ): DiscriminateUnion<TEntityName> {
-        return this.entityManager.createEntity(
-            this.entityType.shortName,
-            options
-        ) as any;
     }
 
     protected baseQuery(toBaseType = true): EntityQuery {
@@ -96,41 +86,42 @@ export abstract class BaseRepoService<
         return query.toType(this.entityType);
     }
 
+    protected createBase(options?: RawEntity<TRepoFor>): TRepoFor {
+        return this.entityManager.createEntity(
+            this.entityType.shortName,
+            options
+        ) as any;
+    }
+
     protected async executeQuery(
         query: EntityQuery,
         fetchStrat?: FetchStrategy
-    ): Promise<Array<DiscriminateUnion<TEntityName>>> {
+    ): Promise<TRepoFor[]> {
         const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
         const dataQueryResult = await this.entityManager.executeQuery(
             queryType
         );
         console.log(dataQueryResult);
-        return Promise.resolve(dataQueryResult.results) as Promise<
-            Array<DiscriminateUnion<TEntityName>>
-        >;
+        return Promise.resolve(dataQueryResult.results) as Promise<TRepoFor[]>;
     }
 
-    protected executeCacheQuery(
-        query: EntityQuery
-    ): Array<DiscriminateUnion<TEntityName>> {
+    protected executeCacheQuery(query: EntityQuery): TRepoFor[] {
         const localCache = this.entityManager.executeQueryLocally(
             query
-        ) as Array<DiscriminateUnion<TEntityName>>;
+        ) as TRepoFor[];
         console.log(localCache);
         return localCache;
     }
 
     makePredicate(
-        property: keyof DiscriminateUnion<TEntityName>,
+        property: keyof TRepoFor,
         condition: string | number,
         filter = FilterQueryOp.Equals
     ): Predicate {
         return Predicate.create(property as any, filter, condition);
     }
 
-    async spChoiceValues(
-        fieldName: keyof DiscriminateUnion<TEntityName>
-    ): Promise<string[]> {
+    async spChoiceValues(fieldName: keyof TRepoFor): Promise<string[]> {
         const cached = this.spChoiceFieldCache[fieldName];
         if (cached) {
             return cached;
@@ -171,19 +162,16 @@ export abstract class BaseRepoService<
         return choices;
     }
 
-    async withId(key: number): Promise<DiscriminateUnion<TEntityName>> {
+    async withId(key: number): Promise<TRepoFor> {
         const result = await this.entityManager.fetchEntityByKey(
             this.entityType.shortName,
             key,
             true
         );
-        return result.entity as DiscriminateUnion<TEntityName>;
+        return result.entity as TRepoFor;
     }
 
-    where(
-        queryName: string,
-        predicate: Predicate
-    ): Promise<Array<DiscriminateUnion<TEntityName>>> {
+    where(queryName: string, predicate: Predicate): Promise<TRepoFor[]> {
         const freshTimeLimit = 6;
         const cachedTime = this.predicateCache[queryName];
         const timeSinceLastServerQuery = cachedTime
@@ -196,79 +184,42 @@ export abstract class BaseRepoService<
         return this.executeQuery(query);
     }
 
-    async whereWithChildren<
-        U extends FilterEntityColNames<DiscriminateUnion<TEntityName>>
-    >(
-        queryName: string,
+    async whereWithChildren<TChild extends EntityChildrenKind<TRepoFor>>(
         predicate: Predicate,
-        childrenRepo: BaseRepoService<U>,
-        childLookupKey: keyof DiscriminateUnion<U>
-    ): Promise<{
-        parent: Array<DiscriminateUnion<TEntityName>>;
-        children: Array<DiscriminateUnion<U>>;
-    }> {
+        childRepoService: BaseRepoService<TChild>,
+        childLookupKey: keyof TChild
+    ): Promise<{ parent: TRepoFor[]; children: TChild[] }> {
+        const queryName = `qForChild-${Predicate.toString()}`;
+
         const parent = await this.where(queryName, predicate);
+
         const pIds = parent.map(et => et.id).sort();
 
         const childPreds: Predicate[] = [];
 
         pIds.forEach(id => {
-            childPreds.push(childrenRepo.makePredicate(childLookupKey, id));
+            childPreds.push(childRepoService.makePredicate(childLookupKey, id));
         });
 
         const cPredicate = Predicate.create(childPreds);
 
-        const cQueryName = `${queryName}-${pIds.toString()}-${childLookupKey}`;
+        const cQueryName = `${queryName}-${pIds.join('|')}-${childLookupKey}`;
 
-        const children = await childrenRepo.where(cQueryName, cPredicate);
+        const children = await childRepoService.where(cQueryName, cPredicate);
 
         return { parent, children };
     }
 
-    // async where(
-    //     queryName: string,
-    //     predicate: Predicate,
-    //     includeChildren?: EntityChildren<T>,
-    // ): Promise<T[]> {
-    //     const query = this.baseQuery();
-
-    //     if (includeChildren) {
-    //         query.expand(includeChildren);
-    //     }
-
-    //     query.where(predicate);
-    //     const lastQueryed = this.queryCache[queryName];
-    //     const now = moment();
-    //     try {
-    //         if (
-    //             refreshFromServer ||
-    //             (!lastQueryed || lastQueryed.diff(now, 'm') >= 5)
-    //         ) {
-    //             const data = await this.executeQuery(
-    //                 query,
-    //                 FetchStrategy.FromServer
-    //             );
-    //             this.queryCache[queryName] = moment();
-    //             return Promise.resolve(data);
-    //         }
-    //         return Promise.resolve(this.executeCacheQuery(query));
-    //     } catch (error) {
-    //         this.queryFailed(error);
-    //     }
-    // }
-
-    whereInCache(predicate?: Predicate): Array<DiscriminateUnion<TEntityName>> {
+    whereInCache(predicate?: Predicate): TRepoFor[] {
         if (!predicate) {
             return this.entityManager.getEntities(this.entityType, [
                 EntityState.Unchanged,
                 EntityState.Added,
                 EntityState.Modified
-            ]) as Array<DiscriminateUnion<TEntityName>>;
+            ]) as TRepoFor[];
         }
         const query = this.baseQuery().where(predicate);
-        return this.executeCacheQuery(query) as Array<
-            DiscriminateUnion<TEntityName>
-        >;
+        return this.executeCacheQuery(query) as TRepoFor[];
     }
 
     async saveEntityChanges(): Promise<SaveResult | undefined> {

@@ -1,14 +1,8 @@
 import { Validators, ValidatorFn } from '@angular/forms';
 import {
-    DiscriminateUnion,
-    SpEntityOfType,
-    SpListEntities
-} from '@ctypes/app-config';
-import {
-    FilterEntityCollection,
+    EntityChildShortName,
     Omit,
-    RawEntity,
-    Unarray
+    SelectedEntityKind
 } from '@ctypes/breeze-type-customization';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
 import * as _ from 'lodash';
@@ -29,22 +23,11 @@ export type SpConstructor<T> = new (...args: any[]) => T;
 
 type SpEntityType = Omit<EntityType, 'custom'>;
 
-export type FilterEntityColNames<T extends SpEntityBase> = Extract<
-    FilterEntityCollection<T>,
-    SpListEntities
->['shortname'];
-
-export type EntityChildProps<T> = Partial<
-    DiscriminateUnion<Extract<T, SpEntityOfType>>
->;
-export type EntityChildType<T> = Extract<
-    DiscriminateUnion<Extract<T, SpEntityOfType>>,
-    SpEntityBase
->;
 export interface IBzCustomFormValidators {
     propVal: Map<string, ValidatorFn[]>;
     entityVal: Array<(entity: SpEntityBase) => ValidatorFn>;
 }
+
 export interface ISpEntityType extends SpEntityType {
     custom?: {
         defaultSelect?: string;
@@ -107,27 +90,13 @@ export abstract class SpEntityBase implements Entity {
      * Convientant method for creating child entities for a
      * given parenet.
      */
-    createChild = <TChild extends FilterEntityColNames<this>>(
+    createChild = <TChild extends EntityChildShortName<this>>(
         childType: TChild,
-        defaultProps?: EntityChildProps<TChild>
-    ): EntityChildProps<TChild> => {
+        defaultProps?: Partial<SelectedEntityKind<TChild>>
+    ): SelectedEntityKind<TChild> => {
         const em = this.entityAspect.entityManager;
         // creates and attaches itself to the current em;
-        const newEntity = em.createEntity(childType, defaultProps);
-        return newEntity as any;
+        const newEntity = em.createEntity(childType as any, defaultProps);
+        return newEntity as SelectedEntityKind<TChild>;
     }
-    // createChild = <T extends FilterEntityCollection<this>>(
-    //     childType: SpListName
-    //     defaultProps?: bareEntity<T>
-    // ): T => {
-    //     const em = this.entityAspect.entityManager;
-    //     try {
-    //         // creates and attaches itself to the current em;
-    //         const newEntity = em.createEntity(entityType, defaultProps);
-    //         return (newEntity as any) as T;
-    //     } catch (e) {
-    //         const err = new Error(e);
-    //         console.log(err);
-    //     }
-    // }
 }

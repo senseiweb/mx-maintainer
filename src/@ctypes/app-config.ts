@@ -51,11 +51,6 @@ export type SpFormModel<T extends SpEntityBase> = {
     [index in SpFormProps<T>]?: FormControl
 };
 
-export type DiscriminateUnion<T extends SpEntityOfType> = Extract<
-    SpListEntities,
-    { shortname: T }
->;
-
 // export type MapDiscriminatedUnion<
 //     T extends Record<keyof typeof SpListName, string>,
 //     K extends keyof T

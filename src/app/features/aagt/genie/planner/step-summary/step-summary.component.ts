@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { fuseAnimations } from '@fuse/animations';
-import { SpListName } from 'app/app-config.service';
 import { MinutesExpand } from 'app/common';
 import { Trigger } from 'app/features/aagt/data';
 import { SpEntityBase } from 'app/global-data';
@@ -122,81 +121,75 @@ export class StepSummaryComponent implements OnInit, OnDestroy {
         let saveResult: SaveResult;
 
         const genChanges = this.changeSet.some(
-            cs => cs.shortName === SpListName.Generation
+            cs => cs.shortName === 'Generation'
         );
         if (genChanges) {
-            this.setSavingStatus(SpListName.Generation);
+            this.setSavingStatus('Generation');
             try {
-                saveResult = await this.uow.saveEntityChanges(
-                    SpListName.Generation
-                );
+                saveResult = await this.uow.saveEntityChanges('Generation');
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    SpListName.Generation
+                    'Generation'
                 );
             } catch (e) {}
         }
 
         const trigChanges = this.changeSet.some(
-            cs => cs.shortName === SpListName.Trigger
+            cs => cs.shortName === 'Trigger'
         );
         if (trigChanges) {
-            this.setSavingStatus(SpListName.Trigger);
+            this.setSavingStatus('Trigger');
             try {
-                saveResult = await this.uow.saveEntityChanges(
-                    SpListName.Trigger
-                );
+                saveResult = await this.uow.saveEntityChanges('Trigger');
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    SpListName.Trigger
+                    'Trigger'
                 );
             } catch (e) {}
         }
 
         const genAssetChanages = this.changeSet.some(
-            cs => cs.shortName === SpListName.GenerationAsset
+            cs => cs.shortName === 'GenerationAsset'
         );
         if (genAssetChanages) {
-            this.setSavingStatus(SpListName.GenerationAsset);
+            this.setSavingStatus('GenerationAsset');
             try {
                 saveResult = await this.uow.saveEntityChanges(
-                    SpListName.GenerationAsset
+                    'GenerationAsset'
                 );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    SpListName.GenerationAsset
+                    'GenerationAsset'
                 );
             } catch (e) {}
         }
 
         const trigActions = this.changeSet.some(
-            cs => cs.shortName === SpListName.TriggerAction
+            cs => cs.shortName === 'TriggerAction'
         );
         if (trigActions) {
-            this.setSavingStatus(SpListName.TriggerAction);
+            this.setSavingStatus('TriggerAction');
             try {
-                saveResult = await this.uow.saveEntityChanges(
-                    SpListName.TriggerAction
-                );
+                saveResult = await this.uow.saveEntityChanges('TriggerAction');
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    SpListName.TriggerAction
+                    'TriggerAction'
                 );
             } catch (e) {}
         }
 
         const assetTrigActs = this.changeSet.some(
-            cs => cs.shortName === SpListName.AssetTriggerAction
+            cs => cs.shortName === 'AssetTriggerAction'
         );
         if (assetTrigActs) {
-            this.setSavingStatus(SpListName.AssetTriggerAction);
+            this.setSavingStatus('AssetTriggerAction');
             try {
                 saveResult = await this.uow.saveEntityChanges(
-                    SpListName.AssetTriggerAction
+                    'AssetTriggerAction'
                 );
                 this.setSavedStatus(
                     saveResult.entitiesWithErrors as any,
-                    SpListName.AssetTriggerAction
+                    'AssetTriggerAction'
                 );
             } catch (e) {}
         }

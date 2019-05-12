@@ -1,10 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-    Entity,
-    FilterQueryOp,
-    Predicate,
-    SaveResult
-} from 'breeze-client';
+import { Entity, FilterQueryOp, Predicate, SaveResult } from 'breeze-client';
 
 import {
     AagtDataModule,
@@ -23,6 +18,7 @@ import {
     TeamCategory,
     TeamCategoryRepoService,
     Trigger,
+    TriggerAction,
     TriggerActionRepoService,
     TriggerRepoService
 } from '../../data';
@@ -34,7 +30,6 @@ import {
 } from '@angular/router';
 
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { AssetTriggerActionRepoService } from 'app/features/aagt/data/repos/asset-trigger-action-repo.service';
 import {} from 'app/features/aagt/data/repos/trigger-action-repo.service';
 import { BaseRepoService, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
@@ -48,9 +43,9 @@ import {
     Subject
 } from 'rxjs';
 
-import {
-    AagtEmProviderService
-} from '../../data/aagt-emprovider.service';
+import { SpListEntities } from '@ctypes/app-config';
+import { AagtEmProviderService } from '../../data/aagt-emprovider.service';
+import { AssetTriggerActionRepoService } from '../../data/repos/asset-trigger-action-repo.service';
 import { TeamRepoService } from '../../data/repos/team-repo.service';
 import { IStepperModel } from './planner.component';
 
@@ -182,16 +177,13 @@ export class PlannerUowService implements Resolve<any> {
         manHoursAvail: number;
     }) => this.teamAvailRepo.create(info)
 
-
     private fetchGenerationAssets(): Observable<any> {
         const genAssetPredicate = this.genAssetRepo.makePredicate(
             'generationId',
             this.currentGen.id
         );
-        const genAssetQueryName = `genAssetFor-${this.currentGen.id}`;
 
-        const query = this.genAssetRepo.whereWithChildren(
-            genAssetQueryName,
+        const query = this.genAssetRepo.whereWithChildren<AssetTriggerAction>(
             genAssetPredicate,
             this.assetTrigActionRepo,
             'genAssetId'
@@ -205,10 +197,7 @@ export class PlannerUowService implements Resolve<any> {
             'generationId',
             this.currentGen.id
         );
-        const genTrigQueryName = `triggersFor-${this.currentGen.id}`;
-
-        const query = this.genAssetRepo.whereWithChildren(
-            genTrigQueryName,
+        const query = this.triggerRepo.whereWithChildren<TriggerAction>(
             predicate,
             this.triggerActionRepo,
             'triggerId'
@@ -396,22 +385,24 @@ export class PlannerUowService implements Resolve<any> {
         return this.entityChangeSet;
     }
 
-    async saveEntityChanges(entityName: SpListName): Promise<SaveResult> {
+    async saveEntityChanges(
+        entityName: SpListEntities['shortname']
+    ): Promise<SaveResult> {
         let repo: BaseRepoService<any>;
         switch (entityName) {
-            case SpListName.Generation:
+            case 'Generation':
                 repo = this.genRepo;
                 break;
-            case SpListName.GenerationAsset:
+            case 'GenerationAsset':
                 repo = this.genAssetRepo;
                 break;
-            case SpListName.Trigger:
+            case 'Trigger':
                 repo = this.triggerRepo;
                 break;
-            case SpListName.TriggerAction:
+            case 'TriggerAction':
                 repo = this.triggerActionRepo;
                 break;
-            case SpListName.AssetTriggerAction:
+            case 'AssetTriggerAction':
                 repo = this.assetTrigActionRepo;
                 break;
         }

@@ -5,7 +5,7 @@ import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { TriggerAction } from '../models';
 
 @Injectable({ providedIn: AagtDataModule })
-export class TriggerActionRepoService extends BaseRepoService<'TriggerAction'> {
+export class TriggerActionRepoService extends BaseRepoService<TriggerAction> {
     constructor(emService: AagtEmProviderService) {
         super('TriggerAction', emService);
     }

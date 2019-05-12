@@ -4,7 +4,7 @@ export * from './generation-repo.service';
 export * from './action-item-repo.service';
 export * from './trigger-repo.service';
 export * from './action-item-repo.service';
-export * from './asset-trigger-action-repo.service';
 export * from './trigger-action-repo.service';
 export * from './team-category-repo.service';
 export * from './team-avail-repo.service';
+export * from './trigger-action-repo.service';
