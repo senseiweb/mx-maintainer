@@ -5,6 +5,7 @@ import { TriggerAction } from './trigger-action';
 
 @BzEntity(MxmAppName.Aagt, {})
 export class ActionItem extends SpEntityBase {
+
     readonly shortname = 'ActionItem';
 
     @BzProp('data', {

@@ -1,4 +1,4 @@
-import { MxmAppName } from 'app/app-config.service';
+import { MxmAppName} from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import { Asset } from './asset';
 import { AssetTriggerAction } from './asset-trigger-action';

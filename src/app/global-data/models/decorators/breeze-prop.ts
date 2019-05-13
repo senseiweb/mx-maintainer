@@ -72,9 +72,10 @@ export const bzEntityValidatorWrapper = (
             );
 
             const result = validator.validate(entity, validator.context);
-
+            /** The validator name that will be added the formgroup.errors.[NAME] */
+            const validatorName = `${entity.shortname}_${validator.name}`;
             return result
-                ? { [entity.entityType.shortName]: result.errorMessage }
+                ? { [validatorName]: result.errorMessage }
                 : null;
         };
     };

@@ -4,6 +4,7 @@ import { GenerationAsset } from './generation-asset';
 
 @BzEntity(MxmAppName.Aagt, {})
 export class Asset extends SpEntityBase {
+
     readonly shortname = 'Asset';
 
     @BzProp('data', {

@@ -22,6 +22,7 @@ type AtaAllowedOutcomes =
 
 @BzEntity(MxmAppName.Aagt, {})
 export class AssetTriggerAction extends SpEntityBase {
+
     readonly shortname = 'AssetTriggerAction';
 
     @BzProp('data', {})
