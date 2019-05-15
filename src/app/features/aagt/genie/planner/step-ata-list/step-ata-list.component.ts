@@ -1,18 +1,22 @@
 import {
     Component,
-    Input,
     OnDestroy,
     OnInit,
+    TemplateRef,
+    ViewChild,
     ViewEncapsulation
 } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
-import { ActionItem, Trigger } from 'app/features/aagt/data';
+import { ActionItem, Trigger, AssetTriggerAction, GenerationAsset, TriggerAction } from 'app/features/aagt/data';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
+import { AssetTriggerActionDataSource } from './asset-trig-action.datasource';
+import { FuseConfirmDialogModule } from '@fuse/components';
+import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
     selector: 'genie-plan-step-ata-list',
@@ -23,11 +27,35 @@ import { PlannerUowService } from '../planner-uow.service';
     providers: [MinutesExpand]
 })
 export class StepAtaListComponent implements OnInit, OnDestroy {
+
+    @ViewChild('dialogContent')
+    dialogContent: TemplateRef<any>;
+
     currentTrigger: Trigger;
 
     triggers: Trigger[] = [];
     searchInput: FormControl;
+    assetTriggerActions: AssetTriggerAction[];
+    user: any;
+    dataSource: AssetTriggerActionDataSource;
+    displayedColumns = [
+        'checkbox',
+        'sequence',
+        'alias',
+        'action',
+        'trigger',
+        'status',
+        'outcome'
+    ];
+
+    selectedContacts: any[];
+    checkboxes: {};
+    dialogRef: any;
+    confirmDialogRef: MatDialogRef<FuseConfirmDialogComponent>;
+
     private unsubscribeAll: Subject<any>;
+    private genAssets: GenerationAsset[];
+    private triggerActions: TriggerAction[];
 
     constructor(
         private planUow: PlannerUowService,
@@ -40,6 +68,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.dataSource = new AssetTriggerActionDataSource(this.planUow);
         this.searchInput.valueChanges
             .pipe(
                 takeUntil(this.unsubscribeAll),

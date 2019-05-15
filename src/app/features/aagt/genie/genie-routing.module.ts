@@ -8,8 +8,6 @@ import { AimUowService } from './action-item-manager/aim-uow.service';
 import { GenListComponent } from './gen-list/gen-list.component';
 import { GenieBaseComponent } from './genie-base.component';
 import {
-    AssetTriggerActionListComponent,
-    AssetTriggerSidebarComponent,
     GenerationDetailDialogComponent,
     PlannerComponent,
     PlannerUowService,
@@ -38,8 +36,6 @@ export const routedComponents = [
     StepTrigActionComponent,
     StepAtaListComponent,
     StepSummaryComponent,
-    AssetTriggerSidebarComponent,
-    AssetTriggerActionListComponent,
     TriggerDetailDialogComponent,
     TeamDetailDialogComponent,
     StepTeamManagerComponent,

@@ -1,7 +1,5 @@
 export * from './step-gen-asset/step-gen-asset.component';
 export * from './step-trig-action/step-trig-action.component';
-export * from './step-ata-list/asset-trigger-sidebar/asset-trigger-sidebar.component';
-export * from './step-ata-list/asset-trigger-action-list/asset-trigger-action-list.component';
 export * from './step-ata-list/step-ata-list.component';
 export * from './step-summary/step-summary.component';
 export * from './step-gen-asset/gen-detail/gen-detail.dialog';

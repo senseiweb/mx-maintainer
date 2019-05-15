@@ -73,9 +73,60 @@
         >
             <!-- SIDEBAR CONTENT -->
             <div class="content" fusePerfectScrollbar>
-                <asset-trigger-sidebar
-                    [@animate]="{ value: '*' }"
-                ></asset-trigger-sidebar>
+                    <div class="sidebar-content"  [@animate]="{ value: '*' }"
+                    >
+                            <div class="card">
+                        
+                                <!-- SIDEBAR HEADER -->
+                                <!-- <div class="header p-24" fxLayout="row" fxLayoutAlign="start center">
+                                </div> -->
+                        
+                                    <div class="content py-16" fusePerfectScrollbar>
+                                            <div class="nav material2">
+                        
+                                                    <div class="nav-item" aria-label="inbox">
+                                                        <a class="nav-link" matRipple (click)="filterActionsByTrigger()"
+                                                            [ngClass]="{'active accent':triggerFilterBy ==='all'}">
+                                                            <span class="title">All Triggers</span>
+                                                        </a>
+                                                    </div>
+                                
+                                                    <div *ngFor="let trigger of triggerNames">
+                                                        <div class="nav-item" aria-label="generation triggers" (click)="filterActionsByTrigger(trigger)">
+                                                            <a class="nav-link" matRipple [ngClass]="{'active accent':triggerFilterBy === trigger}">
+                                                                <div class="title">{{trigger}}</div>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                    </div>
+                                <!-- / SIDEBAR HEADER -->
+                        <hr/>
+                                <!-- SIDEBAR CONTENT -->
+                                <div class="content py-16" fusePerfectScrollbar>
+                                    <div class="nav material2">
+                                        <div class="nav-item" aria-label="inbox">
+                                            <a class="nav-link" matRipple (click)="filterActionsByAsset()"
+                                               [ngClass]="{'active accent':assetFilterBy ==='all'}">
+                                                <span class="title">All Assets</span>
+                                            </a>
+                                        </div>
+                        
+                                        <div *ngFor="let alias of assetNames">
+                                            <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(alias)">
+                                                <a class="nav-link" matRipple [ngClass]="{'active accent':assetFilterBy === alias}">
+                                                    <div class="title">{{alias}}</div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                </div>
+                        
+                            </div>
+                        
+                        </div>
+                        <!-- / SIDEBAR CONTENT -->
             </div>
             <!-- / SIDEBAR CONTENT -->
         </fuse-sidebar>
@@ -85,7 +136,87 @@
         <div class="center p-24 pb-56 pr-sm-92" fusePerfectScrollbar>
             <!-- CONTENT -->
             <div class="content">
-                <asset-trigger-action-list></asset-trigger-action-list>
+                    <mat-table #table [dataSource]="dataSource" [@animateStagger]="{ value: '50' }">
+                            <!-- Checkbox Column -->
+                            <ng-container matColumnDef="checkbox">
+                                <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <mat-checkbox
+                                        [(ngModel)]="checkboxes[ata.id]"
+                                        (ngModelChange)="onSelectedChange(ata.id)"
+                                        (click)="$event.stopPropagation()"
+                                    >
+                                    </mat-checkbox>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Sequence Column -->
+                            <ng-container matColumnDef="sequence">
+                                <mat-header-cell *matHeaderCellDef>Sequence</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="font-weight-600">{{ ata?.sequence }}</p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Alias Column -->
+                            <ng-container matColumnDef="alias">
+                                <mat-header-cell *matHeaderCellDef>Alias</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="text-truncate font-weight-600">
+                                        {{ ata?.genAsset?.asset?.alias }}
+                                    </p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="text-truncate font-weight-600">
+                                        {{ ata?.triggerAction?.actionItem?.action }}
+                                    </p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Trigger Column -->
+                            <ng-container matColumnDef="trigger">
+                                <mat-header-cell *matHeaderCellDef>Trigger</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="text-truncate font-weight-600">
+                                        {{ ata?.triggerAction?.trigger?.milestone }}
+                                    </p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="status">
+                                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="text-truncate font-weight-600">
+                                        {{ ata?.actionStatus }}
+                                    </p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <!-- Outcome Column -->
+                            <ng-container matColumnDef="outcome">
+                                <mat-header-cell *matHeaderCellDef>Outcome</mat-header-cell>
+                                <mat-cell *matCellDef="let ata">
+                                    <p class="text-truncate font-weight-600">
+                                        {{ ata?.outcome }}
+                                    </p>
+                                </mat-cell>
+                            </ng-container>
+                        
+                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                            <mat-row
+                                *matRowDef="let ata; columns: displayedColumns"
+                                class="contact"
+                                matRipple
+                                [@animate]="{ value: '*', params: { y: '100%' } }"
+                            >
+                            </mat-row>
+                        </mat-table>
             </div>
             <!-- / CONTENT -->
         </div>
