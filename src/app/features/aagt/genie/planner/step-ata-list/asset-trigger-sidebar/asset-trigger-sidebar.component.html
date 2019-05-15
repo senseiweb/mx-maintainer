@@ -1,54 +1,78 @@
 <div class="sidebar-content">
-
     <div class="card">
-
         <!-- SIDEBAR HEADER -->
         <!-- <div class="header p-24" fxLayout="row" fxLayoutAlign="start center">
         </div> -->
 
-            <div class="content py-16" fusePerfectScrollbar>
-                    <div class="nav material2">
+        <div class="content py-16" fusePerfectScrollbar>
+            <div class="nav material2">
+                <div class="nav-item" aria-label="inbox">
+                    <a
+                        class="nav-link"
+                        matRipple
+                        (click)="filterActionsByTrigger()"
+                        [ngClass]="{
+                            'active accent': triggerFilterBy === 'all'
+                        }"
+                    >
+                        <span class="title">All Triggers</span>
+                    </a>
+                </div>
 
-                            <div class="nav-item" aria-label="inbox">
-                                <a class="nav-link" matRipple (click)="filterActionsByTrigger()"
-                                    [ngClass]="{'active accent':triggerFilterBy ==='all'}">
-                                    <span class="title">All Triggers</span>
-                                </a>
-                            </div>
-        
-                            <div *ngFor="let trigger of triggerNames">
-                                <div class="nav-item" aria-label="generation triggers" (click)="filterActionsByTrigger(trigger)">
-                                    <a class="nav-link" matRipple [ngClass]="{'active accent':triggerFilterBy === trigger}">
-                                        <div class="title">{{trigger}}</div>
-                                    </a>
-                                </div>
-                            </div>
+                <div *ngFor="let trigger of triggerNames">
+                    <div
+                        class="nav-item"
+                        aria-label="generation triggers"
+                        (click)="filterActionsByTrigger(trigger)"
+                    >
+                        <a
+                            class="nav-link"
+                            matRipple
+                            [ngClass]="{
+                                'active accent': triggerFilterBy === trigger
+                            }"
+                        >
+                            <div class="title">{{ trigger }}</div>
+                        </a>
                     </div>
+                </div>
             </div>
+        </div>
         <!-- / SIDEBAR HEADER -->
-<hr/>
+        <hr />
         <!-- SIDEBAR CONTENT -->
         <div class="content py-16" fusePerfectScrollbar>
             <div class="nav material2">
                 <div class="nav-item" aria-label="inbox">
-                    <a class="nav-link" matRipple (click)="filterActionsByAsset()"
-                       [ngClass]="{'active accent':assetFilterBy ==='all'}">
+                    <a
+                        class="nav-link"
+                        matRipple
+                        (click)="filterActionsByAsset()"
+                        [ngClass]="{ 'active accent': assetFilterBy === 'all' }"
+                    >
                         <span class="title">All Assets</span>
                     </a>
                 </div>
 
                 <div *ngFor="let alias of assetNames">
-                    <div class="nav-item" aria-label="generation asset" (click)="filterActionsByAsset(alias)">
-                        <a class="nav-link" matRipple [ngClass]="{'active accent':assetFilterBy === alias}">
-                            <div class="title">{{alias}}</div>
+                    <div
+                        class="nav-item"
+                        aria-label="generation asset"
+                        (click)="filterActionsByAsset(alias)"
+                    >
+                        <a
+                            class="nav-link"
+                            matRipple
+                            [ngClass]="{
+                                'active accent': assetFilterBy === alias
+                            }"
+                        >
+                            <div class="title">{{ alias }}</div>
                         </a>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
-
 </div>
 <!-- / SIDEBAR CONTENT -->

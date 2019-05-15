@@ -1,16 +1,22 @@
 import { MxmAppName } from 'app/app-config.service';
-import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
+import {
+    BzEntity,
+    BzEntityInitializer,
+    BzProp,
+    SpEntityBase
+} from 'app/global-data';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
 import { TriggerAction } from './trigger-action';
 
 type AtaAllowedActionStatus =
-    | 'Planned'
-    | 'Unscheduled'
-    | 'In-progress'
-    | 'Scheduled'
-    | 'Rescheduled'
-    | 'Delayed';
+    | 'unplanned'
+    | 'planned'
+    | 'unscheduled'
+    | 'in-progress'
+    | 'scheduled'
+    | 'rescheduled'
+    | 'delayed';
 
 type AtaAllowedOutcomes =
     | 'PCW'
@@ -23,7 +29,7 @@ type AtaAllowedOutcomes =
 @BzEntity(MxmAppName.Aagt, {})
 export class AssetTriggerAction extends SpEntityBase {
     readonly shortname = 'AssetTriggerAction';
-    
+
     /**
      * When used, indicates that child entity will be deleted
      * during the next save operation. Prefer to use this method
@@ -94,4 +100,10 @@ export class AssetTriggerAction extends SpEntityBase {
         navCfg: { isScalar: true }
     })
     triggerAction: TriggerAction;
+
+    @BzEntityInitializer
+    private ataInitializer(entity: this) {
+        entity.outcome = entity.outcome || 'untouched';
+        entity.actionStatus = entity.actionStatus || 'unplanned';
+    }
 }

@@ -89,7 +89,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         const triggerActions = this.currentTrigger.triggerActions;
         const genAssets = this.planUow.currentGen.generationAssets;
 
-        /** Flatten all AssetTriggerAction to undelete if found */
+        /** Flatten all AssetTriggerAction to un-softDelete if found */
         const assetTrigActions = _.flatMap(
             triggerActions,
             x => x.assetTriggerActions
@@ -147,7 +147,10 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     .forEach(genAsset => {
                         genAsset.createChild('AssetTriggerAction', {
                             genAsset,
-                            triggerAction
+                            triggerAction,
+                            sequence: triggerAction.sequence,
+                            actionStatus: 'unplanned',
+                            outcome: 'untouched'
                         });
                     });
             }

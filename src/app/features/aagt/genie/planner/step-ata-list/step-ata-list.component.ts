@@ -9,14 +9,27 @@ import {
 import { FormBuilder, FormControl } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { fuseAnimations } from '@fuse/animations';
+import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
 import { MinutesExpand } from 'app/common';
-import { ActionItem, Trigger, AssetTriggerAction, GenerationAsset, TriggerAction } from 'app/features/aagt/data';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import {
+    ActionItem,
+    Asset,
+    AssetTriggerAction,
+    GenerationAsset,
+    Trigger,
+    TriggerAction
+} from 'app/features/aagt/data';
+import { EntityAction } from 'breeze-client';
+import * as _ from 'lodash';
+import { BehaviorSubject, Subject } from 'rxjs';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    takeUntil
+} from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
 import { AssetTriggerActionDataSource } from './asset-trig-action.datasource';
-import { FuseConfirmDialogModule } from '@fuse/components';
-import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
     selector: 'genie-plan-step-ata-list',
@@ -27,6 +40,7 @@ import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/conf
     providers: [MinutesExpand]
 })
 export class StepAtaListComponent implements OnInit, OnDestroy {
+    assetFilterChange = new BehaviorSubject('');
 
     @ViewChild('dialogContent')
     dialogContent: TemplateRef<any>;
@@ -34,7 +48,9 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
 
     triggers: Trigger[] = [];
+    triggerFilterChange = new BehaviorSubject('');
     searchInput: FormControl;
+    assets: Asset[];
     assetTriggerActions: AssetTriggerAction[];
     user: any;
     dataSource: AssetTriggerActionDataSource;
@@ -49,7 +65,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     ];
 
     selectedContacts: any[];
-    checkboxes: {};
+    checkboxes = {};
     dialogRef: any;
     confirmDialogRef: MatDialogRef<FuseConfirmDialogComponent>;
 
@@ -68,7 +84,11 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.dataSource = new AssetTriggerActionDataSource(this.planUow);
+        this.dataSource = new AssetTriggerActionDataSource(
+            this.planUow,
+            this.triggerFilterChange,
+            this.assetFilterChange
+        );
         this.searchInput.valueChanges
             .pipe(
                 takeUntil(this.unsubscribeAll),
@@ -78,16 +98,43 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
             .subscribe(searchText => {
                 // this._contactsService.onSearchTextChanged.next(searchText);
             });
-        this.planUow.onStepperChange.subscribe(stepEvent => {
-            if (stepEvent.selectedIndex === 3) {
-                this.planUow.reviewChanges();
-            }
-        });
+        // this.planUow.onStepperChange.subscribe(stepEvent => {
+        //     if (stepEvent.selectedIndex === 3) {
+        //         this.planUow.reviewChanges();
+        //     }
+        // });
+
+        this.planUow.aagtEmService.onEntityManagerChange
+            .pipe(
+                filter(
+                    ec =>
+                        ec.entityAction === EntityAction.EntityStateChange &&
+                        (ec.entity.shortname === 'TriggerAction' ||
+                            ec.entity.shortname === 'GenerationAsset')
+                )
+            )
+            .subscribe(notUsed => this.setFilterLookups());
     }
 
     ngOnDestroy(): void {
         this.unsubscribeAll.next();
         this.unsubscribeAll.complete();
+    }
+
+    get assetFilter(): string {
+        return this.assetFilterChange.value;
+    }
+    set assetFilter(assetFilterText: string) {
+        this.assetFilterChange.next(assetFilterText);
+    }
+
+    setFilterLookups(): void {
+        this.triggers = this.planUow.currentGen.triggers;
+        const assets = _.flatMap(
+            this.planUow.currentGen.generationAssets,
+            x => x.asset
+        );
+        this.assets = _.uniqBy(assets, 'id');
     }
 
     private sortActionItem(data: ActionItem[], key): ActionItem[] {
@@ -100,5 +147,12 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
 
             return valueA < valueB ? -1 : 1;
         });
+    }
+
+    get triggerFilter(): string {
+        return this.triggerFilterChange.value;
+    }
+    set triggerFilter(triggerFilterText: string) {
+        this.triggerFilterChange.next(triggerFilterText);
     }
 }

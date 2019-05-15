@@ -1,33 +1,14 @@
 import { DataSource } from '@angular/cdk/table';
 import { AssetTriggerAction } from 'app/features/aagt/data';
-import { BehaviorSubject, Observable, merge } from 'rxjs';
-import * as _ from 'lodash';
-import { filter, distinctUntilKeyChanged, tap, map } from 'rxjs/operators';
-import { PlannerUowService } from '../planner-uow.service';
 import { EntityAction } from 'breeze-client';
+import * as _ from 'lodash';
+import { merge, BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilKeyChanged, filter, map, tap } from 'rxjs/operators';
+import { PlannerUowService } from '../planner-uow.service';
 
-export class AssetTriggerActionDataSource extends DataSource<AssetTriggerAction> {
-    assetFilterChange = new BehaviorSubject('');
-    get assetFilter(): string {
-        return this.assetFilterChange.value;
-    }
-    set assetFilter(assetFilterText: string) {
-        this.assetFilterChange.next(assetFilterText);
-    }
-
-    triggerFilterChange = new BehaviorSubject('');
-
-    get triggerFilter(): string {
-        return this.triggerFilterChange.value;
-    }
-    set triggerFilter(triggerFilterText: string) {
-        this.assetFilterChange.next(triggerFilterText);
-    }
-
-    private assetTrigActs = _.flatMap(this.planUow.currentGen.triggers, x =>
-        _.flatMap(x.triggerActions, m => m.assetTriggerActions)
-    );
-
+export class AssetTriggerActionDataSource extends DataSource<
+    AssetTriggerAction
+> {
     private datasource = this.planUow.aagtEmService.onEntityManagerChange.pipe(
         filter(x => x.entity.shortname === 'AssetTriggerAction'),
         filter(
@@ -42,8 +23,18 @@ export class AssetTriggerActionDataSource extends DataSource<AssetTriggerAction>
         )
     );
 
-    constructor(private planUow: PlannerUowService) {
+    constructor(
+        private planUow: PlannerUowService,
+        private triggerFilterChange: BehaviorSubject<string>,
+        private assetFilterChange: BehaviorSubject<string>
+    ) {
         super();
+    }
+
+    private assetTrigActs() {
+        return _.flatMap(this.planUow.currentGen.triggers, x =>
+            _.flatMap(x.triggerActions, m => m.assetTriggerActions)
+        );
     }
 
     connect(): Observable<AssetTriggerAction[]> {
@@ -54,25 +45,38 @@ export class AssetTriggerActionDataSource extends DataSource<AssetTriggerAction>
         ];
 
         return merge(...displayDataChanges).pipe(
-            tap(ec => console.log(ec)),
-            map(noChoice =>
-                this.assetTrigActs.slice().filter(ata => {
-                    let matchedRecord = false;
-                    if (!this.assetFilter && !this.triggerFilter) {
-                        return true;
-                    }
-                    if (this.assetFilter) {
-                        matchedRecord =
-                            ata.genAsset.asset.alias === this.assetFilter;
-                    }
-                    if (!matchedRecord || this.triggerFilter) {
-                        matchedRecord =
-                            ata.triggerAction.trigger.milestone ===
-                            this.triggerFilter;
-                    }
-                    return matchedRecord;
-                })
-            )
+            tap(ec => {
+                console.log('Ata List');
+                console.log(ec);
+            }),
+            map(noChoice => {
+                const assetFilter = this.assetFilterChange.value;
+                const triggerFilter = this.triggerFilterChange.value;
+                console.table(this.assetTrigActs);
+                return this.assetTrigActs()
+                    .slice()
+                    .filter(ata => {
+                        let matchedRecord = false;
+                        if (
+                            !this.assetFilterChange.value &&
+                            !this.triggerFilterChange.value
+                        ) {
+                            return true;
+                        }
+                        if (this.assetFilterChange.value) {
+                            matchedRecord =
+                                assetFilter === 'all' ||
+                                ata.genAsset.asset.alias === assetFilter;
+                        }
+                        if (!matchedRecord || triggerFilter) {
+                            matchedRecord =
+                                triggerFilter === 'all' ||
+                                ata.triggerAction.trigger.milestone ===
+                                    triggerFilter;
+                        }
+                        return matchedRecord;
+                    });
+            })
         );
     }
 

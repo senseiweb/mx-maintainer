@@ -84,7 +84,7 @@ class NewTypeForStore {
     public newBzEntityType: EntityType | ComplexType;
     private entityProps: IBzEntityProps = {} as any;
     private etConstructor: Function;
-    private initializer: (entity: any) => void;
+    private initializer: { [index: string]: (entity: any) => void } = {};
 
     constructor(
         private target: IBreezeScaffoldProto,
@@ -355,7 +355,7 @@ class NewTypeForStore {
         this.store.registerEntityTypeCtor(
             this.entityProps.shortName,
             this.etConstructor,
-            this.initializer
+            this.initializer.value
         );
         return this;
     }

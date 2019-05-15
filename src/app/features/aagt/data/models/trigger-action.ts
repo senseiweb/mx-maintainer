@@ -48,11 +48,15 @@ export class TriggerAction extends SpEntityBase {
     get sequence(): number {
         return this._sequence;
     }
-    set sequence(id: number) {
-        this._sequence = id;
-        this.title = `${this._actionItemId}/${this._triggerId}/${
-            this._sequence
-        }`;
+    set sequence(newSequence: number) {
+        this.assetTriggerActions.forEach(ata => {
+            if (!ata.sequence || ata.sequence === this._sequence) {
+                ata.sequence = newSequence;
+            }
+        });
+
+        this._sequence = newSequence;
+        this.title = `${this._actionItemId}/${this._triggerId}/${newSequence}`;
     }
 
     @BzProp('data', {})
@@ -61,9 +65,7 @@ export class TriggerAction extends SpEntityBase {
     }
     set actionItemId(id: number) {
         this._actionItemId = id;
-        this.title = `${this.actionItemId}/${this._triggerId}/${
-            this._sequence
-        }`;
+        this.title = `${id}/${this._triggerId}/${this._sequence}`;
     }
 
     @BzProp('data', {})
@@ -72,9 +74,7 @@ export class TriggerAction extends SpEntityBase {
     }
     set triggerId(id: number) {
         this._triggerId = id;
-        this.title = `${this._actionItemId}/${this._triggerId}/${
-            this._sequence
-        }`;
+        this.title = `${this._actionItemId}/${id}/${this._sequence}`;
     }
 
     @BzProp('nav', {

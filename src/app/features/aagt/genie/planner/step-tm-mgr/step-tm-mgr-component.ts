@@ -15,6 +15,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material';
 import { IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { Team, TeamAvailability, TeamCategory } from 'app/features/aagt/data';
+import { EntityAction } from 'breeze-client';
 import * as _ from 'lodash';
 import { PlannerUowService } from '../planner-uow.service';
 import { PlannerSteps } from '../planner.component';
@@ -60,7 +61,11 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         this.planUow.aagtEmService.onEntityManagerChange
             .pipe(
                 tap(ec => console.log(ec)),
-                filter(ec => ec.entity.shortname === 'TriggerAction')
+                filter(
+                    ec =>
+                        ec.entity.shortname === 'TriggerAction' &&
+                        ec.entityAction === EntityAction.EntityStateChange
+                )
             )
             .subscribe(unused => {
                 this.getTeamCategories();
