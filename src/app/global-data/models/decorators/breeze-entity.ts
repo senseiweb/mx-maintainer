@@ -1,4 +1,4 @@
-import { SpListEntities, SpEntityOfType } from '@ctypes/app-config';
+import { SpListEntities } from '@ctypes/app-config';
 import { SpEntityDef } from '@ctypes/breeze-type-customization';
 import { MxmAppName, MxmAssignedModels } from 'app/app-config.service';
 import { CustomNameConventionService } from 'app/global-data/service-adapter/custom-namingConventionDict';
@@ -369,8 +369,9 @@ export const BzEntity = <
 ) => {
     return (constructor: TClass): void => {
         // TODO: check constructor name after uglify
-        entityProps.shortName = (constructor as any).ENTITY_SHORTNAME = entityProps.shortName || constructor.name;
-        console.log(constructor.name);
+        entityProps.shortName = (constructor as any).ENTITY_SHORTNAME =
+            entityProps.shortName || constructor.name;
+
         class SpBreezeEntity implements ISpBreezeEntity {
             entityProps = entityProps;
 

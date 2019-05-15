@@ -66,6 +66,7 @@ export type SpListEntities =
     | ActionItem
     | AssetTriggerAction
     | Asset
+    | Assumption
     | GenerationAsset
     | Generation
     | TeamAvailability

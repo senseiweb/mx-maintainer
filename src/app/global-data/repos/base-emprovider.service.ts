@@ -5,21 +5,17 @@ import {
     MxmAppName,
     MxmAssignedModels
 } from 'app/app-config.service';
-import {
-    DataService,
-    EntityAction,
-    EntityManager
-} from 'breeze-client';
+import { DataService, EntityAction, EntityManager } from 'breeze-client';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { CustomNameConventionService } from '../service-adapter/custom-namingConventionDict';
-import { CoreEmProviderService } from './core-em-provider.service';
 import { SpEntityBase } from '../models';
+import { CustomNameConventionService } from '../service-adapter/custom-namingConventionDict';
+import { GlobalEntityMgrProviderService } from './core-em-provider.service';
 
 export interface IEntityChangedEvent {
     entityAction: EntityAction;
     entity: SpEntityBase;
-    args: object;
+    args: any;
 }
 export class BaseEmProviderService {
     private featureAppSiteName: string;
@@ -31,7 +27,7 @@ export class BaseEmProviderService {
     constructor(
         private http: HttpClient,
         private nameConv: CustomNameConventionService,
-        private emProviderService: CoreEmProviderService,
+        private emProviderService: GlobalEntityMgrProviderService,
         appSiteName: string,
         private featureNameSpace: string,
         private appName: MxmAppName
@@ -61,15 +57,16 @@ export class BaseEmProviderService {
         const appModels = MxmAssignedModels.get(this.appName);
 
         appModels.forEach(bzScaffold =>
-            (bzScaffold as any).prototype.spBzEntity.createTypeForStore(this.entityManager.metadataStore,
+            (bzScaffold as any).prototype.spBzEntity.createTypeForStore(
+                this.entityManager.metadataStore,
                 this.nameConv,
-                this.featureNameSpace)
+                this.featureNameSpace
+            )
         );
-      
+
         this.entityManager.entityChanged.subscribe(changedArgs =>
             this.onEntityManagerChange.next(changedArgs)
         );
-
 
         this.getRequestDigest();
     }

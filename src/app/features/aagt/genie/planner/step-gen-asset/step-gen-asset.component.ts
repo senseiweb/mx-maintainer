@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { fuseAnimations } from '@fuse/animations';
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { IDialogResult, RawEntity } from '@ctypes/breeze-type-customization';
+import { fuseAnimations } from '@fuse/animations';
 import { Asset, Generation, GenerationAsset } from 'app/features/aagt/data';
+import * as _ from 'lodash';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
@@ -55,21 +56,74 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
+    /** Called by the picker when items are added to selected list */
     addAsset($event: { items: Asset[] }): void {
-        const alreadyAssigned = this.currentGen.generationAssets;
+        const exisitingGenAssets = this.currentGen.generationAssets;
+
+        /** Flatten all trigAction and AssetTriggerAction to undelte if found */
+        const triggerActions = _.flatMap(
+            this.currentGen.triggers,
+            x => x.triggerActions
+        );
+        const assetTrigActions = _.flatMap(
+            triggerActions,
+            x => x.assetTriggerActions
+        );
+
+        /**
+         * Loap over all the asset items that were added to the selected list
+         * for this generation.
+         */
         $event.items.forEach(asset => {
-            const alreadyExist = alreadyAssigned.find(
+            /** Check if this generation asset was already created */
+            const existingGenAsset = exisitingGenAssets.find(
                 aa => aa.assetId === asset.id
             );
 
-            if (alreadyExist) {
-                alreadyExist.isSoftDeleted = false;
+            /**
+             * If a matching GenerationAsset is found, then it must have been
+             * soft deleted, instead of recreating simply un-softDelete them.
+             * Then check if any grand children (Asset Trig Action) are eligible
+             * to unsoft delete it.
+             */
+            if (existingGenAsset) {
+                existingGenAsset.isSoftDeleted = false;
+
+                /**
+                 * Filter through all the Asset Trigger Actions and selected the
+                 * ones where the co-parenet (Trigger Action) has not been softDeleted
+                 * and is a child of this Generation Asset. If any exisit set their
+                 * soft deletion flag to false.
+                 */
+                assetTrigActions
+                    .filter(
+                        ata =>
+                            !ata.triggerAction.isSoftDeleted &&
+                            ata.genAssetId === existingGenAsset.id
+                    )
+                    .forEach(ata => (ata.isSoftDeleted = false));
             } else {
+                /**
+                 * Since an exisiting GenerationAsset doesn't exists,
+                 * create a new one, then loop through the exisiting but not
+                 * soft-deleted co-parent (TriggerAction) and create children
+                 */
                 const defaultProps: RawEntity<GenerationAsset> = {
                     generationId: this.currentGen.id,
                     assetId: asset.id
                 };
-                this.currentGen.createChild('GenerationAsset', defaultProps);
+                const genAsset = this.currentGen.createChild(
+                    'GenerationAsset',
+                    defaultProps
+                );
+                triggerActions
+                    .filter(ta => !ta.isSoftDeleted)
+                    .forEach(triggerAction =>
+                        triggerAction.createChild('AssetTriggerAction', {
+                            genAsset,
+                            triggerAction
+                        })
+                    );
             }
         });
 
@@ -95,11 +149,30 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
             });
     }
 
+    /** Called by the picker when items are added to selected list */
     removeAsset($event: { items: Asset[] }): void {
         const genAssets = this.currentGen.generationAssets;
+        /**
+         * Loap over all the asset items that were removed from the selected list
+         * for this generation.
+         */
         $event.items.forEach(asset => {
-            const existingAsset = genAssets.find(ga => ga.assetId === asset.id);
-            existingAsset.isSoftDeleted = true;
+            /**
+             * Marked the removed GenAsset as softDeleted and popagate the
+             * the changes to any exisiting children (Asset Trigger Actions)
+             */
+            const existingGenAsset = genAssets.find(
+                ga => ga.assetId === asset.id
+            );
+            existingGenAsset.isSoftDeleted = true;
+            existingGenAsset.assetTriggerActions.forEach(
+                ata => (ata.isSoftDeleted = true)
+            );
+
+            /**
+             * Finally set the "mxPosition" as undefined so that the picker will
+             * use the correct template.
+             */
             asset['mxPosition'] = undefined;
         });
 
@@ -108,8 +181,21 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
         this.rePrioritize();
     }
 
+    /**
+     * Called by the picker when items are shuffled by the picker
+     * or called internally whenever items are added or removed to
+     * ensure the mxPosition are in a consistenent state.
+     */
     rePrioritize(): void {
         const genAssets = this.currentGen.generationAssets;
+
+        /**
+         * Mx Position is determined the index of the asset as
+         * displayed in the selected list. Iterate through the
+         * selected list assigning (or reassigning) the mx position
+         * based on the items index. Only change it if different, so that
+         * we do not cause a false modification that Breeze will detect.
+         */
         this.selectedCached.forEach((scAsset, index) => {
             const mxPosition = index + 1;
             const genAsset = genAssets.find(ga => ga.assetId === scAsset.id);
@@ -117,6 +203,10 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
             genAsset.mxPosition =
                 genAsset.mxPosition !== mxPosition && mxPosition;
 
+            /**
+             * Finally define the asset's "mxPosition" so that the picker will
+             * use the correct template.
+             */
             scAsset['mxPosition'] = mxPosition;
         });
 

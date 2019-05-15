@@ -1,4 +1,3 @@
-import { DataSource } from '@angular/cdk/collections';
 import {
     Component,
     OnDestroy,
@@ -7,12 +6,19 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef, MatTableDataSource } from '@angular/material';
 import * as _ from 'lodash';
-import { from, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { merge, BehaviorSubject, Observable, Subject } from 'rxjs';
+import {
+    distinctUntilKeyChanged,
+    filter,
+    map,
+    switchMap,
+    takeUntil,
+    tap
+} from 'rxjs/operators';
 
+import { DataSource } from '@angular/cdk/table';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
 import {
@@ -20,6 +26,7 @@ import {
     GenerationAsset,
     TriggerAction
 } from 'app/features/aagt/data';
+import { EntityAction } from 'breeze-client';
 import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
@@ -35,8 +42,7 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
 
     assetTriggerActions: AssetTriggerAction[];
     user: any;
-    dataSource: MatTableDataSource<AssetTriggerAction>;
-    // displayedColumns = ['checkbox', 'sequence', 'alias', 'action', 'trigger', 'status', 'outcome'];
+    dataSource: AssetTriggerActionDataSource;
     displayedColumns = [
         'checkbox',
         'sequence',
@@ -56,29 +62,31 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
     private genAssets: GenerationAsset[];
     private triggerActions: TriggerAction[];
 
-    constructor(private uow: PlannerUowService, public _matDialog: MatDialog) {
+    constructor(
+        private planUow: PlannerUowService,
+        public _matDialog: MatDialog
+    ) {
         // Set the private defaults
         this.unsubscribeAll = new Subject();
     }
 
     ngOnInit(): void {
-        this.dataSource = new MatTableDataSource(
-            this.uow.currentGen.assetTrigActions
-        );
-        this.dataSource.filterPredicate = this.filterPedicate();
+        this.dataSource = new AssetTriggerActionDataSource(this.planUow);
+        // this.planUow.onFilterChange
+        //     .pipe(takeUntil(this.unsubscribeAll))
+        //     .subscribe(fc => {
+        //         const filterData: { alias?: string; milestone?: string } = {};
+        //         if (fc.asset.filterText !== 'all' && fc.asset.filterText) {
+        //             filterData.alias = fc.asset.filterText;
+        //         }
+        //         if (fc.trigger.filterText !== 'all' && fc.trigger.filterText) {
+        //             filterData.milestone = fc.trigger.filterText;
+        //         }
+        //         this.dataSource.filter = JSON.stringify(filterData);
+        //     });
 
-        this.uow.onFilterChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(fc => {
-                const filterData: { alias?: string; milestone?: string } = {};
-                if (fc.asset.filterText !== 'all' && fc.asset.filterText) {
-                    filterData.alias = fc.asset.filterText;
-                }
-                if (fc.trigger.filterText !== 'all' && fc.trigger.filterText) {
-                    filterData.milestone = fc.trigger.filterText;
-                }
-                this.dataSource.filter = JSON.stringify(filterData);
-            });
+        // this.dataSource = new MatTableDataSource([datasource]);
+        // this.dataSource.filterPredicate = this.filterPedicate();
 
         // this._contactsService.onSelectedContactsChanged
         //     .pipe(takeUntil(this._unsubscribeAll))
@@ -163,30 +171,6 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
         // });
     }
 
-    filterPedicate(): (data: AssetTriggerAction, filter: string) => boolean {
-        return (data: AssetTriggerAction, filter: string): boolean => {
-            const filterParams: {
-                alias?: string;
-                milestone: string;
-            } = JSON.parse(filter);
-            const alias = filterParams.alias;
-            const milestone = filterParams.milestone;
-            if (alias && milestone) {
-                return (
-                    data.genAsset.asset.alias === alias &&
-                    data.triggerAction.trigger.milestone === milestone
-                );
-            }
-            if (alias) {
-                return data.genAsset.asset.alias === alias;
-            }
-            if (milestone) {
-                return data.triggerAction.trigger.milestone === milestone;
-            }
-            return false;
-        };
-    }
-
     onSelectedChange(contactId): void {
         // this._contactsService.toggleSelectedContact(contactId);
     }
@@ -200,4 +184,77 @@ export class AssetTriggerActionListComponent implements OnInit, OnDestroy {
         // }
         // this._contactsService.updateUserData(this.user);
     }
+}
+
+class AssetTriggerActionDataSource extends DataSource<AssetTriggerAction> {
+    assetFilterChange = new BehaviorSubject('');
+    get assetFilter(): string {
+        return this.assetFilterChange.value;
+    }
+    set assetFilter(assetFilterText: string) {
+        this.assetFilterChange.next(assetFilterText);
+    }
+
+    triggerFilterChange = new BehaviorSubject('');
+
+    get triggerFilter(): string {
+        return this.triggerFilterChange.value;
+    }
+    set triggerFilter(triggerFilterText: string) {
+        this.assetFilterChange.next(triggerFilterText);
+    }
+
+    private assetTrigActs = _.flatMap(this.planUow.currentGen.triggers, x =>
+        _.flatMap(x.triggerActions, m => m.assetTriggerActions)
+    );
+
+    private datasource = this.planUow.aagtEmService.onEntityManagerChange.pipe(
+        filter(x => x.entity.shortname === 'AssetTriggerAction'),
+        filter(
+            ec =>
+                ec.entityAction === EntityAction.EntityStateChange ||
+                (ec.entityAction === EntityAction.PropertyChange &&
+                    ec.args.propertyName === 'isSoftDeleted')
+        ),
+        distinctUntilKeyChanged(
+            'entity',
+            (entity1, entity2) => entity1.id === entity2.id
+        )
+    );
+
+    constructor(private planUow: PlannerUowService) {
+        super();
+    }
+
+    connect(): Observable<AssetTriggerAction[]> {
+        const displayDataChanges = [
+            this.datasource,
+            this.assetFilterChange,
+            this.triggerFilterChange
+        ];
+
+        return merge(...displayDataChanges).pipe(
+            tap(ec => console.log(ec)),
+            map(noChoice =>
+                this.assetTrigActs.slice().filter(ata => {
+                    let matchedRecord = false;
+                    if (!this.assetFilter && !this.triggerFilter) {
+                        return true;
+                    }
+                    if (this.assetFilter) {
+                        matchedRecord =
+                            ata.genAsset.asset.alias === this.assetFilter;
+                    }
+                    if (!matchedRecord || this.triggerFilter) {
+                        matchedRecord =
+                            ata.triggerAction.trigger.milestone ===
+                            this.triggerFilter;
+                    }
+                    return matchedRecord;
+                })
+            )
+        );
+    }
+
+    disconnect() {}
 }

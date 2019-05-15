@@ -49,11 +49,4 @@ export class Generation extends SpEntityBase {
         relativeEntity: 'GenerationAsset'
     })
     generationAssets: GenerationAsset[];
-
-    get assetTrigActions(): AssetTriggerAction[] {
-        if (!this.generationAssets) {
-            return;
-        }
-        return _.flatMap(this.generationAssets, x => x.assetTriggerActions);
-    }
 }

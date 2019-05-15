@@ -22,8 +22,20 @@ type AtaAllowedOutcomes =
 
 @BzEntity(MxmAppName.Aagt, {})
 export class AssetTriggerAction extends SpEntityBase {
-
     readonly shortname = 'AssetTriggerAction';
+    
+    /**
+     * When used, indicates that child entity will be deleted
+     * during the next save operation. Prefer to use this method
+     * when entities may be deleted and restored several times
+     * before actual saving is done to store.
+     *
+     * Used instead of Breeze internal setDeleted() method becuase
+     * setDeleted() assume the entity will not longer be reference, '
+     * which cases all child and parent references to this entity
+     * be dropped and a pain in the butt to be recovered later.
+     */
+    isSoftDeleted?: boolean;
 
     @BzProp('data', {})
     sequence: number;
@@ -78,7 +90,7 @@ export class AssetTriggerAction extends SpEntityBase {
     genAsset: GenerationAsset;
 
     @BzProp('nav', {
-        relativeEntity: 'Trigger',
+        relativeEntity: 'TriggerAction',
         navCfg: { isScalar: true }
     })
     triggerAction: TriggerAction;

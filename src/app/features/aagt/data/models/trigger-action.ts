@@ -18,6 +18,19 @@ export interface ITriggerActionItemShell {
 export class TriggerAction extends SpEntityBase {
     readonly shortname = 'TriggerAction';
 
+    /**
+     * When used, indicates that child entity will be deleted
+     * during the next save operation. Prefer to use this method
+     * when entities may be deleted and restored several times
+     * before actual saving is done to store.
+     *
+     * Used instead of Breeze internal setDeleted() method becuase
+     * setDeleted() assume the entity will not longer be reference, '
+     * which cases all child and parent references to this entity
+     * be dropped and a pain in the butt to be recovered later.
+     */
+    isSoftDeleted?: boolean;
+
     private _actionItemId: number;
     private _triggerId: number;
     private _sequence: number;

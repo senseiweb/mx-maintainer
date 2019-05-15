@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BaseRepoService, CoreEmProviderService } from 'app/global-data';
+import {
+    BaseRepoService,
+    GlobalEntityMgrProviderService
+} from 'app/global-data';
 import { AagtDataModule } from '../aagt-data.module';
 import { AagtEmProviderService } from '../aagt-emprovider.service';
 import { Asset } from '../models';

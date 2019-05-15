@@ -22,7 +22,15 @@ export type EntityChildrenKind<T extends SpEntityBase> = Extract<
     SpEntityBase
 >;
 
+export type ForeignEntityKind<T extends SpEntityBase> = {
+    [P in keyof T]: T[P] extends SpEntityBase ? T : never
+}[keyof T];
+
 export type EntityChildShortName<T extends SpEntityBase> = EntityChildrenKind<
+    T
+>['shortname'];
+
+export type ForeignEntityShortName<T extends SpEntityBase> = ForeignEntityKind<
     T
 >['shortname'];
 

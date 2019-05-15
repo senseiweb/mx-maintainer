@@ -30,7 +30,9 @@
                         formControlName="milestone"
                         matInput
                     />
-                <mat-error *ngIf="triggerFormGroup.errors?.Trigger_duplicateTriggerMiles">{{ triggerFormGroup.errors?.Trigger_duplicateTriggerMiles }}</mat-error>
+                    <mat-error>{{
+                        triggerFormGroup.errors?.Trigger_duplicateTriggerMiles
+                    }}</mat-error>
                 </mat-form-field>
             </div>
 

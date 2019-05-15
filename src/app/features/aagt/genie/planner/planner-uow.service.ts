@@ -44,6 +44,7 @@ import {
 } from 'rxjs';
 
 import { SpListEntities } from '@ctypes/app-config';
+import { IEntityChangedEvent } from 'app/global-data/repos/base-emprovider.service';
 import { AagtEmProviderService } from '../../data/aagt-emprovider.service';
 import { AssetTriggerActionRepoService } from '../../data/repos/asset-trigger-action-repo.service';
 import { TeamRepoService } from '../../data/repos/team-repo.service';
@@ -68,12 +69,12 @@ export class PlannerUowService implements Resolve<any> {
     onStepValidityChange: BehaviorSubject<IStepperModel>;
     onStepperChange: Subject<StepperSelectionEvent>;
     onFilterChange: BehaviorSubject<FilterChange>;
-    onEntitiesChange: Observable<SpEntityBase[]>;
+    // onEntitiesChange: Observable<IEntityChangedEvent>;
     private entityChangeSet: Entity[];
     saveAll: any;
 
     constructor(
-        private aagtEmService: AagtEmProviderService,
+        public aagtEmService: AagtEmProviderService,
         private genRepo: GenerationRepoService,
         private teamRepo: TeamRepoService,
         private teamCatRepo: TeamCategoryRepoService,
@@ -87,7 +88,6 @@ export class PlannerUowService implements Resolve<any> {
         private emProvider: AagtEmProviderService
     ) {
         this.canDeactivatePlaaner = new BehaviorSubject(true);
-        this.onEntitiesChange = new Observable();
         this.onStepValidityChange = new BehaviorSubject({});
         this.onFilterChange = new BehaviorSubject({
             asset: {

@@ -1,4 +1,3 @@
-import { ValidatorFn } from '@angular/forms';
 import { MxmAppName } from 'app/app-config.service';
 import {
     BzCustomValidator,

@@ -9,15 +9,13 @@ import {
     FormBuilder,
     FormControl,
     FormGroup,
-    Validator,
-    Validators,
-    ValidatorFn
+    Validators
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import {
-    RawEntity,
     IDialogResult,
-    Omit
+    Omit,
+    RawEntity
 } from '@ctypes/breeze-type-customization';
 import { Trigger } from 'app/features/aagt/data';
 import * as _ from 'lodash';
@@ -125,6 +123,22 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     }
 
     deleteTrigger(): void {
+        if (
+            this.currentTrigger.entityAspect.entityState.isAdded &&
+            !this.currentTrigger.triggerActions.length
+        ) {
+            this.currentTrigger.entityAspect.rejectChanges();
+            /**
+             * Report back to the caller that trigger has been soft deleted and
+             * notify view that the deletion was successfull.
+             */
+            const diaResult: IDialogResult<Trigger> = {
+                confirmDeletion: true
+            };
+
+            this.dialogRef.close(diaResult);
+        }
+
         const config: sa.SweetAlertOptions = {
             title: 'Delete Trigger?',
             text: `Are you sure you?
@@ -149,9 +163,9 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
                 this.currentTrigger.triggerActions,
                 x => x.assetTriggerActions
             );
-            atas.forEach(ata => (ata.isSoftDeleted = true));
-            this.currentTrigger.triggerActions.forEach(
-                ta => (ta.isSoftDeleted = true)
+            atas.forEach(ata => ata.entityAspect.setDeleted());
+            this.currentTrigger.triggerActions.forEach(ta =>
+                ta.entityAspect.setDeleted()
             );
             /**
              * Report back to the caller that trigger has been soft deleted and

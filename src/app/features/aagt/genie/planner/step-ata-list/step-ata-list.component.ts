@@ -30,11 +30,10 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     private unsubscribeAll: Subject<any>;
 
     constructor(
-        private uow: PlannerUowService,
+        private planUow: PlannerUowService,
         private formBuilder: FormBuilder,
         private trigdialog: MatDialog,
-        private deleteDialog: MatDialog,
-        private planUow: PlannerUowService
+        private deleteDialog: MatDialog
     ) {
         this.unsubscribeAll = new Subject();
         this.searchInput = new FormControl('');
@@ -50,9 +49,9 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
             .subscribe(searchText => {
                 // this._contactsService.onSearchTextChanged.next(searchText);
             });
-        this.uow.onStepperChange.subscribe(stepEvent => {
+        this.planUow.onStepperChange.subscribe(stepEvent => {
             if (stepEvent.selectedIndex === 3) {
-                this.uow.reviewChanges();
+                this.planUow.reviewChanges();
             }
         });
     }

@@ -1,23 +1,21 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { zip, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import {
-    combineAll,
-    debounce,
     debounceTime,
     distinctUntilChanged,
+    filter,
     map,
     startWith,
-    switchMap,
-    take,
-    takeUntil
+    takeUntil,
+    tap
 } from 'rxjs/operators';
-
-import { fuseAnimations } from '@fuse/animations';
 
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { IDialogResult } from '@ctypes/breeze-type-customization';
+import { fuseAnimations } from '@fuse/animations';
 import { Team, TeamAvailability, TeamCategory } from 'app/features/aagt/data';
+import * as _ from 'lodash';
 import { PlannerUowService } from '../planner-uow.service';
 import { PlannerSteps } from '../planner.component';
 import { TmAvailDetailDialogComponent } from './team-avail-detail/tm-avail-detail.dialog';
@@ -48,17 +46,26 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.teamCategories = this.planUow.allTeamCats;
-        this.filteredTeams = this.allTeams = this.planUow.allTeams;
-        this.planUow.onStepValidityChange.next({
-            [PlannerSteps[PlannerSteps.TmMgr]]: {
-                isValid: true
-            }
-        });
+        this.getTeamCategories();
+        this.filteredTeams = this.allTeams = _.flatMap(
+            this.teamCategories,
+            x => x.teams
+        );
+
         this.filteredFormGroup = this.fb.group({
             searchTerm: new FormControl(),
             currentCategory: new FormControl()
         });
+
+        this.planUow.aagtEmService.onEntityManagerChange
+            .pipe(
+                tap(ec => console.log(ec)),
+                filter(ec => ec.entity.shortname === 'TriggerAction')
+            )
+            .subscribe(unused => {
+                this.getTeamCategories();
+                this.checkStepValidity();
+            });
 
         this.filteredFormGroup
             .get('searchTerm')
@@ -89,8 +96,32 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
+    checkStepValidity(): void {
+        this.planUow.onStepValidityChange.next({
+            [PlannerSteps[PlannerSteps.TmMgr]]: {
+                isValid: !!this.allTeams
+            }
+        });
+    }
+
     compareCategories(cat1: TeamCategory, cat2: TeamCategory): boolean {
         return cat1 && cat2 ? cat1.id === cat2.id : cat1 === cat2;
+    }
+
+    getTeamCategories(): void {
+        /**
+         * Gets all the team categories per the created trigger action,
+         * this will result in duplicate team categories, so need to filter
+         * out the duplicate team cats before extracting all teams.
+         */
+        const teamCats = _.flatMap(this.planUow.currentGen.triggers, x =>
+            _.flatMap(x.triggerActions, t => t.actionItem.teamCategory)
+        );
+
+        this.teamCategories = _.uniqBy(teamCats, 'id');
+
+        this.allTeams = _.flatMap(this.teamCategories, x => x.teams);
+        this.filterTeamsBy();
     }
 
     filterTeamsBy(): void {

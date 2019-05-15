@@ -52,7 +52,7 @@ export class PlannerComponent implements OnInit, CanDeactivateGuard {
 
         this.uow.onStepValidityChange
             .pipe(
-                debounceTime(1500),
+                debounceTime(250),
                 takeUntil(this.unsubscribeAll)
             )
             .subscribe(stepStatus => {

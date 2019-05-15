@@ -23,6 +23,7 @@ import { TriggerDetailDialogComponent } from './trigger-detail/trigger-detail.di
 export class StepTrigActionComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     triggers: Trigger[];
+    private stepValid = false;
     selectedCache: ActionItem[] = [];
     unSelectedCache: ActionItem[] = [];
     triggerSelectionFormGroup: FormGroup;
@@ -33,7 +34,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     constructor(
         private formBuilder: FormBuilder,
         private trigdialog: MatDialog,
-        private uow: PlannerUowService
+        private planUow: PlannerUowService
     ) {
         this.unsubscribeAll = new Subject();
     }
@@ -44,31 +45,9 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
          * rethink this, as there isn't current way to ui to allow for
          * reverting trigger deletions.
          */
-        this.triggers = this.uow.currentGen.triggers.filter(
-            t => !t.isSoftDeleted
-        );
+        this.triggers = this.planUow.currentGen.triggers;
 
-        //
         this.triggers.sort(this.triggerSorter);
-
-        /**
-         * Every time the step is change from this step [index 1]
-         * check if the step is still valid, in this case step
-         * is considered valid if there are triggers present/
-         */
-        this.uow.onStepperChange
-            .pipe(
-                filter(sc => sc.selectedIndex === 1),
-                takeUntil(this.unsubscribeAll)
-            )
-            .subscribe(() => {
-                this.uow.onStepValidityChange.next({
-                    [PlannerSteps[PlannerSteps.TrigAction]]: {
-                        isValid: !!this.triggers.filter(t => !t.isSoftDeleted)
-                            .length
-                    }
-                });
-            });
 
         /** Creates the trigger selection group */
         this.triggerSelectionFormGroup = this.formBuilder.group({
@@ -94,6 +73,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                 triggerSelect: this.triggers[0]
             });
         }
+        this.updateStepValidity(!!this.planUow.currentGen.triggers.length);
     }
 
     ngOnDestroy(): void {
@@ -102,40 +82,74 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Method called when the user input moves over Actions from the
+     * Method called the user input moves over Actions from the
      * available Action list to the assigned Trigger Action.
      */
     addActionItem($event: { items: ActionItem[] }): void {
         const triggerActions = this.currentTrigger.triggerActions;
+        const genAssets = this.planUow.currentGen.generationAssets;
 
-        /** Loop over the available, */
-        $event.items.forEach(actionItem => {
+        /** Flatten all AssetTriggerAction to undelete if found */
+        const assetTrigActions = _.flatMap(
+            triggerActions,
+            x => x.assetTriggerActions
+        );
+
+        /**
+         * Loap over all the asset items that were added to the selected list
+         * for this generation.
+         */ $event.items.forEach(actionItem => {
+            /** Check if this TriggerActionItem was already created */
             const existingTrigAct = triggerActions.find(
                 ta => ta.actionItemId === actionItem.id
             );
 
+            /**
+             * If a matching TriggerActionItem is found, then it must have been
+             * soft deleted, instead of recreating simply un-softDelete them.
+             * Then check if any grand children (Asset Trig Action) are eligible
+             * to unsoft delete it.
+             */
             if (existingTrigAct) {
                 existingTrigAct.isSoftDeleted = false;
-                existingTrigAct.assetTriggerActions.forEach(
-                    atas => !atas.isSoftDeleted
-                );
+
+                /**
+                 * Filter through all the Asset Trigger Actions and selected the
+                 * ones where the co-parenet (GenerationAsset) has not been softDeleted
+                 * and is a child of this TriggerActionItem. If any exisit set their
+                 * soft deletion flag to false.
+                 */
+                assetTrigActions
+                    .filter(
+                        ata =>
+                            !ata.genAsset.isSoftDeleted &&
+                            ata.triggerActionId === existingTrigAct.id
+                    )
+                    .forEach(ata => (ata.isSoftDeleted = false));
             } else {
+                /**
+                 * Since an exisiting TriggerActionItem doesn't exists,
+                 * create a new one, then loop through the exisiting but not
+                 * soft-deleted co-parent (GenerationAsset) and create children
+                 */
                 const defaultProps: RawEntity<TriggerAction> = {
                     trigger: this.currentTrigger,
                     actionItem
                 };
 
-                const newTrigAction = this.currentTrigger.createChild(
+                const triggerAction = this.currentTrigger.createChild(
                     'TriggerAction',
                     defaultProps
-                ) as any;
+                );
 
-                this.currentTrigger.generation.generationAssets.forEach(ga => {
-                    ga.createChild('AssetTriggerAction', {
-                        genAsset: ga,
-                        triggerAction: newTrigAction
+                genAssets
+                    .filter(ga => !ga.isSoftDeleted)
+                    .forEach(genAsset => {
+                        genAsset.createChild('AssetTriggerAction', {
+                            genAsset,
+                            triggerAction
+                        });
                     });
-                });
             }
         });
 
@@ -155,7 +169,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     }
 
     filterBasedOnTrigger(selectedTrigger: Trigger): void {
-        const actionItems = this.uow.allActionItems;
+        const actionItems = this.planUow.allActionItems;
         const triggerActionItems = selectedTrigger
             ? selectedTrigger.triggerActions.filter(
                   trigAct => !trigAct.isSoftDeleted
@@ -192,11 +206,14 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
             .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
             .subscribe(reesult => {
                 if (reesult.confirmDeletion) {
-                    if (!this.uow.currentGen.triggers.length) {
+                    if (!this.planUow.currentGen.triggers.length) {
                         this.triggerSelectionFormGroup.controls[
                             'trigger'
                         ].setValue('');
                     }
+                    this.updateStepValidity(
+                        !!this.planUow.currentGen.triggers.length
+                    );
                 } else {
                     // ReSort just in case the date was changed;
                     this.triggers.sort(this.triggerSorter);
@@ -206,7 +223,9 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
 
     createNewTrigger(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.uow.createNewTrigger(this.uow.currentGen.id);
+        dialogCfg.data = this.planUow.createNewTrigger(
+            this.planUow.currentGen.id
+        );
         dialogCfg.disableClose = true;
         dialogCfg.panelClass = 'trigger-detail-dialog';
         this.trigdialog
@@ -218,9 +237,12 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     return;
                 }
 
-                this.triggers = this.uow.currentGen.triggers.filter(
-                    t => !t.isSoftDeleted
-                );
+                this.triggers = this.planUow.currentGen.triggers;
+
+                if (!this.triggers.length) {
+                    this.currentTrigger = undefined;
+                    return;
+                }
 
                 this.triggers.sort(this.triggerSorter);
 
@@ -228,31 +250,48 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     result.value || this.triggers[0]
                 );
 
-                this.uow.onStepValidityChange.next({
-                    [PlannerSteps[PlannerSteps.TrigAction]]: {
-                        isValid: true
-                    }
-                });
+                this.updateStepValidity(true);
             });
     }
 
+    /** Called by the picker when items are added to selected list */
     removeActionItem($event: { items: ActionItem[] }): void {
         const triggerActions = this.currentTrigger.triggerActions;
-
+        /**
+         * Loap over all the asset items that were removed from the selected list
+         * for this generation.
+         */
         $event.items.forEach(actionItem => {
+            /**
+             * Marked the removed GenAsset as softDeleted and popagate the
+             * the changes to any exisiting children (Asset Trigger Actions)
+             */
             const existingTrigAct = triggerActions.find(
                 trigAct => trigAct.actionItemId === actionItem.id
             );
 
             existingTrigAct.isSoftDeleted = true;
+            existingTrigAct.assetTriggerActions.forEach(
+                ata => (ata.isSoftDeleted = true)
+            );
 
+            /**
+             * Finally set the "sequence" as undefined so that the picker will
+             * use the correct template.
+             */
             actionItem['sequence'] = undefined;
         });
 
         this.completionTime = this.calculateCompeletionTime();
+        this.updateStepValidity(!!this.planUow.currentGen.triggers.length);
         this.reSequence();
     }
 
+    /**
+     * Called by the picker when items are shuffled by the picker
+     * or called internally whenever items are added or removed to
+     * ensure the sequece are in a consistenent state.
+     */
     reSequence(): void {
         const triggerActions = this.currentTrigger.triggerActions;
 
@@ -282,5 +321,24 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
 
     private unselectedCacheSorter = (a: ActionItem, b: ActionItem): number => {
         return a.teamCategory.teamType < b.teamCategory.teamType ? -1 : 1;
+    }
+
+    /**
+     * Every time the step is change from this step [index 1]
+     * check if the step is still valid, in this case step
+     * is considered valid if there are triggers present/
+     */
+    private updateStepValidity(hasTriggers: boolean): void {
+        if (this.stepValid === hasTriggers) {
+            return;
+        }
+
+        this.stepValid = hasTriggers;
+
+        this.planUow.onStepValidityChange.next({
+            [PlannerSteps[PlannerSteps.TrigAction]]: {
+                isValid: hasTriggers
+            }
+        });
     }
 }
