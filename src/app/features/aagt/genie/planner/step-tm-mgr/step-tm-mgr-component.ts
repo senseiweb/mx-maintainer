@@ -1,5 +1,12 @@
+import {
+    animate,
+    state,
+    style,
+    transition,
+    trigger
+} from '@angular/animations';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -21,19 +28,47 @@ import { PlannerUowService } from '../planner-uow.service';
 import { PlannerSteps } from '../planner.component';
 import { TmAvailDetailDialogComponent } from './team-avail-detail/tm-avail-detail.dialog';
 
+interface ITeamTableDef<T> {
+    [columnId: string]: [string, keyof T | string];
+}
+
 @Component({
     selector: 'genie-plan-step-tm-manager',
     templateUrl: './step-tm-mgr.component.html',
     styleUrls: ['./step-tm-mgr.component.scss'],
-    animations: fuseAnimations
+    animations: [
+        trigger('detailExpand', [
+            state(
+                'collapsed',
+                style({ height: '0px', minHeight: '0', display: 'none' })
+            ),
+            state('expanded', style({ height: '*' })),
+            transition(
+                'expanded <=> collapsed',
+                animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+            )
+        ]),
+        fuseAnimations
+    ]
 })
 export class StepTeamManagerComponent implements OnInit, OnDestroy {
     categories: any[];
     private allTeams: Team[];
     filteredTeams: Team[];
+    dataSource: any;
+    oKeys = Object.keys;
+    teamColumnDef: ITeamTableDef<Team> = {
+        teamname: ['Team Name', 'teamName'],
+        teamcat: ['Team Category', 'teamCategory.teamType'],
+        numOfMbrs: ['# Members', 'numTeamMembers'],
+        numOfShifts: ['# Shifts', 'numOfShifts'],
+        totalTimeAvail: ['Total Available Hours', 'totalTimeAvail']
+    };
+    expandedTeam: Team;
     teamCategories: TeamCategory[];
     currentCategory: TeamCategory;
-    filteredFormGroup: FormGroup;
+    teamCatSelectionFormGroup: FormGroup;
+    private filterTeamCategoryBy = new BehaviorSubject('');
     searchTerm: string;
 
     private unsubscribeAll: Subject<any>;
@@ -99,6 +134,18 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         // Unsubscribe from all subscriptions
         this.unsubscribeAll.next();
         this.unsubscribeAll.complete();
+    }
+
+    addModifyTeamCategory(teamCategory?: TeamCategory): void {
+        throw new Error('Not Implmeneted');
+    }
+
+    get categoryFilter(): string {
+        return this.filterTeamCategoryBy.value;
+    }
+
+    set categoryFIlter(catFilter: string) {
+        this.filterTeamCategoryBy.next(catFilter);
     }
 
     checkStepValidity(): void {
@@ -167,5 +214,11 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
                     currentGen.genEndDate
                 );
             });
+    }
+
+    get teamTableColumnDefs(): string[] {
+        const keys = this.oKeys(this.teamColumnDef);
+        const columns = keys.map(key => this.teamColumnDef[key][0]);
+        return columns;
     }
 }
