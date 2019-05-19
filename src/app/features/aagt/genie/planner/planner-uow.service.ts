@@ -44,7 +44,7 @@ import {
 } from 'rxjs';
 
 import { SpListEntities } from '@ctypes/app-config';
-import { IEntityChangedEvent } from 'app/global-data/repos/base-emprovider.service';
+
 import { AagtEmProviderService } from '../../data/aagt-emprovider.service';
 import { AssetTriggerActionRepoService } from '../../data/repos/asset-trigger-action-repo.service';
 import { TeamRepoService } from '../../data/repos/team-repo.service';

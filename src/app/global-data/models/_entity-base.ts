@@ -6,7 +6,7 @@ import {
     SelectedEntityKind
 } from '@ctypes/breeze-type-customization';
 import { Entity, EntityAspect, EntityType } from 'breeze-client';
-import * as _ from 'lodash';
+import * as _l from 'lodash';
 import { BzProp } from './decorators';
 import { SpMetadata } from './sp-metadata';
 
@@ -84,7 +84,10 @@ export abstract class SpEntityBase implements Entity {
     ): SelectedEntityKind<TChild> => {
         const em = this.entityAspect.entityManager;
         // creates and attaches itself to the current em;
-        const newEntity = em.createEntity(childType as any, defaultProps);
+        const props = {};
+        props[_l.camelCase(this.shortname)] = this;
+        Object.assign(props, defaultProps || {});
+        const newEntity = em.createEntity(childType, props);
         return newEntity as SelectedEntityKind<TChild>;
     }
 }

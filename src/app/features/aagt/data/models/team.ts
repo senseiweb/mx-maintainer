@@ -9,7 +9,8 @@ import { TeamCategory } from './team-category';
 export class Team extends SpEntityBase {
     readonly shortname = 'Team';
 
-    totalAvailDuringGen: number;
+    /** Tuple to hold the memorized time calculation */
+    totalAvailDuringGen: [string, number];
 
     @BzProp('data', { spInternalName: 'Title' })
     teamName: string;
@@ -36,9 +37,25 @@ export class Team extends SpEntityBase {
     })
     teamAvailabilites: TeamAvailability[];
 
-    calTotalAvailDuringGen = (start: Date, end: Date) => {
+    calTotalAvailDuringGen = (start: Date, end: Date): number => {
         let teamAvails = 0;
 
+        if (!start || !end || !this.teamAvailabilites.length) {
+            return 0;
+        }
+        const cachedKey =
+            start.toString() +
+            end.toString() +
+            this.teamAvailabilites.join('|');
+
+        if (
+            this.totalAvailDuringGen &&
+            this.totalAvailDuringGen[0] === cachedKey
+        ) {
+            return this.totalAvailDuringGen[1];
+        }
+
+        console.time('Cal team avails');
         this.teamAvailabilites
             .filter(
                 ta =>
@@ -55,6 +72,10 @@ export class Team extends SpEntityBase {
 
                 teamAvails += _m(tickEnd).diff(tickStart, 'minute');
             });
-        this.totalAvailDuringGen = teamAvails;
+
+        console.timeEnd('Cal team avails');
+
+        this.totalAvailDuringGen = [cachedKey, teamAvails];
+        return this.totalAvailDuringGen[1];
     }
 }

@@ -10,13 +10,13 @@ export class AssetTriggerActionDataSource extends DataSource<
     AssetTriggerAction
 > {
     private datasource = this.planUow.aagtEmService.onEntityManagerChange.pipe(
-        filter(x => x.entity.shortname === 'AssetTriggerAction'),
-        filter(
-            ec =>
-                ec.entityAction === EntityAction.EntityStateChange ||
-                (ec.entityAction === EntityAction.PropertyChange &&
-                    ec.args.propertyName === 'isSoftDeleted')
-        ),
+        // filter(x => x.shortName === ),
+        // filter(
+        //     ec =>
+        //         ec.entityAction === '' ||
+        //         (ec.entityAction === EntityAction.PropertyChange &&
+        //             ec.args.propertyName === 'isSoftDeleted')
+        // ),
         distinctUntilKeyChanged(
             'entity',
             (entity1, entity2) => entity1.id === entity2.id
@@ -31,7 +31,7 @@ export class AssetTriggerActionDataSource extends DataSource<
         super();
     }
 
-    private assetTrigActs() {
+    get assetTrigActData() {
         return _.flatMap(this.planUow.currentGen.triggers, x =>
             _.flatMap(x.triggerActions, m => m.assetTriggerActions)
         );
@@ -52,30 +52,28 @@ export class AssetTriggerActionDataSource extends DataSource<
             map(noChoice => {
                 const assetFilter = this.assetFilterChange.value;
                 const triggerFilter = this.triggerFilterChange.value;
-                console.table(this.assetTrigActs);
-                return this.assetTrigActs()
-                    .slice()
-                    .filter(ata => {
-                        let matchedRecord = false;
-                        if (
-                            !this.assetFilterChange.value &&
-                            !this.triggerFilterChange.value
-                        ) {
-                            return true;
-                        }
-                        if (this.assetFilterChange.value) {
-                            matchedRecord =
-                                assetFilter === 'all' ||
-                                ata.genAsset.asset.alias === assetFilter;
-                        }
-                        if (!matchedRecord || triggerFilter) {
-                            matchedRecord =
-                                triggerFilter === 'all' ||
-                                ata.triggerAction.trigger.milestone ===
-                                    triggerFilter;
-                        }
-                        return matchedRecord;
-                    });
+                console.table(this.assetTrigActData);
+                return this.assetTrigActData.slice().filter(ata => {
+                    let matchedRecord = false;
+                    if (
+                        !this.assetFilterChange.value &&
+                        !this.triggerFilterChange.value
+                    ) {
+                        return true;
+                    }
+                    if (this.assetFilterChange.value) {
+                        matchedRecord =
+                            assetFilter === 'all' ||
+                            ata.genAsset.asset.alias === assetFilter;
+                    }
+                    if (!matchedRecord || triggerFilter) {
+                        matchedRecord =
+                            triggerFilter === 'all' ||
+                            ata.triggerAction.trigger.milestone ===
+                                triggerFilter;
+                    }
+                    return matchedRecord;
+                });
             })
         );
     }

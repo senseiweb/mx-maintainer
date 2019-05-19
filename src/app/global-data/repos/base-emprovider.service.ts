@@ -1,4 +1,12 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { SpListEntities } from '@ctypes/app-config';
+import {
+    EntityChangeArgType,
+    GetEntityProp,
+    GetEntityType,
+    IEntityChangedEvent,
+    IEntityPropertyChange
+} from '@ctypes/breeze-type-customization';
 import {
     cfgApiAddress,
     cfgFeatureSpAppSite,
@@ -12,17 +20,12 @@ import { SpEntityBase } from '../models';
 import { CustomNameConventionService } from '../service-adapter/custom-namingConventionDict';
 import { GlobalEntityMgrProviderService } from './core-em-provider.service';
 
-export interface IEntityChangedEvent {
-    entityAction: EntityAction;
-    entity: SpEntityBase;
-    args: any;
-}
 export class BaseEmProviderService {
     private featureAppSiteName: string;
     entityManager: EntityManager;
     private dataService: DataService;
     onSaveInProgressChange: BehaviorSubject<boolean>;
-    onEntityManagerChange: Subject<IEntityChangedEvent>;
+    private onEntityManagerChange: Subject<IEntityChangedEvent<any, any, any>>;
 
     constructor(
         private http: HttpClient,
@@ -64,33 +67,103 @@ export class BaseEmProviderService {
             )
         );
 
-        this.entityManager.entityChanged.subscribe(changedArgs =>
-            this.onEntityManagerChange.next(changedArgs)
-        );
+        this.entityManager.entityChanged.subscribe(changedArgs => {
+            changedArgs.shortName = changedArgs.entity.shortname;
+
+            switch (changedArgs.entityAction as EntityAction) {
+                case EntityAction.PropertyChange:
+                    changedArgs.entityAction = 'PropertyChange';
+                    break;
+                case EntityAction.EntityStateChange:
+                    changedArgs.entityAction = 'EntityState';
+                    break;
+            }
+
+            this.onEntityManagerChange.next(changedArgs);
+        });
 
         this.getRequestDigest();
     }
 
-    filterAttached(
-        changedArgs: Observable<IEntityChangedEvent>
-    ): Observable<IEntityChangedEvent> {
-        return changedArgs.pipe(
-            filter(
-                changedArg => changedArg.entityAction === EntityAction.Attach
-            )
-        );
-    }
+    // filterAttached(
+    //     changedArgs: Observable<IEntityChangedEvent>
+    // ): Observable<IEntityChangedEvent> {
+    //     return changedArgs.pipe(
+    //         filter(
+    //             changedArg => changedArg.entityAction === EntityAction.Attach
+    //         )
+    //     );
+    // }
 
-    filterDeleted(
-        changedArgs: Observable<IEntityChangedEvent>
-    ): Observable<IEntityChangedEvent> {
-        return changedArgs.pipe(
+    // filterDeleted(
+    //     changedArgs: Observable<IEntityChangedEvent>
+    // ): Observable<IEntityChangedEvent> {
+    //     return changedArgs.pipe(
+    //         filter(
+    //             changedArg =>
+    //                 changedArg.entity.entityAspect.entityState.isDeleted() &&
+    //                 changedArg.entityAction === EntityAction.EntityStateChange
+    //         )
+    //     );
+    // }
+
+    // onModelChanges<
+    //     TShortName extends SpListEntities['shortname'],
+    //     TEntityAction extends EntityChangeArgs<
+    //         SelectedEntityKind<TShortName>,
+    //         any
+    //     >['entityAction'],
+    //     TEntityProp extends keyof SelectedEntityKind<TShortName>
+    // >(
+    //     shortName: TShortName,
+    //     etAction: TEntityAction
+    // ): Observable<IEntityChangedEvent<TShortName, TEntityAction, any>>;
+
+    onModelChanges<
+        TShortName extends SpListEntities['shortname'],
+        TEntityAction extends EntityChangeArgType<
+            TShortName,
+            any
+        >['entityAction'],
+        TEntityProp extends GetEntityProp<TShortName>
+    >(
+        shortName: TShortName,
+        etAction: TEntityAction,
+        property?: TEntityProp
+    ): Observable<IEntityChangedEvent<TShortName, TEntityAction, TEntityProp>> {
+        const ecObserverable = this.onEntityManagerChange.pipe(
             filter(
-                changedArg =>
-                    changedArg.entity.entityAspect.entityState.isDeleted() &&
-                    changedArg.entityAction === EntityAction.EntityStateChange
+                (
+                    chngArgs: IEntityChangedEvent<
+                        TShortName,
+                        TEntityAction,
+                        any
+                    >
+                ) =>
+                    chngArgs.shortName === shortName &&
+                    chngArgs.entityAction === etAction
             )
         );
+
+        if (property) {
+            ecObserverable.pipe(
+                filter(
+                    (
+                        chngArgs: IEntityChangedEvent<
+                            TShortName,
+                            TEntityAction,
+                            TEntityProp
+                        >
+                    ) =>
+                        (chngArgs.args as IEntityPropertyChange<
+                            TShortName,
+                            TEntityProp
+                        >).propertyName === property
+                )
+            );
+        }
+
+        return ecObserverable;
     }
 
     getRequestDigest(): void {

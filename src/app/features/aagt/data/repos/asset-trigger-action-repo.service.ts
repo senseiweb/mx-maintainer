@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RawEntity } from '@ctypes/breeze-type-customization';
 import { BaseRepoService, SpEntityBase } from 'app/global-data';
-import { IEntityChangedEvent } from 'app/global-data/repos/base-emprovider.service';
 import { EntityAction } from 'breeze-client';
 import { Observable } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -49,34 +48,34 @@ export class AssetTriggerActionRepoService extends BaseRepoService<
     //     this.entityService.onEntityManagerChange.pipe(this.filterProp);
     // }
 
-    private filterGenAssets(
-        changedArgs: Observable<IEntityChangedEvent>
-    ): Observable<IEntityChangedEvent> {
-        return changedArgs.pipe(
-            filter(changedArg => changedArg.entity instanceof GenerationAsset)
-        );
-    }
+    // private filterGenAssets(
+    //     changedArgs: Observable<IEntityChangedEvent>
+    // ): Observable<IEntityChangedEvent> {
+    //     return changedArgs.pipe(
+    //         filter(changedArg => changedArg.entity instanceof GenerationAsset)
+    //     );
+    // }
 
-    private filterTrigActions(
-        changedArgs: Observable<IEntityChangedEvent>
-    ): Observable<IEntityChangedEvent> {
-        return changedArgs.pipe(
-            filter(changedArg => changedArg.entity instanceof TriggerAction)
-        );
-    }
+    // private filterTrigActions(
+    //     changedArgs: Observable<IEntityChangedEvent>
+    // ): Observable<IEntityChangedEvent> {
+    //     return changedArgs.pipe(
+    //         filter(changedArg => changedArg.entity instanceof TriggerAction)
+    //     );
+    // }
 
-    private filterProp<T = SpEntityBase>(
-        changedArgs?: Observable<IEntityChangedEvent>,
-        property?: keyof RawEntity<T>
-    ): Observable<IEntityChangedEvent> {
-        return changedArgs.pipe(
-            filter(
-                changedArg =>
-                    changedArg.entityAction === EntityAction.PropertyChange
-            ),
-            tap(changedArg => console.log(changedArg))
-        );
-    }
+    // private filterProp<T = SpEntityBase>(
+    //     changedArgs?: Observable<IEntityChangedEvent>,
+    //     property?: keyof RawEntity<T>
+    // ): Observable<IEntityChangedEvent> {
+    //     return changedArgs.pipe(
+    //         filter(
+    //             changedArg =>
+    //                 changedArg.entityAction === EntityAction.PropertyChange
+    //         ),
+    //         tap(changedArg => console.log(changedArg))
+    //     );
+    // }
 
     // private createAtaForGenAsset(genAsset: GenerationAsset): void {
     //     const triggerActions = this.entityManager.getEntities(

@@ -16,7 +16,7 @@ const defaultFuseConfig: FuseConfig = {
     colorTheme: 'theme-default',
     customScrollbars: true,
     layout: {
-        style: 'fusec-vertical-layout-3',
+        style: 'fusec-vertical-layout-1',
         width: 'fullwidth',
         navbar: {
             primaryBackground: 'fuse-navy-700',

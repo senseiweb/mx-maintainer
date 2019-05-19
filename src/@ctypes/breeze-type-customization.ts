@@ -34,7 +34,7 @@ export type ForeignEntityShortName<T extends SpEntityBase> = ForeignEntityKind<
     T
 >['shortname'];
 
-export type SelectedEntityKind<T extends string> = Extract<
+export type SelectedEntityKind<T extends SpListEntities['shortname']> = Extract<
     SpListEntities,
     { shortname: T }
 >;
@@ -75,6 +75,7 @@ export interface IDialogResult<T> {
 export interface SpNavDef<T> extends navDef {
     foreignKeyNames?: Array<keyof RawEntity<T>>;
 }
+
 export type DataMembers<T> = {
     [key in keyof RawEntity<T>]: Partial<SpDataDef>
 };
@@ -88,4 +89,81 @@ export interface SpEntityDef<T> extends Partial<CustomEtDef> {
     dataProperties?: DataMembers<T>;
     isComplexType?: boolean;
     navigationProperties?: NavMembers<T>;
+}
+
+export interface IEntityPropertyChange<
+    TShortName extends SpListEntities['shortname'],
+    TProperty extends GetEntityProp<TShortName>
+> {
+    entityAction: 'PropertyChange';
+    propertyName: TProperty;
+    entity: GetEntityType<TShortName>;
+    newValue: Pick<
+        GetEntityType<TShortName>,
+        TProperty & keyof GetEntityType<TShortName>
+    >;
+    oldValue: Pick<
+        GetEntityType<TShortName>,
+        TProperty & keyof GetEntityType<TShortName>
+    >;
+    parent: GetEntityType<TShortName>;
+    property: SpDataDef;
+}
+export interface IEntityStateChange<
+    TShortName extends SpListEntities['shortname']
+> {
+    entityAction: 'EntityState';
+}
+
+export type EntityChangeArgType<
+    TShortName extends SpListEntities['shortname'],
+    TProperty extends GetEntityProp<TShortName>
+> =
+    | IEntityPropertyChange<TShortName, TProperty>
+    | IEntityStateChange<TShortName>;
+
+export type SelectedEntityChangeArgs<
+    TShortName extends SpListEntities['shortname'],
+    TProperty extends GetEntityProp<TShortName>,
+    TEntityAction extends EntityChangeArgType<
+        TShortName,
+        TProperty
+    >['entityAction']
+> = Extract<
+    EntityChangeArgType<TShortName, TProperty>,
+    { entityAction: TEntityAction }
+>;
+
+export type GetEntityType<
+    T extends SpListEntities['shortname']
+> = SpListEntities extends (infer E)
+    ? E extends SpListEntities
+        ? E['shortname'] extends T
+            ? E
+            : never
+        : never
+    : never;
+
+export type GetEntityProp<
+    T extends SpListEntities['shortname']
+> = SpListEntities extends (infer E)
+    ? E extends SpListEntities
+        ? E['shortname'] extends T
+            ? keyof E
+            : never
+        : never
+    : never;
+
+export interface IEntityChangedEvent<
+    TShortName extends SpListEntities['shortname'],
+    TEntityAction extends EntityChangeArgType<
+        TShortName,
+        TProperty
+    >['entityAction'],
+    TProperty extends GetEntityProp<TShortName>
+> {
+    shortName: TShortName;
+    entityAction: TEntityAction;
+    entity: GetEntityType<TShortName>;
+    args: SelectedEntityChangeArgs<TShortName, TProperty, TEntityAction>;
 }

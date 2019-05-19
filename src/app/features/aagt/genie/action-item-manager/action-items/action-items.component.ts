@@ -14,11 +14,9 @@ import {
     MatSort,
     MatTableDataSource
 } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
 import { IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { ActionItem } from 'app/features/aagt/data';
-import { FilesDataSource } from 'app/global-data/';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { ActionItemDetailDialogComponent } from '../action-item-detail/action-item-detail.dialog';

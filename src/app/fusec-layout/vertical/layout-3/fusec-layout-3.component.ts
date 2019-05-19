@@ -29,7 +29,7 @@ export class FusecVerticalLayout3Component implements OnInit, OnDestroy {
     ngOnInit(): void {
         // this.userRepo.setNavStruct();
         // Set the defaults
-        this.navigation = this._navService.getCurrentNavigation();
+        // this.navigation = this._navService.getCurrentNavigation();
         // Subscribe to config changes
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
