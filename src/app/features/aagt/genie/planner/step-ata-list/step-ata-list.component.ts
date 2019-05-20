@@ -105,15 +105,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
         // });
 
         this.planUow.aagtEmService
-            .onModelChanges('TriggerAction', 'EntityState')
-            .pipe(
-                filter(
-                    ec =>
-                        ec.entityAction === EntityAction.EntityStateChange &&
-                        (ec.entity.shortname === 'TriggerAction' ||
-                            ec.entity.shortname === 'GenerationAsset')
-                )
-            )
+            .onModelChanges(['TriggerAction', 'GenerationAsset'], 'EntityState')
             .subscribe(notUsed => this.setFilterLookups());
     }
 

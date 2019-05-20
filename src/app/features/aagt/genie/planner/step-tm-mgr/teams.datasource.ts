@@ -7,18 +7,14 @@ import { distinctUntilKeyChanged, filter, map, tap } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
 
 export class TeamDataSource extends DataSource<Team> {
-    private dataSourceTrigger = this.planUow.aagtEmService.onEntityManagerChange.pipe(
-        filter(
-            x =>
-                x.entity.shortname === 'TeamCategory' ||
-                x.entity.shortname === 'Team'
-        ),
-        filter(ec => ec.entityAction === EntityAction.EntityStateChange),
-        distinctUntilKeyChanged(
-            'entity',
-            (entity1, entity2) => entity1.id === entity2.id
-        )
-    );
+    private dataSourceTrigger = this.planUow.aagtEmService
+        .onModelChanges(['TeamCategory', 'Team'], 'EntityState')
+        .pipe(
+            distinctUntilKeyChanged(
+                'entity',
+                (entity1, entity2) => entity1.id === entity2.id
+            )
+        );
 
     constructor(
         private planUow: PlannerUowService,

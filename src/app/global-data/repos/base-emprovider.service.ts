@@ -85,39 +85,29 @@ export class BaseEmProviderService {
         this.getRequestDigest();
     }
 
-    // filterAttached(
-    //     changedArgs: Observable<IEntityChangedEvent>
-    // ): Observable<IEntityChangedEvent> {
-    //     return changedArgs.pipe(
-    //         filter(
-    //             changedArg => changedArg.entityAction === EntityAction.Attach
-    //         )
-    //     );
-    // }
+    onModelChanges<
+        TShortName extends SpListEntities['shortname'],
+        TEntityAction extends EntityChangeArgType<
+            TShortName,
+            any
+        >['entityAction']
+    >(
+        shortName: TShortName | TShortName[],
+        etAction: 'EntityState'
+    ): Observable<IEntityChangedEvent<TShortName, TEntityAction>>;
 
-    // filterDeleted(
-    //     changedArgs: Observable<IEntityChangedEvent>
-    // ): Observable<IEntityChangedEvent> {
-    //     return changedArgs.pipe(
-    //         filter(
-    //             changedArg =>
-    //                 changedArg.entity.entityAspect.entityState.isDeleted() &&
-    //                 changedArg.entityAction === EntityAction.EntityStateChange
-    //         )
-    //     );
-    // }
-
-    // onModelChanges<
-    //     TShortName extends SpListEntities['shortname'],
-    //     TEntityAction extends EntityChangeArgs<
-    //         SelectedEntityKind<TShortName>,
-    //         any
-    //     >['entityAction'],
-    //     TEntityProp extends keyof SelectedEntityKind<TShortName>
-    // >(
-    //     shortName: TShortName,
-    //     etAction: TEntityAction
-    // ): Observable<IEntityChangedEvent<TShortName, TEntityAction, any>>;
+    onModelChanges<
+        TShortName extends SpListEntities['shortname'],
+        TEntityAction extends EntityChangeArgType<
+            TShortName,
+            any
+        >['entityAction'],
+        TEntityProp extends GetEntityProp<TShortName>
+    >(
+        shortName: TShortName | TShortName[],
+        etAction: 'PropertyChange',
+        property: TEntityProp | TEntityProp[]
+    ): Observable<IEntityChangedEvent<TShortName, TEntityAction>>;
 
     onModelChanges<
         TShortName extends SpListEntities['shortname'],
@@ -129,8 +119,14 @@ export class BaseEmProviderService {
     >(
         shortName: TShortName,
         etAction: TEntityAction,
-        property?: TEntityProp
+        property?: TEntityProp | TEntityProp[]
     ): Observable<IEntityChangedEvent<TShortName, TEntityAction, TEntityProp>> {
+        const shortNameArrayed = Array.isArray(shortName)
+            ? shortName
+            : [shortName];
+        const propertyArrayed =
+            property && Array.isArray(property) ? property : [property];
+
         const ecObserverable = this.onEntityManagerChange.pipe(
             filter(
                 (
@@ -140,7 +136,7 @@ export class BaseEmProviderService {
                         any
                     >
                 ) =>
-                    chngArgs.shortName === shortName &&
+                    shortNameArrayed.includes(chngArgs.shortName) &&
                     chngArgs.entityAction === etAction
             )
         );
@@ -155,10 +151,12 @@ export class BaseEmProviderService {
                             TEntityProp
                         >
                     ) =>
-                        (chngArgs.args as IEntityPropertyChange<
-                            TShortName,
-                            TEntityProp
-                        >).propertyName === property
+                        propertyArrayed.includes(
+                            (chngArgs.args as IEntityPropertyChange<
+                                TShortName,
+                                TEntityProp
+                            >).propertyName
+                        )
                 )
             );
         }

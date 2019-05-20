@@ -160,7 +160,7 @@ export interface IEntityChangedEvent<
         TShortName,
         TProperty
     >['entityAction'],
-    TProperty extends GetEntityProp<TShortName>
+    TProperty extends GetEntityProp<TShortName> = any
 > {
     shortName: TShortName;
     entityAction: TEntityAction;

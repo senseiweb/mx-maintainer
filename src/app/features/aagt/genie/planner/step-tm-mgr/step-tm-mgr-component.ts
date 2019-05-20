@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
+    bufferTime,
     debounceTime,
     distinctUntilChanged,
     filter,
@@ -362,9 +363,9 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
     masterToggle(): void {
         this.isAllSelected
             ? this.teamAvailSelection.clear()
-            : this.teamAvailDataSoure.teamAvailDataSource.forEach(row =>
-                  this.teamAvailSelection.select(row)
-              );
+            : this.teamAvailDataSoure.teamAvailDataSource
+                  .filter(ta => ta.teamId === this.expandedTeam.id)
+                  .forEach(row => this.teamAvailSelection.select(row));
     }
 
     private reactToModelChanges(): void {
@@ -372,7 +373,10 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
         this.planUow.aagtEmService
             .onModelChanges('TriggerAction', 'EntityState')
-            .pipe(takeUntil(this.unsubscribeAll))
+            .pipe(
+                debounceTime(1500),
+                takeUntil(this.unsubscribeAll)
+            )
             .subscribe(_ => {
                 this.getTeamCategories();
                 this.setValidDateRange();
@@ -380,7 +384,10 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
         this.planUow.aagtEmService
             .onModelChanges('TeamAvailability', 'EntityState')
-            .pipe(takeUntil(this.unsubscribeAll))
+            .pipe(
+                debounceTime(1500),
+                takeUntil(this.unsubscribeAll)
+            )
             .subscribe(_ => {
                 console.log(_.args);
                 this.checkStepValidity();
@@ -388,7 +395,10 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
         this.planUow.aagtEmService
             .onModelChanges('Generation', 'PropertyChange', 'genStartDate')
-            .pipe(takeUntil(this.unsubscribeAll))
+            .pipe(
+                debounceTime(1500),
+                takeUntil(this.unsubscribeAll)
+            )
             .subscribe(_ => {
                 console.log(_.args);
                 this.setValidDateRange();

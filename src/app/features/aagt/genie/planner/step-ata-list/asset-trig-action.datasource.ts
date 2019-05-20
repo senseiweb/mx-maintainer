@@ -9,19 +9,14 @@ import { PlannerUowService } from '../planner-uow.service';
 export class AssetTriggerActionDataSource extends DataSource<
     AssetTriggerAction
 > {
-    private datasource = this.planUow.aagtEmService.onEntityManagerChange.pipe(
-        // filter(x => x.shortName === ),
-        // filter(
-        //     ec =>
-        //         ec.entityAction === '' ||
-        //         (ec.entityAction === EntityAction.PropertyChange &&
-        //             ec.args.propertyName === 'isSoftDeleted')
-        // ),
-        distinctUntilKeyChanged(
-            'entity',
-            (entity1, entity2) => entity1.id === entity2.id
-        )
-    );
+    private datasource = this.planUow.aagtEmService
+        .onModelChanges('AssetTriggerAction', 'EntityState')
+        .pipe(
+            distinctUntilKeyChanged(
+                'entity',
+                (entity1, entity2) => entity1.id === entity2.id
+            )
+        );
 
     constructor(
         private planUow: PlannerUowService,
