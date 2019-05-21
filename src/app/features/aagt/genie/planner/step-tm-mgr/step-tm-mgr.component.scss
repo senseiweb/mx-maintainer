@@ -29,16 +29,16 @@ genie-plan-step-tm-manager {
             backface-visibility: hidden;
         }
 
-        .owl-dt-container {
-            &.owl-dt-dialog-container {
-                font-size: 1em;
-            }
-        }
-        .dateDialog {
-            &.owl-dt-dialog {
-                font-size: 1.1em;
-            }
-        }
+        // .owl-dt-container {
+        //     &.owl-dt-dialog-container {
+        //         font-size: 1em;
+        //     }
+        // }
+        // .dateDialog {
+        //     &.owl-dt-dialog {
+        //         font-size: 1.1em;
+        //     }
+        // }
 
         table {
             width: 100%;

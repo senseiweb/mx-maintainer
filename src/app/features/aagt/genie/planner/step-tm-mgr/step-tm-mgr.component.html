@@ -135,36 +135,35 @@
                                                         >Shift Start
                                                         Date</mat-label
                                                     >
-                                                    <mat-icon
-                                                        [owlDateTimeTrigger]="
-                                                            availDatePicker
-                                                        "
-                                                        matSuffix
-                                                        class="secondary-text"
-                                                        >date_range</mat-icon
-                                                    >
+                                        
                                                     <input
                                                         matInput
                                                         name="availDate"
                                                         formControlName="availDate"
                                                         placeholder="Select Day"
-                                                        [selectMode]="'single'"
-                                                        [owlDateTime]="
-                                                            availDatePicker
-                                                        "
+                                                        [matDatepicker]="tmAvailDatePicker"
+
                                                         [min]="generationStart"
-                                                        [max]="generawtionStop"
                                                     />
-                                                    <owl-date-time
-                                                        [pickerMode]="'dialog'"
-                                                        [startAt]="generationStart"
-                                                        [stepMinute]="30"
-                                                        [panelClass]="
-                                                            'dateDialog'
-                                                        "
-                                                        #availDatePicker
-                                                    ></owl-date-time>
+                                                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="tmAvailDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #tmAvailDatePicker></mat-datepicker>
                                                 </mat-form-field>
+                                                <mat-form-field appearance="outline" fxFlex>
+                                                        <mcc-timer-picker
+                                                        mccConnectedTimerPicker
+                                                        [mccConnectedTimerPickerOrigin]="tmAvailTimePicker"
+                                                    ></mcc-timer-picker>
+                                                    <input
+                                                        matInput
+                                                        mccTimerPickerOrigin
+                                                        #tmAvailTimePicker="mccTimerPickerOrigin"
+                                                        placeholder="Team Available Start Time"
+                                                        formControlName="timeAvailStartTime"
+                                                    />
+                                                    </mat-form-field>
                                             </div>
                                         </form>
                                     </div>

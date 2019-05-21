@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { IDialogResult, RawEntity } from '@ctypes/breeze-type-customization';
 import { Generation, GenStatusEnum, Team } from 'app/features/aagt/data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import * as sa from 'sweetalert2';
 import { PlannerUowService } from '../../planner-uow.service';
 
-type GenModelProps = keyof RawEntity<Generation> | 'planDateRange';
+type GenModelProps = keyof RawEntity<Generation> | 'genStartTime';
 type GenFormModel = { [key in GenModelProps]: any };
 
 @Component({
@@ -37,10 +37,9 @@ export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
         'assignedAssetCount',
         'isActive',
         'iso',
-        'genEndDate',
         'genStartDate',
-        'genStatus',
-        'planDateRange'
+        'genStartTime',
+        'genStatus'
     ];
     private unsubscribeAll: Subject<any>;
 
@@ -62,12 +61,8 @@ export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
             const start = _m();
             const remainder = 30 - (start.minute() % 30);
             const defaultStart = start.add(remainder, 'minute');
-
             gen.genStartDate = defaultStart.toDate();
-            gen.genEndDate = defaultStart.add(1, 'day').toDate();
         }
-
-        this.currentGen['planDateRange'] = [gen.genStartDate, gen.genEndDate];
 
         if (gen.entityAspect.entityState.isAdded()) {
             this.formMode = 'add';
@@ -160,15 +155,19 @@ export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
     saveChanges(): void {
         this.modelProps.forEach(prop => {
             const formValue = this.genFormGroup.get(prop).value;
-            if (prop === 'planDateRange' && formValue) {
-                this.currentGen.genStartDate = formValue[0];
-                this.currentGen.genEndDate = formValue[1];
-            } else {
-                const currProp = this.currentGen[prop];
-                if (currProp !== formValue) {
-                    this.currentGen[prop as any] = formValue;
-                }
+            const currProp = this.currentGen[prop];
+            if (currProp !== formValue) {
+                this.currentGen[prop as any] = formValue;
             }
+            // if (prop === 'planDateRange' && formValue) {
+            //     this.currentGen.genStartDate = formValue[0];
+            //     this.currentGen.genEndDate = formValue[1];
+            // } else {
+            //     const currProp = this.currentGen[prop];
+            //     if (currProp !== formValue) {
+            //         this.currentGen[prop as any] = formValue;
+            //     }
+            // }
         });
 
         const genDialogResult: IDialogResult<Generation> = {

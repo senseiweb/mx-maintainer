@@ -1,9 +1,57 @@
 @import 'src/@fuse/scss/fuse';
 
-contacts-contact-list {
-    display: flex;
-    flex: 1 1 auto;
-    width: 100%;
+genie-plan-step-ata-list {
+    #gp-step-ata-list {
+        // display: block;
+        position: relative;
+        perspective: 3000px;
+
+        > div {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .fuse-widget-front {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            position: relative;
+            overflow: hidden;
+            visibility: visible;
+            width: 100%;
+            opacity: 1;
+            z-index: 10;
+            border-radius: 8px;
+            transition: transform 0.5s ease-out 0s, visibility 0s ease-in 0.2s,
+                opacity 0s ease-in 0.2s;
+            transform: rotateY(0deg);
+            backface-visibility: hidden;
+        }
+
+        .content {
+            overflow: hidden;
+
+            .sidebar {
+                &:not(.locked-open) {
+                    background: white;
+                }
+            }
+        }
+    }
+
+    mat-select {
+        > .mat-select-trigger {
+            > .mat-select-value {
+                .mat-select-placeholder {
+                    color: white;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+        }
+    }
 
     .mat-table {
         width: 100%;
@@ -39,102 +87,6 @@ contacts-contact-list {
                         display: none;
                     }
                 }
-            }
-        }
-    }
-}
-
-:host {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    height: 100%;
-
-    .sidebar-content {
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-
-        @include media-breakpoint(gt-sm) {
-            padding: 24px 4px 24px 24px;
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            flex: 0 1 auto;
-            padding: 0;
-            border-radius: 8px;
-
-            @include media-breakpoint(gt-sm) {
-                @include mat-elevation(1);
-            }
-
-            > .header {
-                flex: 0 1 auto;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-            }
-
-            > .content {
-                flex: 0 1 auto;
-            }
-        }
-    }
-}
-
-#add-contact-button {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    padding: 0;
-    z-index: 99;
-
-    @include media-breakpoint('xs') {
-        position: sticky;
-        top: calc(100vh - 120px);
-        bottom: auto;
-    }
-}
-
-#gp-step-ata-list {
-    .header {
-        min-height: 80px !important;
-        max-height: 80px !important;
-        border-radius: 8px;
-
-        .search-wrapper {
-            background: #ffffff;
-            width: 100%;
-            max-width: 480px;
-            border-radius: 28px;
-            overflow: hidden;
-            @include mat-elevation(1);
-
-            .search {
-                width: 100%;
-                height: 36px;
-                line-height: 36px;
-                padding: 0 18px;
-
-                input {
-                    width: 100%;
-                    height: 36px;
-                    min-height: 36px;
-                    max-height: 36px;
-                    padding: 0 16px;
-                    border: none;
-                    outline: none;
-                }
-            }
-        }
-    }
-
-    .content {
-        overflow: hidden;
-
-        .sidebar {
-            &:not(.locked-open) {
-                background: white;
             }
         }
     }

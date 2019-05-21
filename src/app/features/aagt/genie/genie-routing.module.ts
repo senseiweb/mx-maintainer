@@ -6,7 +6,6 @@ import {
 } from './action-item-manager';
 import { AimUowService } from './action-item-manager/aim-uow.service';
 import { GenListComponent } from './gen-list/gen-list.component';
-import { GenieBaseComponent } from './genie-base.component';
 import {
     GenerationDetailDialogComponent,
     PlannerComponent,
@@ -18,6 +17,7 @@ import {
     TriggerDetailDialogComponent
 } from './planner';
 
+import { AssetTriggerSidebarComponent } from './planner/step-ata-list/asset-trigger-sidebar/asset-trigger-sidebar.component';
 import { StepTeamManagerComponent } from './planner/step-tm-mgr/step-tm-mgr-component';
 import { TmAvailDetailDialogComponent } from './planner/step-tm-mgr/team-avail-detail/tm-avail-detail.dialog';
 import { TeamDetailDialogComponent } from './team-manager';
@@ -25,9 +25,9 @@ import { TeamListComponent } from './team-manager/team-list/team-list.component'
 import { TeamUowService } from './team-manager/team-uow.service';
 
 export const routedComponents = [
-    GenieBaseComponent,
     ActionItemsComponent,
     ActionItemDetailDialogComponent,
+    AssetTriggerSidebarComponent,
     TmAvailDetailDialogComponent,
     GenListComponent,
     TeamListComponent,
@@ -45,7 +45,6 @@ export const routedComponents = [
 const featureRoutes: Routes = [
     {
         path: 'genie',
-        component: GenieBaseComponent,
         children: [
             {
                 path: '',

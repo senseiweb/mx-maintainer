@@ -83,6 +83,7 @@ class NewTypeForStore {
     public typeDef: Partial<SpEntityDef<any>> = {};
     public newBzEntityType: EntityType | ComplexType;
     private entityProps: IBzEntityProps = {} as any;
+    // tslint:disable-next-line: ban-types
     private etConstructor: Function;
     private initializer: { [index: string]: (entity: any) => void } = {};
 

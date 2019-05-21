@@ -25,7 +25,9 @@ import { takeUntil } from 'rxjs/operators';
 import * as sa from 'sweetalert2';
 import { PlannerUowService } from '../../planner-uow.service';
 
-type TriggerModelProps = keyof Omit<RawEntity<Trigger>, 'completionTime'>;
+type TriggerModelProps =
+    | keyof Omit<RawEntity<Trigger>, 'completionTime'>
+    | 'triggerStartTime';
 type TriggerFormModel = { [key in TriggerModelProps]: any };
 
 @Component({
@@ -41,7 +43,11 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     isNew = false;
     isValid = false;
     dialogTitle: string;
-    private modelProps: TriggerModelProps[] = ['milestone', 'triggerDateRange'];
+    private modelProps: TriggerModelProps[] = [
+        'milestone',
+        'triggerStart',
+        'triggerStartTime'
+    ];
     private unsubscribeAll: Subject<any>;
 
     constructor(
@@ -67,11 +73,6 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
                 .add(1, 'day')
                 .toDate();
         }
-
-        this.currentTrigger['triggerDateRange'] = [
-            this.currentTrigger.triggerStart,
-            this.currentTrigger.triggerStop
-        ];
 
         this.dialogTitle = this.currentTrigger.entityAspect.entityState.isAdded()
             ? 'Create Trigger'
@@ -100,13 +101,13 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
         this.triggerFormGroup.setValidators(
             Validators.compose(frmGrpValidator)
         );
-        this.triggerFormGroup
-            .get('triggerDateRange')
-            .valueChanges.pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(([startDate, stopDate]) => {
-                this.currentTrigger.triggerStart = startDate;
-                this.currentTrigger.triggerStop = stopDate;
-            });
+        // this.triggerFormGroup
+        //     .get('triggerDateRange')
+        //     .valueChanges.pipe(takeUntil(this.unsubscribeAll))
+        //     .subscribe(([startDate, stopDate]) => {
+        //         this.currentTrigger.triggerStart = startDate;
+        //         this.currentTrigger.triggerStop = stopDate;
+        //     });
     }
 
     ngOnDestroy(): void {
@@ -136,7 +137,7 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
                 confirmDeletion: true
             };
 
-            this.dialogRef.close(diaResult);
+            return this.dialogRef.close(diaResult);
         }
 
         const config: sa.SweetAlertOptions = {
@@ -192,9 +193,10 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     acceptChanges(): void {
         this.modelProps.forEach(prop => {
             const formValue = this.triggerFormGroup.get(prop).value;
-            if (prop === 'triggerDateRange' && formValue) {
-                this.currentTrigger.triggerStart = formValue[0];
-                this.currentTrigger.triggerStop = formValue[1];
+            if (prop === 'triggerStartTime' && formValue) {
+                console.log(formValue);
+                // this.currentTrigger.triggerStart = formValue[0];
+                // this.currentTrigger.triggerStop = formValue[1];
             } else {
                 const currProp = this.currentTrigger[prop];
                 if (currProp !== formValue) {

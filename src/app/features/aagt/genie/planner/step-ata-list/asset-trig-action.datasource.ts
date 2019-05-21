@@ -40,14 +40,10 @@ export class AssetTriggerActionDataSource extends DataSource<
         ];
 
         return merge(...displayDataChanges).pipe(
-            tap(ec => {
-                console.log('Ata List');
-                console.log(ec);
-            }),
             map(noChoice => {
                 const assetFilter = this.assetFilterChange.value;
                 const triggerFilter = this.triggerFilterChange.value;
-                console.table(this.assetTrigActData);
+
                 return this.assetTrigActData.slice().filter(ata => {
                     let matchedRecord = false;
                     if (

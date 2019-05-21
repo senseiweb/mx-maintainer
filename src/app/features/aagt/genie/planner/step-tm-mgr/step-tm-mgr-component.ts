@@ -229,6 +229,8 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
          * numOfHours --> the shift duration (num of work hours);
          */
         const availDate = new FormControl();
+        const timeAvailStartTime = new FormControl();
+
         const repeatNum = new FormControl(0, [Validators.min(0)]);
         const numOfHours = new FormControl(1, [
             Validators.min(1),
@@ -236,6 +238,7 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         ]);
 
         this.teamAvailFormGroup = this.fb.group({
+            timeAvailStartTime,
             repeatNum,
             availDate,
             numOfHours
@@ -247,6 +250,7 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
          */
         repeatNum.disable();
         numOfHours.disable();
+        timeAvailStartTime.disable();
 
         /**
          * Watch the shift availability start date for changes, upon changes

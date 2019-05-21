@@ -30,13 +30,13 @@ const defaultFuseConfig: FuseConfig = {
             customBackgroundColor: false,
             background: 'fuse-white-500',
             hidden: false,
-            position: 'above-fixed'
+            position: 'below-fixed'
         },
         footer: {
             customBackgroundColor: true,
             background: 'fuse-navy-900',
             hidden: false,
-            position: 'above-static'
+            position: 'below-fixed'
         },
         sidepanel: {
             hidden: false,

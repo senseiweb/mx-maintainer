@@ -1,94 +1,69 @@
-// import {
-//     ChangeDetectorRef,
-//     Component,
-//     Input,
-//     OnDestroy,
-//     OnInit
-// } from '@angular/core';
-// import { Asset, Generation } from 'app/features/aagt/data';
-// import { Subject } from 'rxjs';
-// import { filter, take, takeUntil } from 'rxjs/operators';
-// import { PlannerUowService } from '../../planner-uow.service';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    OnDestroy,
+    OnInit,
+    Output
+} from '@angular/core';
+import * as _l from 'lodash';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { PlannerUowService } from '../../planner-uow.service';
 
-// @Component({
-//     selector: 'asset-trigger-sidebar',
-//     templateUrl: './asset-trigger-sidebar.component.html',
-//     styleUrls: ['./asset-trigger-sidebar.component.scss']
-// })
-// export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
-//     triggerNames: string[];
-//     triggerFilterBy: string;
-//     assetFilterBy: string;
-//     assetNames: string[];
-//     // Private
-//     private unsubscribeAll: Subject<any>;
+@Component({
+    selector: 'asset-trigger-sidebar',
+    templateUrl: './asset-trigger-sidebar.component.html',
+    styleUrls: ['./asset-trigger-sidebar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
+    @Output() assetFilterChange = new EventEmitter<string>();
+    triggerNames: string[];
+    assetFilterBy: string;
+    assetNames: string[];
+    // Private
+    private unsubscribeAll: Subject<any>;
 
-//     constructor(
-//         private uow: PlannerUowService,
-//         private cdRef: ChangeDetectorRef
-//     ) {
-//         // Set the private defaults
-//         this.unsubscribeAll = new Subject();
-//     }
+    constructor(
+        private planUow: PlannerUowService,
+        private cdRef: ChangeDetectorRef
+    ) {
+        // Set the private defaults
+        this.unsubscribeAll = new Subject();
+    }
 
-//     ngOnInit(): void {
-//         this.assetFilterBy = this.uow.onFilterChange.value.asset.filterText;
-//         this.triggerFilterBy = this.uow.onFilterChange.value.trigger.filterText;
-//         this.triggerNames = [
-//             ...new Set(
-//                 this.uow.currentGen.triggers.map(trigger => trigger.milestone)
-//             )
-//         ];
+    ngOnInit(): void {
+        this.assetFilterBy = 'all';
+        this.getAssetNames();
+        this.reactToModelChanges();
+    }
 
-//         this.uow.onStepperChange
-//             .pipe(
-//                 filter(stepEvent => stepEvent.selectedIndex === 5),
-//                 takeUntil(this.unsubscribeAll)
-//             )
-//             .subscribe(_ => {
-//                 this.cdRef.detectChanges();
-//             });
-//     }
+    ngOnDestroy(): void {
+        // Unsubscribe from all subscriptions
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
+    }
 
-//     ngOnDestroy(): void {
-//         // Unsubscribe from all subscriptions
-//         this.unsubscribeAll.next();
-//         this.unsubscribeAll.complete();
-//     }
+    filterByAsset(alias: string) {
+        this.assetFilterBy = alias;
+        this.assetFilterChange.emit(alias);
+    }
 
-//     filterActionsByAsset(alias: string): void {
-//         if (!alias) {
-//             this.uow.onFilterChange.next({
-//                 asset: {
-//                     filterText: 'all'
-//                 }
-//             });
-//             this.assetFilterBy = 'all';
-//         } else {
-//             this.uow.onFilterChange.next({
-//                 asset: {
-//                     filterText: 'all'
-//                 }
-//             });
-//             this.assetFilterBy = alias;
-//         }
-//     }
+    private getAssetNames(): void {
+        const assetNames = this.planUow.currentGen.generationAssets.map(
+            ga => ga.asset.alias
+        );
 
-//     filterActionsByTrigger(trigName: string): void {
-//         if (!trigName) {
-//             this.uow.onFilterChange.next({
-//                 trigger: {
-//                     filterText: 'all'
-//                 }
-//             });
-//             this.triggerFilterBy = 'all';
-//         } else {
-//             this.uow.onFilterChange.next({
-//                 trigger: {
-//                     filterText: trigName
-//                 }
-//             });
-//             this.triggerFilterBy = trigName;
-//         }
-//     }
-// }
+        /* Since the reference is changing should not need to call check for changes */
+        this.assetNames = [...new Set(assetNames)];
+    }
+
+    private reactToModelChanges(): void {
+        this.planUow.aagtEmService
+            .onModelChanges('GenerationAsset', 'EntityState')
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(_ => this.getAssetNames);
+    }
+}

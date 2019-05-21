@@ -42,14 +42,14 @@ import {
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { FuseSidebarModule, FuseWidgetModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
-import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
-
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
+import { MccTimerPickerModule } from 'material-community-components';
 import { MxCommonModule } from './common/common.module';
 
 @NgModule({
     imports: [
         CommonModule,
+        MccTimerPickerModule,
         MxCommonModule,
         CdkTableModule,
         CdkTreeModule,
@@ -92,11 +92,10 @@ import { MxCommonModule } from './common/common.module';
         FuseSharedModule,
         FuseWidgetModule,
         FuseSidebarModule,
-        NgxDnDModule,
-        OwlNativeDateTimeModule,
-        OwlDateTimeModule
+        NgxDnDModule
     ],
     exports: [
+        MccTimerPickerModule,
         CommonModule,
         CdkTableModule,
         CdkTreeModule,
@@ -140,9 +139,7 @@ import { MxCommonModule } from './common/common.module';
         FuseWidgetModule,
         FuseSidebarModule,
         NgxDnDModule,
-        MxCommonModule,
-        OwlNativeDateTimeModule,
-        OwlDateTimeModule
+        MxCommonModule
     ]
 })
 export class AppSharedModule {}

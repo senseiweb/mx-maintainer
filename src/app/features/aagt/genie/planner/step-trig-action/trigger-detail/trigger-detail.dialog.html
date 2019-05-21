@@ -10,14 +10,6 @@
                 <mat-icon>close</mat-icon>
             </button>
         </mat-toolbar-row>
-        <!-- 
-        <mat-toolbar-row
-            class="toolbar-bottom py-16"
-            fxLayout="column"
-            fxLayoutAlign="center center"
-        >
-            <div class="contact-name mt-8"></div>
-        </mat-toolbar-row> -->
     </mat-toolbar>
 
     <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
@@ -31,7 +23,7 @@
                         matInput
                     />
                     <mat-error>{{
-                        triggerFormGroup.errors?.Trigger_duplicateTriggerMiles
+                        !!triggerFormGroup.errors?.Trigger_duplicateTriggerMiles
                     }}</mat-error>
                 </mat-form-field>
             </div>
@@ -39,27 +31,33 @@
             <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
                     <mat-label>Trigger Date Range</mat-label>
-                    <mat-icon
-                        [owlDateTimeTrigger]="triggerRangePicker"
-                        matSuffix
-                        class="secondary-text"
-                        >date_range</mat-icon
-                    >
                     <input
                         matInput
-                        name="triggerDateRange"
-                        formControlName="triggerDateRange"
-                        placeholder="Trigger Dates"
-                        [selectMode]="'range'"
-                        [owlDateTime]="triggerRangePicker"
+                        name="triggerStart"
+                        formControlName="triggerStart"
+                        placeholder="Trigger Start"
+                        [matDatepicker]="triggerStartDatePicker"
                         [min]="generationStart"
                         [max]="generationStop"
                     />
-                    <owl-date-time
-                        [pickerMode]="'dialog'"
-                        [stepMinute]="30"
-                        #triggerRangePicker
-                    ></owl-date-time>
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="triggerStartDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #triggerStartDatePicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex>
+                    <mcc-timer-picker
+                        mccConnectedTimerPicker
+                        [mccConnectedTimerPickerOrigin]="triggerStartTimePicker"
+                    ></mcc-timer-picker>
+                    <input
+                        matInput
+                        mccTimerPickerOrigin
+                        #triggerStartTimePicker="mccTimerPickerOrigin"
+                        placeholder="Trigger Start Time"
+                        formControlName="tiggerStartTime"
+                    />
                 </mat-form-field>
             </div>
 

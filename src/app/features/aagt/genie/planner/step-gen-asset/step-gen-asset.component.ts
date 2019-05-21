@@ -140,6 +140,10 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
             .afterClosed()
             .pipe<IDialogResult<Generation>>(takeUntil(this.unsubscribeAll))
             .subscribe(result => {
+                if (!result || result.wasConceled) {
+                    return;
+                }
+
                 const stepper: IStepperModel = {
                     [PlannerSteps[PlannerSteps.GenAsset]]: {
                         isValid: result.value.entityAspect.validateEntity()

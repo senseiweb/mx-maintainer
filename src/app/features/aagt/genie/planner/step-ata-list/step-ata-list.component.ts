@@ -6,8 +6,9 @@ import {
     ViewChild,
     ViewEncapsulation
 } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material';
+import { IDialogResult } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/confirm-dialog.component';
 import { MinutesExpand } from 'app/common';
@@ -19,16 +20,11 @@ import {
     Trigger,
     TriggerAction
 } from 'app/features/aagt/data';
-import { EntityAction } from 'breeze-client';
-import * as _ from 'lodash';
+import * as _l from 'lodash';
 import { BehaviorSubject, Subject } from 'rxjs';
-import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
-    takeUntil
-} from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
+import { TriggerDetailDialogComponent } from '../step-trig-action/trigger-detail/trigger-detail.dialog';
 import { AssetTriggerActionDataSource } from './asset-trig-action.datasource';
 
 @Component({
@@ -48,6 +44,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
 
     triggers: Trigger[] = [];
+    triggerSelectionFormGroup: FormGroup;
     triggerFilterChange = new BehaviorSubject('');
     searchInput: FormControl;
     assets: Asset[];
@@ -89,15 +86,12 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
             this.triggerFilterChange,
             this.assetFilterChange
         );
-        this.searchInput.valueChanges
-            .pipe(
-                takeUntil(this.unsubscribeAll),
-                debounceTime(300),
-                distinctUntilChanged()
-            )
-            .subscribe(searchText => {
-                // this._contactsService.onSearchTextChanged.next(searchText);
-            });
+
+        /** Creates the trigger selection group */
+        this.triggerSelectionFormGroup = this.formBuilder.group({
+            trigger: new FormControl(this.currentTrigger)
+        });
+
         // this.planUow.onStepperChange.subscribe(stepEvent => {
         //     if (stepEvent.selectedIndex === 3) {
         //         this.planUow.reviewChanges();
@@ -114,20 +108,42 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    get assetFilter(): string {
-        return this.assetFilterChange.value;
-    }
-    set assetFilter(assetFilterText: string) {
+    changeAssetFilter(assetFilterText: string) {
         this.assetFilterChange.next(assetFilterText);
+    }
+
+    compareTrigger(trig1: Trigger, trig2: Trigger): boolean {
+        return trig1 && trig2 ? trig1.id === trig2.id : trig1 === trig2;
+    }
+
+    editTrigger(): void {
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.data = this.currentTrigger;
+        this.trigdialog
+            .open(TriggerDetailDialogComponent, dialogCfg)
+            .afterClosed()
+            .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
+            .subscribe(reesult => {
+                if (reesult.confirmDeletion) {
+                    if (!this.planUow.currentGen.triggers.length) {
+                        this.triggerSelectionFormGroup.controls[
+                            'trigger'
+                        ].setValue('');
+                    }
+                } else {
+                    // ReSort just in case the date was changed;
+                    this.triggers.sort(this.triggerSorter);
+                }
+            });
     }
 
     setFilterLookups(): void {
         this.triggers = this.planUow.currentGen.triggers;
-        const assets = _.flatMap(
+        const assets = _l.flatMap(
             this.planUow.currentGen.generationAssets,
             x => x.asset
         );
-        this.assets = _.uniqBy(assets, 'id');
+        this.assets = _l.uniqBy(assets, 'id');
     }
 
     private sortActionItem(data: ActionItem[], key): ActionItem[] {
@@ -147,5 +163,9 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     }
     set triggerFilter(triggerFilterText: string) {
         this.triggerFilterChange.next(triggerFilterText);
+    }
+
+    private triggerSorter = (a: Trigger, b: Trigger) => {
+        return a.triggerStart < b.triggerStart ? -1 : 1;
     }
 }

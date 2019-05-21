@@ -72,8 +72,8 @@
 
             <div fxLayout="row" fxLayoutAlign="start start">
                 <mat-form-field appearance="outline" fxFlex>
-                    <mat-label>Geneation Execution Dates</mat-label>
-                    <mat-icon
+                    <mat-label>Geneation Start</mat-label>
+                    <!-- <mat-icon
                         [owlDateTimeTrigger]="planRangePicker"
                         matSuffix
                         class="secondary-text"
@@ -92,7 +92,33 @@
                         [panelClass]="'dateDialog'"
                         #planRangePicker
                     >
-                    </owl-date-time>
+                    </owl-date-time> -->
+                    <input
+                        matInput
+                        matInput
+                        name="genStartDate"
+                        formControlName="genStartDate"
+                        placeholder="Planned Generation Start"
+                        [matDatepicker]="genStartDatePicker"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="genStartDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #genStartDatePicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex>
+                    <mcc-timer-picker
+                        mccConnectedTimerPicker
+                        [mccConnectedTimerPickerOrigin]="genStartTimePicker"
+                    ></mcc-timer-picker>
+                    <input
+                        matInput
+                        mccTimerPickerOrigin
+                        #genStartTimePicker="mccTimerPickerOrigin"
+                        placeholder="Geneartion Start Time"
+                        formControlName="genStartTime"
+                    />
                 </mat-form-field>
             </div>
 
