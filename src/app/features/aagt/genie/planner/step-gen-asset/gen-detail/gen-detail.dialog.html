@@ -70,31 +70,10 @@
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row" fxLayoutAlign="start start">
-                <mat-form-field appearance="outline" fxFlex>
+            <div fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-form-field appearance="outline" fxFlex="48">
                     <mat-label>Geneation Start</mat-label>
-                    <!-- <mat-icon
-                        [owlDateTimeTrigger]="planRangePicker"
-                        matSuffix
-                        class="secondary-text"
-                        >date_range</mat-icon
-                    >
                     <input
-                        matInput
-                        name="planDateRange"
-                        formControlName="planDateRange"
-                        placeholder="Planned Range"
-                        [selectMode]="'range'"
-                        [owlDateTime]="planRangePicker"
-                    />
-                    <owl-date-time
-                        [pickerMode]="'dialog'"
-                        [panelClass]="'dateDialog'"
-                        #planRangePicker
-                    >
-                    </owl-date-time> -->
-                    <input
-                        matInput
                         matInput
                         name="genStartDate"
                         formControlName="genStartDate"
@@ -107,56 +86,28 @@
                     ></mat-datepicker-toggle>
                     <mat-datepicker #genStartDatePicker></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field appearance="outline" fxFlex>
-                    <mcc-timer-picker
-                        mccConnectedTimerPicker
-                        [mccConnectedTimerPickerOrigin]="genStartTimePicker"
-                    ></mcc-timer-picker>
+
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Generation Start Time</mat-label>
                     <input
                         matInput
-                        mccTimerPickerOrigin
-                        #genStartTimePicker="mccTimerPickerOrigin"
+                        [ngxTimepicker]="genStartTimePicker"
+                        [format]="24"
                         placeholder="Geneartion Start Time"
                         formControlName="genStartTime"
                     />
+                    <ngx-material-timepicker-toggle
+                        [for]="genStartTimePicker"
+                        matSuffix
+                        class="secondary-text"
+                    ></ngx-material-timepicker-toggle>
+
+                    <ngx-material-timepicker
+                        [minutesGap]="15"
+                        #genStartTimePicker
+                    ></ngx-material-timepicker>
                 </mat-form-field>
             </div>
-
-            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
-                <mat-form-field appearance="outline" fxFlex>
-                    <input
-                        matInput
-                        name="getStartDate"
-                        formControlName="planDateRange"
-                        placeholder="Planned Start date"
-                        [selectMode]="'rangeFrom'"
-                        [owlDateTimeTrigger]="planStartPicker"
-                        [owlDateTime]="planStartPicker"
-                    />
-                    <owl-date-time
-                        [pickerMode]="'dialog'"
-                        #planStartPicker
-                    ></owl-date-time>
-                </mat-form-field>
-            </div>
-
-            <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
-                <mat-form-field appearance="outline" fxFlex>
-                    <input
-                        matInput
-                        name="genEndDate"
-                        [selectMode]="'rangeTo'"
-                        formControlName="planDateRange"
-                        placeholder="Planned Stop date"
-                        [owlDateTimeTrigger]="planStopPicker"
-                        [owlDateTime]="planStopPicker"
-                    />
-                    <owl-date-time
-                        [pickerMode]="'dialog'"
-                        #planStopPicker
-                    ></owl-date-time>
-                </mat-form-field>
-            </div> -->
         </form>
     </div>
 

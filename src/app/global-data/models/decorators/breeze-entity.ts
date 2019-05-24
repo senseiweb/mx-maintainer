@@ -1,3 +1,4 @@
+import { Validators } from '@angular/forms';
 import { SpListEntities } from '@ctypes/app-config';
 import { SpEntityDef } from '@ctypes/breeze-type-customization';
 import { MxmAppName, MxmAssignedModels } from 'app/app-config.service';
@@ -7,7 +8,8 @@ import {
     ComplexType,
     DataType,
     EntityType,
-    MetadataStore
+    MetadataStore,
+    Validator
 } from 'breeze-client';
 import {
     DataProperty,
@@ -108,6 +110,18 @@ class NewTypeForStore {
             .step7_CreateFormValidation()
             .step8_RemoveEntityScaffold()
             .step9_RegisterEntity();
+    }
+
+    private addValidator(prop: DataProperty, validator: Validator): void {
+        if (!validator) {
+            return;
+        } // no validator arg
+        const valName = validator.name;
+        const validators = prop.validators;
+        const exists = validators.some(val => val.name === valName);
+        if (!exists) {
+            validators.push(validator);
+        }
     }
 
     private step1_SetDefaults(): this {
@@ -264,6 +278,19 @@ class NewTypeForStore {
         dps.filter(dp => dp.dataType).forEach(dp => {
             const dt = dp.dataType as DataType;
 
+            /** Set required Validator for non-nullable types */
+            if (!dp.isNullable) {
+                this.addValidator(dp, Validator.required());
+            }
+
+            /** Set maxlength Validator  types */
+            if (dp.maxLength != null && dp.dataType === DataType.String) {
+                this.addValidator(
+                    dp,
+                    Validator.maxLength({ maxLength: dp.maxLength })
+                );
+            }
+
             /**
              * Look at each of the non-string data types
              * and discover if there are any Breeze validator based
@@ -273,13 +300,7 @@ class NewTypeForStore {
              */
             if (dp.dataType !== DataType.String) {
                 if (dt.validatorCtor) {
-                    const validator = dt.validatorCtor();
-                    const exists = dp.validators.some(
-                        val => val.name === validator.name
-                    );
-                    if (!exists) {
-                        dp.validators.push(validator);
-                    }
+                    this.addValidator(dp, dt.validatorCtor());
                 }
             }
 

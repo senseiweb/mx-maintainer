@@ -1,0 +1,38 @@
+<div class="sidebar-content">
+    <div class="card">
+        <!-- SIDEBAR CONTENT -->
+        <div class="content py-16" fusePerfectScrollbar>
+            <div class="nav material2">
+                <div class="nav-item" aria-label="inbox">
+                    <a
+                        class="nav-link"
+                        matRipple
+                        (click)="filterActionBy('all')"
+                        [ngClass]="{ 'active accent': actionItemFilterBy === 'all' }"
+                    >
+                        <span class="title">All Actions</span>
+                    </a>
+                </div>
+
+                <div *ngFor="let actionName of actionNames">
+                    <div
+                        class="nav-item"
+                        aria-label="action item"
+                        (click)="filterActionBy(actionName)"
+                    >
+                        <a
+                            class="nav-link"
+                            matRipple
+                            [ngClass]="{
+                                'active accent': actionItemFilterBy === actionName
+                            }"
+                        >
+                            <div class="title">{{ actionName }}</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- / SIDEBAR CONTENT -->

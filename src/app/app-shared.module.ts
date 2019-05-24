@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { CommonModule } from '@angular/common';
@@ -39,17 +40,19 @@ import {
     MatTooltipModule,
     MatTreeModule
 } from '@angular/material';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
+
 import { FuseSidebarModule, FuseWidgetModule } from '@fuse/components';
 import { FuseSharedModule } from '@fuse/shared.module';
 import { NgxDnDModule } from '@swimlane/ngx-dnd';
 import { MccTimerPickerModule } from 'material-community-components';
+import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { MxCommonModule } from './common/common.module';
 
 @NgModule({
     imports: [
         CommonModule,
-        MccTimerPickerModule,
+        DragDropModule,
+        NgxMaterialTimepickerModule,
         MxCommonModule,
         CdkTableModule,
         CdkTreeModule,
@@ -71,7 +74,6 @@ import { MxCommonModule } from './common/common.module';
         MatInputModule,
         MatListModule,
         MatMenuModule,
-        MatMomentDateModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
@@ -95,7 +97,8 @@ import { MxCommonModule } from './common/common.module';
         NgxDnDModule
     ],
     exports: [
-        MccTimerPickerModule,
+        DragDropModule,
+        NgxMaterialTimepickerModule,
         CommonModule,
         CdkTableModule,
         CdkTreeModule,
@@ -117,7 +120,6 @@ import { MxCommonModule } from './common/common.module';
         MatInputModule,
         MatListModule,
         MatMenuModule,
-        MatMomentDateModule,
         MatPaginatorModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,

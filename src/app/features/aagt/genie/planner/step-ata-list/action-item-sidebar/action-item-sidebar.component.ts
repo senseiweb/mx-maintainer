@@ -13,17 +13,16 @@ import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../../planner-uow.service';
 
 @Component({
-    selector: 'asset-trigger-sidebar',
-    templateUrl: './asset-trigger-sidebar.component.html',
-    styleUrls: ['./asset-trigger-sidebar.component.scss'],
+    selector: 'action-item-sidebar',
+    templateUrl: './action-item-sidebar.component.html',
+    styleUrls: ['./action-item-sidebar.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
-    @Output() assetFilterChange = new EventEmitter<string>();
-    triggerNames: string[];
-    assetFilterBy: string;
-    assetNames: string[];
-    // Private
+export class ActionItemSidebarComponent implements OnInit, OnDestroy {
+    @Output() actionItemFilterChange = new EventEmitter<string>();
+    actionNames: string[];
+    actionItemFilterBy: string;
+
     private unsubscribeAll: Subject<any>;
 
     constructor(
@@ -35,8 +34,8 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.assetFilterBy = 'all';
-        this.getAssetNames();
+        this.actionItemFilterBy = 'all';
+        this.getActionNames();
         this.reactToModelChanges();
     }
 
@@ -46,24 +45,24 @@ export class AssetTriggerSidebarComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    filterByAsset(alias: string) {
-        this.assetFilterBy = alias;
-        this.assetFilterChange.emit(alias);
+    filterActionBy(actionName: string) {
+        this.actionItemFilterBy = actionName;
+        this.actionItemFilterChange.emit(actionName);
     }
 
-    private getAssetNames(): void {
-        const assetNames = this.planUow.currentGen.generationAssets.map(
-            ga => ga.asset.alias
+    private getActionNames(): void {
+        const actionNames = _l.flatMap(this.planUow.currentGen.triggers, x =>
+            x.triggerActions.map(ta => ta.actionItem.action)
         );
 
         /* Since the reference is changing should not need to call check for changes */
-        this.assetNames = [...new Set(assetNames)];
+        this.actionNames = [...new Set(actionNames)];
     }
 
     private reactToModelChanges(): void {
         this.planUow.aagtEmService
-            .onModelChanges('GenerationAsset', 'EntityState')
+            .onModelChanges('TriggerAction', 'EntityState')
             .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(_ => this.getAssetNames);
+            .subscribe(_ => this.getActionNames());
     }
 }

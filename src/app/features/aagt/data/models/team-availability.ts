@@ -22,10 +22,9 @@ export class TeamAvailability extends SpEntityBase {
 
     get isFullyBooked(): boolean {
         const totalJobTime = _m.duration(0);
-        const availShiftTime = _m.duration(this.manHoursAvail);
+        const availShiftTime = _m.duration(this.manHoursAvail, 'minutes');
         this.jobReservations.forEach(jr => {
-            const jobTime = _m.duration(jr.jobEnd.diff(jr.jobStart));
-            totalJobTime.add(jobTime);
+            totalJobTime.add(_m.duration(jr.jobEnd.diff(jr.jobStart)));
         });
         return availShiftTime.subtract(totalJobTime).asHours() < 1;
     }

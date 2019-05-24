@@ -1,5 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 import { DataType, Validator } from 'breeze-client';
+import * as _m from 'moment';
 import { SpEntityBase } from '../_entity-base';
 import { SpMetadata } from '../sp-metadata';
 import {
@@ -45,8 +46,15 @@ export class BzPropCollection {
  */
 export const bzPropValidatorWrapper = (validator: Validator) => {
     return (c: AbstractControl): { [error: string]: any } => {
-        const result = validator.validate(c.value, validator.context);
-        return result ? { [c.value]: result.errorMessage } : null;
+        let currentValue = c.value;
+        /**
+         * Mat-Date Picker uses momentjs dates in form controls,
+         */
+        if (currentValue && _m.isMoment(currentValue)) {
+            currentValue = c.value.toDate();
+        }
+        const result = validator.validate(currentValue, validator.context);
+        return result ? { [currentValue]: result.errorMessage } : null;
     };
 };
 
@@ -74,9 +82,7 @@ export const bzEntityValidatorWrapper = (
             const result = validator.validate(entity, validator.context);
             /** The validator name that will be added the formgroup.errors.[NAME] */
             const validatorName = `${entity.shortname}_${validator.name}`;
-            return result
-                ? { [validatorName]: result.errorMessage }
-                : null;
+            return result ? { [validatorName]: result.errorMessage } : null;
         };
     };
 };

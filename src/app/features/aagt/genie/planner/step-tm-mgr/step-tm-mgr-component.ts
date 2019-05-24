@@ -73,6 +73,7 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
     hasTeams = false;
     hasStartDate = false;
     defaultStart: Date;
+    invalidStartDate: _m.Moment;
     teamsDataSource: TeamDataSource;
     teamAvailDataSoure: TeamAvailDataSource;
     teamAvailSelection: SelectionModel<TeamAvailability> = new SelectionModel(
@@ -80,7 +81,6 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         []
     );
     generationStart: Date;
-    generawtionStop: Date;
     teamTableColumns = [
         'teamName',
         'teamCat',
@@ -101,6 +101,8 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
     currentCategory: TeamCategory;
     numOfDaysLeftInGeneration: number;
     teamCatSelectionFormGroup: FormGroup;
+
+  
     private onFilterTeamCategoryChange = new BehaviorSubject('');
     private onExpandedTeamChange: BehaviorSubject<Team> = new BehaviorSubject(
         {} as any
@@ -109,9 +111,20 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
     private unsubscribeAll: Subject<any>;
 
+    markGenAndTriggerDate = (d: _m.Moment): string | undefined => {
+        const triggers = this.planUow.currentGen.triggers;
+        let markDate: string;
+        if (d.isSame(this.generationStart, 'd')) {
+            markDate = 'generation-start-marker';
+        }
+        return triggers.some(trig => d.isSame(trig.triggerStart, 'd'))
+            ? markDate
+                ? 'gen-trig-start-marker'
+                : 'trigger-start-marker'
+            : markDate;
+    }
     constructor(
         private planUow: PlannerUowService,
-        private teamDetailDialog: MatDialog,
         private fb: FormBuilder
     ) {
         this.unsubscribeAll = new Subject();
@@ -121,7 +134,6 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
         this.getTeamCategories();
 
         this.generationStart = this.planUow.currentGen.genStartDate;
-        this.generawtionStop = this.planUow.currentGen.genEndDate;
 
         this.defaultStart = this.planUow.currentGen.genStartDate;
 
@@ -154,9 +166,19 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
     addAvailability(): void {
         const startDate = this.teamAvailFormGroup.get('availDate').value;
+        const startTime = this.teamAvailFormGroup.get('timeAvailStartTime').value;
         const numOfHours = this.teamAvailFormGroup.get('numOfHours').value;
         let repeatNum = this.teamAvailFormGroup.get('repeatNum').value;
+
         const shiftStart = _m(startDate);
+
+        if (startTime) {
+            const timeParts = startTime.split(':');
+            shiftStart.set({
+                h: +timeParts[0],
+                m: +timeParts[1]
+            });
+        }
 
         do {
             const shiftEnd = shiftStart.clone().add(numOfHours, 'h');
@@ -262,15 +284,11 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
             .subscribe(beginDate => {
                 this.hasStartDate = !!beginDate;
                 if (beginDate) {
-                    this.numOfDaysLeftInGeneration = _m(
-                        this.generawtionStop
-                    ).diff(beginDate, 'day');
-
                     repeatNum.setValidators([
                         Validators.min(0),
                         Validators.max(this.numOfDaysLeftInGeneration)
                     ]);
-
+                    timeAvailStartTime.enable();
                     numOfHours.enable();
                     repeatNum.enable();
                 } else {
@@ -420,13 +438,11 @@ export class StepTeamManagerComponent implements OnInit, OnDestroy {
 
     private setValidDateRange(): void {
         this.generationStart = this.planUow.currentGen.genStartDate;
-        this.generawtionStop = this.planUow.currentGen.genEndDate;
     }
 
     tallyTotal(team: Team): number {
         return team.calTotalAvailDuringGen(
-            this.generationStart,
-            this.generawtionStop
+            this.generationStart
         );
     }
 }

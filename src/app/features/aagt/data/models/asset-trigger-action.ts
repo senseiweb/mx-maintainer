@@ -13,7 +13,9 @@ type AtaAllowedActionStatus =
     | 'unplanned'
     | 'planned'
     | 'unscheduled'
-    | 'in-progress'
+    | 'in-progress [on-time]'
+    | 'in-progress [late]'
+    | 'in-progress [early]'
     | 'scheduled'
     | 'rescheduled'
     | 'delayed';

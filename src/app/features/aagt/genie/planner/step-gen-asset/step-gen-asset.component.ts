@@ -1,3 +1,4 @@
+import { NullViewportScroller } from '@angular/common/src/viewport_scroller';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { IDialogResult, RawEntity } from '@ctypes/breeze-type-customization';
@@ -201,17 +202,19 @@ export class StepGenAssetComponent implements OnInit, OnDestroy {
          * we do not cause a false modification that Breeze will detect.
          */
         this.selectedCached.forEach((scAsset, index) => {
-            const mxPosition = index + 1;
+            const newPosition = index + 1;
             const genAsset = genAssets.find(ga => ga.assetId === scAsset.id);
+            const currentPosition = genAsset.mxPosition;
 
-            genAsset.mxPosition =
-                genAsset.mxPosition !== mxPosition && mxPosition;
+            if (!currentPosition || newPosition !== currentPosition) {
+                genAsset.mxPosition = newPosition;
+            }
 
             /**
              * Finally define the asset's "mxPosition" so that the picker will
              * use the correct template.
              */
-            scAsset['mxPosition'] = mxPosition;
+            scAsset['mxPosition'] = newPosition;
         });
 
         this.unSelectedCahched.sort(this.unselectedCacheSorter);

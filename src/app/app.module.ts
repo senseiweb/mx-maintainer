@@ -9,10 +9,18 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
 import {
     cfgFetchUserData,
     cfgSetNavStructure,
+    MY_FORMATS,
     SpConfig
 } from './app-config.service';
 
+import {
+    DateAdapter,
+    MAT_DATE_FORMATS,
+    MAT_DATE_LOCALE
+} from '@angular/material';
+import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { AppRoutingModule } from './app-routing.module';
+import { AppSharedModule } from './app-shared.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core';
 import { GlobalDataModule } from './global-data';
@@ -46,20 +54,20 @@ function loadCtx(fuseNav: FuseNavigationService): () => Promise<boolean> {
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [GlobalDataModule, CoreModule, UserModule, AppRoutingModule],
+    imports: [
+        GlobalDataModule,
+        CoreModule,
+        UserModule,
+        AppSharedModule,
+        AppRoutingModule
+    ],
     providers: [
-        // { provide: ErrorHandler, useClass: AppErrorHandler},
-        // { provide: RollbarService, useFactory: rollbarFactory }
         {
             provide: APP_INITIALIZER,
             useFactory: loadCtx,
             multi: true,
             deps: [FuseNavigationService]
         }
-        // {
-        //     provide: tokens.get('tokenName'),
-        //     useValue: new Service()
-        // }
     ],
     bootstrap: [AppComponent]
 })

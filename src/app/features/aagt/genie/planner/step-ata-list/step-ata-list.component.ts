@@ -1,9 +1,9 @@
 import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     OnDestroy,
     OnInit,
-    TemplateRef,
-    ViewChild,
     ViewEncapsulation
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -33,32 +33,26 @@ import { AssetTriggerActionDataSource } from './asset-trig-action.datasource';
     styleUrls: ['./step-ata-list.component.scss'],
     animations: fuseAnimations,
     encapsulation: ViewEncapsulation.None,
-    providers: [MinutesExpand]
+    providers: [MinutesExpand],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StepAtaListComponent implements OnInit, OnDestroy {
-    assetFilterChange = new BehaviorSubject('');
+    assetFilterChange = new BehaviorSubject('all');
+    actionFilterChange = new BehaviorSubject('all');
+    triggerFilterChange = new BehaviorSubject('all');
 
-    @ViewChild('dialogContent')
-    dialogContent: TemplateRef<any>;
-
-    currentTrigger: Trigger;
-
-    triggers: Trigger[] = [];
+    triggerMilestones: string[] = [];
     triggerSelectionFormGroup: FormGroup;
-    triggerFilterChange = new BehaviorSubject('');
-    searchInput: FormControl;
-    assets: Asset[];
     assetTriggerActions: AssetTriggerAction[];
-    user: any;
     dataSource: AssetTriggerActionDataSource;
     displayedColumns = [
-        'checkbox',
         'sequence',
         'alias',
         'action',
         'trigger',
         'status',
-        'outcome'
+        'plannedStart',
+        'buttons'
     ];
 
     selectedContacts: any[];
@@ -66,41 +60,26 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     dialogRef: any;
     confirmDialogRef: MatDialogRef<FuseConfirmDialogComponent>;
 
-    private unsubscribeAll: Subject<any>;
-    private genAssets: GenerationAsset[];
-    private triggerActions: TriggerAction[];
+    private unsubscribeAll: Subject<any> = new Subject();
 
     constructor(
         private planUow: PlannerUowService,
         private formBuilder: FormBuilder,
         private trigdialog: MatDialog,
-        private deleteDialog: MatDialog
-    ) {
-        this.unsubscribeAll = new Subject();
-        this.searchInput = new FormControl('');
-    }
+        private deleteDialog: MatDialog,
+        private cdRef: ChangeDetectorRef
+    ) {}
 
     ngOnInit() {
         this.dataSource = new AssetTriggerActionDataSource(
             this.planUow,
             this.triggerFilterChange,
-            this.assetFilterChange
+            this.assetFilterChange,
+            this.actionFilterChange
         );
 
-        /** Creates the trigger selection group */
-        this.triggerSelectionFormGroup = this.formBuilder.group({
-            trigger: new FormControl(this.currentTrigger)
-        });
-
-        // this.planUow.onStepperChange.subscribe(stepEvent => {
-        //     if (stepEvent.selectedIndex === 3) {
-        //         this.planUow.reviewChanges();
-        //     }
-        // });
-
-        this.planUow.aagtEmService
-            .onModelChanges(['TriggerAction', 'GenerationAsset'], 'EntityState')
-            .subscribe(notUsed => this.setFilterLookups());
+        this.createFormGroup();
+        this.reactToModelChanges();
     }
 
     ngOnDestroy(): void {
@@ -112,39 +91,67 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
         this.assetFilterChange.next(assetFilterText);
     }
 
-    compareTrigger(trig1: Trigger, trig2: Trigger): boolean {
-        return trig1 && trig2 ? trig1.id === trig2.id : trig1 === trig2;
+    changeActionFilter(actionFilterText: string) {
+        this.actionFilterChange.next(actionFilterText);
     }
 
-    editTrigger(): void {
-        const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.currentTrigger;
-        this.trigdialog
-            .open(TriggerDetailDialogComponent, dialogCfg)
-            .afterClosed()
-            .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
-            .subscribe(reesult => {
-                if (reesult.confirmDeletion) {
-                    if (!this.planUow.currentGen.triggers.length) {
-                        this.triggerSelectionFormGroup.controls[
-                            'trigger'
-                        ].setValue('');
-                    }
-                } else {
-                    // ReSort just in case the date was changed;
-                    this.triggers.sort(this.triggerSorter);
-                }
+    createFormGroup(): void {
+        const triggerMilestone = new FormControl('all');
+
+        triggerMilestone.valueChanges
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(milestone => this.triggerFilterChange.next(milestone));
+
+        /** Creates the trigger selection group */
+        this.triggerSelectionFormGroup = this.formBuilder.group({
+            triggerMilestone
+        });
+
+        this.updateTrigger();
+    }
+
+    planGeneration(triggerId?: number): void {
+        this.planUow.planAssetTaskActions();
+    }
+
+    reactToModelChanges(): void {
+        this.planUow.aagtEmService
+            .onModelChanges('Trigger', 'PropertyChange', 'milestone')
+            .pipe(takeUntil(this.unsubscribeAll))
+            .subscribe(_ => {
+                this.updateTrigger();
             });
     }
 
-    setFilterLookups(): void {
-        this.triggers = this.planUow.currentGen.triggers;
-        const assets = _l.flatMap(
-            this.planUow.currentGen.generationAssets,
-            x => x.asset
-        );
-        this.assets = _l.uniqBy(assets, 'id');
-    }
+    // editTrigger(): void {
+    //     const dialogCfg = new MatDialogConfig();
+    //     dialogCfg.data = this.currentTrigger;
+    //     this.trigdialog
+    //         .open(TriggerDetailDialogComponent, dialogCfg)
+    //         .afterClosed()
+    //         .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
+    //         .subscribe(reesult => {
+    //             if (reesult.confirmDeletion) {
+    //                 if (!this.planUow.currentGen.triggers.length) {
+    //                     this.triggerSelectionFormGroup.controls[
+    //                         'trigger'
+    //                     ].setValue('');
+    //                 }
+    //             } else {
+    //                 // ReSort just in case the date was changed;
+    //                 this.triggers.sort(this.triggerSorter);
+    //             }
+    //         });
+    // }
+
+    // setFilterLookups(): void {
+    //     this.triggers = this.planUow.currentGen.triggers;
+    //     const assets = _l.flatMap(
+    //         this.planUow.currentGen.generationAssets,
+    //         x => x.asset
+    //     );
+    //     this.assets = _l.uniqBy(assets, 'id');
+    // }
 
     private sortActionItem(data: ActionItem[], key): ActionItem[] {
         return data.sort((a: ActionItem, b: ActionItem) => {
@@ -158,14 +165,13 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
         });
     }
 
-    get triggerFilter(): string {
-        return this.triggerFilterChange.value;
-    }
-    set triggerFilter(triggerFilterText: string) {
-        this.triggerFilterChange.next(triggerFilterText);
-    }
-
     private triggerSorter = (a: Trigger, b: Trigger) => {
         return a.triggerStart < b.triggerStart ? -1 : 1;
+    }
+
+    private updateTrigger(): void {
+        const triggers = this.planUow.currentGen.triggers;
+        triggers.sort(this.triggerSorter);
+        this.triggerMilestones = triggers.map(trig => trig.milestone);
     }
 }

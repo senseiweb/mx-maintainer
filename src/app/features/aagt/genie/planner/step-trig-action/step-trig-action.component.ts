@@ -12,6 +12,9 @@ import { PlannerUowService } from '../planner-uow.service';
 import { PlannerSteps } from '../planner.component';
 import { TriggerDetailDialogComponent } from './trigger-detail/trigger-detail.dialog';
 
+interface IActionItemExtended extends ActionItem {
+    sequence: number;
+}
 @Component({
     selector: 'genie-plan-trig-actions',
     templateUrl: './step-trig-action.component.html',
@@ -24,8 +27,8 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     currentTrigger: Trigger;
     triggers: Trigger[];
     private stepValid = false;
-    selectedCache: ActionItem[] = [];
-    unSelectedCache: ActionItem[] = [];
+    selectedCache: IActionItemExtended[] = [];
+    unSelectedCache: IActionItemExtended[] = [];
     triggerSelectionFormGroup: FormGroup;
     completionTime: number;
 
@@ -172,7 +175,8 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
     }
 
     filterBasedOnTrigger(selectedTrigger: Trigger): void {
-        const actionItems = this.planUow.allActionItems;
+        const actionItems = this.planUow
+            .allActionItems as IActionItemExtended[];
         const triggerActionItems = selectedTrigger
             ? selectedTrigger.triggerActions.filter(
                   trigAct => !trigAct.isSoftDeleted
@@ -188,10 +192,10 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
             );
 
             if (existingTrigAct) {
-                ai['sequence'] = existingTrigAct.sequence;
+                ai.sequence = existingTrigAct.sequence;
                 this.selectedCache.push(ai);
             } else {
-                ai['sequnce'] = undefined;
+                ai.sequence = undefined;
                 this.unSelectedCache.push(ai);
             }
         });
@@ -226,9 +230,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
 
     createNewTrigger(): void {
         const dialogCfg = new MatDialogConfig();
-        dialogCfg.data = this.planUow.createNewTrigger(
-            this.planUow.currentGen.id
-        );
+        dialogCfg.data = this.planUow.currentGen.createChild('Trigger', {});
         dialogCfg.disableClose = true;
         dialogCfg.panelClass = 'trigger-detail-dialog';
         this.trigdialog
@@ -249,16 +251,20 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
 
                 this.triggers.sort(this.triggerSorter);
 
-                this.triggerSelectionFormGroup.controls['trigger'].setValue(
-                    result.value || this.triggers[0]
+                const trigControl = this.triggerSelectionFormGroup.get(
+                    'trigger'
                 );
 
+                trigControl.setValue(result.value || this.triggers[0]);
+
+                const newTrigger = trigControl.value as Trigger;
+                this.filterBasedOnTrigger(newTrigger);
                 this.updateStepValidity(true);
             });
     }
 
     /** Called by the picker when items are added to selected list */
-    removeActionItem($event: { items: ActionItem[] }): void {
+    removeActionItem($event: { items: IActionItemExtended[] }): void {
         const triggerActions = this.currentTrigger.triggerActions;
         /**
          * Loap over all the asset items that were removed from the selected list
@@ -282,7 +288,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
              * Finally set the "sequence" as undefined so that the picker will
              * use the correct template.
              */
-            actionItem['sequence'] = undefined;
+            actionItem.sequence = undefined;
         });
 
         this.completionTime = this.calculateCompeletionTime();
@@ -299,23 +305,29 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
         const triggerActions = this.currentTrigger.triggerActions;
 
         this.selectedCache.forEach((scAction, index) => {
-            const sequence = index + 1;
+            const newSequence = index + 1;
             const trigAction = triggerActions.find(
                 trigAct =>
                     trigAct.actionItemId === scAction.id &&
                     !trigAct.isSoftDeleted
             );
+            const currentSequence = trigAction.sequence;
 
-            trigAction.sequence = trigAction.sequence !== sequence && sequence;
+            if (!currentSequence || newSequence !== currentSequence) {
+                trigAction.sequence = newSequence;
+            }
 
-            scAction['sequence'] = sequence;
+            scAction.sequence = newSequence;
         });
 
         this.unSelectedCache.sort(this.unselectedCacheSorter);
     }
 
-    private selectCacheSorter = (a: ActionItem, b: ActionItem): number => {
-        return a['sequence'] < b['sequence'] ? -1 : 1;
+    private selectCacheSorter = (
+        a: IActionItemExtended,
+        b: IActionItemExtended
+    ): number => {
+        return a.sequence < b.sequence ? -1 : 1;
     }
 
     private triggerSorter = (a: Trigger, b: Trigger) => {

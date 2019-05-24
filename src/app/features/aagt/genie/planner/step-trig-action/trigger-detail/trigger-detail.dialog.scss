@@ -22,24 +22,9 @@
             height: auto;
         }
     }
+}
 
-    .dialog-content-wrapper {
-        .owl-dt-container {
-            font: 16px;
-        }
-        max-height: 85vh;
-        width: 500px;
-        display: flex;
-        flex-direction: column;
-    }
-}
-.owl-dt-container {
-    &.owl-dt-dialog-container {
-        font-size: 1em;
-    }
-}
-.dateDialog {
-    &.owl-dt-dialog {
-        font-size: 1.1em;
-    }
+.generation-start-marker {
+    background: orange;
+    border-radius: 100%;
 }

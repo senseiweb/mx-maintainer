@@ -16,16 +16,15 @@
                 <div fxLayout="row">
                     <form [formGroup]="triggerSelectionFormGroup">
                         <mat-form-field floatLabel="never">
-                            <mat-select
-                                placeholder="Select Trigger"
-                                formControlName="trigger"
-                                [compareWith]="compareTrigger"
-                            >
+                            <mat-select formControlName="triggerMilestone">
+                                <mat-option [value]="'all'">
+                                    --All Triigger--
+                                </mat-option>
                                 <mat-option
-                                    *ngFor="let trigger of triggers"
-                                    [(value)]="trigger"
+                                    *ngFor="let milestone of triggerMilestones"
+                                    [value]="milestone"
                                 >
-                                    {{ trigger.milestone }}
+                                    {{ milestone }}
                                 </mat-option>
                             </mat-select>
                         </mat-form-field>
@@ -41,20 +40,20 @@
                     <mat-menu #menu="matMenu">
                         <button
                             mat-menu-item
-                            [disabled]="!triggers.length"
+                            [disabled]="!triggerMilestones.length"
                             (click)="editTrigger()"
                         >
                             <span>Modify Trigger</span>
                         </button>
                         <button
                             mat-menu-item
-                            [disabled]="!triggers.length"
+                            [disabled]="!triggerMilestones.length"
                             (click)="editTrigger()"
                             (click)="createNewTrigger()"
                         >
                             <span>Plan Trigger</span>
                         </button>
-                        <button mat-menu-item (click)="createNewTrigger()">
+                        <button mat-menu-item (click)="planGeneration()">
                             <span>Plan All</span>
                         </button>
                     </mat-menu>
@@ -76,43 +75,40 @@
         >
             <!-- SIDEBAR CONTENT -->
             <div class="content" fusePerfectScrollbar>
-                <asset-trigger-sidebar
+                <asset-sidebar
                     (assetFilterChange)="changeAssetFilter($event)"
                     [@animate]="{ value: '*' }"
-                ></asset-trigger-sidebar>
+                ></asset-sidebar>
+            </div>
+            <div class="content" fusePerfectScrollbar>
+                <action-item-sidebar
+                    (actionItemFilterChange)="changeActionFilter($event)"
+                    [@animate]="{ value: '*' }"
+                ></action-item-sidebar>
             </div>
             <!-- / SIDEBAR CONTENT -->
         </fuse-sidebar>
         <!-- / SIDEBAR -->
 
         <!-- CENTER -->
-        <div class="center p-24 pb-56 pr-sm-92" fusePerfectScrollbar>
+        <div class="center p-24 pb-56 pr-sm-30">
             <!-- CONTENT -->
-            <div class="content">
+            <div                      #ataTable            class="content">
                 <mat-table
-                    #table
+                    fusePerfectScrollbar
                     [dataSource]="dataSource"
                     [@animateStagger]="{ value: '50' }"
+                    cdkDropList
+                    (cdkDropListDropped)="dropTable($event)"
                 >
-                    <!-- Checkbox Column -->
-                    <ng-container matColumnDef="checkbox">
-                        <mat-header-cell *matHeaderCellDef></mat-header-cell>
-                        <mat-cell *matCellDef="let ata">
-                            <mat-checkbox
-                                [(ngModel)]="checkboxes[ata.id]"
-                                (click)="$event.stopPropagation()"
-                            >
-                            </mat-checkbox>
-                        </mat-cell>
-                    </ng-container>
-
+                    
                     <!-- Sequence Column -->
                     <ng-container matColumnDef="sequence">
                         <mat-header-cell *matHeaderCellDef
                             >Sequence</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="font-weight-600">{{ ata?.sequence }}</p>
+                            {{ ata?.sequence }}
                         </mat-cell>
                     </ng-container>
 
@@ -122,9 +118,7 @@
                             >Alias</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="text-truncate font-weight-600">
-                                {{ ata?.genAsset?.asset?.alias }}
-                            </p>
+                            {{ ata?.genAsset?.asset?.alias }}
                         </mat-cell>
                     </ng-container>
 
@@ -134,9 +128,7 @@
                             >Action</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="text-truncate font-weight-600">
-                                {{ ata?.triggerAction?.actionItem?.action }}
-                            </p>
+                            {{ ata?.triggerAction?.actionItem?.action }}
                         </mat-cell>
                     </ng-container>
 
@@ -146,9 +138,7 @@
                             >Trigger</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="text-truncate font-weight-600">
-                                {{ ata?.triggerAction?.trigger?.milestone }}
-                            </p>
+                            {{ ata?.triggerAction?.trigger?.milestone }}
                         </mat-cell>
                     </ng-container>
 
@@ -158,21 +148,50 @@
                             >Status</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="text-truncate font-weight-600">
-                                {{ ata?.actionStatus }}
-                            </p>
+                            {{ ata?.actionStatus }}
                         </mat-cell>
                     </ng-container>
 
-                    <!-- Outcome Column -->
-                    <ng-container matColumnDef="outcome">
+                    <!-- Planned Start Column -->
+                    <ng-container matColumnDef="plannedStart">
                         <mat-header-cell *matHeaderCellDef
-                            >Outcome</mat-header-cell
+                            >Planned Start/Stop</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            <p class="text-truncate font-weight-600">
-                                {{ ata?.outcome }}
-                            </p>
+                            {{ ata?.plannedStart | date: 'dd-MMM HHmm' }} <br />
+                            {{ ata?.plannedStop | date: 'dd-MMM HHmm' }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Buttons Column -->
+                    <ng-container matColumnDef="buttons">
+                        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                        <mat-cell *matCellDef="let ata">
+                            <mat-icon cdkDragHandle>reorder</mat-icon>
+
+                            <div fxFlex="row" fxLayoutAlign="end center">
+                                <button
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="moreMenu"
+                                    aria-label="More"
+                                    (click)="$event.stopPropagation()"
+                                >
+                                    <mat-icon class="secondary-text"
+                                        >more_vert</mat-icon
+                                    >
+                                </button>
+
+                                <mat-menu #moreMenu="matMenu">
+                                    <button
+                                        mat-menu-item
+                                        aria-label="remove"
+                                        (click)="deleteContact(contact)"
+                                    >
+                                        <mat-icon>delete</mat-icon>
+                                        <span>Remove</span>
+                                    </button>
+                                </mat-menu>
+                            </div>
                         </mat-cell>
                     </ng-container>
 
@@ -181,8 +200,10 @@
                     ></mat-header-row>
                     <mat-row
                         *matRowDef="let ata; columns: displayedColumns"
-                        class="contact"
+                        cdkDrag
+                        [cdkDragData]="ata"
                         matRipple
+                        (click)="editContact(contact)"
                         [@animate]="{ value: '*', params: { y: '100%' } }"
                     >
                     </mat-row>

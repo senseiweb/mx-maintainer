@@ -1,9 +1,10 @@
 import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
-import * as _ from 'lodash';
+import * as _l from 'lodash';
 import * as _m from 'moment';
-import { IJobReservation, TeamAvailability } from './team-availability';
+import { RequestError } from 'request-promise/errors';
 import { Team } from './team';
+import { IJobReservation, TeamAvailability } from './team-availability';
 
 export interface IJobReservateionRequest {
     taskId: number;
@@ -37,65 +38,134 @@ export class TeamCategory extends SpEntityBase {
     addJobReservation = (
         request: IJobReservateionRequest
     ): IJobReservationReceipt => {
+        /** Capture the ideal task start period */
         let start = request.requestedStartDate;
+
+        /** Create a receipt holder */
         const receipt: IJobReservationReceipt = {} as any;
+
+        /** Iterate over the task duration until all has been scheduled */
         while (request.taskDuration.asMinutes()) {
+            /** Find the next available shift */
             const teamAvail = this.getNextAvailableStart(start);
+
+            /** If no team is available, simply return the empty object */
             if (!teamAvail) {
                 return receipt;
             }
+
+            /** Shave off 30 minutes to account for a shift change over */
             const endOfShift = _m(teamAvail.availEnd).subtract(30, 'minutes');
+
+            /** Calculate how much of the selected availability has already been reserved */
             const totalReserved = teamAvail.jobReservations.length
-                ? _.sumBy(teamAvail.jobReservations, x =>
+                ? _l.sumBy(teamAvail.jobReservations, x =>
                       _m.duration(x.jobEnd.diff(x.jobStart)).asMinutes()
                   )
                 : 0;
-            let nextTimeSlot = _m(teamAvail.availStart)
+
+            /**
+             * Find the next empty slot by taking the availiability start
+             * add 30 minutes to account for job change over i.e. moving equipment,
+             * work breaks, or personnel changes.
+             * Then add in the amount of time that has already been reserved.
+             *
+             */
+            const nextTimeSlot = _m(teamAvail.availStart)
                 .add(30, 'minute')
                 .add(totalReserved);
 
-            nextTimeSlot = nextTimeSlot.isSameOrAfter(start)
-                ? nextTimeSlot
-                : start;
+            /**
+             * Handle the case where there is time available before the
+             * task is available. i.e. a team availability starts at 0800
+             * but the task cannot start NET 1500. so the next time slot
+             * becomes the start time.
+             * This may not be necessary because we check when getting the next
+             * availability.
+             */
+            // nextTimeSlot = nextTimeSlot.isSameOrAfter(start)
+            //     ? nextTimeSlot
+            //     : start;
 
+            /**
+             * Given the start time slot, how much time is available between start and
+             * end of the shift.
+             */
             const durationAvailable = _m.duration(
                 endOfShift.diff(nextTimeSlot)
             );
+
+            /**
+             * Take the lesser of the time available to the end of shift or
+             * task duration to calculate the jobEnd reservation time.
+             */
+            const timeNeededOrAvailableToComplete =
+                durationAvailable.asMinutes() > request.taskDuration.asMinutes()
+                    ? request.taskDuration
+                    : durationAvailable;
+
             const reserveration: IJobReservation = {
                 taskId: request.taskId,
                 jobStart: nextTimeSlot,
-                jobEnd: nextTimeSlot.add(durationAvailable)
+                jobEnd: nextTimeSlot
+                    .clone()
+                    .add(timeNeededOrAvailableToComplete)
             };
+
             teamAvail.jobReservations.push(reserveration);
-            teamAvail.nextAvail = reserveration.jobEnd;
+
+            /**
+             * Keep the planned start as we continue the process of schedule the task
+             * if multiple iterations is needed.
+             */
             receipt.plannedStart = receipt.plannedStart || nextTimeSlot;
-            receipt.durationPlanned = _m.duration(
-                receipt.plannedEnd.diff(receipt.plannedStart)
-            );
+
+            /**
+             * Set the start to the end and do it again, if needed.
+             */
             start = receipt.plannedEnd = reserveration.jobEnd;
-            request.taskDuration.subtract(durationAvailable);
+
+            request.taskDuration.subtract(timeNeededOrAvailableToComplete);
         }
+
+        receipt.durationPlanned = _m.duration(
+            receipt.plannedEnd.diff(receipt.plannedStart)
+        );
+
         return receipt;
     }
 
     private getNextAvailableStart = (start: _m.Moment): TeamAvailability => {
-        const allTeamAvails = _.flatMap(this.teams, team =>
+        const allTeamAvails = _l.flatMap(this.teams, team =>
             team.teamAvailabilites.filter(
                 ta =>
-                    (ta.nextAvail || _m(ta.availStart)).isSameOrAfter(start) &&
-                    !ta.isFullyBooked
+                    ta.nextAvail ||
+                    (start.isSameOrBefore(ta.availStart) ||
+                        (start.isBetween(
+                            ta.availStart,
+                            ta.availEnd,
+                            'm',
+                            '()'
+                        ) &&
+                            !ta.isFullyBooked))
             )
         );
 
         if (!allTeamAvails.length) {
             return undefined;
         }
-        const orderedTeamAvails = _.orderBy(allTeamAvails, [
-            teamAvail => teamAvail.durationFromStart(start),
-            teamAvail => teamAvail.team.id,
-            teamAvail => teamAvail.availStart.getTime()
+        const orderedTeamAvails = _l.orderBy(allTeamAvails, [
+            ta => ta.durationFromStart(start),
+            ta => ta.team.id,
+            ta => ta.availStart.getTime()
         ]);
 
+        orderedTeamAvails.forEach((item, index) => {
+            console.log(
+                index,
+                allTeamAvails.findIndex(ta => ta.id === item.id)
+            );
+        });
         return orderedTeamAvails[0];
     }
 }

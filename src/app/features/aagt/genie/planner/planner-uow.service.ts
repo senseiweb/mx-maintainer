@@ -50,12 +50,20 @@ import { AssetTriggerActionRepoService } from '../../data/repos/asset-trigger-ac
 import { TeamRepoService } from '../../data/repos/team-repo.service';
 import { IStepperModel } from './planner.component';
 
-export type FilterType = 'asset' | 'trigger';
-export type FilterChange = {
-    [key in FilterType]?: {
-        filterText: string;
-    }
-};
+interface ISchedTriggerTask {
+    [triggerIndex: number]: {
+        triggerRunTime: _m.Duration;
+        assetSchedule: Map<
+            number,
+            {
+                requestedStart: _m.Moment;
+                scheduledTasks: AssetTriggerAction[];
+                failedTasks: AssetTriggerAction[];
+                assetRunTime: _m.Duration;
+            }
+        >;
+    };
+}
 
 @Injectable({ providedIn: AagtDataModule })
 export class PlannerUowService implements Resolve<any> {
@@ -68,8 +76,6 @@ export class PlannerUowService implements Resolve<any> {
     currentGen: Generation;
     onStepValidityChange: BehaviorSubject<IStepperModel>;
     onStepperChange: Subject<StepperSelectionEvent>;
-    onFilterChange: BehaviorSubject<FilterChange>;
-    // onEntitiesChange: Observable<IEntityChangedEvent>;
     private entityChangeSet: Entity[];
     saveAll: any;
 
@@ -89,14 +95,6 @@ export class PlannerUowService implements Resolve<any> {
     ) {
         this.canDeactivatePlaaner = new BehaviorSubject(true);
         this.onStepValidityChange = new BehaviorSubject({});
-        this.onFilterChange = new BehaviorSubject({
-            asset: {
-                filterText: 'all'
-            },
-            trigger: {
-                filterText: 'all'
-            }
-        });
         this.onStepperChange = new Subject();
     }
 
@@ -107,15 +105,6 @@ export class PlannerUowService implements Resolve<any> {
         const id = route.params.id;
 
         this.planGen(id);
-
-        this.onStepperChange.subscribe((stepEvent: StepperSelectionEvent) => {
-            switch (stepEvent.previouslySelectedIndex) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-            }
-        });
 
         const requiredData: Array<Observable<any>> = [
             this.actionItemRepo.all,
@@ -169,13 +158,6 @@ export class PlannerUowService implements Resolve<any> {
 
         return extendResolver;
     }
-
-    createTeamAvailability = (info: {
-        teamId: number;
-        availStart: Date;
-        availEnd: Date;
-        manHoursAvail: number;
-    }) => this.teamAvailRepo.create(info)
 
     private fetchGenerationAssets(): Observable<any> {
         const genAssetPredicate = this.genAssetRepo.makePredicate(
@@ -252,15 +234,6 @@ export class PlannerUowService implements Resolve<any> {
         }
     }
 
-    getAllMilestones(): string[] {
-        return this.currentGen.triggers.map(trig => trig.milestone);
-    }
-
-    createNewTrigger(generationId: number): Trigger {
-        const newTrigger = this.triggerRepo.newTrigger(generationId);
-        return newTrigger;
-    }
-
     rejectAllChanges(): void {
         this.aagtEmService.entityManager.rejectChanges();
     }
@@ -291,52 +264,31 @@ export class PlannerUowService implements Resolve<any> {
 
         // setup a container to hold planned tasks by taskid and
         // then assetid
-        const taskForTrigger: {
-            [index: number]: {
-                triggerRunTime?: _m.Duration;
-                [index: number]: {
-                    requestedStart: _m.Moment;
-                    scheduledTasks: AssetTriggerAction[];
-                    failedTasks: AssetTriggerAction[];
-                    assetRunTime: _m.Duration;
-                };
+        const taskForTrigger: ISchedTriggerTask = {};
+
+        const assetIds = this.currentGen.generationAssets.map(ga => ga.assetId);
+
+        this.currentGen.triggers.sort(this.triggerSort).forEach(trigger => {
+            taskForTrigger[trigger.id] = {
+                triggerRunTime: _m.duration(0),
+                assetSchedule: new Map()
             };
-        } = {};
-
-        const assetIds = _.flatMap(
-            this.currentGen.generationAssets,
-            x => x.generationId
-        );
-
-        this.currentGen.triggers.forEach(trigger => {
-            taskForTrigger[trigger.id].triggerRunTime = _m.duration(0);
 
             assetIds.forEach(aid => {
-                taskForTrigger[trigger.id][aid] = {
+                taskForTrigger[trigger.id].assetSchedule.set(aid, {
                     assetRunTime: _m.duration(0),
                     get requestedStart() {
                         return _m(trigger.triggerStart).add(this.assetRunTime);
                     },
                     scheduledTasks: [],
                     failedTasks: []
-                };
+                });
             });
         });
 
-        // Step 2: Get the team category IDs to fetch the
-        // associated teams
-        const teamCatIds = allAssetTrigActions.map(
-            ata => ata.triggerAction.actionItem.teamCategoryId
-        );
-
-        // Step 3: Get all teams and team availabilities
-        // within the range of this generation
-
-        await this.fetchTeamsAndAvail(teamCatIds);
-
         const prioritizedATAs = _.orderBy(allAssetTrigActions, [
             x => x.genAsset.mxPosition,
-            x => x.triggerAction.trigger.milestone,
+            x => x.triggerAction.trigger.triggerStart,
             x => x.triggerAction.sequence
         ]);
 
@@ -344,14 +296,17 @@ export class PlannerUowService implements Resolve<any> {
             const trigger = pata.triggerAction.trigger;
             const asset = pata.genAsset.asset;
 
-            const start = taskForTrigger[trigger.id][asset.id].requestedStart;
+            const start = taskForTrigger[trigger.id].assetSchedule.get(
+                asset.id
+            );
 
             const reservationRequest: IJobReservateionRequest = {
                 taskId: pata.id,
                 taskDuration: _m.duration(
-                    pata.triggerAction.actionItem.duration
+                    pata.triggerAction.actionItem.duration,
+                    'minute'
                 ),
-                requestedStartDate: start
+                requestedStartDate: start.requestedStart
             };
             const receipt = pata.triggerAction.actionItem.teamCategory.addJobReservation(
                 reservationRequest
@@ -359,7 +314,7 @@ export class PlannerUowService implements Resolve<any> {
 
             pata.plannedStart =
                 receipt.plannedStart && receipt.plannedStart.toDate();
-            pata.plannedStart =
+            pata.plannedStop =
                 receipt.plannedEnd && receipt.plannedEnd.toDate();
 
             if (!receipt.plannedEnd || !receipt.plannedStart) {
@@ -374,9 +329,11 @@ export class PlannerUowService implements Resolve<any> {
             taskForTrigger[trigger.id].triggerRunTime.add(
                 receipt.durationPlanned
             );
-            taskForTrigger[trigger.id][asset.id].assetRunTime.add(
-                receipt.durationPlanned
+            const assetInfo = taskForTrigger[trigger.id].assetSchedule.get(
+                asset.id
             );
+
+            assetInfo.assetRunTime.add(receipt.durationPlanned);
         });
     }
 
@@ -408,5 +365,9 @@ export class PlannerUowService implements Resolve<any> {
         }
         const success = await repo.saveEntityChanges();
         return success;
+    }
+
+    triggerSort(a: Trigger, b: Trigger): number {
+        return a.triggerStart < b.triggerStart ? -1 : 1;
     }
 }

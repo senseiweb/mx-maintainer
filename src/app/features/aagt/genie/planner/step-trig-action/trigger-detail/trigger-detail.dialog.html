@@ -28,71 +28,47 @@
                 </mat-form-field>
             </div>
 
-            <div fxLayout="row" fxLayoutAlign="start start">
-                <mat-form-field appearance="outline" fxFlex>
-                    <mat-label>Trigger Date Range</mat-label>
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="45">
+                    <mat-label>Trigger Start</mat-label>
                     <input
                         matInput
                         name="triggerStart"
                         formControlName="triggerStart"
                         placeholder="Trigger Start"
                         [matDatepicker]="triggerStartDatePicker"
-                        [min]="generationStart"
-                        [max]="generationStop"
+                        [min]="invalidStartDate"
                     />
                     <mat-datepicker-toggle
                         matSuffix
                         [for]="triggerStartDatePicker"
                     ></mat-datepicker-toggle>
-                    <mat-datepicker #triggerStartDatePicker></mat-datepicker>
+                    <mat-datepicker
+                        #triggerStartDatePicker
+                        [dateClass]="markGenerationDate"
+                    ></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field appearance="outline" fxFlex>
-                    <mcc-timer-picker
-                        mccConnectedTimerPicker
-                        [mccConnectedTimerPickerOrigin]="triggerStartTimePicker"
-                    ></mcc-timer-picker>
+
+                <mat-form-field appearance="outline" fxFlex="45">
+                    <mat-label>Trigger Start Time</mat-label>
                     <input
                         matInput
-                        mccTimerPickerOrigin
-                        #triggerStartTimePicker="mccTimerPickerOrigin"
+                        [ngxTimepicker]="triggerStartTimePicker"
+                        [format]="24"
                         placeholder="Trigger Start Time"
-                        formControlName="tiggerStartTime"
+                        formControlName="triggerStartTime"
                     />
+                    <ngx-material-timepicker-toggle
+                        matSuffix
+                        class="secondary-text"
+                        [for]="triggerStartTimePicker"
+                    ></ngx-material-timepicker-toggle>
                 </mat-form-field>
+                <ngx-material-timepicker
+                    [minutesGap]="15"
+                    #triggerStartTimePicker
+                ></ngx-material-timepicker>
             </div>
-
-            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
-                <mat-form-field appearance="outline" fxFlex>
-                    <input
-                        matInput
-                        name="triggerStart"
-                        formControlName="triggerStart"
-                        placeholder="Trigger Start"
-                        [selectMode]="'rangeFrom'"
-                        [owlDateTimeTrigger]="triggerStartPicker"
-                        [owlDateTime]="triggerStartPicker"
-                    />
-                    <owl-date-time
-                        [pickerMode]="'dialog'"
-                        #triggerStartPicker
-                    ></owl-date-time>
-                </mat-form-field>
-            </div> -->
-
-            <!-- <div fxLayout="row" fxLayoutAlign="start start" *ngIf="rangeSet">
-                <mat-form-field appearance="outline" fxFlex>
-                    <input
-                        matInput
-                        name="triggerStop"
-                        [selectMode]="'rangeTo'"
-                        formControlName="triggerStop"
-                        placeholder="Trigger Stop"
-                        [owlDateTimeTrigger]="triggerStopPicker"
-                        [owlDateTime]="triggerStopPicker"
-                    />
-                    <owl-date-time #triggerStopPicker></owl-date-time>
-                </mat-form-field>
-            </div> -->
         </form>
     </div>
 

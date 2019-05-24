@@ -28,6 +28,10 @@ genie-plan-gen-asset {
             transform: rotateY(0deg);
             backface-visibility: hidden;
         }
+
+        .mcc-timer-picker-header {
+            width: 100%;
+        }
     }
 
     mat-select {

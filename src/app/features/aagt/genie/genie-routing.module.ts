@@ -7,6 +7,7 @@ import {
 import { AimUowService } from './action-item-manager/aim-uow.service';
 import { GenListComponent } from './gen-list/gen-list.component';
 import {
+    ActionItemSidebarComponent,
     GenerationDetailDialogComponent,
     PlannerComponent,
     PlannerUowService,
@@ -17,7 +18,7 @@ import {
     TriggerDetailDialogComponent
 } from './planner';
 
-import { AssetTriggerSidebarComponent } from './planner/step-ata-list/asset-trigger-sidebar/asset-trigger-sidebar.component';
+import { AssetSidebarComponent } from './planner/step-ata-list/asset-sidebar/asset-sidebar.component';
 import { StepTeamManagerComponent } from './planner/step-tm-mgr/step-tm-mgr-component';
 import { TmAvailDetailDialogComponent } from './planner/step-tm-mgr/team-avail-detail/tm-avail-detail.dialog';
 import { TeamDetailDialogComponent } from './team-manager';
@@ -27,7 +28,8 @@ import { TeamUowService } from './team-manager/team-uow.service';
 export const routedComponents = [
     ActionItemsComponent,
     ActionItemDetailDialogComponent,
-    AssetTriggerSidebarComponent,
+    AssetSidebarComponent,
+    ActionItemSidebarComponent,
     TmAvailDetailDialogComponent,
     GenListComponent,
     TeamListComponent,

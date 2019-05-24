@@ -1,6 +1,5 @@
 import { DataSource } from '@angular/cdk/table';
 import { AssetTriggerAction } from 'app/features/aagt/data';
-import { EntityAction } from 'breeze-client';
 import * as _ from 'lodash';
 import { merge, BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilKeyChanged, filter, map, tap } from 'rxjs/operators';
@@ -21,7 +20,8 @@ export class AssetTriggerActionDataSource extends DataSource<
     constructor(
         private planUow: PlannerUowService,
         private triggerFilterChange: BehaviorSubject<string>,
-        private assetFilterChange: BehaviorSubject<string>
+        private assetFilterChange: BehaviorSubject<string>,
+        private actionItemFilterChange: BehaviorSubject<string>
     ) {
         super();
     }
@@ -36,34 +36,34 @@ export class AssetTriggerActionDataSource extends DataSource<
         const displayDataChanges = [
             this.datasource,
             this.assetFilterChange,
-            this.triggerFilterChange
+            this.triggerFilterChange,
+            this.actionItemFilterChange
         ];
 
         return merge(...displayDataChanges).pipe(
             map(noChoice => {
                 const assetFilter = this.assetFilterChange.value;
                 const triggerFilter = this.triggerFilterChange.value;
-
+                const actionItemFilter = this.actionItemFilterChange.value;
                 return this.assetTrigActData.slice().filter(ata => {
-                    let matchedRecord = false;
-                    if (
-                        !this.assetFilterChange.value &&
-                        !this.triggerFilterChange.value
-                    ) {
-                        return true;
+                    let assetMatch = true;
+                    let actionItemMatch = true;
+                    let triggerMatch = true;
+
+                    if (assetFilter !== 'all') {
+                        assetMatch = ata.genAsset.asset.alias === assetFilter;
                     }
-                    if (this.assetFilterChange.value) {
-                        matchedRecord =
-                            assetFilter === 'all' ||
-                            ata.genAsset.asset.alias === assetFilter;
+                    if (actionItemFilter !== 'all') {
+                        actionItemMatch =
+                            ata.triggerAction.actionItem.action ===
+                            actionItemFilter;
                     }
-                    if (!matchedRecord || triggerFilter) {
-                        matchedRecord =
-                            triggerFilter === 'all' ||
+                    if (triggerFilter !== 'all') {
+                        triggerMatch =
                             ata.triggerAction.trigger.milestone ===
-                                triggerFilter;
+                            triggerFilter;
                     }
-                    return matchedRecord;
+                    return assetMatch && actionItemMatch && triggerMatch;
                 });
             })
         );

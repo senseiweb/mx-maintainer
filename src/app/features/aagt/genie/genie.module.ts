@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { AppSharedModule } from 'app/app-shared.module';
+import { CalendarModule } from 'primeng/calendar';
 import { EditorModule } from 'primeng/editor';
 import { ListboxModule } from 'primeng/listbox';
 import { PickListModule } from 'primeng/picklist';
@@ -12,13 +13,13 @@ import {
     GenerationDetailDialogComponent,
     TriggerDetailDialogComponent
 } from './planner';
-import { AssetTriggerSidebarComponent } from './planner/step-ata-list/asset-trigger-sidebar/asset-trigger-sidebar.component';
 import { TmAvailDetailDialogComponent } from './planner/step-tm-mgr/team-avail-detail/tm-avail-detail.dialog';
 import { TeamDetailDialogComponent } from './team-manager';
 
 @NgModule({
     imports: [
         AppSharedModule,
+        CalendarModule,
         PickListModule,
         ListboxModule,
         EditorModule,

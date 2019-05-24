@@ -247,3 +247,19 @@ genie-plan-step-tm-manager {
         // }
     }
 }
+
+.generation-start-marker {
+    background: orange;
+    border-radius: 100%;
+}
+
+.gen-trig-start-marker {
+    background: green;
+    border-color: orange;
+    border-radius: 100%;
+}
+
+.trigger-start-marker {
+    background: green;
+    border-radius: 100%;
+}

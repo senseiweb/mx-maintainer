@@ -115,3 +115,15 @@ export const cfgSetNavStructure = (): void => {
     SpConfig.cfgFuseNavService.register(cfgNavStructure.name, navItems);
     SpConfig.cfgFuseNavService.setCurrentNavigation(cfgNavStructure.name);
 };
+
+export const MY_FORMATS = {
+    parse: {
+        dateInput: 'LL'
+    },
+    display: {
+        dateInput: 'YYYYMMDD',
+        monthYearLabel: 'YYYY-MM',
+        dateA11yLabel: 'LL',
+        monthYearA11yLabel: 'YYYY'
+    }
+};

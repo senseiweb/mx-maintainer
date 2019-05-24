@@ -37,15 +37,14 @@ export class Team extends SpEntityBase {
     })
     teamAvailabilites: TeamAvailability[];
 
-    calTotalAvailDuringGen = (start: Date, end: Date): number => {
+    calTotalAvailDuringGen = (start: Date): number => {
         let teamAvails = 0;
 
-        if (!start || !end || !this.teamAvailabilites.length) {
+        if (!start || !this.teamAvailabilites.length) {
             return 0;
         }
         const cachedKey =
             start.toString() +
-            end.toString() +
             this.teamAvailabilites.join('|');
 
         if (
@@ -59,18 +58,10 @@ export class Team extends SpEntityBase {
         this.teamAvailabilites
             .filter(
                 ta =>
-                    _m(ta.availStart).isBetween(start, end) ||
-                    _m(ta.availEnd).isBetween(start, end)
+                    _m(ta.availStart).isSameOrAfter(start, 'h')
             )
             .forEach(avail => {
-                const tickStart = _m(avail.availStart).isBefore(start)
-                    ? start
-                    : avail.availStart;
-                const tickEnd = _m(avail.availEnd).isAfter(end)
-                    ? end
-                    : avail.availEnd;
-
-                teamAvails += _m(tickEnd).diff(tickStart, 'minute');
+                teamAvails += _m(avail.availEnd).diff(avail.availStart, 'minute');
             });
 
         console.timeEnd('Cal team avails');

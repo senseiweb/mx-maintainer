@@ -38,8 +38,8 @@ type TriggerFormModel = { [key in TriggerModelProps]: any };
 })
 export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     triggerFormGroup: FormGroup;
-    generationStart: Date;
-    generationStop: Date;
+    generationStart: _m.Moment;
+    invalidStartDate: _m.Moment;
     isNew = false;
     isValid = false;
     dialogTitle: string;
@@ -50,14 +50,25 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
     ];
     private unsubscribeAll: Subject<any>;
 
+    markGenerationDate = (d: _m.Moment): string | undefined => {
+        return d.isSame(this.generationStart, 'd')
+            ? 'generation-start-marker'
+            : undefined;
+    }
+
     constructor(
         private dialogRef: MatDialogRef<TriggerDetailDialogComponent>,
         private formBuilder: FormBuilder,
-        private uow: PlannerUowService,
+        planUow: PlannerUowService,
         @Inject(MAT_DIALOG_DATA) private currentTrigger: Trigger
     ) {
-        this.generationStart = uow.currentGen.genStartDate;
-        this.generationStop = uow.currentGen.genEndDate;
+        /**
+         * Set one day before generation start as invalid dates
+         * due to the fact that a trigger cannot happen before
+         * the generation start.
+         */
+        this.generationStart = _m(planUow.currentGen.genStartDate);
+        this.invalidStartDate = _m(this.generationStart).subtract(1, 'd');
         this.unsubscribeAll = new Subject();
     }
 
@@ -69,15 +80,54 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
             const defaultStart = start.add(remainder, 'minute');
 
             this.currentTrigger.triggerStart = defaultStart.toDate();
-            this.currentTrigger.triggerStop = defaultStart
-                .add(1, 'day')
-                .toDate();
         }
 
         this.dialogTitle = this.currentTrigger.entityAspect.entityState.isAdded()
             ? 'Create Trigger'
             : `Edit ${this.currentTrigger.milestone} Trigger`;
 
+        this.createFormsAndValidators();
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribeAll.next();
+        this.unsubscribeAll.complete();
+    }
+
+    acceptChanges(): void {
+        this.modelProps.forEach(prop => {
+            const formValue = this.triggerFormGroup.get(prop).value;
+            const currProp = this.currentTrigger[prop];
+
+            if (prop === 'triggerStart' && formValue) {
+                this.currentTrigger.triggerStart = (formValue as _m.Moment).toDate();
+            } else if (currProp !== formValue) {
+                this.currentTrigger[prop as any] = formValue;
+            }
+        });
+
+        const timeValue: string = this.triggerFormGroup.get('triggerStartTime')
+            .value;
+
+        if (timeValue) {
+            const timeParts = timeValue.split(':');
+            const triggerStartWithTime = _m(
+                this.currentTrigger.triggerStart
+            ).set({
+                h: +timeParts[0],
+                m: +timeParts[1]
+            });
+            this.currentTrigger.triggerStart = triggerStartWithTime.toDate();
+        }
+
+        const triggerDiagResult: IDialogResult<Trigger> = {
+            value: this.currentTrigger,
+            confirmAdd: true
+        };
+        this.dialogRef.close(triggerDiagResult);
+    }
+
+    private createFormsAndValidators(): void {
         const formModel: Partial<TriggerFormModel> = {};
         const trigType = this.currentTrigger.entityType;
 
@@ -101,18 +151,19 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
         this.triggerFormGroup.setValidators(
             Validators.compose(frmGrpValidator)
         );
-        // this.triggerFormGroup
-        //     .get('triggerDateRange')
-        //     .valueChanges.pipe(takeUntil(this.unsubscribeAll))
-        //     .subscribe(([startDate, stopDate]) => {
-        //         this.currentTrigger.triggerStart = startDate;
-        //         this.currentTrigger.triggerStop = stopDate;
-        //     });
-    }
 
-    ngOnDestroy(): void {
-        this.unsubscribeAll.next();
-        this.unsubscribeAll.complete();
+        if (this.currentTrigger.triggerStart) {
+            formModel.triggerStart.setValue(_m(this.currentTrigger.triggerStart), {
+                emitEvent: false,
+                onlySelf: true
+            });
+            formModel.triggerStart.setValue(
+                _m(this.currentTrigger.triggerStart)
+                    .clone()
+                    .format('H:m'),
+                { emitEvent: false, onlySelf: true }
+            );
+        }
     }
 
     cancel(): void {
@@ -188,27 +239,5 @@ export class TriggerDetailDialogComponent implements OnInit, OnDestroy {
 
     triggerIsNew(): boolean {
         return this.currentTrigger.entityAspect.entityState.isAdded();
-    }
-
-    acceptChanges(): void {
-        this.modelProps.forEach(prop => {
-            const formValue = this.triggerFormGroup.get(prop).value;
-            if (prop === 'triggerStartTime' && formValue) {
-                console.log(formValue);
-                // this.currentTrigger.triggerStart = formValue[0];
-                // this.currentTrigger.triggerStop = formValue[1];
-            } else {
-                const currProp = this.currentTrigger[prop];
-                if (currProp !== formValue) {
-                    this.currentTrigger[prop as any] = formValue;
-                }
-            }
-        });
-
-        const triggerDiagResult: IDialogResult<Trigger> = {
-            value: this.currentTrigger,
-            confirmAdd: true
-        };
-        this.dialogRef.close(triggerDiagResult);
     }
 }

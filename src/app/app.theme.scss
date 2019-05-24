@@ -117,6 +117,7 @@ body.theme-default {
     // Apply the theme to the user components
     @include components-theme($theme);
 
+    // theme for time component
     @include mcc-theme($theme);
 
     // Generate Fuse color classes for primary, accent and warn colors
@@ -157,6 +158,9 @@ body.theme-yellow-light {
     // Apply the theme to the user components
     @include components-theme($yellow-light-theme);
 
+    // theme for time component
+    @include mcc-theme($theme);
+
     // Generate Fuse color classes for primary, accent and warn colors
     $palettes: (
         primary: $yellow-light-theme-primary-palette,
@@ -195,6 +199,9 @@ body.theme-blue-gray-dark {
     // Apply the theme to the user components
     @include components-theme($blue-gray-dark-theme);
 
+    // theme for time component
+    @include mcc-theme($theme);
+
     // Generate Fuse color classes for primary, accent and warn colors
     $palettes: (
         primary: $blue-gray-dark-theme-primary-palette,
@@ -232,6 +239,9 @@ body.theme-pink-dark {
 
     // Apply the theme to the user components
     @include components-theme($pink-dark-theme);
+
+    // theme for time component
+    @include mcc-theme($theme);
 
     // Generate Fuse color classes for primary, accent and warn colors
     $palettes: (

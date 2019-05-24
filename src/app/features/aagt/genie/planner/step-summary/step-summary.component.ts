@@ -49,15 +49,15 @@ export class StepSummaryComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.uow.onStepperChange
-            .pipe(takeUntil(this.unsubscribeAll))
-            .subscribe(stepEvent => {
-                if (stepEvent.selectedIndex !== 3) {
-                    return;
-                }
-                const changes = this.uow.reviewChanges() as SpEntityBase[];
-                this.changeSet = this.buildChangeSet(changes);
-            });
+        // this.uow.onStepperChange
+        //     .pipe(takeUntil(this.unsubscribeAll))
+        //     .subscribe(stepEvent => {
+        //         if (stepEvent.selectedIndex !== 3) {
+        //             return;
+        //         }
+        //         const changes = this.uow.reviewChanges() as SpEntityBase[];
+        //         this.changeSet = this.buildChangeSet(changes);
+        //     });
     }
 
     buildChangeSet(changes: SpEntityBase[]): IChangeSet[] {

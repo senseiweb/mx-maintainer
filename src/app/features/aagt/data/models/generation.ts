@@ -17,7 +17,7 @@ export enum GenStatusEnum {
 export class Generation extends SpEntityBase {
     readonly shortname = 'Generation';
 
-    @BzProp('data', {})
+    @BzProp('data', { dataCfg: { isNullable: false } })
     title: string;
 
     @BzProp('data', {})

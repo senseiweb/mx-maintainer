@@ -14,7 +14,12 @@ import { TriggerAction } from './trigger-action';
 export class Trigger extends SpEntityBase {
     readonly shortname = 'Trigger';
 
-    @BzProp('data', { spInternalName: 'Title' })
+    @BzProp('data', {
+        spInternalName: 'Title',
+        dataCfg: {
+            isNullable: false
+        }
+    })
     milestone?: string;
 
     get completionTime(): number {

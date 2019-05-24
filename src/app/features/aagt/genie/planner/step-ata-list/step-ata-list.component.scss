@@ -53,22 +53,38 @@ genie-plan-step-ata-list {
         }
     }
 
+    #ataTable {
+        height: 400px;
+        overflow: auto;
+    }
+
     .mat-table {
         width: 100%;
         background: transparent;
         box-shadow: none;
 
-        .mat-column-checkbox {
-            flex: 0 1 64px;
-            padding-left: 18px;
+        .mat-column-sequence {
+            flex: 0 0 10%;
         }
 
-        .mat-column-sequence {
-            flex: 0 1 25px;
+        .mat-column-alias {
+            flex: 0 1 15%;
+        }
+        .mat-column-action {
+            flex: 0 1 15%;
+        }
+        .mat-column-trigger {
+            flex: 0 1 15%;
+        }
+        .mat-column-status {
+            flex: 0 1 15%;
+        }
+        .mat-column-plannedStart {
+            flex: 0 1 20%;
         }
 
         .mat-column-buttons {
-            flex: 0 1 80px;
+            flex: 0 0 10%;
         }
 
         .mat-row {

@@ -1,4 +1,5 @@
 import {
+    ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
     ElementRef,
@@ -27,7 +28,8 @@ import { AimUowService } from '../aim-uow.service';
     templateUrl: './action-items.component.html',
     styleUrls: ['./action-items.component.scss'],
     animations: fuseAnimations,
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ActionItemsComponent implements OnInit, OnDestroy {
     dataSource: MatTableDataSource<ActionItem>;

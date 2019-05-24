@@ -113,39 +113,40 @@ export class TmAvailDetailDialogComponent implements OnInit, OnDestroy {
         this.unsubscribeAll.complete();
     }
 
-    addAvailability(): void {
-        const startDate = this.tmAvailFormGroup.get('availDate').value;
-        const numOfHours = this.tmAvailFormGroup.get('numOfHours').value;
-        let repeatNum = this.tmAvailFormGroup.get('repeatNum').value;
-        const shiftStart = _m(startDate);
+    // addAvailability(): void {
+    //     const startDate = this.tmAvailFormGroup.get('availDate').value;
+    //     const numOfHours = this.tmAvailFormGroup.get('numOfHours').value;
+    //     let repeatNum = this.tmAvailFormGroup.get('repeatNum').value;
+    //     const shiftStart = _m(startDate);
 
-        do {
-            const shiftEnd = shiftStart.clone().add(numOfHours, 'h');
+    //     do {
+    //         const shiftEnd = shiftStart.clone().add(numOfHours, 'h');
 
-            if (this.alreadyExist(shiftStart, shiftEnd)) {
-                repeatNum--;
-                continue;
-            }
+    //         if (this.alreadyExist(shiftStart, shiftEnd)) {
+    //             repeatNum--;
+    //             continue;
+    //         }
 
-            this.removeOverlap(shiftStart, shiftEnd);
-            this.planUow.createTeamAvailability({
-                teamId: this.currentTeam.id,
-                availStart: shiftStart.toDate(),
-                availEnd: shiftEnd.toDate(),
-                manHoursAvail: shiftEnd.diff(shiftStart, 'm')
-            });
-            shiftStart.add(1, 'd');
-            repeatNum--;
-        } while (repeatNum > 0);
+    //         this.removeOverlap(shiftStart, shiftEnd);
+    //         this.currentTeam
+    //         this.planUow.createTeamAvailability({
+    //             teamId: this.currentTeam.id,
+    //             availStart: shiftStart.toDate(),
+    //             availEnd: shiftEnd.toDate(),
+    //             manHoursAvail: shiftEnd.diff(shiftStart, 'm')
+    //         });
+    //         shiftStart.add(1, 'd');
+    //         repeatNum--;
+    //     } while (repeatNum > 0);
 
-        this.tmAvailDataSource.data = this.currentTeam.teamAvailabilites.sort(
-            (a, b) => {
-                return a.availStart < b.availStart ? -1 : 1;
-            }
-        );
+    //     this.tmAvailDataSource.data = this.currentTeam.teamAvailabilites.sort(
+    //         (a, b) => {
+    //             return a.availStart < b.availStart ? -1 : 1;
+    //         }
+    //     );
 
-        this.tmAvailFormGroup.reset();
-    }
+    //     this.tmAvailFormGroup.reset();
+    // }
 
     calcuateHours(minutes: number): number {
         return minutes ? Math.round(minutes / 60) : 0;

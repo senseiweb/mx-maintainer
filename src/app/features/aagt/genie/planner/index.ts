@@ -6,3 +6,4 @@ export * from './step-gen-asset/gen-detail/gen-detail.dialog';
 export * from './planner.component';
 export * from './planner-uow.service';
 export * from './step-trig-action/trigger-detail/trigger-detail.dialog';
+export * from './step-ata-list/action-item-sidebar/action-item-sidebar.component';
