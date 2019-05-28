@@ -1,4 +1,9 @@
 <div class="pt-12 pb-24">
+    <mat-progress-bar
+        *ngIf="isWorking"
+        [color]="'primary'"
+        mode="indeterminate"
+    ></mat-progress-bar>
     <button mat-raised-button matStepperPrevious>
         Back: Generation Actions
     </button>

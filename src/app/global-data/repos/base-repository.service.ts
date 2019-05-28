@@ -14,15 +14,13 @@ import {
 } from 'breeze-client';
 import { QueryResult } from 'breeze-client/src/entity-manager';
 import * as _m from 'moment';
-import { defer, BehaviorSubject, Observable, Subject } from 'rxjs';
+import { defer, from, BehaviorSubject, Observable, Subject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { SpEntityBase } from '../models';
 // import { FilterEntityColNames } from '../models/_entity-base';
 import { BaseEmProviderService } from './base-emprovider.service';
 
-interface IRepoPredicateCache {
-    [index: string]: _m.Moment;
-}
+type RepoPredicateCache = { [index in string | 'all']: _m.Moment };
 
 type SpChoiceCache<T> = { [index in keyof T]: string[] };
 export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
@@ -30,7 +28,7 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
     protected entityType: EntityType;
     protected resourceName: string;
     private cached: Observable<TRepoFor[]>;
-    private predicateCache: IRepoPredicateCache = {};
+    private predicateCache: RepoPredicateCache = {};
     private reload: Subject<any>;
     onSaveInProgressChange: BehaviorSubject<boolean>;
     private spChoiceFieldCache: SpChoiceCache<TRepoFor> = {} as any;
@@ -55,18 +53,19 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
     get all(): Observable<TRepoFor[]> {
         const freshTimeLimit = 6;
 
-        const cachedTime = this.predicateCache['all'];
+        const cachedTime = this.predicateCache.all;
 
         const timeSinceLastServerQuery = cachedTime
-            ? _m.duration(cachedTime.diff(_m(), 'minutes'))
+            ? this.minutesSinceLastServerQuery(cachedTime)
             : freshTimeLimit + 1;
 
-        if (timeSinceLastServerQuery < 5 && this.cached) {
-            return this.cached;
+        if (timeSinceLastServerQuery < 5) {
+            return from([
+                this.entityManager.getEntities(this.entityType) as TRepoFor[]
+            ]);
         }
 
-        this.cached = this.allEntities().pipe(shareReplay(1));
-        return this.cached;
+        return this.allEntities();
     }
 
     forceReload(): void {
@@ -75,7 +74,9 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
     }
 
     private allEntities(): Observable<TRepoFor[]> {
-        return defer(() => this.executeQuery(this.baseQuery()));
+        return defer(() =>
+            this.executeQuery(this.baseQuery(), undefined, 'all')
+        );
     }
 
     protected baseQuery(toBaseType = true): EntityQuery {
@@ -95,14 +96,15 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
 
     protected async executeQuery(
         query: EntityQuery,
-        fetchStrat?: FetchStrategy
+        fetchStrategy: FetchStrategy = this.defaultFetchStrategy,
+        queryName?: string
     ): Promise<TRepoFor[]> {
-        const queryType = query.using(fetchStrat || this.defaultFetchStrategy);
+        const queryType = query.using(fetchStrategy);
         const dataQueryResult = await this.entityManager.executeQuery(
             queryType
         );
-        console.log(dataQueryResult);
-        return Promise.resolve(dataQueryResult.results) as Promise<TRepoFor[]>;
+        this.predicateCache[queryName] = _m();
+        return dataQueryResult.results as TRepoFor[];
     }
 
     protected executeCacheQuery(query: EntityQuery): TRepoFor[] {
@@ -119,6 +121,13 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
         filter = FilterQueryOp.Equals
     ): Predicate {
         return Predicate.create(property as any, filter, condition);
+    }
+
+    private minutesSinceLastServerQuery(cachedTime: _m.Moment) {
+        return _m
+            .duration(cachedTime.diff(_m()))
+            .abs()
+            .asMinutes();
     }
 
     async spChoiceValues(fieldName: keyof TRepoFor): Promise<string[]> {
@@ -171,17 +180,24 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
         return result.entity as TRepoFor;
     }
 
-    where(queryName: string, predicate: Predicate): Promise<TRepoFor[]> {
+    async where(queryName: string, predicate: Predicate): Promise<TRepoFor[]> {
         const freshTimeLimit = 6;
+
         const cachedTime = this.predicateCache[queryName];
+
         const timeSinceLastServerQuery = cachedTime
-            ? _m.duration(cachedTime.diff(_m(), 'minutes'))
+            ? this.minutesSinceLastServerQuery(cachedTime)
             : freshTimeLimit + 1;
+
         const query = this.baseQuery().where(predicate);
+
         if (timeSinceLastServerQuery < 5) {
             return Promise.resolve(this.executeCacheQuery(query));
         }
-        return this.executeQuery(query);
+
+        const results = await this.executeQuery(query, undefined, queryName);
+
+        return results;
     }
 
     async whereWithChildren<TChild extends EntityChildrenKind<TRepoFor>>(
@@ -189,7 +205,7 @@ export abstract class BaseRepoService<TRepoFor extends SpEntityBase> {
         childRepoService: BaseRepoService<TChild>,
         childLookupKey: keyof TChild
     ): Promise<{ parent: TRepoFor[]; children: TChild[] }> {
-        const queryName = `qForChild-${Predicate.toString()}`;
+        const queryName = `qForChild-${predicate.toString()}`;
 
         const parent = await this.where(queryName, predicate);
 

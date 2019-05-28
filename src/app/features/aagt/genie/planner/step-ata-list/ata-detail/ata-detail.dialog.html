@@ -1,0 +1,176 @@
+<div class="dialog-content-wrapper">
+    <mat-toolbar matDialogTitle class="mat-accent m-0">
+        <mat-toolbar-row fxLayout="row" fxLayoutAlign="space-between center">
+            <span class="title dialog-title">{{ dialogTitle }}</span>
+            <button
+                mat-icon-button
+                (click)="cancel()"
+                aria-label="Close dialog"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div mat-dialog-content class="p-24 pb-0 m-0" fusePerfectScrollbar>
+        <form [formGroup]="ataFormGroup">
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Current Status</mat-label>
+                    <input
+                        name="actionStatus"
+                        formControlName="actionStatus"
+                        matInput
+                    />
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Outcome</mat-label>
+                    <input name="outcome" formControlName="outcome" matInput />
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Planned Start</mat-label>
+                    <input
+                        name="plannedStart"
+                        formControlName="plannedStart"
+                        matInput
+                    />
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Planned Stop</mat-label>
+                    <input
+                        name="plannedStop"
+                        formControlName="plannedStop"
+                        matInput
+                    />
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Scheduled Start</mat-label>
+                    <input
+                        name="scheduledStart"
+                        formControlName="scheduledStart"
+                        matInput
+                        [matDatepicker]="schedStartDatePicker"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="schedStartDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #schedStartDatePicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Scheduled Stop</mat-label>
+                    <input
+                        name="scheduledStop"
+                        formControlName="scheduledStop"
+                        matInput
+                        [matDatepicker]="schedStopDatePicker"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="schedStopDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #schedStopDatePicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Actual Start</mat-label>
+                    <input
+                        name="actualStart"
+                        formControlName="actualStart"
+                        matInput
+                        [matDatepicker]="actualStartDatePicker"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="actualStartDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #actualStartDatePicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Actual Stop</mat-label>
+                    <input
+                        name="actualStop"
+                        formControlName="actualStop"
+                        matInput
+                        [matDatepicker]="actualStopDatePicker"
+                    />
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="actualStopDatePicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #actualStopDatePicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="space-between start">
+                <mat-form-field appearance="outline" fxFlex="48">
+                    <mat-label>Assigned Team Category</mat-label>
+                    <input
+                        name="teamCategory"
+                        formControlName="teamCategory"
+                        matInput
+                    />
+                </mat-form-field>
+                <div appearance="outline" fxFlex="48">
+                    <mat-form-field>
+                        <mat-chip-list>
+                            <mat-chip
+                                #tmNames
+                                *ngFor="let tmName of assignedToTeamNames"
+                            >
+                                {{ tmName }}
+                            </mat-chip>
+                            <input [matChipInputFor]="tmNames" />
+                        </mat-chip-list>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div
+        mat-dialog-actions
+        class="m-0 p-16"
+        fxLayout="row"
+        fxLayoutAlign="end center"
+    >
+        <!-- <button
+            *ngIf="action === 'edit'"
+            mat-button
+            class="mr-8"
+            (click)="matDialogRef.close(['delete', contactForm])"
+            aria-label="Delete"
+            matTooltip="Delete"
+        >
+            DELETE
+        </button>
+
+        <button
+            *ngIf="action !== 'edit'"
+            mat-button
+            class="save-button"
+            (click)="matDialogRef.close(contactForm)"
+            [disabled]="ataFormGroup.invalid"
+            aria-label="SAVE"
+        >
+            ADD
+        </button> -->
+
+        <button
+            mat-button
+            class="save-button"
+            (click)="acceptChanges()"
+            [disabled]="ataFormGroup.invalid"
+            aria-label="SAVE"
+        >
+            SAVE
+        </button>
+    </div>
+</div>

@@ -15,6 +15,7 @@ import {
 } from './planner';
 import { TmAvailDetailDialogComponent } from './planner/step-tm-mgr/team-avail-detail/tm-avail-detail.dialog';
 import { TeamDetailDialogComponent } from './team-manager';
+import { AtaDetailDialogComponent } from './planner/step-ata-list/ata-detail/ata-detail.dialog';
 
 @NgModule({
     imports: [
@@ -34,7 +35,8 @@ import { TeamDetailDialogComponent } from './team-manager';
         TriggerDetailDialogComponent,
         GenerationDetailDialogComponent,
         TmAvailDetailDialogComponent,
-        TeamDetailDialogComponent
+        TeamDetailDialogComponent,
+        AtaDetailDialogComponent
     ]
 })
 export class GenieModule {}

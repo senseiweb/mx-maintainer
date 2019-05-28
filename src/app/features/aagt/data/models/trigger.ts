@@ -37,8 +37,6 @@ export class Trigger extends SpEntityBase {
     @BzProp('data', {})
     triggerStop?: Date;
 
-    triggerDateRange?: Date[];
-
     @BzProp('data', {
         dataCfg: { isNullable: false }
     })

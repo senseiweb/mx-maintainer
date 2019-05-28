@@ -9,23 +9,22 @@ import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MatSnackBar, MAT_DIALOG_DATA } from '@angular/material';
 import { Observable, Subject } from 'rxjs';
 
-import {
-    filter,
-    takeUntil
-} from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 
-import { RawEntity, IDialogResult } from '@ctypes/breeze-type-customization';
+import { SpFormModel, SpFormProps } from '@ctypes/app-config';
+import { IDialogResult, RawEntity } from '@ctypes/breeze-type-customization';
 import { fuseAnimations } from '@fuse/animations';
 import { MinutesExpand } from 'app/common';
 import { ActionItem } from 'app/features/aagt/data';
 import { TeamCategory } from 'app/features/aagt/data/models/team-category';
 import { EntityFormGroup } from 'app/global-data/';
+import { Action } from 'rxjs/internal/scheduler/Action';
 import * as sa from 'sweetalert2';
 import { AimUowService } from '../aim-uow.service';
-import { SpFormModel, SpFormProps } from '@ctypes/app-config';
-import { Action } from 'rxjs/internal/scheduler/Action';
 
 type TeamCatFormMode = 'edit' | 'select' | 'add';
+type ThisFormProps = SpFormProps<ActionItem>;
+type ThisFormModel = SpFormModel<ThisFormProps[]>;
 @Component({
     selector: 'action-item-detail-dialog',
     templateUrl: './action-item-detail.dialog.html',
@@ -81,7 +80,7 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
 
         this.teamCatFormMode = 'select';
 
-        const formModel: SpFormModel<ActionItem> = {};
+        const formModel: ThisFormModel = {};
         const formValidators =
             ai.entityType.custom && ai.entityType.custom.formValidators;
 
@@ -175,31 +174,6 @@ export class ActionItemDetailDialogComponent implements OnInit, OnDestroy {
         };
         const result = await sa.default.fire(config);
         return result.value;
-
-        // const atas = _.flatMap(
-        //     this.actionItemFormGroup.generationAssets,
-        //     x => x.assetTriggerActions
-        // );
-
-        // const trigActs = _.flatMap(
-        //     this.currentGen.triggers,
-        //     x => x.triggerActions
-        // );
-
-        // atas.forEach(ata => ata.entityAspect.setDeleted());
-
-        // trigActs.forEach(ta => ta.entityAspect.setDeleted());
-
-        // this.currentGen.triggers.forEach(ta =>
-        //     ta.entityAspect.setDeleted()
-        // );
-
-        // this.currentGen.generationAssets.forEach(ga =>
-        //     ga.entityAspect.setDeleted()
-        // );
-
-        // this.currentGen.entityAspect.setDeleted();
-        // const saveResult = await this.uow.saveAll();
     }
 
     async confirmDelete(): Promise<void> {

@@ -31,7 +31,7 @@ import {
 
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import {} from 'app/features/aagt/data/repos/trigger-action-repo.service';
-import { BaseRepoService, SpEntityBase } from 'app/global-data';
+import { BaseRepoService } from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import {
@@ -168,7 +168,7 @@ export class PlannerUowService implements Resolve<any> {
         const query = this.genAssetRepo.whereWithChildren<AssetTriggerAction>(
             genAssetPredicate,
             this.assetTrigActionRepo,
-            'genAssetId'
+            'generationAssetId'
         );
 
         return from(query);
@@ -250,7 +250,7 @@ export class PlannerUowService implements Resolve<any> {
                 : this.genRepo.whereInCache(genPredicate)[0];
     }
 
-    async planAssetTaskActions(): Promise<void> {
+    async planAssetTaskActions(triggerId?: number): Promise<void> {
         // Step 1: Get all asset trig actions
         const allAssetTrigActions = _.flatMap(
             this.currentGen.generationAssets,
@@ -286,15 +286,25 @@ export class PlannerUowService implements Resolve<any> {
             });
         });
 
-        const prioritizedATAs = _.orderBy(allAssetTrigActions, [
-            x => x.genAsset.mxPosition,
+        let prioritizedATAs = _.orderBy(allAssetTrigActions, [
+            x => x.generationAsset.mxPosition,
             x => x.triggerAction.trigger.triggerStart,
             x => x.triggerAction.sequence
         ]);
 
+        prioritizedATAs = prioritizedATAs.filter(
+            pata => !pata.plannedStart || !pata.plannedStop
+        );
+
+        if (triggerId) {
+            prioritizedATAs = prioritizedATAs.filter(
+                pata => pata.triggerAction.triggerId === triggerId
+            );
+        }
+
         prioritizedATAs.forEach(pata => {
             const trigger = pata.triggerAction.trigger;
-            const asset = pata.genAsset.asset;
+            const asset = pata.generationAsset.asset;
 
             const start = taskForTrigger[trigger.id].assetSchedule.get(
                 asset.id
@@ -302,6 +312,7 @@ export class PlannerUowService implements Resolve<any> {
 
             const reservationRequest: IJobReservateionRequest = {
                 taskId: pata.id,
+                genId: this.currentGen.id,
                 taskDuration: _m.duration(
                     pata.triggerAction.actionItem.duration,
                     'minute'
@@ -320,6 +331,8 @@ export class PlannerUowService implements Resolve<any> {
             if (!receipt.plannedEnd || !receipt.plannedStart) {
                 // in case a start could be schedule but not an end;
                 return;
+            } else {
+                pata.actionStatus = 'planned';
             }
 
             // if a task can be done concurrently, do not update runtime or start date;

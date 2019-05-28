@@ -38,23 +38,21 @@
                         <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
-                        <button
-                            mat-menu-item
-                            [disabled]="!triggerMilestones.length"
-                            (click)="editTrigger()"
-                        >
-                            <span>Modify Trigger</span>
-                        </button>
-                        <button
-                            mat-menu-item
-                            [disabled]="!triggerMilestones.length"
-                            (click)="editTrigger()"
-                            (click)="createNewTrigger()"
-                        >
-                            <span>Plan Trigger</span>
-                        </button>
-                        <button mat-menu-item (click)="planGeneration()">
+                        <button mat-menu-item (click)="planAll()">
+                            <mat-icon>view_headline</mat-icon>
                             <span>Plan All</span>
+                        </button>
+                        <button mat-menu-item (click)="planAtas()">
+                            <mat-icon>view_list </mat-icon>
+                            <span>Plan Unplanned</span>
+                        </button>
+                        <button
+                            [disabled]="triggerFilterChange.value === 'all'"
+                            (click)="planAtas(triggerFilterChange.value)"
+                        >
+                            <mat-icon>view_day</mat-icon>
+
+                            <span>Plan Trigger</span>
                         </button>
                     </mat-menu>
                 </div>
@@ -93,15 +91,14 @@
         <!-- CENTER -->
         <div class="center p-24 pb-56 pr-sm-30">
             <!-- CONTENT -->
-            <div                      #ataTable            class="content">
+            <div #ataTable class="content">
                 <mat-table
                     fusePerfectScrollbar
                     [dataSource]="dataSource"
                     [@animateStagger]="{ value: '50' }"
                     cdkDropList
-                    (cdkDropListDropped)="dropTable($event)"
+                    (cdkDropListDropped)="reSequenceTask($event)"
                 >
-                    
                     <!-- Sequence Column -->
                     <ng-container matColumnDef="sequence">
                         <mat-header-cell *matHeaderCellDef
@@ -118,7 +115,7 @@
                             >Alias</mat-header-cell
                         >
                         <mat-cell *matCellDef="let ata">
-                            {{ ata?.genAsset?.asset?.alias }}
+                            {{ ata?.generationAsset?.asset?.alias }}
                         </mat-cell>
                     </ng-container>
 
@@ -203,7 +200,7 @@
                         cdkDrag
                         [cdkDragData]="ata"
                         matRipple
-                        (click)="editContact(contact)"
+                        (click)="editAta(ata)"
                         [@animate]="{ value: '*', params: { y: '100%' } }"
                     >
                     </mat-row>

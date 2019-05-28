@@ -45,21 +45,30 @@
             >
                 <ng-template let-asset pTemplate="item">
                     <div class="ui-helper-clearfix">
-                        <div [hidden]="!!asset.priority">
+                        <div [hidden]="!!asset.mxPosition">
                             <div
                                 fxLayout="row"
                                 fxLayoutAlign="space-around center"
                             >
-                                {{ asset.alias }}
+                                <span class="w-35-p"
+                                    >Alias: {{ asset.alias }}</span
+                                >
+                                <span class="w-50-p"
+                                    >Health: {{ asset.health }}
+                                </span>
                             </div>
                         </div>
-                        <div [hidden]="!asset.priority">
+                        <div [hidden]="!asset.mxPosition">
                             <div
                                 fxLayout="row"
                                 fxLayoutAlign="space-between center"
                             >
-                                <span class="w-20-p">{{ asset.priority }}</span>
-                                <span class="w-60-p">{{ asset.alias }}</span>
+                                <span class="w-50-p"
+                                    >Mx Position: {{ asset.mxPosition }}</span
+                                >
+                                <span class="w-50-p"
+                                    >Alias: {{ asset.alias }}</span
+                                >
                             </div>
                         </div>
                     </div>

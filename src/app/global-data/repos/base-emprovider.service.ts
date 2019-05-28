@@ -85,6 +85,10 @@ export class BaseEmProviderService {
         this.getRequestDigest();
     }
 
+    onModelChanges<TShortName extends SpListEntities['shortname']>(
+        shortName: TShortName | TShortName[]
+    ): Observable<IEntityChangedEvent<TShortName, any>>;
+
     onModelChanges<
         TShortName extends SpListEntities['shortname'],
         TEntityAction extends EntityChangeArgType<
@@ -118,7 +122,7 @@ export class BaseEmProviderService {
         TEntityProp extends GetEntityProp<TShortName>
     >(
         shortName: TShortName,
-        etAction: TEntityAction,
+        etAction?: TEntityAction,
         property?: TEntityProp | TEntityProp[]
     ): Observable<IEntityChangedEvent<TShortName, TEntityAction, TEntityProp>> {
         const shortNameArrayed = Array.isArray(shortName)
@@ -135,11 +139,23 @@ export class BaseEmProviderService {
                         TEntityAction,
                         any
                     >
-                ) =>
-                    shortNameArrayed.includes(chngArgs.shortName) &&
-                    chngArgs.entityAction === etAction
+                ) => shortNameArrayed.includes(chngArgs.shortName)
             )
         );
+
+        if (etAction) {
+            ecObserverable.pipe(
+                filter(
+                    (
+                        chngArgs: IEntityChangedEvent<
+                            TShortName,
+                            TEntityAction,
+                            TEntityProp
+                        >
+                    ) => chngArgs.entityAction === etAction
+                )
+            );
+        }
 
         if (property) {
             ecObserverable.pipe(

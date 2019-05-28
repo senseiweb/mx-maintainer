@@ -1,3 +1,4 @@
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
@@ -14,18 +15,15 @@ import { FuseConfirmDialogComponent } from '@fuse/components/confirm-dialog/conf
 import { MinutesExpand } from 'app/common';
 import {
     ActionItem,
-    Asset,
     AssetTriggerAction,
-    GenerationAsset,
-    Trigger,
-    TriggerAction
+    Trigger
 } from 'app/features/aagt/data';
 import * as _l from 'lodash';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { PlannerUowService } from '../planner-uow.service';
-import { TriggerDetailDialogComponent } from '../step-trig-action/trigger-detail/trigger-detail.dialog';
 import { AssetTriggerActionDataSource } from './asset-trig-action.datasource';
+import { AtaDetailDialogComponent } from './ata-detail/ata-detail.dialog';
 
 @Component({
     selector: 'genie-plan-step-ata-list',
@@ -43,7 +41,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
 
     triggerMilestones: string[] = [];
     triggerSelectionFormGroup: FormGroup;
-    assetTriggerActions: AssetTriggerAction[];
+    // assetTriggerActions: AssetTriggerAction[];
     dataSource: AssetTriggerActionDataSource;
     displayedColumns = [
         'sequence',
@@ -65,8 +63,7 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
     constructor(
         private planUow: PlannerUowService,
         private formBuilder: FormBuilder,
-        private trigdialog: MatDialog,
-        private deleteDialog: MatDialog,
+        private ataDialog: MatDialog,
         private cdRef: ChangeDetectorRef
     ) {}
 
@@ -110,8 +107,44 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
         this.updateTrigger();
     }
 
-    planGeneration(triggerId?: number): void {
-        this.planUow.planAssetTaskActions();
+    editAta(ata: AssetTriggerAction): void {
+        const dialogCfg = new MatDialogConfig();
+        dialogCfg.panelClass = 'generation-detail-dialog';
+        dialogCfg.data = ata;
+        dialogCfg.disableClose = true;
+        this.ataDialog
+            .open(AtaDetailDialogComponent, dialogCfg)
+            .afterClosed()
+            .pipe<IDialogResult<AssetTriggerAction>>(
+                takeUntil(this.unsubscribeAll)
+            )
+            .subscribe(result => {
+                if (!result || result.wasConceled) {
+                    return;
+                }
+            });
+    }
+
+    planAll(): void {
+        const atas = _l.flatMap(
+            this.planUow.currentGen.teamJobReservations,
+            x => x.assetTriggerAction
+        );
+
+        atas.forEach(ata => {
+            ata.plannedStart = undefined;
+            ata.plannedStop = undefined;
+        });
+
+        this.planUow.currentGen.teamJobReservations.forEach(tjr =>
+            tjr.entityAspect.setDeleted()
+        );
+        this.planAtas();
+    }
+
+    planAtas(triggerId?: number): void {
+        const trigId = triggerId && +triggerId;
+        this.planUow.planAssetTaskActions(trigId);
     }
 
     reactToModelChanges(): void {
@@ -123,35 +156,56 @@ export class StepAtaListComponent implements OnInit, OnDestroy {
             });
     }
 
-    // editTrigger(): void {
-    //     const dialogCfg = new MatDialogConfig();
-    //     dialogCfg.data = this.currentTrigger;
-    //     this.trigdialog
-    //         .open(TriggerDetailDialogComponent, dialogCfg)
-    //         .afterClosed()
-    //         .pipe<IDialogResult<Trigger>>(takeUntil(this.unsubscribeAll))
-    //         .subscribe(reesult => {
-    //             if (reesult.confirmDeletion) {
-    //                 if (!this.planUow.currentGen.triggers.length) {
-    //                     this.triggerSelectionFormGroup.controls[
-    //                         'trigger'
-    //                     ].setValue('');
-    //                 }
-    //             } else {
-    //                 // ReSort just in case the date was changed;
-    //                 this.triggers.sort(this.triggerSorter);
-    //             }
-    //         });
-    // }
+    reSequenceTask($event: CdkDragDrop<AssetTriggerAction>): void {
+        /**
+         * Access the ATA entity that has been dropped.
+         */
+        const ataElement = $event.item.data as AssetTriggerAction;
 
-    // setFilterLookups(): void {
-    //     this.triggers = this.planUow.currentGen.triggers;
-    //     const assets = _l.flatMap(
-    //         this.planUow.currentGen.generationAssets,
-    //         x => x.asset
-    //     );
-    //     this.assets = _l.uniqBy(assets, 'id');
-    // }
+        /**
+         * Looking at the current Generation, flatMap all the ATAs that
+         * are siblings on the dropped ATA by first filtering the parent
+         * GenerationAsset, then filtering out all the sibling ATA will a lower
+         * sequence number that will not have to be reSequenced and finally
+         * filtering out the dropped ATA element.
+         */
+        const ataElementSiblings = _l.flatMap(
+            this.planUow.currentGen.generationAssets.filter(
+                ga => ga.id === ataElement.generationAssetId
+            ),
+            x =>
+                x.assetTriggerActions.filter(
+                    ata => ata.sequence >= ataElement.sequence
+                )
+        );
+
+        /**
+         * Sort affected ATA by their sequence number.
+         */
+        const orderedAtas = _l.orderBy(ataElementSiblings, x => x.sequence);
+
+        /**
+         * set the new sequence by adding 1 to convert sequence from zero based to
+         * 1 based number and adding another 1 to account from the ataElement that
+         * was dropped in this spot.
+         */
+        let newSequence = $event.currentIndex + 2;
+
+        /**
+         * Loop through the affected ATAs and reSequence them according to their previous
+         * sequence +1.
+         */
+        orderedAtas.forEach(ata => {
+            ata.sequence = newSequence;
+            newSequence++;
+        });
+
+        /**
+         * Last step is to set the dropped ataElement's sequence to its dropped
+         * location + 1 (to current from zero-based index)
+         */
+        ataElement.sequence = newSequence + 1;
+    }
 
     private sortActionItem(data: ActionItem[], key): ActionItem[] {
         return data.sort((a: ActionItem, b: ActionItem) => {

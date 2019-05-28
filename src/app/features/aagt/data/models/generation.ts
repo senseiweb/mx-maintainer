@@ -1,9 +1,9 @@
 import { MxmAppName } from 'app/app-config.service';
 import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
-import { AssetTriggerAction } from './asset-trigger-action';
 import { Assumption } from './assumption';
 import { GenerationAsset } from './generation-asset';
+import { TeamJobReservation } from './team-job-reservation';
 import { Trigger } from './trigger';
 
 export enum GenStatusEnum {
@@ -20,8 +20,8 @@ export class Generation extends SpEntityBase {
     @BzProp('data', { dataCfg: { isNullable: false } })
     title: string;
 
-    @BzProp('data', {})
-    isActive: boolean;
+    // @BzProp('data', {})
+    // isActive: boolean;
 
     @BzProp('data', {})
     iso: string;
@@ -49,4 +49,9 @@ export class Generation extends SpEntityBase {
         relativeEntity: 'GenerationAsset'
     })
     generationAssets: GenerationAsset[];
+
+    @BzProp('nav', {
+        relativeEntity: 'TeamJobReservation'
+    })
+    teamJobReservations: TeamJobReservation[];
 }

@@ -52,18 +52,19 @@ export function makeAagtNavStructure(): FuseNavigation[] {
             type: 'group',
             children: [
                 {
+                    id: 'genielist',
+                    title: 'Gen Control',
+                    icon: 'contacts',
+                    type: 'item',
+                    url: 'aagt/gen-control/gen-list',
+                    exactMatch: true
+                },
+                {
                     id: 'genie',
                     title: 'Genie',
                     icon: 'contacts',
                     type: 'collapsable',
                     children: [
-                        {
-                            id: 'genlist',
-                            title: 'Generations',
-                            type: 'item',
-                            url: 'aagt/genie/list',
-                            exactMatch: true
-                        },
                         {
                             id: 'genplanner',
                             title: 'Planner',

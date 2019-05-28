@@ -78,6 +78,7 @@ $typography: mat-typography-config(
 @import 'src/app/fusec-layout/components/toolbar/fusec-toolbar.theme';
 @import 'src/app/features/aagt/dashboard/aagt-dash.theme';
 @import 'src/app/features/aagt/genie/action-item-manager/action-items/action-items.theme';
+@import 'src/app/features/aagt/gen-manager/gen-manager.theme';
 @import '~material-community-components/theming';
 
 // Define a mixin for easier access
@@ -87,6 +88,7 @@ $typography: mat-typography-config(
     @include toolbar-theme($theme);
     @include dashboards-statusboard-theme($theme);
     @include gene-app-action-items-theme($theme);
+    @include gen-manager-theme($theme);
 }
 
 // -----------------------------------------------------------------------------------------------------

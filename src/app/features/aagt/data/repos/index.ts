@@ -8,3 +8,4 @@ export * from './trigger-action-repo.service';
 export * from './team-category-repo.service';
 export * from './team-avail-repo.service';
 export * from './trigger-action-repo.service';
+export * from './team-job-resevation-repo.service';

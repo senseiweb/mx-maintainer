@@ -4,12 +4,14 @@ import * as _l from 'lodash';
 import * as _m from 'moment';
 import { RequestError } from 'request-promise/errors';
 import { Team } from './team';
-import { IJobReservation, TeamAvailability } from './team-availability';
+import { TeamAvailability } from './team-availability';
+import { TeamJobReservation } from './team-job-reservation';
 
 export interface IJobReservateionRequest {
     taskId: number;
     requestedStartDate: _m.Moment;
     taskDuration: _m.Duration;
+    genId: number;
 }
 export interface IJobReservationReceipt {
     plannedStart: _m.Moment;
@@ -58,11 +60,7 @@ export class TeamCategory extends SpEntityBase {
             const endOfShift = _m(teamAvail.availEnd).subtract(30, 'minutes');
 
             /** Calculate how much of the selected availability has already been reserved */
-            const totalReserved = teamAvail.jobReservations.length
-                ? _l.sumBy(teamAvail.jobReservations, x =>
-                      _m.duration(x.jobEnd.diff(x.jobStart)).asMinutes()
-                  )
-                : 0;
+            const totalReserved = teamAvail.totalReservation;
 
             /**
              * Find the next empty slot by taking the availiability start
@@ -104,15 +102,17 @@ export class TeamCategory extends SpEntityBase {
                     ? request.taskDuration
                     : durationAvailable;
 
-            const reserveration: IJobReservation = {
-                taskId: request.taskId,
-                jobStart: nextTimeSlot,
-                jobEnd: nextTimeSlot
+            const reserveration: Partial<TeamJobReservation> = {
+                assetTriggerActionId: request.taskId,
+                generationId: request.genId,
+                reservationStart: nextTimeSlot.toDate(),
+                reservationEnd: nextTimeSlot
                     .clone()
                     .add(timeNeededOrAvailableToComplete)
+                    .toDate()
             };
 
-            teamAvail.jobReservations.push(reserveration);
+            teamAvail.createChild('TeamJobReservation', reserveration);
 
             /**
              * Keep the planned start as we continue the process of schedule the task
@@ -123,7 +123,7 @@ export class TeamCategory extends SpEntityBase {
             /**
              * Set the start to the end and do it again, if needed.
              */
-            start = receipt.plannedEnd = reserveration.jobEnd;
+            start = receipt.plannedEnd = _m(reserveration.reservationEnd);
 
             request.taskDuration.subtract(timeNeededOrAvailableToComplete);
         }
@@ -139,15 +139,14 @@ export class TeamCategory extends SpEntityBase {
         const allTeamAvails = _l.flatMap(this.teams, team =>
             team.teamAvailabilites.filter(
                 ta =>
-                    ta.nextAvail ||
                     (start.isSameOrBefore(ta.availStart) ||
-                        (start.isBetween(
+                        start.isBetween(
                             ta.availStart,
                             ta.availEnd,
                             'm',
                             '()'
-                        ) &&
-                            !ta.isFullyBooked))
+                        )) &&
+                    !ta.isFullyBooked
             )
         );
 

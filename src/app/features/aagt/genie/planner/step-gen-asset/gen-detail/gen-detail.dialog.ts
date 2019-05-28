@@ -46,7 +46,6 @@ export class GenerationDetailDialogComponent implements OnInit, OnDestroy {
     private modelProps: GenModelProps[] = [
         'title',
         'assignedAssetCount',
-        'isActive',
         'iso',
         'genStartDate',
         'genStartTime',

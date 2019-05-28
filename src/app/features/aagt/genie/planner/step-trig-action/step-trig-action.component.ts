@@ -125,7 +125,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                 assetTrigActions
                     .filter(
                         ata =>
-                            !ata.genAsset.isSoftDeleted &&
+                            !ata.generationAsset.isSoftDeleted &&
                             ata.triggerActionId === existingTrigAct.id
                     )
                     .forEach(ata => (ata.isSoftDeleted = false));
@@ -136,7 +136,6 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                  * soft-deleted co-parent (GenerationAsset) and create children
                  */
                 const defaultProps: RawEntity<TriggerAction> = {
-                    trigger: this.currentTrigger,
                     actionItem
                 };
 
@@ -149,7 +148,7 @@ export class StepTrigActionComponent implements OnInit, OnDestroy {
                     .filter(ga => !ga.isSoftDeleted)
                     .forEach(genAsset => {
                         genAsset.createChild('AssetTriggerAction', {
-                            genAsset,
+                            generationAsset: genAsset,
                             triggerAction,
                             sequence: triggerAction.sequence,
                             actionStatus: 'unplanned',

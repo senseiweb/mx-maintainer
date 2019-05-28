@@ -12,8 +12,9 @@ import {
     Trigger,
     TriggerAction
 } from 'app/features/aagt/data';
+import { TeamJobReservation } from 'app/features/aagt/data/models/team-job-reservation';
 import { SpEntityBase } from 'app/global-data';
-import { Omit, RawEntity } from './breeze-type-customization';
+import { Omit, RawEntity, Unarray } from './breeze-type-customization';
 
 export declare class IAppConfig {
     static aggtFeatureAppSite: string;
@@ -47,8 +48,8 @@ export type SpFormProps<T extends SpEntityBase> = Extract<
     string
 >;
 
-export type SpFormModel<T extends SpEntityBase> = {
-    [index in SpFormProps<T>]?: FormControl
+export type SpFormModel<T extends Array<SpFormProps<any>>> = {
+    [index in Unarray<T>]?: FormControl
 };
 
 // export type MapDiscriminatedUnion<
@@ -62,6 +63,12 @@ export type SpFormModel<T extends SpEntityBase> = {
 //     V extends T[K]
 // > = T extends Record<K, V> ? T : never;
 
+/**
+ * A union type that represents that Sp List
+ * names to which they are associated.
+ * They list name should match exacty to ensure'
+ * that query operations are correct.
+ */
 export type SpListEntities =
     | ActionItem
     | AssetTriggerAction
@@ -71,6 +78,7 @@ export type SpListEntities =
     | Generation
     | TeamAvailability
     | TeamCategory
+    | TeamJobReservation
     | Team
     | TriggerAction
     | Trigger;

@@ -11,7 +11,7 @@ const appRoutes: Routes = [
         redirectTo: '/user/dashboard',
         pathMatch: 'full'
     }
-]; 
+];
 
 @NgModule({
     imports: [

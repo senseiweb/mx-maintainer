@@ -7,6 +7,7 @@ import {
 } from 'app/global-data';
 import { GenerationAsset } from './generation-asset';
 import { Team } from './team';
+import { TeamJobReservation } from './team-job-reservation';
 import { TriggerAction } from './trigger-action';
 
 type AtaAllowedActionStatus =
@@ -52,7 +53,7 @@ export class AssetTriggerAction extends SpEntityBase {
         dataCfg: {
             isNullable: false
         },
-        spInternalName: 'Title'
+        spInternalName: 'Task Status'
     })
     actionStatus: AtaAllowedActionStatus;
 
@@ -65,10 +66,14 @@ export class AssetTriggerAction extends SpEntityBase {
     @BzProp('data', {})
     plannedStop: Date;
 
-    @BzProp('data', {})
+    @BzProp('data', {
+        spInternalName: 'Start Date'
+    })
     scheduledStart: Date;
 
-    @BzProp('data', {})
+    @BzProp('data', {
+        spInternalName: 'Due Date'
+    })
     scheduledStop: Date;
 
     @BzProp('data', {})
@@ -83,7 +88,7 @@ export class AssetTriggerAction extends SpEntityBase {
     completedByTeam?: Team;
 
     @BzProp('data', {})
-    genAssetId: number;
+    generationAssetId: number;
 
     @BzProp('data', {})
     triggerActionId: number;
@@ -95,13 +100,18 @@ export class AssetTriggerAction extends SpEntityBase {
         relativeEntity: 'GenerationAsset',
         navCfg: { isScalar: true }
     })
-    genAsset: GenerationAsset;
+    generationAsset: GenerationAsset;
 
     @BzProp('nav', {
         relativeEntity: 'TriggerAction',
         navCfg: { isScalar: true }
     })
     triggerAction: TriggerAction;
+
+    @BzProp('nav', {
+        relativeEntity: 'TeamJobReservation'
+    })
+    teamJobReservations: TeamJobReservation[];
 
     @BzEntityInitializer
     private ataInitializer(entity: this) {

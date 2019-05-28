@@ -203,7 +203,7 @@
             *ngIf="formMode === 'edit'"
             mat-button
             class="mr-8"
-            (click)="deleteActionItem()"
+            (click)="deleteItem()"
             aria-label="Delete"
             matTooltip="Delete"
         >
@@ -233,7 +233,7 @@
         </button>
     </div>
     <mat-progress-bar
-        *ngIf="(isSaving | async)"
+        *ngIf="isSaving | async"
         [color]="isDeleting ? 'warn' : 'primary'"
         mode="indeterminate"
     ></mat-progress-bar>

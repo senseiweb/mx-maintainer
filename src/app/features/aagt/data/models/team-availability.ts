@@ -3,11 +3,7 @@ import { BzEntity, BzProp, SpEntityBase } from 'app/global-data';
 import * as _ from 'lodash';
 import * as _m from 'moment';
 import { Team } from './team';
-export interface IJobReservation {
-    taskId: number;
-    jobStart: _m.Moment;
-    jobEnd: _m.Moment;
-}
+import { TeamJobReservation } from './team-job-reservation';
 
 @BzEntity(MxmAppName.Aagt, {})
 export class TeamAvailability extends SpEntityBase {
@@ -18,31 +14,23 @@ export class TeamAvailability extends SpEntityBase {
     })
     availabilityTitle: string;
 
-    jobReservations: IJobReservation[] = [];
-
     get isFullyBooked(): boolean {
-        const totalJobTime = _m.duration(0);
         const availShiftTime = _m.duration(this.manHoursAvail, 'minutes');
-        this.jobReservations.forEach(jr => {
-            totalJobTime.add(_m.duration(jr.jobEnd.diff(jr.jobStart)));
-        });
-        return availShiftTime.subtract(totalJobTime).asHours() < 1;
+        return availShiftTime.subtract(this.totalReservation).asHours() <= 1;
     }
 
-    get jobResSerialize(): string {
-        return JSON.stringify(this.jobReservations);
-    }
-
-    set jobResSerialize(serializeJob) {
-        if (!serializeJob) {
-            return;
+    get totalReservation(): _m.Duration {
+        const totalJobTime = _m.duration(0);
+        if (!this.teamJobReservations) {
+            return _m.duration(0);
         }
-        const parsedJobRes = JSON.parse(serializeJob) as IJobReservation[];
-        parsedJobRes.forEach(jr => {
-            jr.jobStart = _m(jr.jobStart);
-            jr.jobEnd = _m(jr.jobEnd);
+        this.teamJobReservations.forEach(jr => {
+            const jobStart = _m(jr.reservationStart);
+            const jobEnd = _m(jr.reservationEnd);
+            totalJobTime.add(_m.duration(jobEnd.diff(jobStart)));
         });
-        this.jobReservations = [];
+
+        return totalJobTime;
     }
 
     @BzProp('data', {
@@ -53,7 +41,7 @@ export class TeamAvailability extends SpEntityBase {
     @BzProp('data', {})
     availStart: Date;
 
-    nextAvail: _m.Moment;
+    // nextAvail: _m.Moment;
 
     @BzProp('data', {})
     availEnd: Date;
@@ -69,8 +57,13 @@ export class TeamAvailability extends SpEntityBase {
     })
     team: Team;
 
+    @BzProp('nav', {
+        relativeEntity: 'TeamJobReservation'
+    })
+    teamJobReservations: TeamJobReservation[];
+
     durationFromStart = (start: _m.Moment): number => {
-        const availStart = this.nextAvail || _m(this.availStart);
+        const availStart = _m(this.availStart);
         return _m
             .duration(availStart.diff(start))
             .abs()
