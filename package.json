@@ -57,7 +57,7 @@
         "d3": "5.9.2",
         "gd-sprest": "^4.7.8",
         "hammerjs": "2.0.8",
-        "lodash": "4.17.11",
+        "lodash": "4.17.21",
         "luxon": "^1.15.0",
         "material-community-components": "^3.4.1",
         "moment": "2.24.0",
