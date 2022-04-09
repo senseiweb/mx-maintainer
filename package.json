@@ -60,7 +60,7 @@
         "lodash": "4.17.11",
         "luxon": "^1.15.0",
         "material-community-components": "^3.4.1",
-        "moment": "2.24.0",
+        "moment": "2.29.2",
         "moment-duration-format": "^2.2.2",
         "ng-pick-datetime": "^7.0.0",
         "ng2-charts": "2.2.3",
